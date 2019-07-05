@@ -1,0 +1,3 @@
+[submodule "thirdpart/src/libyuv"]
+	path = thirdpart/src/libyuv
+	url = https://github.com/storyfrom1982/libyuv.git

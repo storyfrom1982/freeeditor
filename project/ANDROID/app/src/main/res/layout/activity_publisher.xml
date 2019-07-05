@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:fitsSystemWindows="false"
+        android:foregroundGravity="clip_horizontal|clip_vertical" >
+        <android.view.SurfaceView
+            android:id="@+id/publish_surface"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:id="@+id/publish_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:paddingTop="20dp"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:visibility="invisible">
+            <EditText
+                android:id="@+id/publish_edit_url"
+                android:layout_width="fill_parent"
+                android:layout_alignParentTop="true"
+                android:layout_height="50dp"
+                android:cursorVisible="true"
+                android:inputType="textUri"
+                android:textColor="#ffffffff"
+                android:hint="test.fls"
+                android:textColorHint="#ffffffff" />
+            <Button
+                android:id="@+id/publish_start_button"
+                android:layout_below="@+id/publish_edit_url"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/start_record"/>
+            <Button
+                android:id="@+id/publish_swap_camera"
+                android:layout_below="@+id/publish_start_button"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/change_camera_position"/>
+            <Button
+                android:id="@+id/publish_change_aspect_ratio"
+                android:layout_below="@+id/publish_swap_camera"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/change_orientation"/>
+            <Button
+                android:id="@+id/publish_quit_button"
+                android:layout_below="@+id/publish_change_aspect_ratio"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/exit"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>
