@@ -12,10 +12,10 @@
 namespace freee {
 
 
-    class StaticMutex {
+    class Mutex {
     public:
-        StaticMutex() : m_mutex(PTHREAD_MUTEX_INITIALIZER){};
-        ~StaticMutex(){}
+        Mutex() : m_mutex(PTHREAD_MUTEX_INITIALIZER){};
+        ~Mutex(){}
 
         void lock(){ pthread_mutex_lock(&m_mutex); }
         void unlock(){ pthread_mutex_unlock(&m_mutex); }
@@ -27,11 +27,11 @@ namespace freee {
 
     class AutoLock {
     public:
-        AutoLock(StaticMutex &mutex) : m_lock(mutex){ m_lock.lock(); }
+        AutoLock(Mutex &mutex) : m_lock(mutex){ m_lock.lock(); }
         ~AutoLock(){ m_lock.unlock(); }
 
     private:
-        StaticMutex &m_lock;
+        Mutex &m_lock;
     };
 
 }

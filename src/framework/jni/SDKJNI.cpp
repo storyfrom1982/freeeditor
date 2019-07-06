@@ -28,7 +28,7 @@ JavaVM *global_JVM_Instance;
 
 static void log_debug(int level, const char *debug_log, const char *pure_log)
 {
-    static const char *tag = "FREEE";
+    static const char *tag = "FREEESDK";
     if (level == SR_LOG_LEVEL_DEBUG){
         __android_log_print(ANDROID_LOG_DEBUG, tag, "%s", pure_log);
     }else if (level == SR_LOG_LEVEL_INFO){
@@ -107,9 +107,9 @@ public:
         }else if (__sr_msg_is_float(msg)){
             msg.f64 = env->GetDoubleField(obj, m_float64Field);
         }else if (__sr_msg_is_pointer(msg)){
-            size_t size = static_cast<size_t>(env->GetIntField(obj, m_sizeField));
+            size_t size = (size_t)(env->GetIntField(obj, m_sizeField));
             if (size > 0){
-                jbyteArray array = static_cast<jbyteArray>(env->GetObjectField(obj, m_objField));
+                jbyteArray array = (jbyteArray)(env->GetObjectField(obj, m_objField));
                 LOGD("jbyteArray array : %p\n", array);
                 jbyte *bytes = env->GetByteArrayElements(array, 0);
                 int byteSize = env->GetArrayLength(array);
@@ -130,16 +130,16 @@ public:
 
     jobject requestMessage(JNIEnv *env, jobject obj){
         sr_msg_t msg = obj2msg(env, obj);
-        msg = requestToOutput(msg);
+        msg = sendRequestToDownstream(msg);
         return msg2obj(env, msg);
     }
 
     void sendMessage(JNIEnv *env, jobject obj){
         sr_msg_t msg = obj2msg(env, obj);
-        sendMsgToOutput(msg);
+        sendMessageToDownstream(msg);
     }
 
-    virtual sr_msg_t onInputRequest(sr_msg_t msg) override {
+    sr_msg_t onRequestFromUpstream(sr_msg_t msg) override {
         JniEnv env;
         jobject obj = msg2obj(env.m_pEnv, msg);
         jobject Msg = env->CallObjectMethod(m_obj, m_onRequestMessage, obj);
@@ -147,7 +147,7 @@ public:
         return obj2msg(env.m_pEnv, Msg);
     }
 
-    virtual void onMsgFromOutput(sr_msg_t msg) override {
+    void onMessageFromDownstream(sr_msg_t msg) override {
         JniEnv env;
         jobject obj = msg2obj(env.m_pEnv, msg);
         env->CallVoidMethod(m_obj, m_onMessage, obj);
@@ -227,7 +227,7 @@ Java_cn_freeeditor_sdk_MsgHandler_setListener(JNIEnv *env, jobject instance, jlo
     IMsgListener *msgHandler = (IMsgListener *)handlerInstance;
     IMsgListener *msgListener = (IMsgListener *)listener;
     if (msgHandler && msgListener){
-        msgHandler->addOutput(msgListener);
+        msgHandler->addOutputStream(msgListener);
     }
 }
 
@@ -236,7 +236,7 @@ JNIEXPORT void JNICALL
 Java_cn_freeeditor_sdk_MContext_apply(JNIEnv *env, jobject instance, jlong handlerInstance) {
     if (handlerInstance != 0){
         MsgHandler *msgHandler = (MsgHandler *)handlerInstance;
-        MContext::Instance()->addInput(msgHandler);
+        MContext::Instance()->addInputStream(msgHandler);
     }
 }
 
@@ -245,8 +245,8 @@ JNIEXPORT void JNICALL
 Java_cn_freeeditor_sdk_MContext_remove(JNIEnv *env, jobject instance, jlong handlerInstance) {
     if (handlerInstance != 0){
         MsgHandler *msgHandler = (MsgHandler *)handlerInstance;
-        msgHandler->removeOutput(MContext::Instance());
-        MContext::Instance()->removeInput(msgHandler);
+        msgHandler->removeOutputStream(MContext::Instance());
+        MContext::Instance()->removeInputStream(msgHandler);
         delete MContext::Instance();
     }
     sr_log_file_close();

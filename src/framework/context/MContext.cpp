@@ -22,12 +22,12 @@ MContext* MContext::Instance() {
 MContext::MContext() {
 
     class SetDirPathListener : public IMsgListener {
-        virtual void onMsgFromInput(sr_msg_t msg) override {
+        void onMessageFromUpstream(sr_msg_t msg) override {
             if (__sr_msg_is_pointer(msg)){
                 if (__sr_msg_is_malloc(msg)){
-                    if (msg.key == MSG_KEY_SetHomeDirPath){
+                    if (msg.key == MsgKey_Context_HomePath){
                         MContext::Instance()->setHomeDirPath(std::string(static_cast<const char *>(msg.ptr)));
-                    }else if (msg.key == MSG_KEY_SetConfigDirPath){
+                    }else if (msg.key == MsgKey_Context_ConfigPath){
                         MContext::Instance()->setConfigDirPath(std::string(static_cast<const char *>(msg.ptr)));
                     }
                     __sr_msg_free(msg);
@@ -37,17 +37,17 @@ MContext::MContext() {
     };
 
     m_setPathListener = new SetDirPathListener;
-    addMessageListener(MSG_KEY_SetHomeDirPath, m_setPathListener);
-    addMessageListener(MSG_KEY_SetConfigDirPath, m_setPathListener);
+    addMessageListener(MsgKey_Context_HomePath, m_setPathListener);
+    addMessageListener(MsgKey_Context_ConfigPath, m_setPathListener);
 
     class RecorderListener : public IMsgListener {
-        virtual sr_msg_t onInputRequest(sr_msg_t msg) override {
-            if (msg.key == MSG_KEY_RequestNewRecorder){
+        sr_msg_t onRequestFromUpstream(sr_msg_t msg) override {
+            if (msg.key == MsgKey_Context_NewEditor){
                 Recorder *recorder = MContext::Instance()->createRecorder(msg);
                 msg = __sr_ok_msg;
                 msg.ptr = recorder;
                 return msg;
-            }else if (msg.key == MSG_KEY_RequestRemoveRecorder){
+            }else if (msg.key == MsgKey_Context_RemoveEditor){
                 if (msg.ptr != NULL){
                     Recorder *recorder = static_cast<Recorder *>(msg.ptr);
                     MContext::Instance()->removeRecorder(recorder);
@@ -59,8 +59,8 @@ MContext::MContext() {
     };
 
     m_recorderListener = new RecorderListener;
-    addMessageListener(MSG_KEY_RequestNewRecorder, m_recorderListener);
-    addMessageListener(MSG_KEY_RequestRemoveRecorder, m_recorderListener);
+    addMessageListener(MsgKey_Context_NewEditor, m_recorderListener);
+    addMessageListener(MsgKey_Context_RemoveEditor, m_recorderListener);
 
 //    addMessageListener(MSG_KEY_RequestLoadConfig, MConfig::Instance());
 //    addMessageListener(MSG_KEY_RequestSaveConfig, MConfig::Instance());
@@ -82,33 +82,33 @@ MContext::~MContext() {
     g_ctx = nullptr;
 }
 
-sr_msg_t MContext::onInputRequest(sr_msg_t msg) {
+sr_msg_t MContext::onRequestFromUpstream(sr_msg_t msg) {
     AutoLock lock(m_mapLock);
     if (m_map[msg.key].empty()){
         return __sr_bad_msg;
     }
-    return m_map[msg.key][0]->onInputRequest(msg);
+    return m_map[msg.key][0]->onRequestFromUpstream(msg);
 }
 
-void MContext::onMsgFromInput(sr_msg_t msg) {
+void MContext::onMessageFromUpstream(sr_msg_t msg) {
     AutoLock lock(m_mapLock);
     if (!m_map[msg.key].empty()){
         for (int i = 0; i < m_map[msg.key].size(); ++i){
-            m_map[msg.key][i]->onMsgFromInput(msg);
+            m_map[msg.key][i]->onMessageFromUpstream(msg);
         }
     }
 }
 
-void MContext::onMsgFromOutput(sr_msg_t msg) {
+void MContext::onMessageFromDownstream(sr_msg_t msg) {
 
 }
 
 void MContext::sendMessage(sr_msg_t msg) {
-    sendMsgToInput(msg);
+    sendMessageToUpstream(msg);
 }
 
 sr_msg_t MContext::requestMessage(sr_msg_t msg) {
-    return requestToInput(msg);
+    return sendRequestToUpstream(msg);
 }
 
 void MContext::addMessageListener(int32_t key, IMsgListener *listener) {

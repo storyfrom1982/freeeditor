@@ -37,32 +37,26 @@ namespace freee {
             {
                 AutoLock lockInputs(m_inputsLock);
                 for (int i = 0; i < m_inputs.size(); ++i){
-                    m_inputs[i]->removeOutput(this);
+                    m_inputs[i]->removeOutputStream(this);
                 }
                 m_inputs.clear();
             }
             {
                 AutoLock lockOutputs(m_outputsLock);
                 for (int i = 0; i < m_outputs.size(); ++i){
-                    m_outputs[i]->removeInput(this);
+                    m_outputs[i]->removeInputStream(this);
                 }
                 m_outputs.clear();
             }
         };
 
-        virtual void addInput(IMsgListener *input){
+        virtual void addInputStream(IMsgListener *input){
             AutoLock lock(m_inputsLock);
             input->m_outputs.push_back(this);
             this->m_inputs.push_back(input);
         };
 
-        virtual void addOutput(IMsgListener *receiver){
-            AutoLock lock(m_outputsLock);
-            receiver->m_inputs.push_back(this);
-            this->m_outputs.push_back(receiver);
-        };
-
-        virtual void removeInput(IMsgListener *listener){
+        virtual void removeInputStream(IMsgListener *listener){
             AutoLock lock(m_inputsLock);
             for (int i = 0; i < m_inputs.size(); ++i){
                 if (m_inputs[i] == listener){
@@ -72,7 +66,13 @@ namespace freee {
             }
         }
 
-        virtual void removeOutput(IMsgListener *listener){
+        virtual void addOutputStream(IMsgListener *receiver){
+            AutoLock lock(m_outputsLock);
+            receiver->m_inputs.push_back(this);
+            this->m_outputs.push_back(receiver);
+        };
+
+        virtual void removeOutputStream(IMsgListener *listener){
             AutoLock lock(m_outputsLock);
             for (int i = 0; i < m_outputs.size(); ++i){
                 if (m_outputs[i] == listener){
@@ -82,64 +82,65 @@ namespace freee {
             }
         }
 
-        virtual void onMsgFromOutput(sr_msg_t msg){};
+        virtual void onMessageFromDownstream(sr_msg_t msg){};
 
-        virtual void sendMsgToInput(sr_msg_t msg){
+        virtual void sendMessageToUpstream(sr_msg_t msg){
             AutoLock lock(m_inputsLock);
             if (m_inputs.size() > 0){
                 for (int i = 0; i < m_inputs.size(); ++i){
-                    m_inputs[i]->onMsgFromOutput(msg);
+                    m_inputs[i]->onMessageFromDownstream(msg);
                 }
             }
         };
 
-        virtual void onMsgFromInput(sr_msg_t msg){};
+        virtual void onMessageFromUpstream(sr_msg_t msg){};
 
-        virtual void sendMsgToOutput(sr_msg_t msg){
+        virtual void sendMessageToDownstream(sr_msg_t msg){
             AutoLock lock(m_outputsLock);
             if (m_outputs.size() > 0){
                 for (int i = 0; i < m_outputs.size(); ++i){
-                    m_outputs[i]->onMsgFromInput(msg);
+                    m_outputs[i]->onMessageFromUpstream(msg);
                 }
             }
         };
 
-        virtual sr_msg_t onInputRequest(sr_msg_t msg){
+        virtual sr_msg_t onRequestFromUpstream(sr_msg_t msg){
             AutoLock lock(m_outputsLock);
             if (m_outputs.empty()){
                 return __sr_bad_msg;
             }
-            return m_outputs.front()->onInputRequest(msg);
+            return m_outputs.front()->onRequestFromUpstream(msg);
         };
 
-        virtual sr_msg_t requestToOutput(sr_msg_t msg){
+        virtual sr_msg_t sendRequestToDownstream(sr_msg_t msg){
             AutoLock lock(m_outputsLock);
             if (m_outputs.empty()){
                 return __sr_bad_msg;
             }
-            return m_outputs.front()->onInputRequest(msg);
+            return m_outputs.front()->onRequestFromUpstream(msg);
         }
 
-        virtual sr_msg_t onOutputRequest(sr_msg_t msg){
+        virtual sr_msg_t onRequestFromDownstream(sr_msg_t msg){
             AutoLock lock(m_inputsLock);
             if (m_inputs.empty()){
                 return __sr_bad_msg;
             }
-            return m_inputs.front()->onOutputRequest(msg);
+            return m_inputs.front()->onRequestFromDownstream(msg);
         };
 
-        virtual sr_msg_t requestToInput(sr_msg_t msg){
+        virtual sr_msg_t sendRequestToUpstream(sr_msg_t msg){
             AutoLock lock(m_inputsLock);
             if (m_inputs.empty()){
                 return __sr_bad_msg;
             }
-            return m_inputs.front()->onOutputRequest(msg);
+            return m_inputs.front()->onRequestFromDownstream(msg);
         }
 
     protected:
 
-        StaticMutex m_inputsLock;
-        StaticMutex m_outputsLock;
+        Mutex m_inputsLock;
+        Mutex m_outputsLock;
+
         std::vector<IMsgListener*> m_inputs;
         std::vector<IMsgListener*> m_outputs;
     };

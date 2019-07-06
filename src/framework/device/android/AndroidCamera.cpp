@@ -18,31 +18,31 @@ void freee::AndroidCamera::openSource(json cfg) {
     LOGD("AndroidCamera::openSource: %s", s.c_str());
     sr_msg_t msg = __sr_msg_malloc(MSG_KEY_SendCmd_OpenSource, s.length());
     memcpy(msg.ptr, s.c_str(), s.length());
-    sendMsgToInput(msg);
+    sendMessageToUpstream(msg);
     LOGD("AndroidCamera::openSource: exit", s.c_str());
 }
 
 void freee::AndroidCamera::closeSource() {
     sr_msg_t msg = {0};
     msg.key = MSG_KEY_SendCmd_CloseSource;
-    sendMsgToInput(msg);
+    sendMessageToUpstream(msg);
 }
 
 void freee::AndroidCamera::startCapture() {
     LOGD("AndroidCamera::startCapture enter");
     sr_msg_t msg = {0};
     msg.key = MSG_KEY_SendCmd_StartCapture;
-    sendMsgToInput(msg);
+    sendMessageToUpstream(msg);
     LOGD("AndroidCamera::startCapture exit");
 }
 
 void freee::AndroidCamera::stopCapture() {
     sr_msg_t msg = {0};
     msg.key = MSG_KEY_SendCmd_StopCapture;
-    sendMsgToInput(msg);
+    sendMessageToUpstream(msg);
 }
 
-sr_msg_t freee::AndroidCamera::onInputRequest(sr_msg_t msg) {
+sr_msg_t freee::AndroidCamera::onRequestFromUpstream(sr_msg_t msg) {
     switch (msg.key){
         case MSG_KEY_RecvCmd_UpdateVideoConfig:
             m_videoConfig = json::parse(std::string((const char *)msg.ptr));
@@ -57,6 +57,6 @@ sr_msg_t freee::AndroidCamera::onInputRequest(sr_msg_t msg) {
     return __sr_bad_msg;
 }
 
-sr_msg_t freee::AndroidCamera::onOutputRequest(sr_msg_t msg) {
+sr_msg_t freee::AndroidCamera::onRequestFromDownstream(sr_msg_t msg) {
     return __sr_bad_msg;
 }

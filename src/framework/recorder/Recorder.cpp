@@ -33,11 +33,11 @@ Recorder::~Recorder() {
     }
 }
 
-void Recorder::onMsgFromInput(sr_msg_t msg) {
+void Recorder::onMessageFromUpstream(sr_msg_t msg) {
     sr_msg_queue_push(m_queue, msg);
 }
 
-void Recorder::onMsgFromOutput(sr_msg_t msg) {
+void Recorder::onMessageFromDownstream(sr_msg_t msg) {
 
 }
 
@@ -80,7 +80,7 @@ void Recorder::messageProcessorThread(sr_msg_processor_t *processor, sr_msg_t ms
     static_cast<Recorder *>(processor->handler)->messageProcessorLoop(processor, msg);
 }
 
-sr_msg_t Recorder::onInputRequest(sr_msg_t msg) {
+sr_msg_t Recorder::onRequestFromUpstream(sr_msg_t msg) {
 
     switch (msg.key){
         case MSG_RecvReq_LoadConfig:
@@ -95,7 +95,7 @@ sr_msg_t Recorder::onInputRequest(sr_msg_t msg) {
     return __sr_bad_msg;
 }
 
-sr_msg_t Recorder::onOutputRequest(sr_msg_t msg) {
+sr_msg_t Recorder::onRequestFromDownstream(sr_msg_t msg) {
 
     LOGD("video frame: %p\n", msg.ptr);
 

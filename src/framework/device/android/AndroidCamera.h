@@ -33,8 +33,8 @@ namespace freee {
         virtual void startCapture() override ;
         virtual void stopCapture() override ;
 
-        virtual sr_msg_t onInputRequest(sr_msg_t msg) override ;
-        virtual sr_msg_t onOutputRequest(sr_msg_t msg) override ;
+        virtual sr_msg_t onRequestFromUpstream(sr_msg_t msg) override ;
+        virtual sr_msg_t onRequestFromDownstream(sr_msg_t msg) override ;
     };
 }
 

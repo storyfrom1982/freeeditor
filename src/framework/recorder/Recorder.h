@@ -58,10 +58,10 @@ namespace freee {
 
     private:
 
-        virtual sr_msg_t onInputRequest(sr_msg_t msg) override ;
-        virtual sr_msg_t onOutputRequest(sr_msg_t msg) override ;
-        virtual void onMsgFromInput(sr_msg_t msg) override ;
-        virtual void onMsgFromOutput(sr_msg_t msg) override ;
+        virtual sr_msg_t onRequestFromUpstream(sr_msg_t msg) override ;
+        virtual sr_msg_t onRequestFromDownstream(sr_msg_t msg) override ;
+        virtual void onMessageFromUpstream(sr_msg_t msg) override ;
+        virtual void onMessageFromDownstream(sr_msg_t msg) override ;
 
     private:
 

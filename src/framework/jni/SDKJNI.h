@@ -9,7 +9,7 @@
 #include <jni.h>
 
 
-extern JavaVM*   global_JVM_Instance;
+extern JavaVM* global_JVM_Instance;
 
 class JniEnv{
 public:

@@ -54,20 +54,6 @@ public class MContext implements Runnable, ComponentCallbacks {
         return mGlobalUniqueCtx;
     }
 
-    private static final int MSG_KEY_ERR = -1;
-    private static final int MSG_KEY_OK = 0;
-
-    private static final int MSG_KEY_SetHomeDirPath = 1;
-    private static final int MSG_KEY_SetConfigDirPath = 2;
-    private static final int MSG_KEY_RequestLoadConfig = 3;
-    private static final int MSG_KEY_RequestSaveConfig = 4;
-    private static final int MSG_KEY_RequestUpdateConfig = 5;
-    private static final int MSG_KEY_RequestNewRecorder = 6;
-    private static final int MSG_KEY_RequestRemoveRecorder = 7;
-    private static final int MSG_KEY_RequestNewPlayer = 8;
-    private static final int MSG_KEY_RequestRemovePlayer = 9;
-
-
     @SuppressLint("UseSparseArrays")
     private MContext(Context context) {
 
@@ -134,7 +120,7 @@ public class MContext implements Runnable, ComponentCallbacks {
         if (name == null || name.isEmpty()){
             name = "DefaultRecorder";
         }
-        Msg msg = requestMessage(new Msg(MSG_KEY_RequestNewRecorder, name));
+        Msg msg = requestMessage(new Msg(MsgKey.Context_NewEditor, name));
         if (msg.isResultInstance()){
             recorder = new Recorder(msg.i64);
         }
@@ -143,7 +129,7 @@ public class MContext implements Runnable, ComponentCallbacks {
 
     public void removeRecorder(IRecorder irecorder){
         Recorder recorder = (Recorder) irecorder;
-        requestMessage(new Msg(MSG_KEY_RequestRemoveRecorder, recorder.getNativeInstance()));
+        requestMessage(new Msg(MsgKey.Context_RemoveEditor, recorder.getNativeInstance()));
         recorder.remove();
     }
 
@@ -201,7 +187,7 @@ public class MContext implements Runnable, ComponentCallbacks {
         if (context != null){
             File configPath = new File(context.getFilesDir().getAbsolutePath() + "/freertc");
             if (configPath.exists() || configPath.mkdirs()) {
-                sendMessage(new Msg(MSG_KEY_SetConfigDirPath, configPath.getAbsolutePath()));
+                sendMessage(new Msg(MsgKey.Context_ConfigPath, configPath.getAbsolutePath()));
             }
         }
     }
@@ -209,7 +195,7 @@ public class MContext implements Runnable, ComponentCallbacks {
     private void setHomeDirPath(){
         File homePath = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/freertc");
         if (homePath.exists() || homePath.mkdirs()) {
-            sendMessage(new Msg(MSG_KEY_SetHomeDirPath, homePath.getAbsolutePath()));
+            sendMessage(new Msg(MsgKey.Context_HomePath, homePath.getAbsolutePath()));
         }
     }
 

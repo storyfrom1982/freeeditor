@@ -34,11 +34,11 @@ freee::VideoSource *freee::VideoSource::openVideoSource(IMsgListener *listener) 
 
 VideoSource::VideoSource(IMsgListener *listener)
         : m_listener(listener) {
-    addInput(m_listener);
+    addInputStream(m_listener);
 }
 
 VideoSource::~VideoSource() {
-    m_listener->removeOutput(this);
+    m_listener->removeOutputStream(this);
     imageFilter(NULL, 0, 0, 0 , NULL, 0, 0, 0, 0);
 }
 
