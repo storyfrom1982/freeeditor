@@ -115,20 +115,20 @@ public class MContext implements Runnable, ComponentCallbacks {
         debug();
     }
 
-    public IRecorder createRecorder(String name){
-        Recorder recorder = null;
+    public IEditor createRecorder(String name){
+        Editor recorder = null;
         if (name == null || name.isEmpty()){
             name = "DefaultRecorder";
         }
         Msg msg = requestMessage(new Msg(MsgKey.Context_NewEditor, name));
         if (msg.isResultInstance()){
-            recorder = new Recorder(msg.i64);
+            recorder = new Editor(msg.i64);
         }
         return recorder;
     }
 
-    public void removeRecorder(IRecorder irecorder){
-        Recorder recorder = (Recorder) irecorder;
+    public void removeRecorder(IEditor irecorder){
+        Editor recorder = (Editor) irecorder;
         requestMessage(new Msg(MsgKey.Context_RemoveEditor, recorder.getNativeInstance()));
         recorder.remove();
     }

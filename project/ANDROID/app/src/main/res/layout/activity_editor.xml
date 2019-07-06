@@ -42,7 +42,7 @@
                 android:layout_below="@+id/publish_edit_url"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="@string/start_record"/>
+                android:text="@string/start_edit"/>
             <Button
                 android:id="@+id/publish_swap_camera"
                 android:layout_below="@+id/publish_start_button"

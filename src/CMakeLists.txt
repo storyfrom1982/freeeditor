@@ -29,7 +29,7 @@ file(GLOB sdk_sources
     framework/jni/*.cpp
     framework/base/*.cpp
     framework/context/*.cpp
-    framework/recorder/*.cpp
+    framework/editor/*.cpp
     framework/player/*.cpp
     framework/device/*.cpp
     framework/device/android/*.cpp
@@ -50,7 +50,7 @@ target_include_directories(
     framework/jni
     framework/base
     framework/context
-    framework/recorder
+    framework/editor
     framework/player
     framework/device
     framework/device/android

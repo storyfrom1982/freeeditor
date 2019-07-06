@@ -3,6 +3,7 @@
 //
 
 #include <vector>
+#include <MsgKey.h>
 #include "MContext.h"
 #include "MConfig.h"
 
@@ -43,13 +44,13 @@ MContext::MContext() {
     class RecorderListener : public IMsgListener {
         sr_msg_t onRequestFromUpstream(sr_msg_t msg) override {
             if (msg.key == MsgKey_Context_NewEditor){
-                Recorder *recorder = MContext::Instance()->createRecorder(msg);
+                Editor *recorder = MContext::Instance()->createRecorder(msg);
                 msg = __sr_ok_msg;
                 msg.ptr = recorder;
                 return msg;
             }else if (msg.key == MsgKey_Context_RemoveEditor){
                 if (msg.ptr != NULL){
-                    Recorder *recorder = static_cast<Recorder *>(msg.ptr);
+                    Editor *recorder = static_cast<Editor *>(msg.ptr);
                     MContext::Instance()->removeRecorder(recorder);
                 }
                 return __sr_ok_msg;
@@ -129,36 +130,36 @@ void MContext::removeMessageListener(int32_t key, IMsgListener *listener) {
 }
 
 std::string MContext::getConfigDirPath() {
-    AutoLock lock(m_dirPathLock);
-    return m_configDirPath;
+    AutoLock lock(m_pathLock);
+    return m_configPath;
 }
 
 std::string MContext::getHomeDirPath() {
-    AutoLock lock(m_dirPathLock);
-    return m_homeDirPath;
+    AutoLock lock(m_pathLock);
+    return m_homePath;
 }
 
 void MContext::setHomeDirPath(std::string path) {
     LOGD("setHomeDirPath: %s\n", path.c_str());
-    AutoLock lock(m_dirPathLock);
-    m_homeDirPath = path;
-    sr_log_file_open(m_homeDirPath.c_str());
+    AutoLock lock(m_pathLock);
+    m_homePath = path;
+    sr_log_file_open(m_homePath.c_str());
 }
 
 void MContext::setConfigDirPath(std::string path) {
     LOGD("setConfigDirPath: %s\n", path.c_str());
-    AutoLock lock(m_dirPathLock);
-    m_configDirPath = path;
+    AutoLock lock(m_pathLock);
+    m_configPath = path;
 }
 
-Recorder *MContext::createRecorder(sr_msg_t msg) {
+Editor *MContext::createRecorder(sr_msg_t msg) {
     AutoLock lock(m_recorderLock);
-    Recorder *recorder = new Recorder(msg);
+    Editor *recorder = new Editor(msg);
     m_recorders.push_back(recorder);
     return recorder;
 }
 
-void MContext::removeRecorder(Recorder *recorder) {
+void MContext::removeRecorder(Editor *recorder) {
     AutoLock lock(m_recorderLock);
     if (!m_recorders.empty()){
         for (int i = 0; i < m_recorders.size(); ++i){
@@ -171,7 +172,7 @@ void MContext::removeRecorder(Recorder *recorder) {
     }
 }
 
-Recorder *MContext::getRecorder(int id) {
+Editor *MContext::getRecorder(int id) {
     AutoLock lock(m_recorderLock);
     if (id < m_recorders.size()){
         return m_recorders[id];

@@ -12,26 +12,9 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Recorder implements IRecorder, Runnable, SurfaceHolder.Callback {
+public class Editor implements IEditor, Runnable, SurfaceHolder.Callback {
 
-    private static final String TAG = "Recorder";
-
-    //send msg
-    private static final int MSG_SendReq_LoadConfig = 0;
-    private static final int MSG_SendReq_SaveConfig = 1;
-    private static final int MSG_SendCmd_SetVideoSource = 2;
-    private static final int MSG_SendCmd_RemoveVideoSource = 3;
-    private static final int MSG_SendCmd_SetAudioSource = 4;
-    private static final int MSG_SendCmd_RemoveAudioSource = 5;
-    private static final int MSG_SendCmd_StartPreview = 6;
-    private static final int MSG_SendCmd_StopPreview = 7;
-    private static final int MSG_SendCmd_StartPushStream = 8;
-    private static final int MSG_SendCmd_StopPushStream = 9;
-    private static final int MSG_RecvCmd_SetVideoView = 10;
-
-    //receive msg
-    private static final int MSG_RecvReq_GetCamera = 0;
-    private static final int MSG_RecvReq_GetMicrophone = 1;
+    private static final String TAG = "Editor";
 
 
     private SurfaceView mVideoView;
@@ -45,7 +28,7 @@ public class Recorder implements IRecorder, Runnable, SurfaceHolder.Callback {
 
     private JSONObject mConfig;
 
-    Recorder(long nativeListener) {
+    Editor(long nativeListener) {
         mNativeInstance = nativeListener;
         mMsgHandler = new MsgHandler(new MsgHandler.IMsgListener() {
             @Override
@@ -55,7 +38,7 @@ public class Recorder implements IRecorder, Runnable, SurfaceHolder.Callback {
 
             @Override
             public Msg onRequest(Msg msg) {
-                return Recorder.this.onRequest(msg);
+                return Editor.this.onRequest(msg);
             }
         });
 
@@ -74,7 +57,7 @@ public class Recorder implements IRecorder, Runnable, SurfaceHolder.Callback {
 
         mMsgHandler.setListener(mNativeInstance);
 
-        Msg msg = mMsgHandler.requestMessage(new Msg(MSG_SendReq_LoadConfig));
+        Msg msg = mMsgHandler.requestMessage(new Msg(MsgKey.Editor_LoadConfig));
         try {
             mConfig = new JSONObject(msg.msgToString());
             Log.d(TAG, mConfig.toString());
@@ -119,8 +102,8 @@ public class Recorder implements IRecorder, Runnable, SurfaceHolder.Callback {
 
     @Override
     public void startPreview() {
-        mMsgHandler.sendMessage(new Msg(MSG_SendCmd_SetVideoSource, mVideoSource.getInstance()));
-        mMsgHandler.sendMessage(new Msg(MSG_SendCmd_StartPreview));
+        mMsgHandler.sendMessage(new Msg(MsgKey.Editor_OpenVideoSource, mVideoSource.getInstance()));
+        mMsgHandler.sendMessage(new Msg(MsgKey.Editor_StartPreview));
     }
 
     @Override
@@ -130,12 +113,12 @@ public class Recorder implements IRecorder, Runnable, SurfaceHolder.Callback {
 
     @Override
     public void startPushStream() {
-        mMsgHandler.sendMessage(new Msg(MSG_SendCmd_StartPushStream));
+        mMsgHandler.sendMessage(new Msg(MsgKey.Editor_StartPublish));
     }
 
     @Override
     public void stopPushStream() {
-        mMsgHandler.sendMessage(new Msg(MSG_SendCmd_StopPushStream));
+        mMsgHandler.sendMessage(new Msg(MsgKey.Editor_StopPublish));
     }
 
     @Override
@@ -149,7 +132,7 @@ public class Recorder implements IRecorder, Runnable, SurfaceHolder.Callback {
 
     private Msg onRequest(Msg msg){
         switch (msg.key){
-            case MSG_RecvReq_GetCamera:
+            case MsgKey.Editor_OpenVideoSource:
                 break;
             default:
                 break;
@@ -197,7 +180,7 @@ public class Recorder implements IRecorder, Runnable, SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        mMsgHandler.sendMessage(new Msg(MSG_RecvCmd_SetVideoView, holder.getSurface(), 0));
+        mMsgHandler.sendMessage(new Msg(MsgKey.Editor_SetVideoView, holder.getSurface(), 0));
     }
 
     @Override
@@ -212,15 +195,15 @@ public class Recorder implements IRecorder, Runnable, SurfaceHolder.Callback {
 
     private static final class ThreadHandler extends Handler {
 
-        final WeakReference<Recorder> weakReference;
+        final WeakReference<Editor> weakReference;
 
-        ThreadHandler(Recorder recorder){
+        ThreadHandler(Editor recorder){
             weakReference = new WeakReference<>(recorder);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            Recorder recorder = weakReference.get();
+            Editor recorder = weakReference.get();
             if (recorder != null){
                 switch (msg.what){
                     case MSG_HandleSetListener:

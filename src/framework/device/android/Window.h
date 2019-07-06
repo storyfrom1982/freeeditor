@@ -9,12 +9,12 @@
 
 namespace freee {
 
-    class AndroidWindow : public NativeWindow {
+    class Window : public NativeWindow {
 
     public:
 
-        AndroidWindow();
-        virtual ~AndroidWindow();
+        Window();
+        virtual ~Window();
 
         virtual void* getWindowHandler() override ;
 

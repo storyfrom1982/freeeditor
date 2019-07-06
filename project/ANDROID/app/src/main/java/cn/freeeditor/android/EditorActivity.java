@@ -20,7 +20,7 @@ import android.widget.EditText;
 
 import java.lang.ref.WeakReference;
 
-import cn.freeeditor.sdk.IRecorder;
+import cn.freeeditor.sdk.IEditor;
 import cn.freeeditor.sdk.MContext;
 import cn.freeeditor.sdk.permission.PermissionEverywhere;
 import cn.freeeditor.sdk.permission.PermissionResponse;
@@ -30,9 +30,9 @@ import cn.freeeditor.sdk.permission.PermissionResultCallback;
 /**
  * Created by kly on 16/8/26.
  */
-public class PublisherActivity extends Activity {
+public class EditorActivity extends Activity {
 
-    private static final String TAG = "PublisherActivity";
+    private static final String TAG = "EditorActivity";
 
     private static final int OVERLAY_FADEOUT_TIME = 40000;
 
@@ -47,7 +47,7 @@ public class PublisherActivity extends Activity {
     private Button swapOrientationButton;
     private Button quitButton;
 
-    private IRecorder recorder;
+    private IEditor recorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class PublisherActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        setContentView(R.layout.activity_publisher);
+        setContentView(R.layout.activity_editor);
 
         surfaceView = (SurfaceView)findViewById(R.id.publish_surface);
         overlayView = findViewById(R.id.publish_overlay);
@@ -194,15 +194,15 @@ public class PublisherActivity extends Activity {
 
     private static class PublishHandler extends Handler {
 
-        private WeakReference<PublisherActivity> publishReference = null;
+        private WeakReference<EditorActivity> publishReference = null;
 
-        public PublishHandler(PublisherActivity activity) {
-            publishReference = new WeakReference<PublisherActivity>(activity);
+        public PublishHandler(EditorActivity activity) {
+            publishReference = new WeakReference<EditorActivity>(activity);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            PublisherActivity activity = publishReference.get();
+            EditorActivity activity = publishReference.get();
             if (activity == null)
                 return;
 

@@ -3,13 +3,14 @@
 //
 
 #include <MContext.h>
-#include "Recorder.h"
+#include <MsgKey.h>
+#include "Editor.h"
 
 
 using namespace freee;
 
 
-Recorder::Recorder(sr_msg_t msg) : m_videoSource(nullptr) {
+Editor::Editor(sr_msg_t msg) : m_videoSource(nullptr) {
     if (__sr_msg_is_pointer(msg) && __sr_msg_is_malloc(msg)){
         m_processor.name = strdup(static_cast<const char *>(msg.ptr));
         __sr_msg_free(msg);
@@ -17,13 +18,13 @@ Recorder::Recorder(sr_msg_t msg) : m_videoSource(nullptr) {
         m_processor.name = strdup("DefaultRecorder");
     }
     m_processor.handler = this;
-    m_processor.process = Recorder::messageProcessorThread;
+    m_processor.process = Editor::messageProcessorThread;
 
     m_queue = sr_msg_queue_build();
     sr_msg_queue_start_processor(m_queue, &m_processor);
 }
 
-Recorder::~Recorder() {
+Editor::~Editor() {
     removeVideoSource();
     sr_msg_queue_complete(m_queue);
     sr_msg_queue_remove(&m_queue);
@@ -33,42 +34,42 @@ Recorder::~Recorder() {
     }
 }
 
-void Recorder::onMessageFromUpstream(sr_msg_t msg) {
+void Editor::onMessageFromUpstream(sr_msg_t msg) {
     sr_msg_queue_push(m_queue, msg);
 }
 
-void Recorder::onMessageFromDownstream(sr_msg_t msg) {
+void Editor::onMessageFromDownstream(sr_msg_t msg) {
 
 }
 
-void Recorder::messageProcessorLoop(sr_msg_processor_t *processor, sr_msg_t msg){
+void Editor::messageProcessorLoop(sr_msg_processor_t *processor, sr_msg_t msg){
 
     switch (msg.key){
-        case MSG_RecvCmd_SetVideoSource:
+        case MsgKey_Editor_OpenVideoSource:
             setVideoSource(msg);
             break;
-        case MSG_RecvCmd_RemoveVideoSource:
+        case MsgKey_Editor_CloseVideoSource:
             removeVideoSource();
             break;
-        case MSG_RecvCmd_SetAudioSource:
+        case MsgKey_Editor_OpenAudioSource:
             setAudioSource(msg);
             break;
-        case MSG_RecvCmd_RemoveAudioSource:
+        case MsgKey_Editor_CloseAudioSource:
             removeAudioSource();
             break;
-        case MSG_RecvCmd_StartPreview:
+        case MsgKey_Editor_StartPreview:
             startPreview();
             break;
-        case MSG_RecvCmd_StopPreview:
+        case MsgKey_Editor_StopPreview:
             stopPreview();
             break;
-        case MSG_RecvCmd_StartPushStream:
+        case MsgKey_Editor_StartPublish:
             startPushStream();
             break;
-        case MSG_RecvCmd_StopPushStream:
+        case MsgKey_Editor_StopPublish:
             stopPushStream();
             break;
-        case MSG_RecvCmd_SetVideoView:
+        case MsgKey_Editor_SetVideoView:
             setVideoView(msg);
             break;
         default:
@@ -76,16 +77,16 @@ void Recorder::messageProcessorLoop(sr_msg_processor_t *processor, sr_msg_t msg)
     }
 }
 
-void Recorder::messageProcessorThread(sr_msg_processor_t *processor, sr_msg_t msg) {
-    static_cast<Recorder *>(processor->handler)->messageProcessorLoop(processor, msg);
+void Editor::messageProcessorThread(sr_msg_processor_t *processor, sr_msg_t msg) {
+    static_cast<Editor *>(processor->handler)->messageProcessorLoop(processor, msg);
 }
 
-sr_msg_t Recorder::onRequestFromUpstream(sr_msg_t msg) {
+sr_msg_t Editor::onRequestFromUpstream(sr_msg_t msg) {
 
     switch (msg.key){
-        case MSG_RecvReq_LoadConfig:
+        case MsgKey_Editor_LoadConfig:
             return loadConfig();
-        case MSG_RecvReq_SaveConfig:
+        case MsgKey_Editor_SaveConfig:
             return saveConfig(msg);
         default:
             LOGD("video frame: %p\n", msg.ptr);
@@ -95,14 +96,14 @@ sr_msg_t Recorder::onRequestFromUpstream(sr_msg_t msg) {
     return __sr_bad_msg;
 }
 
-sr_msg_t Recorder::onRequestFromDownstream(sr_msg_t msg) {
+sr_msg_t Editor::onRequestFromDownstream(sr_msg_t msg) {
 
     LOGD("video frame: %p\n", msg.ptr);
 
     return __sr_bad_msg;
 }
 
-sr_msg_t Recorder::loadConfig() {
+sr_msg_t Editor::loadConfig() {
     std::string configPath = MContext::Instance()->getConfigDirPath() + "/" + m_processor.name + ".cfg";
     MConfig::load(m_config, configPath);
     std::string cfg = m_config.dump();
@@ -113,7 +114,7 @@ sr_msg_t Recorder::loadConfig() {
     return msg;
 }
 
-sr_msg_t Recorder::saveConfig(sr_msg_t msg) {
+sr_msg_t Editor::saveConfig(sr_msg_t msg) {
     std::string configPath = MContext::Instance()->getConfigDirPath() + "/" + m_processor.name + ".cfg";
     if (__sr_msg_is_pointer(msg) && __sr_msg_is_malloc(msg)){
         m_config.clear();
@@ -129,24 +130,24 @@ sr_msg_t Recorder::saveConfig(sr_msg_t msg) {
 
 
 
-void Recorder::startPreview() {
+void Editor::startPreview() {
     m_videoSource->startCapture();
 //    m_videoSource->addOutput(this);
 }
 
-void Recorder::stopPreview() {
+void Editor::stopPreview() {
     m_videoSource->stopCapture();
 }
 
-void Recorder::startPushStream() {
+void Editor::startPushStream() {
 
 }
 
-void Recorder::stopPushStream() {
+void Editor::stopPushStream() {
 
 }
 
-void Recorder::setVideoSource(sr_msg_t msg) {
+void Editor::setVideoSource(sr_msg_t msg) {
     if (__sr_msg_is_integer(msg)){
         removeVideoSource();
         m_videoSource = VideoSource::openVideoSource(static_cast<IMsgListener *>(msg.ptr));
@@ -154,7 +155,7 @@ void Recorder::setVideoSource(sr_msg_t msg) {
     }
 }
 
-void Recorder::removeVideoSource() {
+void Editor::removeVideoSource() {
     if (m_videoSource){
         m_videoSource->closeSource();
         delete m_videoSource;
@@ -162,14 +163,14 @@ void Recorder::removeVideoSource() {
     }
 }
 
-void Recorder::setAudioSource(sr_msg_t msg) {
+void Editor::setAudioSource(sr_msg_t msg) {
 
 }
 
-void Recorder::removeAudioSource() {
+void Editor::removeAudioSource() {
 
 }
 
-void Recorder::setVideoView(sr_msg_t msg) {
+void Editor::setVideoView(sr_msg_t msg) {
     LOGD("setVideoView: %p\n", msg.ptr);
 }

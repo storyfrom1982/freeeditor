@@ -6,41 +6,12 @@
 #define ANDROID_MCONTEXT_H
 
 #include <IMsgListener.h>
-#include <Recorder.h>
+#include <Editor.h>
 
 #include <map>
 
 
 namespace freee {
-
-    enum {
-
-        MsgKey_Err = -1,
-        MsgKey_OK = 0,
-        MsgKey_Context_HomePath,
-        MsgKey_Context_ConfigPath,
-        MsgKey_Context_LoadConfig,
-        MsgKey_Context_SaveConfig,
-        MsgKey_Context_UpdateConfig,
-        MsgKey_Context_SystemInfo,
-        MsgKey_Context_SystemStatus,
-        MsgKey_Context_NewEditor = 900,
-        MsgKey_Context_RemoveEditor,
-        MsgKey_Context_NewPlayer,
-        MsgKey_Context_RemovePlayer,
-
-        MsgKey_Editor_Begin = 1000,
-        MsgKey_Player_Begin = 2000,
-        MsgKey_Text_Source_Begin = 3000,
-        MsgKey_Text_Effect_Begin = 4000,
-        MsgKey_Audio_Source_Begin = 5000,
-        MsgKey_Audio_Effect_Begin = 6000,
-        MsgKey_Audio_Render_Begin = 7000,
-        MsgKey_Video_Source_Begin = 8000,
-        MsgKey_Video_Effect_Begin = 9000,
-        MsgKey_Video_Render_Begin = 10000,
-    };
-
 
     class MContext : public IMsgListener {
 
@@ -63,9 +34,9 @@ namespace freee {
         std::string getHomeDirPath();
         std::string getConfigDirPath();
 
-        Recorder* createRecorder(sr_msg_t msg);
-        void removeRecorder(Recorder *recorder);
-        Recorder* getRecorder(int id = 0);
+        Editor* createRecorder(sr_msg_t msg);
+        void removeRecorder(Editor *recorder);
+        Editor* getRecorder(int id = 0);
 
 
     private:
@@ -83,15 +54,15 @@ namespace freee {
     private:
 
 
-        Mutex m_dirPathLock;
-        std::string m_homeDirPath;
-        std::string m_configDirPath;
+        Mutex m_pathLock;
+        std::string m_homePath;
+        std::string m_configPath;
 
         IMsgListener *m_setPathListener;
         IMsgListener *m_recorderListener;
 
         Mutex m_recorderLock;
-        std::vector<Recorder*> m_recorders;
+        std::vector<Editor*> m_recorders;
 
         Mutex m_mapLock;
         std::map<int32_t, std::vector<IMsgListener*>> m_map;

@@ -5,7 +5,7 @@
 #include "VideoSource.h"
 
 #ifdef __ANDROID__
-#include <AndroidCamera.h>
+#include <Camera.h>
 #endif
 
 //#ifdef __cplusplus
@@ -26,7 +26,7 @@ freee::VideoSource *freee::VideoSource::openVideoSource(IMsgListener *listener) 
     VideoSource *camera = NULL;
 
 #ifdef __ANDROID__
-    camera = new AndroidCamera(listener);
+    camera = new Camera(listener);
 #endif
 
     return camera;

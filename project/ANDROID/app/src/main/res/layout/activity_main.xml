@@ -22,7 +22,7 @@
                 android:id="@+id/open_publisher"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="Publisher"/>
+                android:text="Editor"/>
 
             <Button
                 android:id="@+id/open_player"

@@ -19,7 +19,7 @@
         </activity>
 
         <activity android:name=".PlayerActivity"></activity>
-        <activity android:name=".PublisherActivity"></activity>
+        <activity android:name=".EditorActivity"></activity>
 
     </application>
 

@@ -2,7 +2,7 @@ package cn.freeeditor.sdk;
 
 import android.view.SurfaceView;
 
-public interface IRecorder {
+public interface IEditor {
 
     void setListener(MsgHandler.IMsgListener listener);
 

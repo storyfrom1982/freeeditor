@@ -13,47 +13,12 @@
 
 namespace freee {
 
-
-    enum
-    {
-
-        MSG_RecvReq_LoadConfig = 0,
-        MSG_RecvReq_SaveConfig,
-
-        MSG_RecvCmd_SetVideoSource,
-        MSG_RecvCmd_RemoveVideoSource,
-        MSG_RecvCmd_SetAudioSource,
-        MSG_RecvCmd_RemoveAudioSource,
-        MSG_RecvCmd_StartPreview,
-        MSG_RecvCmd_StopPreview,
-        MSG_RecvCmd_StartPushStream,
-        MSG_RecvCmd_StopPushStream,
-        MSG_RecvCmd_SetVideoView,
-        MSG_RecvCmd_EnableAudioStream,
-        MSG_RecvCmd_DisableAudioStream,
-        MSG_RecvCmd_EnableVideoStream,
-        MSG_RecvCmd_DisableVideoStream,
-        MSG_RecvCmd_OpenCamera,
-        MSG_RecvCmd_CloseCamera,
-        MSG_RecvCmd_OpenMicrophone,
-        MSG_RecvCmd_CloseMicrophone,
-
-    };
-
-
-    enum
-    {
-        MSG_SendReq_GetCamera = 0,
-        MSG_SendReq_GetMicrophone,
-    };
-
-
-    class Recorder : public IMsgListener {
+    class Editor : public IMsgListener {
 
     public:
 
-        Recorder(sr_msg_t msg);
-        ~Recorder();
+        Editor(sr_msg_t msg);
+        ~Editor();
 
 
     private:

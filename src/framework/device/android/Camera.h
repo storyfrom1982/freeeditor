@@ -21,11 +21,11 @@ namespace freee {
     };
 
 
-    class AndroidCamera : public VideoSource {
+    class Camera : public VideoSource {
 
     public:
-        AndroidCamera(IMsgListener *listener);
-        ~AndroidCamera();
+        Camera(IMsgListener *listener);
+        ~Camera();
 
         virtual void openSource(json cfg) override ;
         virtual void closeSource() override ;
