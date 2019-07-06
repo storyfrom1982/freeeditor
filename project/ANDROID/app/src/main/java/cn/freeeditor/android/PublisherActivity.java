@@ -1,5 +1,6 @@
 package cn.freeeditor.android;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -18,6 +19,12 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import java.lang.ref.WeakReference;
+
+import cn.freeeditor.sdk.IRecorder;
+import cn.freeeditor.sdk.MContext;
+import cn.freeeditor.sdk.permission.PermissionEverywhere;
+import cn.freeeditor.sdk.permission.PermissionResponse;
+import cn.freeeditor.sdk.permission.PermissionResultCallback;
 
 
 /**
@@ -40,6 +47,7 @@ public class PublisherActivity extends Activity {
     private Button swapOrientationButton;
     private Button quitButton;
 
+    private IRecorder recorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +78,13 @@ public class PublisherActivity extends Activity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                         | View.SYSTEM_UI_FLAG_IMMERSIVE);
 
+        publishHandler.sendEmptyMessage(HANDLER_PERMISSION_GAN);
+
         fadeIn();
     }
+
+
+
 
 
     @Override
@@ -82,12 +95,14 @@ public class PublisherActivity extends Activity {
 
 
     private void openRecorder(String url) throws Exception {
-
+        recorder = MContext.Instance().createRecorder("test");
+        recorder.startPreview();
     }
 
 
     private void closeRecorder(){
-
+        recorder.stopPreview();
+        MContext.Instance().removeRecorder(recorder);
     }
 
 
@@ -152,6 +167,78 @@ public class PublisherActivity extends Activity {
     };
 
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_UP){
+            if (!isShowing){
+                fadeIn();
+            }else{
+                fadeOut(true);
+            }
+        }
+        return false;
+    }
+
+
+    private void publisherRunning(){
+        recordButton.setText("Stop");
+        recordButton.setEnabled(true);
+    }
+
+
+    private static final int OVERLAY_FADE_OUT = 0;
+    private static final int HANDLER_PERMISSION_GAN = 3721;
+
+
+    private final Handler publishHandler = new PublishHandler(this);
+
+    private static class PublishHandler extends Handler {
+
+        private WeakReference<PublisherActivity> publishReference = null;
+
+        public PublishHandler(PublisherActivity activity) {
+            publishReference = new WeakReference<PublisherActivity>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            PublisherActivity activity = publishReference.get();
+            if (activity == null)
+                return;
+
+            switch (msg.what) {
+                case OVERLAY_FADE_OUT:
+                    activity.fadeOut(false);
+                    break;
+                case HANDLER_PERMISSION_GAN:
+                    activity.requirePermission();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void requirePermission(){
+        PermissionEverywhere.getPermission(getApplicationContext(),
+                new String[]{
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.RECORD_AUDIO},
+                3721).enqueue(new PermissionResultCallback() {
+            @Override
+            public void onComplete(PermissionResponse permissionResponse) {
+                if (permissionResponse.getRequestCode() == 3721){
+                    if (permissionResponse.isGranted()) {
+
+                    } else {
+                        cn.freeeditor.sdk.Log.e(TAG, "Get Manifest.permission.WRITE_EXTERNAL_STORAGE failed");
+                        publishHandler.sendEmptyMessage(HANDLER_PERMISSION_GAN);
+                    }
+                }
+            }
+        });
+    }
+
     /**
      * hider overlay
      */
@@ -186,52 +273,4 @@ public class PublisherActivity extends Activity {
         }
     }
 
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_UP){
-            if (!isShowing){
-                fadeIn();
-            }else{
-                fadeOut(true);
-            }
-        }
-        return false;
-    }
-
-
-    private void publisherRunning(){
-        recordButton.setText("Stop");
-        recordButton.setEnabled(true);
-    }
-
-
-    private static final int OVERLAY_FADE_OUT = 0;
-
-
-    private final Handler publishHandler = new PublishHandler(this);
-
-    private static class PublishHandler extends Handler {
-
-        private WeakReference<PublisherActivity> publishReference = null;
-
-        public PublishHandler(PublisherActivity activity) {
-            publishReference = new WeakReference<PublisherActivity>(activity);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            PublisherActivity activity = publishReference.get();
-            if (activity == null)
-                return;
-
-            switch (msg.what) {
-                case OVERLAY_FADE_OUT:
-                    activity.fadeOut(false);
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
 }

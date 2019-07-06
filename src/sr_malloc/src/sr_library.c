@@ -128,7 +128,7 @@ int sr_log_file_open(const char *log_directory)
     pthread_mutex_lock(&g_log_writer_mutex);
     if (__is_false(g_log_writer.running)){
         g_log_writer.dir_name = strdup(log_directory);
-        g_log_writer.pipe = sr_pipe_build(__sr_log_pipe_size * 2);
+        g_log_writer.pipe = sr_pipe_create(__sr_log_pipe_size * 2);
         if (pthread_create(&(g_log_writer.tid), NULL, log_file_writer_loop, &g_log_writer) != 0){
             LOGE("pthread_create failed\n");
             free(g_log_writer.dir_name);
@@ -222,7 +222,7 @@ struct sr_mutex_t{
 };
 
 
-sr_mutex_t* sr_mutex_build()
+sr_mutex_t* sr_mutex_create()
 {
 	sr_mutex_t *mutex = NULL;
 
@@ -323,7 +323,7 @@ sr_queue_t* sr_queue_create(int max_node_number, void (*free_node_cb)(sr_node_t*
         return NULL;
     }
 
-    if ((queue->mutex = sr_mutex_build()) == NULL){
+    if ((queue->mutex = sr_mutex_create()) == NULL){
         LOGE("sr_mutex_create failed\n");
         free(queue);
         return NULL;
@@ -813,7 +813,7 @@ struct sr_pipe_t {
 
 
 
-sr_pipe_t* sr_pipe_build(unsigned int len)
+sr_pipe_t* sr_pipe_create(unsigned int len)
 {
 	sr_pipe_t *pipe = NULL;
 
@@ -836,7 +836,7 @@ sr_pipe_t* sr_pipe_build(unsigned int len)
 		LOGF("malloc failed\n");
 	}
 
-    pipe->mutex = sr_mutex_build();
+    pipe->mutex = sr_mutex_create();
     pipe->stopped = false;
 	pipe->writer = pipe->reader = 0;
 	pipe->read_waiting = pipe->write_waiting = 0;
@@ -1123,7 +1123,7 @@ sr_msg_queue_t* sr_msg_queue_build()
 		LOGF("calloc failed\n");
 	}
 
-	queue->pipe = sr_pipe_build(0);
+	queue->pipe = sr_pipe_create(0);
 
 	LOGD("sr_msg_queue_build exit\n");
 

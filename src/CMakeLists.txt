@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.4.1)
 
 
 
+set(LIBS_PATH ${CMAKE_SOURCE_DIR}/../thirdpart/android/libs)
+set(INCLUDE_PATH ${CMAKE_SOURCE_DIR}/../thirdpart/src)
+
+add_library(lib_yuv STATIC IMPORTED)
+set_target_properties(lib_yuv PROPERTIES IMPORTED_LOCATION
+    ${LIBS_PATH}/${ANDROID_ABI}/libyuv.a)
+
+
 if (${CMAKE_BUILD_TYPE} STREQUAL "debug")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
@@ -14,9 +22,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 set(SRC_DIR ${CMAKE_SOURCE_DIR})
 
 
-file(GLOB sdk_sources 
+file(GLOB sdk_sources
     sr_malloc/src/*.c
     sr_malloc/src/*.cpp
+    framework/*.c
+    framework/jni/*.cpp
+    framework/base/*.cpp
+    framework/context/*.cpp
+    framework/recorder/*.cpp
+    framework/player/*.cpp
+    framework/device/*.cpp
+    framework/device/android/*.cpp
     )
 
 
@@ -30,12 +46,23 @@ add_library(
 target_include_directories(
     freeeditor
     PRIVATE
+    nlohmann
+    framework/jni
+    framework/base
+    framework/context
+    framework/recorder
+    framework/player
+    framework/device
+    framework/device/android
     sr_malloc/include
+    ${INCLUDE_PATH}/libyuv/include
     )
 
 
 target_link_libraries(
     freeeditor
+
+    lib_yuv
 
     log
     android

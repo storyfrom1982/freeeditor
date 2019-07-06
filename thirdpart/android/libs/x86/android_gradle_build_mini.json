@@ -1,0 +1,28 @@
+{
+  "buildFiles": [
+    "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/CMakeLists.txt"
+  ],
+  "cleanCommands": [
+    "/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86 --target clean"
+  ],
+  "libraries": {
+    "yuv-Debug-x86": {
+      "artifactName": "yuv",
+      "buildCommand": "/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86 --target yuv",
+      "abi": "x86",
+      "output": "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86/libyuv.a"
+    },
+    "yuv_shared-Debug-x86": {
+      "artifactName": "yuv_shared",
+      "buildCommand": "/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86 --target yuv_shared",
+      "abi": "x86",
+      "output": "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/build/intermediates/cmake/debug/obj/x86/libyuv.so"
+    },
+    "yuvconvert-Debug-x86": {
+      "artifactName": "yuvconvert",
+      "buildCommand": "/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86 --target yuvconvert",
+      "abi": "x86",
+      "output": "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86/yuvconvert"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "buildFiles": [
+    "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/CMakeLists.txt"
+  ],
+  "cleanCommands": [
+    "/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a --target clean"
+  ],
+  "libraries": {
+    "yuv-Debug-armeabi-v7a": {
+      "artifactName": "yuv",
+      "buildCommand": "/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a --target yuv",
+      "abi": "armeabi-v7a",
+      "output": "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/libyuv.a"
+    },
+    "yuv_shared-Debug-armeabi-v7a": {
+      "artifactName": "yuv_shared",
+      "buildCommand": "/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a --target yuv_shared",
+      "abi": "armeabi-v7a",
+      "output": "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/build/intermediates/cmake/debug/obj/armeabi-v7a/libyuv.so"
+    },
+    "yuvconvert-Debug-armeabi-v7a": {
+      "artifactName": "yuvconvert",
+      "buildCommand": "/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a --target yuvconvert",
+      "abi": "armeabi-v7a",
+      "output": "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/yuvconvert"
+    }
+  }
+}

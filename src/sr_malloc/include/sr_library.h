@@ -194,7 +194,7 @@ extern void sr_log_debug(int level, const char *file, const char *func, int line
 
 typedef struct sr_mutex_t sr_mutex_t;
 
-extern sr_mutex_t* sr_mutex_build();
+extern sr_mutex_t* sr_mutex_create();
 extern void sr_mutex_remove(sr_mutex_t **pp_mutex);
 
 extern void sr_mutex_lock(sr_mutex_t *mutex);
@@ -292,7 +292,7 @@ extern void sr_queue_block_clean(sr_queue_t *queue);
 
 typedef struct sr_pipe_t sr_pipe_t;
 
-extern sr_pipe_t* sr_pipe_build(unsigned int size);
+extern sr_pipe_t* sr_pipe_create(unsigned int size);
 extern void sr_pipe_remove(sr_pipe_t **pp_pipe);
 
 extern void sr_pipe_complete(sr_pipe_t *pipe);
