@@ -73,7 +73,15 @@ public class MsgKey {
 
     public static final int Audio_Render_Begin = 7000;
 
+
     public static final int Video_Source_Begin = 8000;
+    public static final int Video_Source_Open = 8001;
+    public static final int Video_Source_Close = 8002;
+    public static final int Video_Source_StartCapture = 8003;
+    public static final int Video_Source_StopCapture = 8004;
+    public static final int Video_Source_FinalConfig = 8005;
+    public static final int Video_Source_ProvideFrame = 8006;
+
 
     public static final int Video_Effect_Begin = 9000;
 

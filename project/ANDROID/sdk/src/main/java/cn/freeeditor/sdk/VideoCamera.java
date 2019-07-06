@@ -21,13 +21,6 @@ public class VideoCamera implements IVideoSource, Runnable,
 
     private static final String TAG = "VideoCamera";
 
-    public static final int MSG_KEY_RecvCmd_OpenSource = 0;
-    public static final int MSG_KEY_RecvCmd_CloseSource = 1;
-    public static final int MSG_KEY_RecvCmd_StartCapture = 2;
-    public static final int MSG_KEY_RecvCmd_StopCapture = 3;
-    public static final int MSG_KEY_SendCmd_UpdateVideoConfig = 4;
-    public static final int MSG_KEY_SendCmd_PreviewFrame = 5;
-
     private final Thread mMsgThread;
     private final MsgHandler mMsgHandler;
 
@@ -167,7 +160,7 @@ public class VideoCamera implements IVideoSource, Runnable,
             newConfig.put("width", mOutputWidth).put("height", mOutputHeight)
                     .put("croppedWidth", mCroppedWidth).put("croppedHeight", mCroppedHeight)
                     .put("format", 0).put("rotate", 90);
-            mMsgHandler.requestMessage(new Msg(MSG_KEY_SendCmd_UpdateVideoConfig, newConfig.toString()));
+            mMsgHandler.requestMessage(new Msg(MsgKey.Video_Source_FinalConfig, newConfig.toString()));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -220,16 +213,16 @@ public class VideoCamera implements IVideoSource, Runnable,
     private void handleMessage(Msg msg){
 
         switch (msg.key){
-            case MSG_KEY_RecvCmd_OpenSource:
+            case MsgKey.Video_Source_Open:
                 openCamera(msg);
                 break;
-            case MSG_KEY_RecvCmd_CloseSource:
+            case MsgKey.Video_Source_Close:
                 closeCamera();
                 break;
-            case MSG_KEY_RecvCmd_StartCapture:
+            case MsgKey.Video_Source_StartCapture:
                 startCapture();
                 break;
-            case MSG_KEY_RecvCmd_StopCapture:
+            case MsgKey.Video_Source_StopCapture:
                 stopCapture();
                 break;
             default:
@@ -258,7 +251,7 @@ public class VideoCamera implements IVideoSource, Runnable,
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         Log.e(TAG, "onPreviewFrame: data size: " + data.length);
-        mMsgHandler.requestMessage(new Msg(MSG_KEY_SendCmd_PreviewFrame, data, 0));
+        mMsgHandler.requestMessage(new Msg(MsgKey.Video_Source_ProvideFrame, data, 0));
         mCamera.addCallbackBuffer(data);
     }
 

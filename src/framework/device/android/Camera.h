@@ -11,16 +11,6 @@
 
 namespace freee {
 
-    enum {
-        MSG_KEY_SendCmd_OpenSource = 0,
-        MSG_KEY_SendCmd_CloseSource,
-        MSG_KEY_SendCmd_StartCapture,
-        MSG_KEY_SendCmd_StopCapture,
-        MSG_KEY_RecvCmd_UpdateVideoConfig,
-        MSG_KEY_RecvCmd_PreviewFrame,
-    };
-
-
     class Camera : public VideoSource {
 
     public:

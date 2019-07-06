@@ -72,7 +72,16 @@ enum {
     MsgKey_Audio_Source_Begin = 5000,
     MsgKey_Audio_Effect_Begin = 6000,
     MsgKey_Audio_Render_Begin = 7000,
+
+
     MsgKey_Video_Source_Begin = 8000,
+    MsgKey_Video_Source_Open,
+    MsgKey_Video_Source_Close,
+    MsgKey_Video_Source_StartCapture,
+    MsgKey_Video_Source_StopCapture,
+    MsgKey_Video_Source_FinalConfig,
+    MsgKey_Video_Source_ProvideFrame,
+
     MsgKey_Video_Effect_Begin = 9000,
     MsgKey_Video_Render_Begin = 10000,
 };

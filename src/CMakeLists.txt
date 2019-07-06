@@ -19,9 +19,6 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSR_LOG_DEBUG -DSR_MALLOC_BACKTRACE -DSR_MA
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
 
-set(SRC_DIR ${CMAKE_SOURCE_DIR})
-
-
 file(GLOB sdk_sources
     sr_malloc/src/*.c
     sr_malloc/src/*.cpp

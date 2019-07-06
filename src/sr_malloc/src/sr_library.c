@@ -1113,9 +1113,9 @@ static void *sr_msg_queue_loop(void *p)
 }
 
 
-sr_msg_queue_t* sr_msg_queue_build()
+sr_msg_queue_t* sr_msg_queue_create()
 {
-	LOGD("sr_msg_queue_build enter\n");
+	LOGD("sr_msg_queue_create enter\n");
 
 	sr_msg_queue_t *queue = NULL;
 
@@ -1125,7 +1125,7 @@ sr_msg_queue_t* sr_msg_queue_build()
 
 	queue->pipe = sr_pipe_create(0);
 
-	LOGD("sr_msg_queue_build exit\n");
+	LOGD("sr_msg_queue_create exit\n");
 
 	return queue;
 }

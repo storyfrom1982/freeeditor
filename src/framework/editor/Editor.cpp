@@ -20,7 +20,7 @@ Editor::Editor(sr_msg_t msg) : m_videoSource(nullptr) {
     m_processor.handler = this;
     m_processor.process = Editor::messageProcessorThread;
 
-    m_queue = sr_msg_queue_build();
+    m_queue = sr_msg_queue_create();
     sr_msg_queue_start_processor(m_queue, &m_processor);
 }
 

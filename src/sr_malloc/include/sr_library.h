@@ -368,7 +368,7 @@ typedef struct sr_msg_processor_t{
 
 typedef struct sr_msg_queue_t sr_msg_queue_t;
 
-extern sr_msg_queue_t* sr_msg_queue_build();
+extern sr_msg_queue_t* sr_msg_queue_create();
 extern void sr_msg_queue_remove(sr_msg_queue_t **pp_queue);
 extern int sr_msg_queue_start_processor(sr_msg_queue_t *queue, sr_msg_processor_t *processor);
 
