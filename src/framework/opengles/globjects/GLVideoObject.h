@@ -10,8 +10,12 @@
 
 namespace freee {
 
-    class YV21Object : public GLObject {
+    class GLVideoObject : public GLObject {
     public:
+
+        GLVideoObject();
+        ~GLVideoObject();
+
         virtual void build();
 
         virtual void clean();

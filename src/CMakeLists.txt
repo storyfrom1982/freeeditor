@@ -31,6 +31,7 @@ file(GLOB sdk_sources
     framework/opengles/*.cpp
     framework/opengles/android/*.cpp
     framework/opengles/globjects/*.cpp
+    framework/opengles/glshapes/*.cpp
     framework/device/*.cpp
     framework/device/android/*.cpp
     )
@@ -55,6 +56,7 @@ target_include_directories(
     framework/opengles
     framework/opengles/android
     framework/opengles/globjects
+    framework/opengles/glshapes
     framework/device
     framework/device/android
     sr_malloc/include
