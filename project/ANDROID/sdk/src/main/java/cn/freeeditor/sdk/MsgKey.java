@@ -58,33 +58,33 @@ public class MsgKey {
     public static final int Editor_DisableVideoStream = 1029;
 
     public static final int Editor_SetPublishURL = 1030;
-    public static final int Editor_StartPublish = 1031;
-    public static final int Editor_StopPublish = 1032;
+    static final int Editor_StartPublish = 1031;
+    static final int Editor_StopPublish = 1032;
 
-    public static final int Player_Begin = 2000;
+    static final int Player_Begin = 2000;
 
-    public static final int Text_Source_Begin = 3000;
+    static final int Text_Source_Begin = 3000;
 
-    public static final int Text_Effect_Begin = 4000;
+    static final int Text_Effect_Begin = 4000;
 
-    public static final int Audio_Source_Begin = 5000;
+    static final int Audio_Source_Begin = 5000;
 
-    public static final int Audio_Effect_Begin = 6000;
+    static final int Audio_Effect_Begin = 6000;
 
-    public static final int Audio_Render_Begin = 7000;
-
-
-    public static final int Video_Source_Begin = 8000;
-    public static final int Video_Source_Open = 8001;
-    public static final int Video_Source_Close = 8002;
-    public static final int Video_Source_StartCapture = 8003;
-    public static final int Video_Source_StopCapture = 8004;
-    public static final int Video_Source_FinalConfig = 8005;
-    public static final int Video_Source_ProvideFrame = 8006;
+    static final int Audio_Render_Begin = 7000;
 
 
-    public static final int Video_Effect_Begin = 9000;
+    static final int Video_Source_Begin = 8000;
+    static final int Video_Source_Open = 8001;
+    static final int Video_Source_Close = 8002;
+    static final int Video_Source_StartCapture = 8003;
+    static final int Video_Source_StopCapture = 8004;
+    static final int Video_Source_FinalConfig = 8005;
+    static final int Video_Source_ProvideFrame = 8006;
 
-    public static final int Video_Render_Begin = 10000;
+
+    static final int Video_Effect_Begin = 9000;
+
+    static final int Video_Render_Begin = 10000;
 
 }

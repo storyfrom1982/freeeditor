@@ -28,6 +28,8 @@ file(GLOB sdk_sources
     framework/context/*.cpp
     framework/editor/*.cpp
     framework/player/*.cpp
+    framework/opengles/*.cpp
+    framework/opengles/android/*.cpp
     framework/device/*.cpp
     framework/device/android/*.cpp
     )
@@ -49,6 +51,8 @@ target_include_directories(
     framework/context
     framework/editor
     framework/player
+    framework/opengles
+    framework/opengles/android
     framework/device
     framework/device/android
     sr_malloc/include
@@ -62,5 +66,7 @@ target_link_libraries(
     lib_yuv
 
     log
+    EGL
+    GLESv3
     android
     )
