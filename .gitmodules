@@ -1,3 +1,6 @@
 [submodule "thirdpart/src/libyuv"]
 	path = thirdpart/src/libyuv
 	url = https://github.com/storyfrom1982/libyuv.git
+[submodule "thirdpart/src/glm"]
+	path = thirdpart/src/glm
+	url = https://github.com/g-truc/glm.git

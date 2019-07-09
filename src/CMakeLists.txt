@@ -30,6 +30,7 @@ file(GLOB sdk_sources
     framework/player/*.cpp
     framework/opengles/*.cpp
     framework/opengles/android/*.cpp
+    framework/opengles/globjects/*.cpp
     framework/device/*.cpp
     framework/device/android/*.cpp
     )
@@ -53,10 +54,17 @@ target_include_directories(
     framework/player
     framework/opengles
     framework/opengles/android
+    framework/opengles/globjects
     framework/device
     framework/device/android
     sr_malloc/include
     ${INCLUDE_PATH}/libyuv/include
+    ${INCLUDE_PATH}/glm/glm
+    ${INCLUDE_PATH}/glm/glm/gtx
+    ${INCLUDE_PATH}/glm/glm/gtc
+    ${INCLUDE_PATH}/glm/glm/detail
+    ${INCLUDE_PATH}/glm/glm/simd
+    ${INCLUDE_PATH}/glm/glm/ext
     )
 
 

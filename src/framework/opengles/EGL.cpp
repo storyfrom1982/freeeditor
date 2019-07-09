@@ -26,7 +26,7 @@ EGL::~EGL() {
 }
 
 EGL *EGL::createEglContext(EGL *shareContext) {
-    EGL *egl;
+    EGL *egl = NULL;
 #ifdef __ANDROID__
     egl = new AndroidEGL(shareContext);
 #endif
@@ -34,7 +34,7 @@ EGL *EGL::createEglContext(EGL *shareContext) {
 }
 
 EGL *EGL::createEglContext(int major, int minor) {
-    EGL *egl;
+    EGL *egl = NULL;
 #ifdef __ANDROID__
     egl = new AndroidEGL(major, minor);
 #endif
