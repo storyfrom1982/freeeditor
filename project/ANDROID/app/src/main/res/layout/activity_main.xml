@@ -30,6 +30,12 @@
                 android:layout_height="50dp"
                 android:text="Player"/>
 
+            <Button
+                android:id="@+id/update_app"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="Update"/>
+
         </LinearLayout>
 
     </FrameLayout>

@@ -6,3 +6,19 @@
 
 
 using namespace freee;
+
+gl_vetex* GLShape::getVertexArray() {
+        return NULL;
+}
+
+GLubyte* GLShape::getIndexArray() {
+        return NULL;
+}
+
+GLuint GLShape::getVertexCount() {
+        return 0;
+}
+
+GLuint GLShape::getIndexCount() {
+        return 0;
+}

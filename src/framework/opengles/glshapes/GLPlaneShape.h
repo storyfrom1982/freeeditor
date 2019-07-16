@@ -12,8 +12,16 @@
 namespace freee {
 
 
-    class GLPlaneShape {
+    class GLPlaneShape : public GLShape {
+    public:
 
+        gl_vetex* getVertexArray() override;
+
+        GLubyte* getIndexArray() override;
+
+        GLuint getVertexCount() override;
+
+        GLuint getIndexCount() override;
     };
 
 }

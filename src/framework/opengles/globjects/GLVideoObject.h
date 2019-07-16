@@ -7,6 +7,7 @@
 
 
 #include "../GLObject.h"
+#include "../GLShape.h"
 
 namespace freee {
 
@@ -30,17 +31,7 @@ namespace freee {
 
         virtual void setCallback(GLObjectCallback *callback);
 
-        virtual void setAnimation();
-
-        virtual void setImage();
-
-        virtual void setScenesSize(glm::vec3 size);
-
-        virtual void setShader(std::string v, std::string f);
-
         virtual int getTexture();
-
-        virtual int getObjectSize();
 
     protected:
         virtual void updateImage();

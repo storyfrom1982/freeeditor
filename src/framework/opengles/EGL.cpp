@@ -12,7 +12,7 @@ using namespace freee;
 
 
 EGL::EGL(EGL *shareContext) {
-    mMajor = 2;
+    mMajor = 3;
     mMinor = 0;
 }
 

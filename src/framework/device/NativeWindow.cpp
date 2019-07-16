@@ -6,14 +6,12 @@
 
 #include <IMsgListener.h>
 
+#include <android/Window.h>
+
 
 using namespace freee;
 
 
-NativeWindow *NativeWindow::createNativeWindow() {
-    return NULL;
-}
-
-void *NativeWindow::getWindowHandler() {
-    return NULL;
+NativeWindow *NativeWindow::createNativeWindow(void *p) {
+    return new Window(p);
 }

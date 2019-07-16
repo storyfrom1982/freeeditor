@@ -9,6 +9,8 @@ import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.Surface;
+import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -56,6 +58,7 @@ public class PlayerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_player);
 
         playSurface = (SurfaceView) findViewById(R.id.player_surface);
+        playSurface.getHolder().addCallback(callback);
         frameLayout = (FrameLayout) findViewById(R.id.player_surface_frame);
 
         mUrlEdit = (EditText)findViewById(R.id.play_edit_url);
@@ -240,5 +243,31 @@ public class PlayerActivity extends AppCompatActivity {
             playHandler.sendMessageDelayed(msg, timeout);
         }
     }
+
+
+    SurfaceHolder.Callback callback = new SurfaceHolder.Callback() {
+        @Override
+        public void surfaceCreated(SurfaceHolder holder) {
+            createRenderer(holder.getSurface());
+            rendererDraw();
+        }
+
+        @Override
+        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
+        }
+
+        @Override
+        public void surfaceDestroyed(SurfaceHolder holder) {
+            releaseRenderer();
+        }
+    };
+
+
+    private native void createRenderer(Surface surface);
+
+    private native void releaseRenderer();
+
+    private native void rendererDraw();
 
 }

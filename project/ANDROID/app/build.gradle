@@ -1,6 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        release {
+            storeFile file('/home/yongge/kly/freeeditor/project/ANDROID/freeeditor.jks')
+            storePassword '778899'
+            keyAlias = 'key0'
+            keyPassword '778899'
+        }
+    }
     compileSdkVersion 28
     defaultConfig {
         applicationId "cn.freeeditor.android"
@@ -9,6 +17,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.release
     }
     buildTypes {
         release {

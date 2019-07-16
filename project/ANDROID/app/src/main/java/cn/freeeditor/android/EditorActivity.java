@@ -96,6 +96,7 @@ public class EditorActivity extends Activity {
 
     private void openRecorder(String url) throws Exception {
         recorder = MContext.Instance().createRecorder("test");
+        recorder.setPreviewSurface(surfaceView);
         recorder.startPreview();
     }
 

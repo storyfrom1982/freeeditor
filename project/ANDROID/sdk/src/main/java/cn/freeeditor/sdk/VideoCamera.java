@@ -250,8 +250,8 @@ public class VideoCamera implements IVideoSource, Runnable,
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        Log.e(TAG, "onPreviewFrame: data size: " + data.length);
-        mMsgHandler.requestMessage(new Msg(MsgKey.Video_Source_ProvideFrame, data, 0));
+//        Log.e(TAG, "onPreviewFrame: data size: " + data.length);
+//        mMsgHandler.requestMessage(new Msg(MsgKey.Video_Source_ProvideFrame, data, 0));
         mCamera.addCallbackBuffer(data);
     }
 

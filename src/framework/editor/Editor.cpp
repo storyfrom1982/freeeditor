@@ -4,6 +4,7 @@
 
 #include <MContext.h>
 #include <MsgKey.h>
+#include <globjects/GLVideoObject.h>
 #include "Editor.h"
 
 
@@ -172,5 +173,12 @@ void Editor::removeAudioSource() {
 }
 
 void Editor::setVideoView(sr_msg_t msg) {
+    LOGD("setVideoView =========== enter\n");
     LOGD("setVideoView: %p\n", msg.ptr);
+    nativeWindow = NativeWindow::createNativeWindow(msg.ptr);
+    videoRenderer = new VideoRenderer(1280, 720);
+    videoRenderer->setNativeWindow(nativeWindow);
+    glObject = new GLVideoObject();
+    videoRenderer->addElement(glObject);
+
 }

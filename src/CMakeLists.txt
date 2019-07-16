@@ -16,7 +16,7 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "debug")
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DSR_LOG_DEBUG -DSR_MALLOC_BACKTRACE -DSR_MALLOC_PAGE_SIZE=0xA00000 -DSR_MALLOC_MAX_POOL=16")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSR_LOG_DEBUG -std=c++14")
 
 
 file(GLOB sdk_sources
@@ -24,6 +24,7 @@ file(GLOB sdk_sources
     sr_malloc/src/*.cpp
     framework/*.c
     framework/jni/*.cpp
+    framework/jni/*.c
     framework/base/*.cpp
     framework/context/*.cpp
     framework/editor/*.cpp
@@ -61,12 +62,13 @@ target_include_directories(
     framework/device/android
     sr_malloc/include
     ${INCLUDE_PATH}/libyuv/include
-    ${INCLUDE_PATH}/glm/glm
-    ${INCLUDE_PATH}/glm/glm/gtx
-    ${INCLUDE_PATH}/glm/glm/gtc
-    ${INCLUDE_PATH}/glm/glm/detail
-    ${INCLUDE_PATH}/glm/glm/simd
-    ${INCLUDE_PATH}/glm/glm/ext
+    ${INCLUDE_PATH}/glm
+#    ${INCLUDE_PATH}/glm/glm
+#    ${INCLUDE_PATH}/glm/glm/gtx
+#    ${INCLUDE_PATH}/glm/glm/gtc
+#    ${INCLUDE_PATH}/glm/glm/detail
+#    ${INCLUDE_PATH}/glm/glm/simd
+#    ${INCLUDE_PATH}/glm/glm/ext
     )
 
 
@@ -77,6 +79,7 @@ target_link_libraries(
 
     log
     EGL
+    GLESv1_CM
     GLESv3
     android
     )

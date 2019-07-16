@@ -13,10 +13,17 @@ namespace freee {
 
     public:
 
-        Window();
+        Window(void *windowHandler);
         virtual ~Window();
 
         virtual void* getWindowHandler() override ;
+
+        void getWindowSize(int *w, int *h) override;
+
+
+    private:
+
+        void *mWindowHandler;
 
     };
 }

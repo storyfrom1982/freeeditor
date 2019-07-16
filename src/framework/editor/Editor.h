@@ -9,6 +9,8 @@
 #include <IMsgListener.h>
 #include <MConfig.h>
 #include <VideoSource.h>
+#include <NativeWindow.h>
+#include <VideoRenderer.h>
 
 
 namespace freee {
@@ -59,6 +61,10 @@ namespace freee {
         sr_msg_processor_t m_processor;
 
         VideoSource *m_videoSource;
+
+        NativeWindow *nativeWindow;
+        VideoRenderer *videoRenderer;
+        GLObject *glObject;
     };
 
 

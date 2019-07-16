@@ -5,21 +5,13 @@
 #ifndef ANDROID_GLOBJECT_H
 #define ANDROID_GLOBJECT_H
 
+#include "opengles.h"
+#include "GLShape.h"
+
 #include <string>
+#include <glm/glm.hpp>
+#include <glm/ext/matrix_transform.hpp>
 
-#ifdef __ANDROID__
-# ifdef __cplusplus
-extern "C" {
-# endif
-#  include <GLES3/gl3.h>
-#  include <GLES3/gl3ext.h>
-# ifdef __cplusplus
-}
-# endif
-#endif
-
-
-#include <glm.hpp>
 
 
 namespace freee {
@@ -67,10 +59,41 @@ namespace freee {
 
         virtual void updateImage();
 
+        virtual GLuint createProgram(const char *vertex_shader, const char *fragment_shader);
+
+        virtual GLuint createTexture(GLenum pixelFormat);
+
 
     protected:
 
         glm::mat4 mModelMat;
+
+        GLuint mProgram;
+
+        GLint attrib_pos;
+        GLint attrib_uv;
+        GLint attrib_col;
+
+        GLint uniform_project;
+        GLint uniform_view;
+        GLint uniform_model;
+
+        GLint uniform_tyy;
+        GLint uniform_tuv;
+        GLint uniform_tvu;
+
+        GLint uniform_alpha;
+        GLint uniform_fhRange;
+
+        GLuint texids[3];
+
+        float * mFVertexBuffer;
+        unsigned char * mIndexBuffer;
+        GLuint m_vertex_array_object;
+        GLuint m_vertex_buffer;
+        GLuint m_index_buffer;
+
+        GLShape *glShape;
 
     };
 

@@ -52,7 +52,7 @@ sr_msg_t freee::Camera::onRequestFromUpstream(sr_msg_t msg) {
             LOGD("update config =======: %s\n", m_videoConfig.dump().c_str());
             break;
         case MsgKey_Video_Source_ProvideFrame:
-            LOGD("video frame =======: %p\n", msg.ptr);
+//            LOGD("video frame =======: %p\n", msg.ptr);
             break;
         default:
             break;

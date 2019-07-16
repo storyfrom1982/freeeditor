@@ -5,6 +5,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -124,8 +125,10 @@ public class Editor implements IEditor, Runnable, SurfaceHolder.Callback {
     @Override
     public void setPreviewSurface(SurfaceView view) {
         mVideoView = view;
-        if (mVideoSource != null){
+        if (mVideoView != null) {
+            mVideoView.setVisibility(View.INVISIBLE);
             mVideoView.getHolder().addCallback(this);
+            mVideoView.setVisibility(View.VISIBLE);
         }
     }
 

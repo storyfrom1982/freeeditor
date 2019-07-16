@@ -12,11 +12,13 @@ namespace freee {
 
     public:
 
-        static NativeWindow* createNativeWindow();
+        static NativeWindow* createNativeWindow(void *p);
 
         virtual ~NativeWindow(){};
 
-        virtual void* getWindowHandler();
+        virtual void* getWindowHandler() = 0;
+
+        virtual void getWindowSize(int *w, int *h) = 0;
 
     };
 
