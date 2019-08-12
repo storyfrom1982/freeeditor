@@ -828,6 +828,20 @@ void* aligned_alloc(size_t alignment, size_t size)
 	return NULL;
 }
 
+void* _aligned_alloc(size_t alignment, size_t size)
+{
+    return aligned_alloc(alignment, size);
+}
+
+int posix_memalign(void **ptr, size_t align, size_t size)
+{
+    *ptr = aligned_alloc(align, size);
+    if (NULL == *ptr){
+        return -1;
+    }
+    return 0;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 ////
 /////////////////////////////////////////////////////////////////////////////

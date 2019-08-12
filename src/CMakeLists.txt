@@ -9,6 +9,26 @@ add_library(lib_yuv STATIC IMPORTED)
 set_target_properties(lib_yuv PROPERTIES IMPORTED_LOCATION
     ${LIBS_PATH}/${ANDROID_ABI}/libyuv.a)
 
+add_library(lib_avcodec STATIC IMPORTED)
+set_target_properties(lib_avcodec PROPERTIES IMPORTED_LOCATION
+        ${LIBS_PATH}/${ANDROID_ABI}/libavcodec.a)
+
+add_library(lib_avutil STATIC IMPORTED)
+set_target_properties(lib_avutil PROPERTIES IMPORTED_LOCATION
+        ${LIBS_PATH}/${ANDROID_ABI}/libavutil.a)
+
+add_library(lib_avformat STATIC IMPORTED)
+set_target_properties(lib_avformat PROPERTIES IMPORTED_LOCATION
+        ${LIBS_PATH}/${ANDROID_ABI}/libavformat.a)
+
+add_library(lib_swresample STATIC IMPORTED)
+set_target_properties(lib_swresample PROPERTIES IMPORTED_LOCATION
+        ${LIBS_PATH}/${ANDROID_ABI}/libswresample.a)
+
+add_library(lib_swscale STATIC IMPORTED)
+set_target_properties(lib_swscale PROPERTIES IMPORTED_LOCATION
+        ${LIBS_PATH}/${ANDROID_ABI}/libswscale.a)
+
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "debug")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g")
@@ -26,6 +46,7 @@ file(GLOB sdk_sources
     framework/jni/*.cpp
     framework/jni/*.c
     framework/base/*.cpp
+    framework/context/*.c
     framework/context/*.cpp
     framework/editor/*.cpp
     framework/player/*.cpp
@@ -61,6 +82,7 @@ target_include_directories(
     framework/device
     framework/device/android
     sr_malloc/include
+    ${INCLUDE_PATH}/include
     ${INCLUDE_PATH}/libyuv/include
     ${INCLUDE_PATH}/glm
 #    ${INCLUDE_PATH}/glm/glm
@@ -76,6 +98,11 @@ target_link_libraries(
     freeeditor
 
     lib_yuv
+        lib_avformat
+        lib_avcodec
+        lib_swresample
+        lib_swscale
+        lib_avutil
 
     log
     EGL

@@ -81,6 +81,12 @@ public class EditorActivity extends Activity {
         publishHandler.sendEmptyMessage(HANDLER_PERMISSION_GAN);
 
         fadeIn();
+
+        try {
+            openRecorder("test");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 

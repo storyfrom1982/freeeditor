@@ -132,8 +132,22 @@ sr_msg_t Editor::saveConfig(sr_msg_t msg) {
 
 
 void Editor::startPreview() {
-    m_videoSource->startCapture();
+//    m_videoSource->startCapture();
 //    m_videoSource->addOutput(this);
+
+    AVFrame *cfg = av_frame_alloc();
+    cfg->format = AV_PIX_FMT_YUV420P;
+    cfg->width = 1280;
+    cfg->height = 720;
+
+    AVFramePool *pool = av_frame_pool_create(cfg, 10);
+    AVFrameEx *frameEx = av_frame_pool_alloc(pool);
+    av_frame_pool_add_reference(frameEx);
+    av_frame_pool_free(frameEx);
+    av_frame_pool_free(frameEx);
+    frameEx = av_frame_pool_alloc(pool);
+    frameEx = av_frame_pool_alloc(pool);
+    av_frame_pool_release(&pool);
 }
 
 void Editor::stopPreview() {
@@ -175,10 +189,10 @@ void Editor::removeAudioSource() {
 void Editor::setVideoView(sr_msg_t msg) {
     LOGD("setVideoView =========== enter\n");
     LOGD("setVideoView: %p\n", msg.ptr);
-    nativeWindow = NativeWindow::createNativeWindow(msg.ptr);
-    videoRenderer = new VideoRenderer(1280, 720);
-    videoRenderer->setNativeWindow(nativeWindow);
-    glObject = new GLVideoObject();
-    videoRenderer->addElement(glObject);
+//    nativeWindow = NativeWindow::createNativeWindow(msg.ptr);
+//    videoRenderer = new VideoRenderer(1280, 720);
+//    videoRenderer->setNativeWindow(nativeWindow);
+//    glObject = new GLVideoObject();
+//    videoRenderer->addElement(glObject);
 
 }

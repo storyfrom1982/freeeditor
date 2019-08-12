@@ -18,6 +18,7 @@ extern "C" {
 
 # include <sr_malloc.h>
 # include <sr_library.h>
+# include <AVFramePool.h>
 
 #ifdef __cplusplus
 }
