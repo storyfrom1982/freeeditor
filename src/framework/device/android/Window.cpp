@@ -7,7 +7,7 @@
 #include <SDKJNI.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
-#include <IMsgListener.h>
+#include <StreamProcessor.h>
 
 
 using namespace freee;

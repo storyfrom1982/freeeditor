@@ -6,7 +6,7 @@
 #include <android/log.h>
 
 #include <MConfig.h>
-#include <MContext.h>
+#include <EnvContext.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -42,7 +42,7 @@ static void log_debug(int level, const char *debug_log, const char *pure_log)
 
 
 
-class MsgHandler : public IMsgListener {
+class MsgHandler : public StreamProcessor {
 
 public:
 
@@ -50,8 +50,8 @@ public:
         JniEnv env;
         m_obj = env->NewGlobalRef(obj);
         m_class = env->GetObjectClass(m_obj);
-        m_onMessage = env->GetMethodID(m_class, "onMessage", "(Lcn/freeeditor/sdk/Msg;)V");
-        m_onRequestMessage = env->GetMethodID(m_class, "onRequest", "(Lcn/freeeditor/sdk/Msg;)Lcn/freeeditor/sdk/Msg;");
+        m_onReceiveMessage = env->GetMethodID(m_class, "onReceiveMessage", "(Lcn/freeeditor/sdk/Msg;)V");
+        m_onReceiveRequest = env->GetMethodID(m_class, "onReceiveRequest", "(Lcn/freeeditor/sdk/Msg;)Lcn/freeeditor/sdk/Msg;");
 
         m_msgClass = static_cast<jclass>(env->NewGlobalRef(env->FindClass("cn/freeeditor/sdk/Msg")));
         m_buildInteger = env->GetMethodID(m_msgClass, "<init>", "(IJ)V");
@@ -93,7 +93,7 @@ public:
                 obj = env->NewObject(m_msgClass, m_buildObject, msg.key, (jobject)msg.ptr, msg.size);
             }
         }else {
-            obj = env->NewObject(m_msgClass, m_buildInteger, -1, -1);
+            obj = env->NewObject(m_msgClass, m_buildInteger, msg.key, msg.type);
         }
         return obj;
     }
@@ -126,44 +126,45 @@ public:
 //                LOGD("jobject : %p\n", msg.ptr);
             }
         }else {
-            msg = __sr_bad_msg;
+            msg = __sr_null_msg;
         }
         return msg;
     }
 
-    jobject requestMessage(JNIEnv *env, jobject obj){
+    void sendJniMessageToOutputStream(JNIEnv *env, jobject obj){
         sr_msg_t msg = obj2msg(env, obj);
-        msg = sendRequestToDownstream(msg);
+        sendMessageToOutputStream(msg);
+    }
+
+    jobject sendJniRequestToOutputStream(JNIEnv *env, jobject obj){
+        sr_msg_t msg = obj2msg(env, obj);
+        msg = sendRequestToOutputStream(msg, 0);
         return msg2obj(env, msg);
     }
 
-    void sendMessage(JNIEnv *env, jobject obj){
-        sr_msg_t msg = obj2msg(env, obj);
-        sendMessageToDownstream(msg);
-    }
+protected:
 
-    sr_msg_t onRequestFromUpstream(sr_msg_t msg) override {
+    void messageFromOutputStream(sr_msg_t msg) override {
         JniEnv env;
         jobject obj = msg2obj(env.m_pEnv, msg);
-        jobject Msg = env->CallObjectMethod(m_obj, m_onRequestMessage, obj);
+        env->CallVoidMethod(m_obj, m_onReceiveMessage, obj);
+        env->DeleteLocalRef(obj);
+    }
+
+    sr_msg_t requestFromOutputStream(sr_msg_t msg) override {
+        JniEnv env;
+        jobject obj = msg2obj(env.m_pEnv, msg);
+        jobject Msg = env->CallObjectMethod(m_obj, m_onReceiveRequest, obj);
         env->DeleteLocalRef(obj);
         return obj2msg(env.m_pEnv, Msg);
     }
-
-    void onMessageFromDownstream(sr_msg_t msg) override {
-        JniEnv env;
-        jobject obj = msg2obj(env.m_pEnv, msg);
-        env->CallVoidMethod(m_obj, m_onMessage, obj);
-        env->DeleteLocalRef(obj);
-    }
-
 
 private:
 
     jobject m_obj;
     jclass m_class;
-    jmethodID m_onMessage;
-    jmethodID m_onRequestMessage;
+    jmethodID m_onReceiveMessage;
+    jmethodID m_onReceiveRequest;
 
     jclass m_msgClass;
     jmethodID m_buildInteger;
@@ -205,14 +206,14 @@ Java_cn_freeeditor_sdk_MsgHandler_remove(JNIEnv *env, jobject instance, jlong ha
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_cn_freeeditor_sdk_MsgHandler_requestMessage(JNIEnv *env, jobject instance, jobject msg, jlong handlerInstance) {
+Java_cn_freeeditor_sdk_MsgHandler_sendRequest(JNIEnv *env, jobject instance, jobject msg, jlong handlerInstance) {
     if (handlerInstance == 0){
         jclass msgClass = static_cast<jclass>(env->NewGlobalRef(env->FindClass("cn/freeeditor/sdk/Msg")));
         jmethodID buildMsg = env->GetMethodID(msgClass, "<init>", "(IJ)V");
         return env->NewObject(msgClass, buildMsg, -1, -1);
     }
     MsgHandler *msgHandler = (MsgHandler *)handlerInstance;
-    return msgHandler->requestMessage(env, msg);
+    return msgHandler->sendJniRequestToOutputStream(env, msg);
 }
 
 extern "C"
@@ -220,17 +221,17 @@ JNIEXPORT void JNICALL
 Java_cn_freeeditor_sdk_MsgHandler_sendMessage(JNIEnv *env, jobject instance, jobject msg, jlong handlerInstance) {
     if (handlerInstance != 0){
         MsgHandler *msgHandler = (MsgHandler *)handlerInstance;
-        msgHandler->sendMessage(env, msg);
+        msgHandler->sendJniMessageToOutputStream(env, msg);
     }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_MsgHandler_setListener(JNIEnv *env, jobject instance, jlong listener, jlong handlerInstance) {
-    IMsgListener *msgHandler = (IMsgListener *)handlerInstance;
-    IMsgListener *msgListener = (IMsgListener *)listener;
-    if (msgHandler && msgListener){
-        msgHandler->addOutputStream(msgListener);
+Java_cn_freeeditor_sdk_MsgHandler_setListener(JNIEnv *env, jobject instance, jlong processorInstance, jlong handlerInstance) {
+    StreamProcessor *msgHandler = (StreamProcessor *)handlerInstance;
+    StreamProcessor *msgProcessor = (StreamProcessor *)processorInstance;
+    if (msgHandler && msgProcessor){
+        msgHandler->addOutputStream(msgProcessor);
     }
 }
 
@@ -239,7 +240,7 @@ JNIEXPORT void JNICALL
 Java_cn_freeeditor_sdk_MContext_apply(JNIEnv *env, jobject instance, jlong handlerInstance) {
     if (handlerInstance != 0){
         MsgHandler *msgHandler = (MsgHandler *)handlerInstance;
-        MContext::Instance()->addInputStream(msgHandler);
+        EnvContext::Instance()->addInputStream(msgHandler);
     }
 }
 
@@ -248,9 +249,9 @@ JNIEXPORT void JNICALL
 Java_cn_freeeditor_sdk_MContext_remove(JNIEnv *env, jobject instance, jlong handlerInstance) {
     if (handlerInstance != 0){
         MsgHandler *msgHandler = (MsgHandler *)handlerInstance;
-        msgHandler->removeOutputStream(MContext::Instance());
-        MContext::Instance()->removeInputStream(msgHandler);
-        delete MContext::Instance();
+        msgHandler->removeOutputStream(EnvContext::Instance());
+        EnvContext::Instance()->removeInputStream(msgHandler);
+        delete EnvContext::Instance();
     }
     sr_log_file_close();
 }

@@ -83,6 +83,7 @@ public class EditorActivity extends Activity {
         fadeIn();
 
         try {
+            MContext.Instance().getPermissions();
             openRecorder("test");
         } catch (Exception e) {
             e.printStackTrace();

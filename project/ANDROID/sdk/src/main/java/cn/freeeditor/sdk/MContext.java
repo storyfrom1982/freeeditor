@@ -68,19 +68,38 @@ public class MContext implements Runnable, ComponentCallbacks {
 
         mMsgHandler = new MsgHandler(new MsgHandler.IMsgListener() {
             @Override
-            public void onMessage(Msg msg) {
+            public void onReceiveMessage(Msg msg) {
                 mHandler.sendMessage(mHandler.obtainMessage(HANDLER_MESSAGE, msg));
             }
 
             @Override
-            public Msg onRequest(Msg msg) {
+            public Msg onReceiveRequest(Msg msg) {
                 synchronized (mListeners){
                     ArrayList<MsgHandler.IMsgListener> list = mListeners.get(msg.key);
                     if (list == null){
-                        return new Msg(-1);
+                        return new Msg(MsgKey.Null);
                     }
-                    return list.get(0).onRequest(msg);
+                    return list.get(0).onReceiveRequest(msg);
                 }
+            }
+        });
+
+        registerMessageListener(MsgKey.EnvCtx_HomePath, new MsgHandler.IMsgListener() {
+            @Override
+            public void onReceiveMessage(Msg msg) {
+
+            }
+
+            @Override
+            public Msg onReceiveRequest(Msg msg) {
+                Context context = mAppCtxReference.get();
+                if (context != null){
+                    File configPath = new File(context.getFilesDir().getAbsolutePath() + "/freertc");
+                    if (configPath.exists() || configPath.mkdirs()) {
+                        return new Msg(MsgKey.OK, configPath.getAbsolutePath());
+                    }
+                }
+                return new Msg(MsgKey.Null);
             }
         });
 
@@ -99,10 +118,6 @@ public class MContext implements Runnable, ComponentCallbacks {
         }
 
         apply(mMsgHandler.getInstance());
-
-        setConfigDirPath();
-
-        getWriteFilePermissions();
     }
 
     public void remove(){
@@ -115,12 +130,16 @@ public class MContext implements Runnable, ComponentCallbacks {
         debug();
     }
 
+    public void getPermissions(){
+        mHandler.sendEmptyMessage(HANDLER_PERMISSION_GAN);
+    }
+
     public IEditor createRecorder(String name){
         Editor recorder = null;
         if (name == null || name.isEmpty()){
             name = "DefaultRecorder";
         }
-        Msg msg = requestMessage(new Msg(MsgKey.Context_NewEditor, name));
+        Msg msg = requestMessage(new Msg(MsgKey.EnvCtx_CreateCapture, name));
         if (msg.isResultInstance()){
             recorder = new Editor(msg.i64);
         }
@@ -129,20 +148,20 @@ public class MContext implements Runnable, ComponentCallbacks {
 
     public void removeRecorder(IEditor irecorder){
         Editor recorder = (Editor) irecorder;
-        requestMessage(new Msg(MsgKey.Context_RemoveEditor, recorder.getNativeInstance()));
+        requestMessage(new Msg(MsgKey.EnvCtx_RemoveCapture, recorder.getNativeInstance()));
         recorder.remove();
     }
 
 //    public String loadConfig(){
-//        return requestMessage(new Msg(MSG_KEY_RequestLoadConfig)).obj;
+//        return sendRequest(new Msg(MSG_KEY_RequestLoadConfig)).obj;
 //    }
 //
 //    public String saveConfig(){
-//        return requestMessage(new Msg(MSG_KEY_RequestSaveConfig)).obj;
+//        return sendRequest(new Msg(MSG_KEY_RequestSaveConfig)).obj;
 //    }
 //
 //    public void updateConfig(String cfg){
-//        requestMessage(new Msg(MSG_KEY_RequestUpdateConfig, cfg));
+//        sendRequest(new Msg(MSG_KEY_RequestUpdateConfig, cfg));
 //    }
 
     public Context getApplicationContext(){
@@ -154,7 +173,7 @@ public class MContext implements Runnable, ComponentCallbacks {
     }
 
     public Msg requestMessage(Msg msg){
-        return mMsgHandler.requestMessage(msg);
+        return mMsgHandler.sendRequest(msg);
     }
 
     private final HashMap<Integer, ArrayList<MsgHandler.IMsgListener>> mListeners;
@@ -176,26 +195,16 @@ public class MContext implements Runnable, ComponentCallbacks {
             ArrayList<MsgHandler.IMsgListener> list = mListeners.get(msg.key);
             if (list != null){
                 for (int i = 0; i < list.size(); ++i){
-                    list.get(i).onMessage(msg);
+                    list.get(i).onReceiveMessage(msg);
                 }
             }
         }
     }
 
-    private void setConfigDirPath(){
-        Context context = mAppCtxReference.get();
-        if (context != null){
-            File configPath = new File(context.getFilesDir().getAbsolutePath() + "/freertc");
-            if (configPath.exists() || configPath.mkdirs()) {
-                sendMessage(new Msg(MsgKey.Context_ConfigPath, configPath.getAbsolutePath()));
-            }
-        }
-    }
-
-    private void setHomeDirPath(){
+    private void setStorageDirPath(){
         File homePath = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/freertc");
         if (homePath.exists() || homePath.mkdirs()) {
-            sendMessage(new Msg(MsgKey.Context_HomePath, homePath.getAbsolutePath()));
+            sendMessage(new Msg(MsgKey.EnvCtx_StoragePath, homePath.getAbsolutePath()));
         }
     }
 
@@ -282,7 +291,7 @@ public class MContext implements Runnable, ComponentCallbacks {
                         context.getWriteFilePermissions();
                         break;
                     case HANDLER_PERMISSION_OBTAIN:
-                        context.setHomeDirPath();
+                        context.setStorageDirPath();
                         break;
                     default:
                         context.notifyMessage((Msg) msg.obj);

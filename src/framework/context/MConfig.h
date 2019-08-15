@@ -6,7 +6,7 @@
 #define ANDROIDFREERTC_MCONFIG_H
 
 
-#include <IMsgListener.h>
+#include <StreamProcessor.h>
 
 #include <string>
 #include <json.hpp>

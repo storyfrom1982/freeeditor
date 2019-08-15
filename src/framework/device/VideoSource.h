@@ -6,20 +6,20 @@
 #define ANDROID_CAMERA_H
 
 
-#include <IMsgListener.h>
+#include <StreamProcessor.h>
 #include <MConfig.h>
 
 
 namespace freee {
 
 
-    class VideoSource : public IMsgListener {
+    class VideoSource : public StreamProcessor {
 
     public:
 
-        static VideoSource* openVideoSource(IMsgListener *listener);
+        static VideoSource* openVideoSource(StreamProcessor *listener);
 
-        VideoSource(IMsgListener *listener);
+        VideoSource(StreamProcessor *listener);
         virtual ~VideoSource();
 
         virtual void openSource(json cfg) = 0;
@@ -38,7 +38,7 @@ namespace freee {
     protected:
 
         json m_videoConfig;
-        IMsgListener *m_listener;
+        StreamProcessor *m_listener;
 
     };
 

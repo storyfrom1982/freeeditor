@@ -4,7 +4,7 @@
 
 #include "NativeWindow.h"
 
-#include <IMsgListener.h>
+#include <StreamProcessor.h>
 
 #include <android/Window.h>
 

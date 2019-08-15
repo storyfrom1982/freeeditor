@@ -3,7 +3,7 @@
 //
 
 #include "MConfig.h"
-#include "MContext.h"
+#include "EnvContext.h"
 
 #include <fstream>
 #include <iostream>
@@ -111,7 +111,7 @@ void MConfig::buildDefaultConfig(json &config) {
 }
 
 
-//sr_msg_t MConfig::onRequest(sr_msg_t msg) {
+//sr_msg_t MConfig::onReceiveRequest(sr_msg_t msg) {
 //    if (msg.key == MSG_KEY_RequestLoadConfig){
 //        std::string cfg = load(MContext::Instance()->getConfigDirPath());
 //        size_t size = cfg.length();

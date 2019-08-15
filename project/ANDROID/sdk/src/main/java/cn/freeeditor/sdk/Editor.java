@@ -33,12 +33,12 @@ public class Editor implements IEditor, Runnable, SurfaceHolder.Callback {
         mNativeInstance = nativeListener;
         mMsgHandler = new MsgHandler(new MsgHandler.IMsgListener() {
             @Override
-            public void onMessage(Msg msg) {
+            public void onReceiveMessage(Msg msg) {
                 mThreadHandler.sendMessage(mThreadHandler.obtainMessage(MSG_HandleMessage, msg));
             }
 
             @Override
-            public Msg onRequest(Msg msg) {
+            public Msg onReceiveRequest(Msg msg) {
                 return Editor.this.onRequest(msg);
             }
         });
@@ -58,7 +58,7 @@ public class Editor implements IEditor, Runnable, SurfaceHolder.Callback {
 
         mMsgHandler.setListener(mNativeInstance);
 
-        Msg msg = mMsgHandler.requestMessage(new Msg(MsgKey.Editor_LoadConfig));
+        Msg msg = mMsgHandler.sendRequest(new Msg(MsgKey.Editor_LoadConfig));
         try {
             mConfig = new JSONObject(msg.msgToString());
             Log.d(TAG, mConfig.toString());
@@ -66,7 +66,7 @@ public class Editor implements IEditor, Runnable, SurfaceHolder.Callback {
             e.printStackTrace();
         }
 
-//        mMsgHandler.requestMessage(new Msg(MSG_SendReq_SaveConfig, mConfig.toString()));
+//        mMsgHandler.sendRequest(new Msg(MSG_SendReq_SaveConfig, mConfig.toString()));
 
         mVideoSource = new VideoCamera();
 //        mMsgHandler.sendMessage(new Msg(MSG_SendCmd_SetVideoSource, mVideoSource.getInstance()));
@@ -160,7 +160,7 @@ public class Editor implements IEditor, Runnable, SurfaceHolder.Callback {
 
     private void handleMessage(Msg msg){
         if (mMsgListener != null){
-            mMsgListener.onMessage(msg);
+            mMsgListener.onReceiveMessage(msg);
         }
     }
 

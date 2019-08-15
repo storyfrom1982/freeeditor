@@ -7,9 +7,7 @@
 
 enum {
 
-    MsgKey_Err = -1,
-    MsgKey_OK = 0,
-    MsgKey_Context_HomePath,
+    MsgKey_Context_HomePath = 3,
     MsgKey_Context_ConfigPath,
     MsgKey_Context_LoadConfig,
     MsgKey_Context_SaveConfig,

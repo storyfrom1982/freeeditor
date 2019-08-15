@@ -3,8 +3,8 @@ package cn.freeeditor.sdk;
 public class MsgHandler {
 
     public interface IMsgListener {
-        void onMessage(Msg msg);
-        Msg onRequest(Msg msg);
+        void onReceiveMessage(Msg msg);
+        Msg onReceiveRequest(Msg msg);
     }
 
     private final IMsgListener mListener;
@@ -31,16 +31,16 @@ public class MsgHandler {
         sendMessage(msg, mInstance);
     }
 
-    public Msg requestMessage(Msg msg){
-        return requestMessage(msg, mInstance);
+    public Msg sendRequest(Msg msg){
+        return sendRequest(msg, mInstance);
     }
 
-    void onMessage(Msg msg){
-        mListener.onMessage(msg);
+    void onReceiveMessage(Msg msg){
+        mListener.onReceiveMessage(msg);
     }
 
-    Msg onRequest(Msg msg){
-        return mListener.onRequest(msg);
+    Msg onReceiveRequest(Msg msg){
+        return mListener.onReceiveRequest(msg);
     }
 
     private long mInstance;
@@ -51,7 +51,7 @@ public class MsgHandler {
 
     private native void sendMessage(Msg msg, long mInstance);
 
-    private native Msg requestMessage(Msg msg, long mInstance);
+    private native Msg sendRequest(Msg msg, long mInstance);
 
     private native void setListener(long listener, long mInstance);
 

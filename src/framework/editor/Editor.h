@@ -6,16 +6,17 @@
 #define ANDROID_RECORDER_H
 
 
-#include <IMsgListener.h>
+#include <StreamProcessor.h>
 #include <MConfig.h>
 #include <VideoSource.h>
 #include <NativeWindow.h>
 #include <VideoRenderer.h>
+#include "StreamCapture.h"
 
 
 namespace freee {
 
-    class Editor : public IMsgListener {
+    class Editor : public StreamCapture {
 
     public:
 
@@ -25,10 +26,10 @@ namespace freee {
 
     private:
 
-        virtual sr_msg_t onRequestFromUpstream(sr_msg_t msg) override ;
-        virtual sr_msg_t onRequestFromDownstream(sr_msg_t msg) override ;
-        virtual void onMessageFromUpstream(sr_msg_t msg) override ;
-        virtual void onMessageFromDownstream(sr_msg_t msg) override ;
+        virtual sr_msg_t requestFromInputStream(sr_msg_t msg) override ;
+        virtual sr_msg_t requestFromOutputStream(sr_msg_t msg) override ;
+        virtual void messageFromInputStream(sr_msg_t msg) override ;
+        virtual void messageFromOutputStream(sr_msg_t msg) override ;
 
     private:
 

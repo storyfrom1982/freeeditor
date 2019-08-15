@@ -21,7 +21,7 @@
 
 using namespace freee;
 
-freee::VideoSource *freee::VideoSource::openVideoSource(IMsgListener *listener) {
+freee::VideoSource *freee::VideoSource::openVideoSource(StreamProcessor *listener) {
 
     VideoSource *camera = NULL;
 
@@ -32,7 +32,7 @@ freee::VideoSource *freee::VideoSource::openVideoSource(IMsgListener *listener) 
     return camera;
 }
 
-VideoSource::VideoSource(IMsgListener *listener)
+VideoSource::VideoSource(StreamProcessor *listener)
         : m_listener(listener) {
     addInputStream(m_listener);
 }

@@ -2,20 +2,22 @@ package cn.freeeditor.sdk;
 
 public class MsgKey {
 
-    public static final int ERR = -1;
+    public static final int Null = -1;
     public static final int OK = 0;
+    public static final int ProcessData = 1;
+    public static final int UpdateConfig = 2;
 
-    public static final int Context_HomePath = 1;
-    public static final int Context_ConfigPath = 2;
-    public static final int Context_LoadConfig = 3;
-    public static final int Context_SaveConfig = 4;
-    public static final int Context_UpdateConfig = 5;
-    public static final int Context_SystemInfo = 6;
-    public static final int Context_SystemStatus = 7;
-    public static final int Context_NewEditor = 900;
-    public static final int Context_RemoveEditor = 901;
-    public static final int Context_NewPlayer = 902;
-    public static final int Context_RemovePlayer = 903;
+    public static final int EnvCtx_HomePath = 3;
+    public static final int EnvCtx_StoragePath = 4;
+    public static final int EnvCtx_LoadConfig = 5;
+    public static final int EnvCtx_SaveConfig = 6;
+    public static final int EnvCtx_UpdateConfig = 7;
+    public static final int EnvCtx_SystemInfo = 8;
+    public static final int EnvCtx_SystemStatus = 9;
+    public static final int EnvCtx_CreateCapture = 10;
+    public static final int EnvCtx_RemoveCapture = 11;
+    public static final int EnvCtx_CreatePlayer = 12;
+    public static final int EnvCtx_RemovePlayer = 13;
 
 
     public static final int Editor_Begin = 1000;

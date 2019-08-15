@@ -340,7 +340,7 @@ typedef struct sr_msg_t{
 
 
 #define __sr_ok_msg         ((sr_msg_t){0})
-#define __sr_bad_msg        ((sr_msg_t){.key = -1, .type = 0, .i64 = 0})
+#define __sr_null_msg       ((sr_msg_t){.key = -1, .type = 0, .i64 = 0})
 
 #define __sr_msg_is_float(msg)          ((msg).type == SR_MSG_TYPE_FLOAT)
 #define __sr_msg_is_integer(msg)        ((msg).type == SR_MSG_TYPE_INTEGER)

@@ -5,7 +5,7 @@
 #ifndef ANDROID_VIDEORENDERER_H
 #define ANDROID_VIDEORENDERER_H
 
-#include <IMsgListener.h>
+#include <StreamProcessor.h>
 #include <EGL.h>
 #include <GLObject.h>
 #include <NativeWindow.h>
@@ -13,7 +13,7 @@
 namespace freee {
 
 
-    class VideoRenderer : public IMsgListener{
+    class VideoRenderer : public StreamProcessor{
 
     public:
 

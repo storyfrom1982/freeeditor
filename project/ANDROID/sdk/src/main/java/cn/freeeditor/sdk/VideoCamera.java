@@ -48,12 +48,12 @@ public class VideoCamera implements IVideoSource, Runnable,
 
         mMsgHandler = new MsgHandler(new MsgHandler.IMsgListener() {
             @Override
-            public void onMessage(Msg msg) {
+            public void onReceiveMessage(Msg msg) {
                 mThreadHandler.sendMessage(mThreadHandler.obtainMessage(MSG_HandleMessage, msg));
             }
 
             @Override
-            public Msg onRequest(Msg msg) {
+            public Msg onReceiveRequest(Msg msg) {
                 return null;
             }
         });
@@ -160,7 +160,7 @@ public class VideoCamera implements IVideoSource, Runnable,
             newConfig.put("width", mOutputWidth).put("height", mOutputHeight)
                     .put("croppedWidth", mCroppedWidth).put("croppedHeight", mCroppedHeight)
                     .put("format", 0).put("rotate", 90);
-            mMsgHandler.requestMessage(new Msg(MsgKey.Video_Source_FinalConfig, newConfig.toString()));
+            mMsgHandler.sendRequest(new Msg(MsgKey.Video_Source_FinalConfig, newConfig.toString()));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -251,7 +251,7 @@ public class VideoCamera implements IVideoSource, Runnable,
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
 //        Log.e(TAG, "onPreviewFrame: data size: " + data.length);
-//        mMsgHandler.requestMessage(new Msg(MsgKey.Video_Source_ProvideFrame, data, 0));
+//        mMsgHandler.sendRequest(new Msg(MsgKey.Video_Source_ProvideFrame, data, 0));
         mCamera.addCallbackBuffer(data);
     }
 
