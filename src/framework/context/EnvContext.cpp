@@ -51,9 +51,9 @@ void EnvContext::messageFromInputStream(sr_msg_t msg) {
     }else {
         switch (msg.key){
             case MsgKey_EnvCtx_StoragePath:
-                if (__sr_msg_is_pointer(msg) && __sr_msg_is_malloc(msg)){
-                    sr_log_file_open(static_cast<const char *>(msg.ptr));
-                    __sr_msg_free(msg);
+                if (__sr_msg_is_string(msg)){
+                    sr_log_file_open(static_cast<const char *>(msg.p64));
+                    __sr_msg_clear(msg);
                 }
                 break;
             default:

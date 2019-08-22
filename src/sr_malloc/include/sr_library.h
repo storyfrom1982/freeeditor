@@ -316,10 +316,18 @@ extern unsigned int sr_pipe_block_write(sr_pipe_t *pipe, char *data, unsigned in
 ////缓冲区
 ///////////////////////////////////////////////////////////////
 
+
+enum {
+    MsgKey_Bad = -1,
+    MsgKey_Null = 0,
+    MsgKey_Good = 1
+};
+
 enum {
 	SR_MSG_TYPE_INTEGER = 0,
 	SR_MSG_TYPE_FLOAT,
-	SR_MSG_TYPE_POINTER
+	SR_MSG_TYPE_POINTER,
+    SR_MSG_TYPE_STRING
 };
 
 typedef struct sr_msg_t{
@@ -327,37 +335,46 @@ typedef struct sr_msg_t{
 	int32_t type;
 	union {
 	    size_t size;
-        uint64_t ssize;
+        uint64_t size64;
 	};
 	union {
-        void *ptr;
+        void *p64;
         double f64;
         int64_t i64;
 		uint64_t u64;
 	};
-    void (*remove)(void*);
+    union {
+        void (*free)(void*);
+        uint64_t free64;
+    };
 }sr_msg_t;
 
 
-#define __sr_ok_msg         ((sr_msg_t){0})
-#define __sr_null_msg       ((sr_msg_t){.key = -1, .type = 0, .i64 = 0})
+#define __sr_null_msg       ((sr_msg_t){0})
 
 #define __sr_msg_is_float(msg)          ((msg).type == SR_MSG_TYPE_FLOAT)
 #define __sr_msg_is_integer(msg)        ((msg).type == SR_MSG_TYPE_INTEGER)
-#define __sr_msg_is_pointer(msg)        ((msg).type == SR_MSG_TYPE_POINTER)
-#define __sr_msg_is_malloc(msg)         ((msg).size > 0 && (msg).ptr != NULL)
+#define __sr_msg_is_pointer(msg)        ((msg).type == SR_MSG_TYPE_POINTER && (msg).p64 != NULL)
+#define __sr_msg_is_string(msg)         ((msg).type == SR_MSG_TYPE_STRING && (msg).p64 != NULL)
 
-#define __sr_msg_free(msg) \
+#define __sr_msg_set_float(mkey, f) \
+    {.key = (mkey), .type = SR_MSG_TYPE_FLOAT, .size = 0, .f64 = (f), .free = NULL}
+
+#define __sr_msg_set_pointer(mkey, ptr, freefp) \
+    {.key = (mkey), .type = SR_MSG_TYPE_POINTER, .size = 0, .p64 = (ptr), .free = (freefp)}
+
+#define __sr_msg_set_string(mkey, str, len) \
+    {.key = (mkey), .type = SR_MSG_TYPE_STRING, .size = (len), .p64 = strdup((str)), .free = NULL}
+
+#define __sr_msg_clear(msg) \
     { \
-        if ((msg).remove) (msg).remove(msg.ptr); \
-        else free((msg).ptr); \
-        (msg).ptr = NULL; \
-        (msg).size = 0; \
+        if (__sr_msg_is_string((msg))){ \
+            free((msg).p64); \
+        }else if (__sr_msg_is_pointer((msg))){ \
+            if ((msg).free) {(msg).free((msg).p64);} \
+        } \
+        msg = __sr_null_msg; \
     }
-
-#define __sr_msg_malloc(k, s) \
-    {.key = (k), .type = SR_MSG_TYPE_POINTER, .ptr = (calloc(1, (s))), .size = (s), .remove = free}
-
 
 
 typedef struct sr_msg_processor_t{

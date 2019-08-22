@@ -23,9 +23,9 @@ using namespace freee;
 
 
 Editor::Editor(sr_msg_t msg) : StreamCapture(msg), m_videoSource(nullptr) {
-    if (__sr_msg_is_pointer(msg) && __sr_msg_is_malloc(msg)){
-        m_processor.name = strdup(static_cast<const char *>(msg.ptr));
-        __sr_msg_free(msg);
+    if (__sr_msg_is_string(msg)){
+        m_processor.name = strdup(static_cast<const char *>(msg.p64));
+        __sr_msg_clear(msg);
     }else {
         m_processor.name = strdup("DefaultRecorder");
     }
@@ -101,7 +101,7 @@ sr_msg_t Editor::requestFromInputStream(sr_msg_t msg) {
         case MsgKey_Editor_SaveConfig:
             return saveConfig(msg);
         default:
-            LOGD("video frame: %p\n", msg.ptr);
+            LOGD("video frame: %p\n", msg.p64);
             break;
     }
 
@@ -110,7 +110,7 @@ sr_msg_t Editor::requestFromInputStream(sr_msg_t msg) {
 
 sr_msg_t Editor::requestFromOutputStream(sr_msg_t msg) {
 
-    LOGD("video frame: %p\n", msg.ptr);
+    LOGD("video frame: %p\n", msg.p64);
 
     return __sr_null_msg;
 }
@@ -119,47 +119,48 @@ sr_msg_t Editor::loadConfig() {
     sr_msg_t msg;
     msg.key = MsgKey_EnvCtx_HomePath;
     msg = EnvContext::Instance()->sendRequestToInputStream(msg);
-    std::string cfg = std::string((const char *)msg.ptr);
-    __sr_msg_free(msg);
+    std::string cfg = std::string((const char *)msg.p64);
+    LOGD("load config 0: %s\n", msg.p64);
+    __sr_msg_clear(msg);
     cfg = cfg + "/" + m_processor.name + ".cfg";
     MConfig::load(m_config, cfg);
     cfg = m_config.dump();
-    size_t size = cfg.length();
-    msg = __sr_msg_malloc(0, size  +1);
-    memcpy(msg.ptr, cfg.c_str(), size);
-    LOGD("load config: %s\n", msg.ptr);
+    msg = __sr_msg_set_string(MsgKey_Good, cfg.c_str(), cfg.length());
+//    msg.type = SR_MSG_TYPE_STRING;
+//    msg.p64 = strdup(cfg.c_str());
+    LOGD("load config: %s\n", msg.p64);
     return msg;
 }
 
 sr_msg_t Editor::saveConfig(sr_msg_t msg) {
-    std::string cfg = std::string((const char *)msg.ptr);
-    __sr_msg_free(msg);
+    std::string cfg = std::string((const char *)msg.p64);
+    __sr_msg_clear(msg);
     cfg = cfg + "/" + m_processor.name + ".cfg";
     m_config.clear();
-    m_config.update(json::parse((char *)msg.ptr));
+    m_config.update(json::parse((char *)msg.p64));
     MConfig::save(m_config, cfg);
-    __sr_msg_free(msg);
+    __sr_msg_clear(msg);
     LOGD("save config: %s\n", m_config.dump().c_str());
-    return __sr_ok_msg;
+    return __sr_null_msg;
 }
 
 void Editor::startPreview() {
 //    m_videoSource->startCapture();
 //    m_videoSource->addOutput(this);
 
-    AVFrame *cfg = av_frame_alloc();
-    cfg->format = AV_PIX_FMT_YUV420P;
-    cfg->width = 1280;
-    cfg->height = 720;
-
-    AVFramePool *pool = av_frame_pool_create(cfg, 10);
-    AVFrameEx *frameEx = av_frame_pool_alloc(pool);
-    av_frame_pool_add_reference(frameEx);
-    av_frame_pool_free(frameEx);
-    av_frame_pool_free(frameEx);
-    frameEx = av_frame_pool_alloc(pool);
-    frameEx = av_frame_pool_alloc(pool);
-    av_frame_pool_release(&pool);
+//    AVFrame *cfg = av_frame_alloc();
+//    cfg->format = AV_PIX_FMT_YUV420P;
+//    cfg->width = 1280;
+//    cfg->height = 720;
+//
+//    AVFramePool *pool = av_frame_pool_create(cfg, 10);
+//    AVFrameEx *frameEx = av_frame_pool_alloc(pool);
+//    av_frame_pool_add_reference(frameEx);
+//    av_frame_pool_free(frameEx);
+//    av_frame_pool_free(frameEx);
+//    frameEx = av_frame_pool_alloc(pool);
+//    frameEx = av_frame_pool_alloc(pool);
+//    av_frame_pool_release(&pool);
 }
 
 void Editor::stopPreview() {
@@ -177,7 +178,7 @@ void Editor::stopPushStream() {
 void Editor::setVideoSource(sr_msg_t msg) {
     if (__sr_msg_is_integer(msg)){
         removeVideoSource();
-        m_videoSource = VideoSource::openVideoSource(static_cast<StreamProcessor *>(msg.ptr));
+        m_videoSource = VideoSource::openVideoSource(static_cast<StreamProcessor *>(msg.p64));
         m_videoSource->openSource(m_config["videoSource"]);
     }
 }
@@ -200,7 +201,7 @@ void Editor::removeAudioSource() {
 
 void Editor::setVideoView(sr_msg_t msg) {
     LOGD("setVideoView =========== enter\n");
-    LOGD("setVideoView: %p\n", msg.ptr);
+    LOGD("setVideoView: %p\n", msg.p64);
 //    nativeWindow = NativeWindow::createNativeWindow(msg.ptr);
 //    videoRenderer = new VideoRenderer(1280, 720);
 //    videoRenderer->setNativeWindow(nativeWindow);

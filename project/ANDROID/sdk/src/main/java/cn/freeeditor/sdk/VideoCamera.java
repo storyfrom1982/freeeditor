@@ -206,7 +206,7 @@ public class VideoCamera implements IVideoSource, Runnable,
 
 
     private void sendVideoFrame(byte[] frame){
-        Msg msg = new Msg(0, frame, 0);
+        Msg msg = new Msg(0, frame);
         mMsgHandler.sendMessage(msg);
     }
 

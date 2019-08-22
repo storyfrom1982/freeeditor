@@ -16,6 +16,7 @@ import java.io.File;
 import cn.freeeditor.android.utils.AppInstallPermissionActivity;
 import cn.freeeditor.android.utils.AppUpdateManager;
 import cn.freeeditor.sdk.Log;
+import cn.freeeditor.sdk.MContext;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,6 +40,11 @@ public class MainActivity extends AppCompatActivity {
         updateAppButton.setOnClickListener(updateAppListener);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MContext.Instance().remove();
+    }
 
     private final View.OnClickListener openPublishListener = new View.OnClickListener() {
         @Override

@@ -183,7 +183,7 @@ public class Editor implements IEditor, Runnable, SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        mMsgHandler.sendMessage(new Msg(MsgKey.Editor_SetVideoView, holder.getSurface(), 0));
+        mMsgHandler.sendMessage(new Msg(MsgKey.Editor_SetVideoView, holder.getSurface()));
     }
 
     @Override

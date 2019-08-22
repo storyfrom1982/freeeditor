@@ -1100,8 +1100,8 @@ static void *sr_msg_queue_loop(void *p)
             break;
         }
 		queue->processor->process(queue->processor, msg);
-		if (__sr_msg_is_pointer(msg) && __sr_msg_is_malloc(msg)){
-            __sr_msg_free(msg);
+		if (__sr_msg_is_pointer(msg) && __sr_msg_is_string(msg)){
+            __sr_msg_clear(msg);
 		}
 	}
 

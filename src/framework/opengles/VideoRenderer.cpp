@@ -27,14 +27,14 @@ VideoRenderer::~VideoRenderer() {
 void VideoRenderer::setNativeWindow(NativeWindow *window) {
     sr_msg_t msg = {0};
     msg.type = 0;
-    msg.ptr = window;
+    msg.p64 = window;
     sr_msg_queue_push(queue, msg);
 }
 
 void VideoRenderer::addElement(GLObject *obj) {
     sr_msg_t msg = {0};
     msg.type = 1;
-    msg.ptr = obj;
+    msg.p64 = obj;
     sr_msg_queue_push(queue, msg);
 }
 
@@ -107,7 +107,7 @@ void VideoRenderer::msgSetNativeWindow(sr_msg_t msg) {
     if (viewSurface){
         egl->destroySurface(viewSurface);
     }
-    NativeWindow *nativeWindow = (NativeWindow *)msg.ptr;
+    NativeWindow *nativeWindow = (NativeWindow *)msg.p64;
     nativeWindow->getWindowSize(&width, &height);
     mainSurface = viewSurface = egl->createWindowSurface(nativeWindow->getWindowHandler());
 
@@ -146,7 +146,7 @@ void VideoRenderer::msgSetNativeWindow(sr_msg_t msg) {
 }
 
 void VideoRenderer::msgAddElement(sr_msg_t msg) {
-    GLObject *obj = (GLObject *)msg.ptr;
+    GLObject *obj = (GLObject *)msg.p64;
     objList.push_back(obj);
     obj->build();
 }

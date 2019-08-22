@@ -27,8 +27,8 @@ extern "C" {
 namespace freee {
 
     enum {
-        MsgKey_Null = -1,
-        MsgKey_OK = 0,
+//        MsgKey_Null = -1,
+//        MsgKey_OK = 0,
         MsgKey_ProcessData = 1,
         MsgKey_UpdateConfig = 2
     };

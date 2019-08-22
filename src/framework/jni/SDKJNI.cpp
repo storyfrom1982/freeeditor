@@ -56,11 +56,11 @@ public:
         m_msgClass = static_cast<jclass>(env->NewGlobalRef(env->FindClass("cn/freeeditor/sdk/Msg")));
         m_buildInteger = env->GetMethodID(m_msgClass, "<init>", "(IJ)V");
         m_buildFloat = env->GetMethodID(m_msgClass, "<init>", "(ID)V");
-        m_buildObject = env->GetMethodID(m_msgClass, "<init>", "(ILjava/lang/Object;I)V");
+        m_buildObject = env->GetMethodID(m_msgClass, "<init>", "(ILjava/lang/Object;)V");
+        m_buildString = env->GetMethodID(m_msgClass, "<init>", "(ILjava/lang/String;)V");
 
         m_keyField = env->GetFieldID(m_msgClass, "key", "I");
         m_typeField = env->GetFieldID(m_msgClass, "type", "I");
-        m_sizeField = env->GetFieldID(m_msgClass, "size", "I");
         m_int64Field = env->GetFieldID(m_msgClass, "i64", "J");
         m_float64Field = env->GetFieldID(m_msgClass, "f64", "D");
         m_objField = env->GetFieldID(m_msgClass, "obj", "Ljava/lang/Object;");
@@ -78,22 +78,17 @@ public:
 
     jobject msg2obj(JNIEnv *env, sr_msg_t msg){
         jobject obj;
-        if (__sr_msg_is_integer(msg)){
-            obj = env->NewObject(m_msgClass, m_buildInteger, msg.key, msg.i64);
-        }else if (__sr_msg_is_float(msg)){
+        if (__sr_msg_is_float(msg)){
             obj = env->NewObject(m_msgClass, m_buildFloat, msg.key, msg.f64);
         }else if (__sr_msg_is_pointer(msg)){
-            if (__sr_msg_is_malloc(msg)){
-                jbyteArray array = env->NewByteArray(msg.size);
-                env->SetByteArrayRegion(array, 0, msg.size, static_cast<const jbyte *>(msg.ptr));
-                obj = env->NewObject(m_msgClass, m_buildObject, msg.key, array, msg.size);
-                env->DeleteLocalRef(array);
-                __sr_msg_free(msg);
-            }else {
-                obj = env->NewObject(m_msgClass, m_buildObject, msg.key, (jobject)msg.ptr, msg.size);
-            }
+            obj = env->NewObject(m_msgClass, m_buildObject, msg.key, (jobject)msg.p64);
+        }else if (__sr_msg_is_string(msg)){
+            jstring s = env->NewStringUTF(static_cast<const char *>(msg.p64));
+            obj = env->NewObject(m_msgClass, m_buildString, msg.key, s);
+            env->DeleteLocalRef(s);
+            __sr_msg_clear(msg);
         }else {
-            obj = env->NewObject(m_msgClass, m_buildInteger, msg.key, msg.type);
+            obj = env->NewObject(m_msgClass, m_buildInteger, msg.key, msg.i64);
         }
         return obj;
     }
@@ -107,26 +102,14 @@ public:
         }else if (__sr_msg_is_float(msg)){
             msg.f64 = env->GetDoubleField(obj, m_float64Field);
         }else if (__sr_msg_is_pointer(msg)){
-            size_t size = (size_t)(env->GetIntField(obj, m_sizeField));
-            if (size > 0){
-                jbyteArray array = (jbyteArray)(env->GetObjectField(obj, m_objField));
-                LOGD("jbyteArray array : %p\n", array);
-                jbyte *bytes = env->GetByteArrayElements(array, 0);
-                int byteSize = env->GetArrayLength(array);
-                msg = __sr_msg_malloc(msg.key, size + 1);
-                msg.size = size;
-                memcpy(msg.ptr, bytes, msg.size);
-                env->ReleaseByteArrayElements(array, bytes, 0);
-                env->DeleteLocalRef(array);
-            }else {
-                msg.size = 0;
-//                LOGD("create jobject\n");
-                msg.ptr = env->NewGlobalRef(env->GetObjectField(obj, m_objField));
-//                msg.ptr = env->GetObjectField(obj, m_objField);
-//                LOGD("jobject : %p\n", msg.ptr);
-            }
-        }else {
-            msg = __sr_null_msg;
+            msg.p64 = env->GetObjectField(obj, m_objField);
+        }else if (__sr_msg_is_string(msg)){
+            jstring js = (jstring)env->GetObjectField(obj, m_objField);
+            const char *s = env->GetStringUTFChars(js, 0);
+            msg.size = (size_t)env->GetStringUTFLength(js);
+            msg.p64 = strdup(s);
+            env->ReleaseStringUTFChars(js, s);
+            env->DeleteLocalRef(js);
         }
         return msg;
     }
@@ -170,10 +153,10 @@ private:
     jmethodID m_buildInteger;
     jmethodID m_buildFloat;
     jmethodID m_buildObject;
+    jmethodID m_buildString;
 
     jfieldID m_keyField;
     jfieldID m_typeField;
-    jfieldID m_sizeField;
     jfieldID m_int64Field;
     jfieldID m_float64Field;
     jfieldID m_objField;
