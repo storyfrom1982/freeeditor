@@ -15,8 +15,10 @@ import java.io.File;
 
 import cn.freeeditor.android.utils.AppInstallPermissionActivity;
 import cn.freeeditor.android.utils.AppUpdateManager;
+import cn.freeeditor.sdk.JNIContext;
 import cn.freeeditor.sdk.Log;
 import cn.freeeditor.sdk.MContext;
+import cn.freeeditor.sdk.MediaRecord;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -38,12 +40,21 @@ public class MainActivity extends AppCompatActivity {
 
         updateAppButton = findViewById(R.id.update_app);
         updateAppButton.setOnClickListener(updateAppListener);
+
+        if (record == null){
+            record = new MediaRecord();
+        }
     }
+
+    MediaRecord record;
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MContext.Instance().remove();
+        record.release();
+        record = null;
+        JNIContext.Instance().release();
+        JNIContext.Instance().debug();
     }
 
     private final View.OnClickListener openPublishListener = new View.OnClickListener() {

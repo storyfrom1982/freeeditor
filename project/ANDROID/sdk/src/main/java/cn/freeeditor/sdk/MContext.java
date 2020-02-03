@@ -300,11 +300,6 @@ public class MContext implements Runnable, ComponentCallbacks {
         }
     }
 
-
-    static {
-        System.loadLibrary("freeeditor");
-    }
-
     private native void apply(long msgHandler);
 
     private native void remove(long msgHandler);

@@ -4,7 +4,7 @@
 
 #include "Window.h"
 
-#include <SDKJNI.h>
+#include <SDKJNI.hbk>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <StreamProcessor.h>

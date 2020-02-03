@@ -2,7 +2,7 @@
 // Created by yongge on 19-5-20.
 //
 
-#include "SDKJNI.h"
+#include "SDKJNI.hbk"
 #include <android/log.h>
 
 #include <MConfig.h>
