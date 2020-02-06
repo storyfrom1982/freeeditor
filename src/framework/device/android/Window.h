@@ -7,23 +7,35 @@
 
 #include "../NativeWindow.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+# include <GLRenderer.h>
+
+#ifdef __cplusplus
+}
+#endif
+
 namespace freee {
 
-    class Window : public NativeWindow {
+    class Window{
 
     public:
 
-        Window(void *windowHandler);
+        Window();
         virtual ~Window();
 
-        virtual void* getWindowHandler() override ;
+        virtual void* getWindowHandler();
 
-        void getWindowSize(int *w, int *h) override;
+        void getWindowSize(int *w, int *h);
 
 
     private:
 
-        void *mWindowHandler;
+        gl_window_t *window;
+        gl_renderer_t *renderer;
 
     };
 }

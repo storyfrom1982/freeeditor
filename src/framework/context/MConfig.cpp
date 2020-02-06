@@ -72,8 +72,8 @@ void MConfig::buildDefaultConfig(json &config) {
     config = {
 
             {"videoSource", {
-                {"width", 1280},
-                {"height", 720},
+                {"width", 640},
+                {"height", 360},
                 {"fps", 25},
                 {"position", "front"},
                 {"rotation", 0},

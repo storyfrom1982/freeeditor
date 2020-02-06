@@ -1,6 +1,5 @@
 package cn.freeeditor.android;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
@@ -13,12 +12,9 @@ import android.widget.Button;
 
 import java.io.File;
 
-import cn.freeeditor.android.utils.AppInstallPermissionActivity;
 import cn.freeeditor.android.utils.AppUpdateManager;
 import cn.freeeditor.sdk.JNIContext;
 import cn.freeeditor.sdk.Log;
-import cn.freeeditor.sdk.MContext;
-import cn.freeeditor.sdk.MediaRecord;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,18 +37,19 @@ public class MainActivity extends AppCompatActivity {
         updateAppButton = findViewById(R.id.update_app);
         updateAppButton.setOnClickListener(updateAppListener);
 
-        if (record == null){
-            record = new MediaRecord();
-        }
+//        if (record == null){
+//            record = new MediaRecord();
+//        }
+//        record.startCapture();
     }
 
-    MediaRecord record;
+//    MediaRecord record;
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        record.release();
-        record = null;
+//        record.release();
+//        record = null;
         JNIContext.Instance().release();
         JNIContext.Instance().debug();
     }
@@ -61,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             Intent intent = new Intent();
-            intent.setClass(MainActivity.this, EditorActivity.class);
+            intent.setClass(MainActivity.this, RecordActivity.class);
             startActivity(intent);
         }
     };

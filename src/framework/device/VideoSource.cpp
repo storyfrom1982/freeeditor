@@ -21,24 +21,22 @@
 
 using namespace freee;
 
-freee::VideoSource *freee::VideoSource::openVideoSource(StreamProcessor *listener) {
+freee::VideoSource *freee::VideoSource::openVideoSource(DeviceContext *ctx) {
 
     VideoSource *camera = NULL;
 
 #ifdef __ANDROID__
-    camera = new Camera(listener);
+    camera = new Camera(ctx);
 #endif
 
     return camera;
 }
 
-VideoSource::VideoSource(StreamProcessor *listener)
-        : m_listener(listener) {
-    addInputStream(m_listener);
+VideoSource::VideoSource(DeviceContext *ctx) : DeviceContext(ctx) {
 }
 
 VideoSource::~VideoSource() {
-    m_listener->removeOutputStream(this);
+//    m_listener->removeOutputStream(this);
     imageFilter(NULL, 0, 0, 0 , NULL, 0, 0, 0, 0);
 }
 
@@ -110,3 +108,12 @@ int VideoSource::imageFilter(void *src, int src_w, int src_h, int src_fmt, void 
 
     return 0;
 }
+
+void VideoSource::setEncoder(DeviceContext *ctx) {
+    outputCtx = ctx;
+}
+
+void VideoSource::processData(void *data, int size) {
+    outputCtx->onPutData(data, size);
+}
+

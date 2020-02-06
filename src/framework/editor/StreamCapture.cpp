@@ -14,30 +14,30 @@ class CaptureListener : public StreamProcessor {
 protected:
 
     sr_msg_t requestFromInputStream(sr_msg_t msg) override {
-        StreamCapture *capture = nullptr;
-        if (msg.key == MsgKey_EnvCtx_CreateCapture) {
-            AutoLock lock(m_captureListLock);
-            capture = StreamCapture::create(msg);
-            m_captureList.push_back(capture);
-            msg = __sr_null_msg;
-            msg.type = SR_MSG_TYPE_INTEGER;
-            msg.p64 = capture;
-            return msg;
-        } else if (msg.key == MsgKey_EnvCtx_RemoveCapture) {
-            if (msg.p64 != nullptr) {
-                capture = static_cast<StreamCapture *>(msg.p64);
-                AutoLock lock(m_captureListLock);
-                if (!m_captureList.empty()) {
-                    for (int i = 0; i < m_captureList.size(); ++i) {
-                        if (m_captureList[i] == capture) {
-                            m_captureList.erase(m_captureList.begin() + i);
-                            delete capture;
-                            return __sr_null_msg;
-                        }
-                    }
-                }
-            }
-        }
+//        StreamCapture *capture = nullptr;
+//        if (msg.key == MsgKey_EnvCtx_CreateCapture) {
+//            AutoLock lock(m_captureListLock);
+//            capture = StreamCapture::create(msg);
+//            m_captureList.push_back(capture);
+//            msg = __sr_null_msg;
+//            msg.type = SR_MSG_TYPE_INTEGER;
+//            msg.p64 = capture;
+//            return msg;
+//        } else if (msg.key == MsgKey_EnvCtx_RemoveCapture) {
+//            if (msg.p64 != nullptr) {
+//                capture = static_cast<StreamCapture *>(msg.p64);
+//                AutoLock lock(m_captureListLock);
+//                if (!m_captureList.empty()) {
+//                    for (int i = 0; i < m_captureList.size(); ++i) {
+//                        if (m_captureList[i] == capture) {
+//                            m_captureList.erase(m_captureList.begin() + i);
+//                            delete capture;
+//                            return __sr_null_msg;
+//                        }
+//                    }
+//                }
+//            }
+//        }
         return __sr_null_msg;
     }
 
@@ -74,7 +74,8 @@ void StreamCapture::release() {
 }
 
 StreamCapture *StreamCapture::create(sr_msg_t msg) {
-    return new Editor(msg);
+//    return new Editor(msg);
+    return NULL;
 }
 
 void StreamCapture::messageFromInputStream(sr_msg_t msg) {

@@ -45,7 +45,7 @@ public:
         m_onPutObject = env->GetMethodID(m_class, "onPutObject", "(IJ)I");
         m_onPutData = env->GetMethodID(m_class, "onPutData", "([BI)I");
         m_onGetBuffer = env->GetMethodID(m_class, "onGetBuffer", "()Ljava/nio/ByteBuffer;");
-        m_onGetObject = env->GetMethodID(m_class, "onGetObject", "(I)Ljava/lang/Object;");
+        m_onGetObject = env->GetMethodID(m_class, "onGetObject", "(I)J");
         m_onGetMessage = env->GetMethodID(m_class, "onGetMessage", "(I)Ljava/lang/String;");
         env->DeleteLocalRef(m_class);
     }
@@ -66,7 +66,7 @@ public:
 
     void *onGetObject(int type) override {
         JniEnv env;
-        return env->CallObjectMethod(m_obj, m_onGetObject, type);
+        return (void*) env->CallLongMethod(m_obj, m_onGetObject, type);
     }
 
     int onPutMessage(int cmd, std::string msg) override {

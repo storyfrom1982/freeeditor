@@ -1083,6 +1083,13 @@ struct sr_msg_queue_t
 	bool stopped;
 	pthread_t tid;
 	sr_pipe_t *pipe;
+
+	unsigned int push_index;
+    unsigned int pop_index;
+    unsigned int len;
+	sr_msg_t *msgs;
+	sr_mutex_t *mutex;
+
 	sr_msg_processor_t *processor;
 };
 
@@ -1095,13 +1102,32 @@ static void *sr_msg_queue_loop(void *p)
     LOGD("message processor [%s] enter\n", queue->processor->name);
 
 	while (__is_true(queue->running)) {
-        if (sr_pipe_block_read(queue->pipe, (char*)&msg, __msg_size) != __msg_size){
-            LOGD("message processor [%s] break\n", queue->processor->name);
+
+//        if (sr_pipe_block_read(queue->pipe, (char*)&msg, __msg_size) != __msg_size){
+//            LOGD("message processor [%s] break\n", queue->processor->name);
+//            break;
+//        }
+
+        sr_mutex_lock(queue->mutex);
+
+        while (0 == (queue->push_index - queue->pop_index)){
+            sr_mutex_wait(queue->mutex);
+        }
+
+        if (__is_false(queue->running)){
+            sr_mutex_unlock(queue->mutex);
             break;
         }
+
+        msg = queue->msgs[queue->pop_index & (queue->len - 1)];
+        queue->pop_index ++;
+
+        sr_mutex_signal(queue->mutex);
+        sr_mutex_unlock(queue->mutex);
+
 		queue->processor->process(queue->processor, msg);
-		if (__sr_msg_is_pointer(msg) && __sr_msg_is_string(msg)){
-            __sr_msg_clear(msg);
+		if (msg.size > 0 && msg.ptr){
+            free(msg.ptr);
 		}
 	}
 
@@ -1123,6 +1149,10 @@ sr_msg_queue_t* sr_msg_queue_create()
 		LOGF("calloc failed\n");
 	}
 
+	queue->len = 256;
+	queue->push_index = queue->pop_index = 0;
+	queue->mutex = sr_mutex_create();
+	queue->msgs = (sr_msg_t*) malloc(sizeof(sr_msg_t) * 256);
 	queue->pipe = sr_pipe_create(0);
 
 	LOGD("sr_msg_queue_create exit\n");
@@ -1203,9 +1233,25 @@ int sr_msg_queue_push(sr_msg_queue_t *queue, sr_msg_t msg)
 		return -1;
 	}
 
-	if (sr_pipe_block_write(queue->pipe, (char*)&msg, __msg_size) != __msg_size){
-		return -1;
+	sr_mutex_lock(queue->mutex);
+
+	while (0 == (queue->len - queue->push_index + queue->pop_index)){
+        sr_mutex_wait(queue->mutex);
+        if (__is_false(queue->running)){
+            sr_mutex_unlock(queue->mutex);
+            return -1;
+        }
 	}
+
+    queue->msgs[queue->push_index & (queue->len - 1)] = msg;
+    queue->push_index ++;
+
+    sr_mutex_signal(queue->mutex);
+    sr_mutex_unlock(queue->mutex);
+
+//	if (sr_pipe_block_write(queue->pipe, (char*)&msg, __msg_size) != __msg_size){
+//		return -1;
+//	}
 
 	return 0;
 }
@@ -1218,9 +1264,26 @@ int sr_msg_queue_pop(sr_msg_queue_t *queue, sr_msg_t *msg)
 		return -1;
 	}
 
-    if (sr_pipe_block_read(queue->pipe, (char*)msg, __msg_size) != __msg_size){
-        return -1;
+
+    sr_mutex_lock(queue->mutex);
+
+    while (0 == (queue->push_index - queue->pop_index)){
+        sr_mutex_wait(queue->mutex);
+        if (__is_false(queue->running)){
+            sr_mutex_unlock(queue->mutex);
+            return -1;
+        }
     }
+
+    *msg = queue->msgs[queue->pop_index & (queue->len - 1)];
+    queue->pop_index ++;
+
+    sr_mutex_signal(queue->mutex);
+    sr_mutex_unlock(queue->mutex);
+
+//    if (sr_pipe_block_read(queue->pipe, (char*)msg, __msg_size) != __msg_size){
+//        return -1;
+//    }
 
     return 0;
 }

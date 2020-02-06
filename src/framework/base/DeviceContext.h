@@ -75,8 +75,10 @@ namespace freee{
             return mCtx->onGetBuffer();
         }
 
-    protected:
+    public:
 
+        //processMessage(sr_msg_t){}
+        //processData(sr_msg_t){}
         virtual int onPutObject(int type, void *obj) = 0;
         virtual void* onGetObject(int type) = 0;
         virtual int onPutMessage(int cmd, std::string msg) = 0;

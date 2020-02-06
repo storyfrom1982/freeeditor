@@ -20,37 +20,37 @@ namespace freee {
         VideoRenderer(int w, int h);
         ~VideoRenderer();
 
-        void setNativeWindow(NativeWindow *window);
-        void addElement(GLObject *obj);
-
-
-    private:
-
-        void msgSetNativeWindow(sr_msg_t msg);
-        void msgAddElement(sr_msg_t msg);
-
-        void messageProcessorLoop();
-        static void* messageProcessorThread(void *p);
-
-
-    private:
-
-        int width;
-        int height;
-
-        EGL *egl;
-        GLSurface offscreen;
-        GLSurface viewSurface;
-        GLSurface mainSurface;
-        NativeWindow *window;
-
-        std::vector<GLObject*> objList;
-
-        pthread_t tid;
-        sr_msg_queue_t *queue;
-
-        glm::mat4 mProjectMat;
-        glm::mat4 mViewMat;
+//        void setNativeWindow(NativeWindow *window);
+//        void addElement(GLObject *obj);
+//
+//
+//    private:
+//
+//        void msgSetNativeWindow(sr_msg_t msg);
+//        void msgAddElement(sr_msg_t msg);
+//
+//        void messageProcessorLoop();
+//        static void* messageProcessorThread(void *p);
+//
+//
+//    private:
+//
+//        int width;
+//        int height;
+//
+//        EGL *egl;
+//        GLSurface offscreen;
+//        GLSurface viewSurface;
+//        GLSurface mainSurface;
+//        NativeWindow *window;
+//
+//        std::vector<GLObject*> objList;
+//
+//        pthread_t tid;
+//        sr_msg_queue_t *queue;
+//
+//        glm::mat4 mProjectMat;
+//        glm::mat4 mViewMat;
     };
 
 }

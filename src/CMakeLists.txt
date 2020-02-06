@@ -56,6 +56,7 @@ file(GLOB sdk_sources
     framework/opengles/glshapes/*.cpp
     framework/device/*.cpp
     framework/device/android/*.cpp
+    framework/media/*.c
     )
 
 

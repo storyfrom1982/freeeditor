@@ -7,6 +7,12 @@ import java.nio.ByteBuffer;
 
 public class JNIContext extends JNIHandler {
 
+    public static final int Cmd_GetRecord = 0;
+    public static final int Cmd_GetRecordConfig = 1;
+
+    private static final int Cmd_OnGet_Camera = 0;
+    private static final int Cmd_OnGet_Microphone = 1;
+
     private static JNIContext jniContext = null;
 
     public static JNIContext Instance(){
@@ -29,7 +35,7 @@ public class JNIContext extends JNIHandler {
     }
 
     private JNIContext(){
-        super(new IJNIListener() {
+        setListener(new IJNIListener() {
             @Override
             public int onPutObject(int type, long obj) {
                 return 0;
@@ -46,8 +52,16 @@ public class JNIContext extends JNIHandler {
             }
 
             @Override
-            public Object onGetObject(int type) {
-                return null;
+            public long onGetObject(int type) {
+                switch (type){
+                    case Cmd_OnGet_Camera:
+                        return createCamera();
+                    case Cmd_OnGet_Microphone:
+                        break;
+                    default:
+                        break;
+                }
+                return 0;
             }
 
             @Override
@@ -63,6 +77,12 @@ public class JNIContext extends JNIHandler {
         mCtx = createContext();
         setContext(mCtx);
     }
+
+    private long createCamera(){
+        VideoCamera camera = new VideoCamera();
+        return camera.getContext();
+    }
+
 
     static {
         System.loadLibrary("freeeditor");

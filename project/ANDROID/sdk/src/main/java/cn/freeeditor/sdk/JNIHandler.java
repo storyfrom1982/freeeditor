@@ -9,19 +9,27 @@ public class JNIHandler {
         int onPutObject(int type, long obj);
         int onPutMessage(int cmd, String msg);
         int onPutData(byte[] data, int size);
-        Object onGetObject(int type);
+        long onGetObject(int type);
         String onGetMessage(int cmd);
         ByteBuffer onGetBuffer();
     }
 
-    private final IJNIListener listener;
+    private IJNIListener listener;
 
-    public JNIHandler(IJNIListener listener){
+    public JNIHandler(){
+
+    }
+
+    public void setListener(IJNIListener listener){
         this.listener = listener;
     }
 
     public void setContext(long ctx){
         mCtx = createContext(ctx);
+    }
+
+    public long getContext(){
+        return mCtx;
     }
 
     public void release(){
@@ -41,7 +49,7 @@ public class JNIHandler {
         return listener.onPutData(data, size);
     }
 
-    public Object onGetObject(int type){
+    public long onGetObject(int type){
         return listener.onGetObject(type);
     }
 

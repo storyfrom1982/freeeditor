@@ -6,6 +6,7 @@
 
 #include <jni.h>
 #include <EGL/egl.h>
+#include <GLES2/gl2.h>
 
 
 #include <sr_library.h>
@@ -70,7 +71,7 @@ struct gl_renderer_t{
     EGLSurface mEGLSurface;
     EGLSurface mEGLOffscreenSurface;
     EGLSurface current_surface;
-    gl_window_t *window;
+    void *window;
     int width, height;
 };
 
@@ -210,7 +211,7 @@ int gl_renderer_set_window(gl_renderer_t *renderer, gl_window_t *window)
     renderer->window = window;
 
     renderer->mEGLSurface = eglCreateWindowSurface(renderer->mEGLDisplay,
-            renderer->mEGLConfig, (EGLNativeWindowType)gl_window_get_native_window(window), NULL);
+            renderer->mEGLConfig, (EGLNativeWindowType)window, NULL);
     if (renderer->mEGLSurface == NULL){
         LOGE("eglCreateWindowSurface failed %d\n", eglGetError());
         return -1;
@@ -230,6 +231,8 @@ int gl_renderer_set_window(gl_renderer_t *renderer, gl_window_t *window)
 
 int gl_renderer_remove_window(gl_renderer_t *renderer)
 {
+    renderer->window = NULL;
+
     if (renderer->mEGLSurface){
         eglDestroySurface(renderer->mEGLDisplay, renderer->mEGLSurface);
         renderer->mEGLSurface = NULL;
@@ -257,7 +260,7 @@ int gl_renderer_swap_buffers(gl_renderer_t *renderer)
 
 int gl_renderer_get_view_width(gl_renderer_t *renderer)
 {
-    if (renderer->current_surface == renderer->mEGLSurface){
+    if (renderer->current_surface == renderer->mEGLSurface && renderer->window){
         return gl_window_get_window_width(renderer->window);
     }
     return renderer->width;
@@ -265,7 +268,7 @@ int gl_renderer_get_view_width(gl_renderer_t *renderer)
 
 int gl_renderer_get_view_height(gl_renderer_t *renderer)
 {
-    if (renderer->current_surface == renderer->mEGLSurface){
+    if (renderer->current_surface == renderer->mEGLSurface && renderer->window){
         return gl_window_get_window_height(renderer->window);
     }
     return renderer->height;

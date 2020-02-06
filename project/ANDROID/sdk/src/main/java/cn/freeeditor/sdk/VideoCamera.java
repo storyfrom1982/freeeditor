@@ -7,22 +7,23 @@ import android.opengl.GLES20;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v4.app.NavUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class VideoCamera implements IVideoSource, Runnable,
+public class VideoCamera extends JNIHandler implements Runnable,
         Camera.PreviewCallback, Camera.ErrorCallback {
 
     private static final String TAG = "VideoCamera";
 
-    private final Thread mMsgThread;
-    private final MsgHandler mMsgHandler;
+    private final Thread mThread;
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final SurfaceTexture mSurfaceTexture = new SurfaceTexture(buildTexture());
@@ -46,23 +47,11 @@ public class VideoCamera implements IVideoSource, Runnable,
 
     public VideoCamera(){
 
-        mMsgHandler = new MsgHandler(new MsgHandler.IMsgListener() {
-            @Override
-            public void onReceiveMessage(Msg msg) {
-                mThreadHandler.sendMessage(mThreadHandler.obtainMessage(MSG_HandleMessage, msg));
-            }
+        mThread = new Thread(this);
+        mThread.start();
 
-            @Override
-            public Msg onReceiveRequest(Msg msg) {
-                return null;
-            }
-        });
-
-        mMsgThread = new Thread(this);
-        mMsgThread.start();
-
-        if (!isRunning.get()){
-            synchronized (isRunning){
+        synchronized (isRunning){
+            if (!isRunning.get()){
                 try {
                     isRunning.wait();
                 } catch (InterruptedException e) {
@@ -70,28 +59,55 @@ public class VideoCamera implements IVideoSource, Runnable,
                 }
             }
         }
+
+        setContext(0);
+        setListener(new IJNIListener() {
+            @Override
+            public int onPutObject(int type, long obj) {
+                return 0;
+            }
+
+            @Override
+            public int onPutMessage(int cmd, String msg) {
+                mThreadHandler.sendMessage(mThreadHandler.obtainMessage(cmd, msg));
+                return 0;
+            }
+
+            @Override
+            public int onPutData(byte[] data, int size) {
+                return 0;
+            }
+
+            @Override
+            public long onGetObject(int type) {
+                return 0;
+            }
+
+            @Override
+            public String onGetMessage(int cmd) {
+                return null;
+            }
+
+            @Override
+            public ByteBuffer onGetBuffer() {
+                return null;
+            }
+        });
     }
 
-    @Override
-    public void remove(){
+    public void release(){
         mThreadHandler.sendEmptyMessage(MSG_HandleRemove);
         try {
-            mMsgThread.join();
+            mThread.join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
-    @Override
-    public long getInstance(){
-        return mMsgHandler.getInstance();
-    }
-
-
-    private void openCamera(Msg msg){
+    private void openCamera(String cfg){
 
         try {
-            mConfig = new JSONObject(msg.msgToString());
+            mConfig = new JSONObject(cfg);
             mFrameRate = mConfig.getInt("fps");
             mRequestWidth = mConfig.getInt("width");
             mRequestHeight = mConfig.getInt("height");
@@ -160,7 +176,7 @@ public class VideoCamera implements IVideoSource, Runnable,
             newConfig.put("width", mOutputWidth).put("height", mOutputHeight)
                     .put("croppedWidth", mCroppedWidth).put("croppedHeight", mCroppedHeight)
                     .put("format", 0).put("rotate", 90);
-            mMsgHandler.sendRequest(new Msg(MsgKey.Video_Source_FinalConfig, newConfig.toString()));
+//            mMsgHandler.sendRequest(new Msg(MsgKey.Video_Source_FinalConfig, newConfig.toString()));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -200,34 +216,8 @@ public class VideoCamera implements IVideoSource, Runnable,
 
 
     private void internalRemove(){
-        mMsgHandler.remove();
+        super.release();
         Looper.myLooper().quit();
-    }
-
-
-    private void sendVideoFrame(byte[] frame){
-        Msg msg = new Msg(0, frame);
-        mMsgHandler.sendMessage(msg);
-    }
-
-    private void handleMessage(Msg msg){
-
-        switch (msg.key){
-            case MsgKey.Video_Source_Open:
-                openCamera(msg);
-                break;
-            case MsgKey.Video_Source_Close:
-                closeCamera();
-                break;
-            case MsgKey.Video_Source_StartCapture:
-                startCapture();
-                break;
-            case MsgKey.Video_Source_StopCapture:
-                stopCapture();
-                break;
-            default:
-                break;
-        }
     }
 
     @Override
@@ -241,10 +231,12 @@ public class VideoCamera implements IVideoSource, Runnable,
         Looper.loop();
     }
 
+    private static final int MSG_HandleRemove = -1;
+    private static final int MSG_HandleOpen = 0;
+    private static final int MSG_HandleStart = 1;
+    private static final int MSG_HandleStop = 2;
+    private static final int MSG_HandleClose = 3;
 
-    private static final int MSG_HandleVideoFrame = 0;
-    private static final int MSG_HandleMessage = 1;
-    private static final int MSG_HandleRemove = 2;
 
     private MessageHandler mThreadHandler;
 
@@ -252,12 +244,14 @@ public class VideoCamera implements IVideoSource, Runnable,
     public void onPreviewFrame(byte[] data, Camera camera) {
 //        Log.e(TAG, "onPreviewFrame: data size: " + data.length);
 //        mMsgHandler.sendRequest(new Msg(MsgKey.Video_Source_ProvideFrame, data, 0));
+        putData(data, data.length);
         mCamera.addCallbackBuffer(data);
     }
 
     @Override
     public void onError(int error, Camera camera) {
         Log.d(TAG, "onError: " + error);
+        putMessage(0, "" + error);
     }
 
 
@@ -274,15 +268,22 @@ public class VideoCamera implements IVideoSource, Runnable,
             VideoCamera deviceCamera = weakReference.get();
             if (deviceCamera != null){
                 switch (msg.what){
-                    case MSG_HandleVideoFrame:
-                        deviceCamera.sendVideoFrame((byte[]) msg.obj);
-                        break;
                     case MSG_HandleRemove:
                         deviceCamera.internalRemove();
                         break;
-                    case MSG_HandleMessage:
+                    case MSG_HandleOpen:
+                        deviceCamera.openCamera((String) msg.obj);
+                        break;
+                    case MSG_HandleStart:
+                        deviceCamera.startCapture();
+                        break;
+                    case MSG_HandleStop:
+                        deviceCamera.stopCapture();
+                        break;
+                    case MSG_HandleClose:
+                        deviceCamera.closeCamera();
+                        break;
                     default:
-                        deviceCamera.handleMessage((Msg) msg.obj);
                         break;
                 }
             }
@@ -322,7 +323,7 @@ public class VideoCamera implements IVideoSource, Runnable,
                 }
             }
 
-            int difference = size.width * size.height - closestWidth * closestHeight;
+            int difference = size.width * size.height - width * height;
             if (difference < minimumDifference) {
                 minimumDifference = difference;
                 isCropped = isCrop;
@@ -330,10 +331,11 @@ public class VideoCamera implements IVideoSource, Runnable,
                 mCroppedHeight = closestHeight;
                 mOutputWidth = size.width;
                 mOutputHeight = size.height;
-                Log.d(TAG, "fixedOutputSize: output size: " + mOutputWidth + "x" + mOutputHeight
-                        + " is crop: " + isCropped + " cropped size: " + mCroppedWidth + "x" + mCroppedHeight);
             }
         }
+
+        Log.d(TAG, "fixedOutputSize: output size: " + mOutputWidth + "x" + mOutputHeight
+                + " is crop: " + isCropped + " cropped size: " + mCroppedWidth + "x" + mCroppedHeight);
     }
 
     private void fixedOutputRotation(int rotate){

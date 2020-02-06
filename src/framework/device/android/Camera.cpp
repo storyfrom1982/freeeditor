@@ -7,62 +7,87 @@
 #include <MsgKey.h>
 
 
-freee::Camera::Camera(freee::StreamProcessor *listener)
-        : VideoSource(listener) {
+using namespace freee;
+
+
+Camera::Camera(DeviceContext *ctx)
+        : VideoSource(ctx) {
 
 }
 
-freee::Camera::~Camera() {
+Camera::~Camera() {
 
 }
 
 void freee::Camera::openSource(json cfg) {
     std::string s = cfg.dump();
     LOGD("AndroidCamera::openSource: %s", s.c_str());
-    sr_msg_t msg = __sr_null_msg;
-    msg.key = MsgKey_Video_Source_Open;
-    msg.type = SR_MSG_TYPE_STRING;
-    msg.p64 = strdup(s.c_str());
-    sendMessageToInputStream(msg);
-    LOGD("AndroidCamera::openSource: exit", s.c_str());
+    putMessage(VideoSource_Open, cfg.dump());
+    LOGD("AndroidCamera::openSource: exit");
 }
 
 void freee::Camera::closeSource() {
-    sr_msg_t msg = {0};
-    msg.key = MsgKey_Video_Source_Close;
-    sendMessageToInputStream(msg);
+    putMessage(VideoSource_Close, "");
 }
 
 void freee::Camera::startCapture() {
     LOGD("AndroidCamera::startCapture enter");
-    sr_msg_t msg = {0};
-    msg.key = MsgKey_Video_Source_StartCapture;
-    sendMessageToInputStream(msg);
+    putMessage(VideoSource_Start, "");
     LOGD("AndroidCamera::startCapture exit");
 }
 
 void freee::Camera::stopCapture() {
-    sr_msg_t msg = {0};
-    msg.key = MsgKey_Video_Source_StopCapture;
-    sendMessageToInputStream(msg);
+    putMessage(VideoSource_Stop, "");
 }
 
-sr_msg_t freee::Camera::requestFromInputStream(sr_msg_t msg) {
-    switch (msg.key){
-        case MsgKey_Video_Source_FinalConfig:
-            m_videoConfig = json::parse(std::string((const char *)msg.p64));
-            __sr_msg_clear(msg);
-            LOGD("update config =======: %s\n", m_videoConfig.dump().c_str());
-            break;
-        case MsgKey_Video_Source_ProvideFrame:
-//            LOGD("video frame =======: %p\n", msg.ptr);
-            break;
-        default:
-            break;
-    }
-    return __sr_null_msg;
+int Camera::onPutObject(int type, void *obj) {
+    return 0;
 }
 
-sr_msg_t freee::Camera::requestFromOutputStream(sr_msg_t msg) {
-    return __sr_null_msg;
+void *Camera::onGetObject(int type) {
+    return nullptr;
 }
+
+int Camera::onPutMessage(int cmd, std::string msg) {
+    return 0;
+}
+
+std::string Camera::onGetMessage(int cmd) {
+    return std::string();
+}
+
+int Camera::onPutData(void *data, int size) {
+//    LOGD("camera data size: %d", size);
+    processData(data, size);
+    return 0;
+}
+
+void *Camera::onGetBuffer() {
+    return nullptr;
+}
+
+int
+Camera::imageFilter(void *src, int src_w, int src_h, int src_fmt, void *dst, int dst_w, int dst_h,
+                    int dst_fmt, int rotate) {
+    return VideoSource::imageFilter(src, src_w, src_h, src_fmt, dst, dst_w, dst_h, dst_fmt, rotate);
+}
+
+//sr_msg_t freee::Camera::requestFromInputStream(sr_msg_t msg) {
+//    switch (msg.key){
+//        case MsgKey_Video_Source_FinalConfig:
+//            m_videoConfig = json::parse(std::string((const char *)msg.p64));
+//            __sr_msg_clear(msg);
+//            LOGD("update config =======: %s\n", m_videoConfig.dump().c_str());
+//            break;
+//        case MsgKey_Video_Source_ProvideFrame:
+////            LOGD("video frame =======: %p\n", msg.ptr);
+//            break;
+//        default:
+//            break;
+//    }
+//    return __sr_null_msg;
+//}
+//
+//sr_msg_t freee::Camera::requestFromOutputStream(sr_msg_t msg) {
+//    return __sr_null_msg;
+//}

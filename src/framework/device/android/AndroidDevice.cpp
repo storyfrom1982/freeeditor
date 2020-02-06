@@ -2,6 +2,7 @@
 // Created by yongge on 20-2-2.
 //
 
+#include <MConfig.h>
 #include "AndroidDevice.h"
 #include "MediaRecord.h"
 
@@ -22,7 +23,6 @@ AndroidDevice *AndroidDevice::Instance() {
 }
 
 int AndroidDevice::onPutObject(int type, void *obj) {
-    delete obj;
     return 0;
 }
 
@@ -36,7 +36,9 @@ int AndroidDevice::onPutMessage(int cmd, std::string msg) {
 }
 
 std::string AndroidDevice::onGetMessage(int cmd) {
-    return std::string();
+    json js;
+    MConfig::load(js, "");
+    return js.dump();
 }
 
 int AndroidDevice::onPutData(void *data, int size) {

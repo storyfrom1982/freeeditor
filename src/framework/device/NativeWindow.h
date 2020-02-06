@@ -6,19 +6,28 @@
 #define ANDROID_NATIVEWINDOW_H
 
 
+#ifdef __ANDROID__
+
+#endif
+
+
 namespace freee {
 
     class NativeWindow {
 
     public:
 
-        static NativeWindow* createNativeWindow(void *p);
+        NativeWindow(void *p);
 
         virtual ~NativeWindow(){};
 
-        virtual void* getWindowHandler() = 0;
+        void* getWindowHandler();
 
-        virtual void getWindowSize(int *w, int *h) = 0;
+        void getWindowSize(int *w, int *h);
+
+    private:
+
+        void *windowHanler;
 
     };
 

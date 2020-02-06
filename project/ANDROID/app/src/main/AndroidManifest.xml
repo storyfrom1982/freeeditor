@@ -22,7 +22,7 @@
         </activity>
 
         <activity android:name=".PlayerActivity"></activity>
-        <activity android:name=".EditorActivity"></activity>
+        <activity android:name=".RecordActivity"></activity>
         <activity android:name=".utils.AppInstallPermissionActivity"></activity>
 
         <provider

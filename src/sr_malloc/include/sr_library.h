@@ -316,69 +316,25 @@ extern unsigned int sr_pipe_block_write(sr_pipe_t *pipe, char *data, unsigned in
 ////缓冲区
 ///////////////////////////////////////////////////////////////
 
-
 enum {
-    MsgKey_Bad = -1,
-    MsgKey_Null = 0,
-    MsgKey_Good = 1
-};
-
-enum {
-	SR_MSG_TYPE_INTEGER = 0,
-	SR_MSG_TYPE_FLOAT,
-	SR_MSG_TYPE_POINTER,
+	SR_MSG_TYPE_POINTER = 0,
     SR_MSG_TYPE_STRING
 };
 
 typedef struct sr_msg_t{
 	int32_t key;
-	int32_t type;
+	int32_t size;
 	union {
-	    size_t size;
-        uint64_t size64;
+        void *ptr; //size > 0 is string; size == 0 is object pointer
+        int32_t i32[2];
+		int64_t i64; //byte aligned
 	};
-	union {
-        void *p64;
-        double f64;
-        int64_t i64;
-		uint64_t u64;
-	};
-    union {
-        void (*free)(void*);
-        uint64_t free64;
-    };
 }sr_msg_t;
-
 
 #define __sr_null_msg       ((sr_msg_t){0})
 
-#define __sr_msg_is_float(msg)          ((msg).type == SR_MSG_TYPE_FLOAT)
-#define __sr_msg_is_integer(msg)        ((msg).type == SR_MSG_TYPE_INTEGER)
-#define __sr_msg_is_pointer(msg)        ((msg).type == SR_MSG_TYPE_POINTER && (msg).p64 != NULL)
-#define __sr_msg_is_string(msg)         ((msg).type == SR_MSG_TYPE_STRING && (msg).p64 != NULL)
-
-#define __sr_msg_set_float(mkey, f) \
-    {.key = (mkey), .type = SR_MSG_TYPE_FLOAT, .size = 0, .f64 = (f), .free = NULL}
-
-#define __sr_msg_set_pointer(mkey, ptr, freefp) \
-    {.key = (mkey), .type = SR_MSG_TYPE_POINTER, .size = 0, .p64 = (ptr), .free = (freefp)}
-
-#define __sr_msg_set_string(mkey, str, len) \
-    {.key = (mkey), .type = SR_MSG_TYPE_STRING, .size = (len), .p64 = strdup((str)), .free = NULL}
-
-#define __sr_msg_clear(msg) \
-    { \
-        if (__sr_msg_is_string((msg))){ \
-            free((msg).p64); \
-        }else if (__sr_msg_is_pointer((msg))){ \
-            if ((msg).free) {(msg).free((msg).p64);} \
-        } \
-        msg = __sr_null_msg; \
-    }
-
-
 typedef struct sr_msg_processor_t{
-    char *name;
+    const char *name;
 	void *handler;
 	void (*process)(struct sr_msg_processor_t *processor, sr_msg_t msg);
 }sr_msg_processor_t;

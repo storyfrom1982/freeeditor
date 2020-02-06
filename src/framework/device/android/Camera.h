@@ -14,7 +14,7 @@ namespace freee {
     class Camera : public VideoSource {
 
     public:
-        Camera(StreamProcessor *listener);
+        Camera(DeviceContext *ctx);
         ~Camera();
 
         virtual void openSource(json cfg) override ;
@@ -23,8 +23,23 @@ namespace freee {
         virtual void startCapture() override ;
         virtual void stopCapture() override ;
 
-        virtual sr_msg_t requestFromInputStream(sr_msg_t msg) override ;
-        virtual sr_msg_t requestFromOutputStream(sr_msg_t msg) override ;
+    protected:
+        int onPutObject(int type, void *obj) override;
+
+        void *onGetObject(int type) override;
+
+        int onPutMessage(int cmd, std::string msg) override;
+
+        std::string onGetMessage(int cmd) override;
+
+        int onPutData(void *data, int size) override;
+
+        void *onGetBuffer() override;
+
+        int
+        imageFilter(void *src, int src_w, int src_h, int src_fmt, void *dst, int dst_w, int dst_h,
+                    int dst_fmt, int rotate) override;
+
     };
 }
 

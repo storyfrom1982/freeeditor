@@ -7,8 +7,22 @@
 
 
 #include <DeviceContext.h>
+#include <VideoSource.h>
+#include <NativeWindow.h>
+#include <OpenGLESRender.h>
 
 namespace freee{
+
+
+    enum {
+        Record_SetConfig = 0,
+        Record_StartCapture,
+        Record_StartRecord,
+        Record_StopCapture,
+        Record_StopRecord,
+        Record_ChangeCameraConfig,
+        Record_ChangeEncodeConfig,
+    };
 
     class MediaRecord : public DeviceContext{
 
@@ -28,6 +42,22 @@ namespace freee{
         int onPutData(void *data, int size) override;
 
         void *onGetBuffer() override;
+
+
+    private:
+        void init(sr_msg_t msg);
+        void messageProcessorLoop(sr_msg_processor_t *processor, sr_msg_t msg);
+        static void messageProcessorThread(sr_msg_processor_t *processor, sr_msg_t msg);
+
+
+    private:
+        sr_msg_queue_t *m_queue;
+        sr_msg_processor_t m_processor;
+
+        VideoSource *videoSource;
+        NativeWindow *window;
+
+        OpenGLESRender *glesRender;
     };
 }
 

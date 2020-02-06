@@ -20,8 +20,7 @@ import android.widget.EditText;
 
 import java.lang.ref.WeakReference;
 
-import cn.freeeditor.sdk.IEditor;
-import cn.freeeditor.sdk.MContext;
+import cn.freeeditor.sdk.MediaRecord;
 import cn.freeeditor.sdk.permission.PermissionEverywhere;
 import cn.freeeditor.sdk.permission.PermissionResponse;
 import cn.freeeditor.sdk.permission.PermissionResultCallback;
@@ -30,9 +29,9 @@ import cn.freeeditor.sdk.permission.PermissionResultCallback;
 /**
  * Created by kly on 16/8/26.
  */
-public class EditorActivity extends Activity {
+public class RecordActivity extends Activity {
 
-    private static final String TAG = "EditorActivity";
+    private static final String TAG = "RecordActivity";
 
     private static final int OVERLAY_FADEOUT_TIME = 40000;
 
@@ -47,7 +46,7 @@ public class EditorActivity extends Activity {
     private Button swapOrientationButton;
     private Button quitButton;
 
-    private IEditor recorder;
+    private MediaRecord recorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,12 +81,7 @@ public class EditorActivity extends Activity {
 
         fadeIn();
 
-        try {
-            MContext.Instance().getPermissions();
-            openRecorder("test");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        openRecorder("test");
     }
 
 
@@ -101,16 +95,15 @@ public class EditorActivity extends Activity {
     }
 
 
-    private void openRecorder(String url) throws Exception {
-        recorder = MContext.Instance().createRecorder("test");
-        recorder.setPreviewSurface(surfaceView);
-        recorder.startPreview();
+    private void openRecorder(String url){
+        recorder = new MediaRecord();
+        recorder.startCapture();
+        recorder.startPreview(surfaceView);
     }
 
 
     private void closeRecorder(){
-        recorder.stopPreview();
-        MContext.Instance().removeRecorder(recorder);
+        recorder.release();
     }
 
 
@@ -202,15 +195,15 @@ public class EditorActivity extends Activity {
 
     private static class PublishHandler extends Handler {
 
-        private WeakReference<EditorActivity> publishReference = null;
+        private WeakReference<RecordActivity> publishReference = null;
 
-        public PublishHandler(EditorActivity activity) {
-            publishReference = new WeakReference<EditorActivity>(activity);
+        public PublishHandler(RecordActivity activity) {
+            publishReference = new WeakReference<RecordActivity>(activity);
         }
 
         @Override
         public void handleMessage(Message msg) {
-            EditorActivity activity = publishReference.get();
+            RecordActivity activity = publishReference.get();
             if (activity == null)
                 return;
 
