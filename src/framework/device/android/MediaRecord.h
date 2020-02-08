@@ -44,7 +44,7 @@ namespace freee{
 
     private:
         void init(sr_message_t msg);
-        void createWindow(sr_message_t msg);
+        void StartPreview(sr_message_t msg);
         void drawPicture(sr_message_t msg);
 //        static void messageProcessorThread(sr_message_processor_t *processor, sr_message_t msg);
 

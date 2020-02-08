@@ -27,6 +27,9 @@ sr_message_t MediaContext::OnGetMessage(sr_message_t msg) {
     if (msg.key == MediaMessage_CreateRecord){
         msg.ptr = new MediaRecord();
         msg.size = MessageType_Pointer;
+    }else if (msg.key == MediaMessage_GetVideoView){
+        msg.ptr = new NativeWindow();
+        msg.size = MessageType_Pointer;
     }else if (msg.key == MediaMessage_GetRecordConfig){
         json js;
         MConfig::load(js, "");

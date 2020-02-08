@@ -12,6 +12,7 @@ using namespace freee;
 
 Camera::Camera(MessageContext *ctx){
     SetContextHandler(ctx);
+    SetContextName("Camera");
 }
 
 Camera::~Camera() {

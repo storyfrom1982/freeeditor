@@ -28,6 +28,7 @@ namespace freee{
 
         MessageContext(){
             messageQueue = NULL;
+            messageContext = NULL;
         }
 
         virtual ~MessageContext(){

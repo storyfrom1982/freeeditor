@@ -61,7 +61,7 @@ public class RecordActivity extends Activity {
         overlayView = findViewById(R.id.publish_overlay);
         mUrlEdit = (EditText)findViewById(R.id.publish_edit_url);
         recordButton = (Button)findViewById(R.id.publish_start_button);
-        recordButton.setOnClickListener(publishClickListener);
+//        recordButton.setOnClickListener(publishClickListener);
         swapCameraButton = (Button)findViewById(R.id.publish_swap_camera);
         swapCameraButton.setOnClickListener(swapCameraClickListener);
         swapOrientationButton = (Button)findViewById(R.id.publish_change_aspect_ratio);

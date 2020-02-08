@@ -59,39 +59,39 @@ public class VideoCamera extends JNIContext implements Runnable,
             }
         }
 
-        setContext(0);
-        setListener(new JNIListener() {
-
-            @Override
-            public void onPutMessage(int key, String msg) {
-                mThreadHandler.sendMessage(mThreadHandler.obtainMessage(key, msg));
-            }
-
-            @Override
-            public void onPutObject(int key, Object obj) {
-
-            }
-
-            @Override
-            public void onPutContext(int key, long messageContext) {
-
-            }
-
-            @Override
-            public Object onGetObject(int key) {
-                return null;
-            }
-
-            @Override
-            public String onGetMessage(int key) {
-                return null;
-            }
-
-            @Override
-            public long onGetContext(int key) {
-                return 0;
-            }
-        });
+//        setMessageContext(0);
+//        setListener(new JNIListener() {
+//
+//            @Override
+//            public void onPutMessage(int key, String msg) {
+//                mThreadHandler.sendMessage(mThreadHandler.obtainMessage(key, msg));
+//            }
+//
+//            @Override
+//            public void onPutObject(int key, Object obj) {
+//
+//            }
+//
+//            @Override
+//            public void onPutContext(int key, long messageContext) {
+//
+//            }
+//
+//            @Override
+//            public Object onGetObject(int key) {
+//                return null;
+//            }
+//
+//            @Override
+//            public String onGetMessage(int key) {
+//                return null;
+//            }
+//
+//            @Override
+//            public long onGetContext(int key) {
+//                return 0;
+//            }
+//        });
     }
 
     public void release(){
@@ -102,6 +102,37 @@ public class VideoCamera extends JNIContext implements Runnable,
             e.printStackTrace();
         }
     }
+
+    @Override
+    public void onPutObject(int key, Object obj) {
+
+    }
+
+    @Override
+    public void onPutMessage(int key, String msg) {
+        mThreadHandler.sendMessage(mThreadHandler.obtainMessage(key, msg));
+    }
+
+    @Override
+    public void onPutContext(int key, long ctx) {
+
+    }
+
+    @Override
+    public Object onGetObject(int key) {
+        return null;
+    }
+
+    @Override
+    public String onGetMessage(int key) {
+        return null;
+    }
+
+    @Override
+    public long onGetContext(int key) {
+        return 0;
+    }
+
 
     private void openCamera(String cfg){
 

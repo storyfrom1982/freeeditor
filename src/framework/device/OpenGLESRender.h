@@ -25,12 +25,14 @@ namespace freee {
         OpenGLESRender_Init = 0,
         OpenGLESRender_SetSurfaceView,
         OpenGLESRender_DrawPicture,
+        OpenGLESRender_SurfaceCreated,
+        OpenGLESRender_SurfaceDestroyed,
     };
 
     class OpenGLESRender : public MessageContext {
-    public:
-        OpenGLESRender(MessageContext *ctx);
 
+    public:
+        OpenGLESRender();
         ~OpenGLESRender() override;
 
     public:
@@ -46,6 +48,10 @@ namespace freee {
 //        static void messageProcessorThread(sr_message_processor_t *processor, sr_message_t msg);
 
         void init(sr_message_t msg);
+        void surfaceCreated(sr_message_t msg);
+        void surfaceChanged(sr_message_t msg);
+        void surfaceDestroyed(sr_message_t msg);
+
         void setSurfaceView(sr_message_t msg);
         void drawPicture(sr_message_t msg);
 

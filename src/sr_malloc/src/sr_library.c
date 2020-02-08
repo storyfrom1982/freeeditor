@@ -1170,6 +1170,12 @@ void sr_message_queue_release(sr_message_queue_t **pp_queue)
 			}
 			pthread_join(queue->tid, NULL);
 		}
+        sr_message_t msg = __sr_null_msg;
+        while (sr_message_queue_get(queue, &msg) == 0){
+            if (msg.size > MessageType_Command && msg.ptr){
+                free(msg.ptr);
+            }
+        }
 		sr_mutex_remove(&queue->mutex);
 		free(queue->message_array);
 		free(queue);
@@ -1227,10 +1233,16 @@ int sr_message_queue_put(sr_message_queue_t *queue, sr_message_t msg)
 		return -1;
 	}
 
+	if (__is_false(queue->running)){
+        return -1;
+	}
+
 	sr_mutex_lock(queue->mutex);
 
 	while (0 == (queue->length - queue->put_index + queue->get_index)){
-        sr_mutex_wait(queue->mutex);
+	    if (__is_true(queue->running)){
+            sr_mutex_wait(queue->mutex);
+	    }
         if (__is_false(queue->running)){
             sr_mutex_unlock(queue->mutex);
             return -1;
@@ -1258,7 +1270,9 @@ int sr_message_queue_get(sr_message_queue_t *queue, sr_message_t *msg)
     sr_mutex_lock(queue->mutex);
 
     while (0 == (queue->put_index - queue->get_index)){
-        sr_mutex_wait(queue->mutex);
+        if (__is_true(queue->running)){
+            sr_mutex_wait(queue->mutex);
+        }
         if (__is_false(queue->running)){
             sr_mutex_unlock(queue->mutex);
             return -1;

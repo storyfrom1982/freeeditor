@@ -4,10 +4,10 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 
-import java.nio.ByteBuffer;
 
-public class MediaRecord extends JNIContext implements JNIContext.JNIListener, SurfaceHolder.Callback {
 
+
+public class MediaRecord extends JNIContext implements SurfaceHolder.Callback {
 
     private static final int Record_SetConfig = 0;
     private static final int Record_StartCapture = 1;
@@ -17,18 +17,24 @@ public class MediaRecord extends JNIContext implements JNIContext.JNIListener, S
     private static final int Record_ChangeCameraConfig = 5;
     private static final int Record_ChangeEncodeConfig = 6;
 
-    private long mCtx;
+    private long messageContext;
 
     private SurfaceView mVideoView;
+    private VideoView videoView;
 
     public MediaRecord(){
-        setListener(this);
-
-        mCtx = MediaContext.Instance().getContext(MediaContext.Cmd_GetRecord);
-        setContext(mCtx);
-
+        messageContext = MediaContext.Instance().getContext(MediaContext.Cmd_GetRecord);
+        setMessageContext(messageContext);
         String configStr = MediaContext.Instance().getMessage(MediaContext.Cmd_GetRecordConfig);
         putMessage(Record_SetConfig, configStr);
+    }
+
+    public void release(){
+        MediaContext.Instance().deleteContext(messageContext);
+        super.release();
+        if (videoView != null){
+            videoView.release();
+        }
     }
 
     public void startCapture(){
@@ -66,17 +72,14 @@ public class MediaRecord extends JNIContext implements JNIContext.JNIListener, S
     }
 
     public void startPreview(SurfaceView view){
-        mVideoView = view;
-        if (mVideoView != null) {
-            mVideoView.setVisibility(View.INVISIBLE);
-            mVideoView.getHolder().addCallback(this);
-            mVideoView.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void release(){
-        MediaContext.Instance().deleteObject(mCtx);
-        super.release();
+        videoView = new VideoView(view);
+        putContext(7,videoView.getMessageContext());
+//        mVideoView = view;
+//        if (mVideoView != null) {
+//            mVideoView.setVisibility(View.INVISIBLE);
+//            mVideoView.getHolder().addCallback(this);
+//            mVideoView.setVisibility(View.VISIBLE);
+//        }
     }
 
     @Override

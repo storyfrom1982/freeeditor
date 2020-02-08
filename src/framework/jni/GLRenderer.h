@@ -22,7 +22,7 @@ typedef struct gl_renderer_t gl_renderer_t;
 
 gl_renderer_t* gl_renderer_create(int w, int h);
 void gl_renderer_release(gl_renderer_t **pp_renderer);
-int gl_renderer_set_window(gl_renderer_t *renderer, gl_window_t *window);
+int gl_renderer_set_window(gl_renderer_t *renderer, void *window);
 int gl_renderer_remove_window(gl_renderer_t *renderer);
 int gl_renderer_swap_buffers(gl_renderer_t *renderer);
 int gl_renderer_get_view_width(gl_renderer_t *renderer);

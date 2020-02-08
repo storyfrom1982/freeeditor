@@ -10,11 +10,8 @@
 using namespace freee;
 
 MediaRecord::MediaRecord(){
-//    m_processor.name = "MediaRecord";
-//    m_processor.handler = this;
-//    m_processor.process = MediaRecord::messageProcessorThread;
-//    m_queue = sr_message_queue_create();
-//    sr_message_queue_start_processor(m_queue, &m_processor);
+    glesRender = NULL;
+    videoSource = NULL;
     SetContextName("MediaRecord");
     StartMessageProcessor();
 }
@@ -27,9 +24,6 @@ MediaRecord::~MediaRecord() {
     }
     if (glesRender){
         delete glesRender;
-    }
-    if (window){
-        delete window;
     }
 //    sr_message_queue_clear(m_queue);
 //    sr_message_queue_release(&m_queue);
@@ -65,7 +59,7 @@ void MediaRecord::MessageProcessor(sr_message_t msg) {
             videoSource->startCapture();
             break;
         case Record_StartPreview:
-            createWindow(msg);
+            StartPreview(msg);
             break;
         case Record_DrawPicture:
             drawPicture(msg);
@@ -89,16 +83,15 @@ void MediaRecord::init(sr_message_t msg) {
     videoSource = VideoSource::openVideoSource(context);
     videoSource->openSource(cfg["videoSource"]);
     videoSource->setEncoder(this);
-    glesRender = new OpenGLESRender(NULL);
+    glesRender = new OpenGLESRender();
     msg.key = OpenGLESRender_Init;
     glesRender->OnPutMessage(msg);
 }
 
-void MediaRecord::createWindow(sr_message_t msg) {
-    window = new NativeWindow(msg.ptr);
+void MediaRecord::StartPreview(sr_message_t msg) {
     msg.key = OpenGLESRender_SetSurfaceView;
-    msg.ptr = window;
     glesRender->OnPutMessage(msg);
+
 }
 
 void MediaRecord::drawPicture(sr_message_t msg) {

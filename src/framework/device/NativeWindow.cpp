@@ -8,24 +8,28 @@
 #include <JNIContext.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
+#include <MConfig.h>
+
 #endif
 
 using namespace freee;
 
 
-NativeWindow::NativeWindow(void *p) {
-    window = p;
-#ifdef __ANDROID__
-    JniEnv env;
-    windowHandler = ANativeWindow_fromSurface(env.m_pEnv, (jobject)window);
-#endif
+NativeWindow::NativeWindow() {
+    window = NULL;
+    windowHandler = NULL;
+    SetContextName("NativeWindow");
 }
 
 NativeWindow::~NativeWindow() {
 #ifdef __ANDROID__
-    ANativeWindow_release((ANativeWindow*)windowHandler);
-    JniEnv env;
-    env->DeleteGlobalRef((jobject)window);
+    if (windowHandler){
+        ANativeWindow_release((ANativeWindow*)windowHandler);
+    }
+    if (window){
+        JniEnv env;
+        env->DeleteGlobalRef((jobject)window);
+    }
 #endif
 }
 
@@ -38,4 +42,41 @@ void NativeWindow::getWindowSize(int *w, int *h) {
     *w = ANativeWindow_getWidth((ANativeWindow*)windowHandler);
     *h = ANativeWindow_getHeight((ANativeWindow*)windowHandler);
 #endif
+}
+
+void NativeWindow::OnPutMessage(sr_message_t msg) {
+    if (msg.key == 1){
+        window = msg.ptr;
+#ifdef __ANDROID__
+        JniEnv env;
+        windowHandler = ANativeWindow_fromSurface(env.m_pEnv, (jobject)window);
+        if (context){
+            msg.key = OpenGLESRender_SurfaceCreated;
+            msg.ptr = this;
+            context->OnPutMessage(msg);
+        }
+#endif
+    }else if (msg.key == 2){
+        if (msg.ptr != NULL){
+//            json  js = json::parse((char *)(msg.ptr));
+//            LOGD("reszie: %s\n", js.dump().c_str());
+            free(msg.ptr);
+        }
+
+    }else if (msg.key == 3){
+        msg.key = OpenGLESRender_SurfaceDestroyed;
+        msg.ptr = this;
+        context->OnPutMessage(msg);
+    }
+}
+
+sr_message_t NativeWindow::OnGetMessage(sr_message_t msg) {
+    return MessageContext::OnGetMessage(msg);
+}
+
+void NativeWindow::SetRenderer(MessageContext *context) {
+    this->context = context;
+    sr_message_t msg = __sr_null_msg;
+    msg.key = 1;
+    PutMessage(msg);
 }

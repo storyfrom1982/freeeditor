@@ -199,7 +199,7 @@ void gl_renderer_release(gl_renderer_t **pp_renderer)
     LOGD("gl_renderer_release exit\n");
 }
 
-int gl_renderer_set_window(gl_renderer_t *renderer, gl_window_t *window)
+int gl_renderer_set_window(gl_renderer_t *renderer, void *window)
 {
     LOGD("gl_renderer_set_view enter\n");
 
@@ -231,6 +231,8 @@ int gl_renderer_set_window(gl_renderer_t *renderer, gl_window_t *window)
 
 int gl_renderer_remove_window(gl_renderer_t *renderer)
 {
+    LOGD("gl_renderer_remove_window enter\n");
+
     renderer->window = NULL;
 
     if (renderer->mEGLSurface){
@@ -244,6 +246,8 @@ int gl_renderer_remove_window(gl_renderer_t *renderer)
         LOGE("eglMakeCurrent failed\n");
         return -1;
     }
+
+    LOGD("gl_renderer_remove_window exit\n");
 
     return 0;
 }

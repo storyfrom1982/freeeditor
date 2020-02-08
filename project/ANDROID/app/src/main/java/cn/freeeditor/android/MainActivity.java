@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 //        record.release();
 //        record = null;
-        MediaContext.Instance().release();
+//        MediaContext.Instance().release();
         MediaContext.Instance().debug();
     }
 

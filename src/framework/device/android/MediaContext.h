@@ -13,6 +13,7 @@ namespace freee {
         MediaMessage_CreateRecord = 1,
         MediaMessage_CreateCamera,
         MediaMessage_GetRecordConfig,
+        MediaMessage_GetVideoView = 5,
     };
 
     class MediaContext : public MessageContext {

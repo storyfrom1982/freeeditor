@@ -139,7 +139,7 @@ Java_cn_freeeditor_sdk_JNIContext_deleteContext(JNIEnv *env, jobject instance, j
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_JNIContext_setContext__JJ(JNIEnv *env, jobject instance, jlong messageContext,
+Java_cn_freeeditor_sdk_JNIContext_setMessageContext__JJ(JNIEnv *env, jobject instance, jlong messageContext,
                                                  jlong mCtx) {
     MessageContext *pMessageContext = reinterpret_cast<MessageContext *>(messageContext);
     JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(mCtx);
@@ -278,19 +278,10 @@ Java_cn_freeeditor_sdk_MediaContext_createContext(JNIEnv *env, jobject instance)
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_MediaContext_deleteContext(JNIEnv *env, jobject instance, jlong mCtx) {
-    MediaContext *device = (MediaContext*)mCtx;
-    if (device){
-        delete device;
-    }
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_MediaContext_deleteObject(JNIEnv *env, jobject instance, jlong jniObject) {
-    MessageContext *ctx = (MessageContext*)jniObject;
-    if (ctx){
-        delete ctx;
+Java_cn_freeeditor_sdk_MediaContext_deleteContext(JNIEnv *env, jobject instance, jlong jniContext) {
+    MessageContext *pMessageContext = (MessageContext*)jniContext;
+    if (pMessageContext){
+        delete pMessageContext;
     }
 }
 

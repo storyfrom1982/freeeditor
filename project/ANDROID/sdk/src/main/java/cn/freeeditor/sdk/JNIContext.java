@@ -1,105 +1,82 @@
 package cn.freeeditor.sdk;
 
-import java.nio.ByteBuffer;
 
-public class JNIContext {
-
-
-    public interface JNIListener {
-        void onPutMessage(int key, String msg);
-        void onPutObject(int key, Object obj);
-        void onPutContext(int key, long ctx);
-        Object onGetObject(int key);
-        String onGetMessage(int key);
-        long onGetContext(int key);
-    }
-
-    private JNIListener listener;
+abstract public class JNIContext {
 
     public JNIContext(){
-        mCtx = createContext();
-    }
-
-    public void setListener(JNIListener listener){
-        this.listener = listener;
-    }
-
-    public void setContext(long messageContext){
-        setContext(messageContext, mCtx);
-    }
-
-    public long getContext(){
-        return mCtx;
+        jniContext = createContext();
     }
 
     public void release(){
-        deleteContext(mCtx);
-        mCtx = 0;
+        deleteContext(jniContext);
+        jniContext = 0;
     }
 
-    public void onPutObject(int key, Object obj) {
-        listener.onPutObject(key, obj);
+    public void setMessageContext(long messageContext){
+        setMessageContext(messageContext, jniContext);
     }
 
-    public void onPutMessage(int key, String msg){
-        listener.onPutMessage(key, msg);
+    public long getMessageContext(){
+        return jniContext;
     }
 
-    public void onPutContext(int key, long ctx){
-        listener.onPutContext(key, ctx);
-    }
+    protected abstract void onPutObject(int key, Object obj);
 
-    public Object onGetObject(int key){
-        return listener.onGetObject(key);
-    }
+    protected abstract void onPutMessage(int key, String msg);
 
-    public String onGetMessage(int key){
-        return listener.onGetMessage(key);
-    }
+    protected abstract void onPutContext(int key, long ctx);
 
-    public long onGetContext(int key){
-        return listener.onGetContext(key);
-    }
+    protected abstract Object onGetObject(int key);
+
+    protected abstract String onGetMessage(int key);
+
+    protected abstract long onGetContext(int key);
+
 
     public void putObject(int key, Object obj){
-        putObject(key, obj, mCtx);
+        putObject(key, obj, jniContext);
     }
 
     public void putMessage(int key, String msg){
-        putMessage(key, msg, mCtx);
+        putMessage(key, msg, jniContext);
     }
 
     public void putContext(int key, long messageContext){
-        putContext(key, messageContext, mCtx);
+        putContext(key, messageContext, jniContext);
     }
 
     public void putData(int key, byte[] data, int size){
-        putData(key, data, size, mCtx);
+        putData(key, data, size, jniContext);
     }
 
     public long getContext(int key){
-        return getContext(key, mCtx);
+        return getContext(key, jniContext);
     }
 
     public String getMessage(int key){
-        return getMessage(key, mCtx);
+        return getMessage(key, jniContext);
     }
 
     public Object getObject(int key){
-        return getObject(key, mCtx);
+        return getObject(key, jniContext);
     }
 
-    private long mCtx;
+
+    static {
+        System.loadLibrary("freeeditor");
+    }
+
+    private long jniContext;
 
     private native long createContext();
-    private native void deleteContext(long mCtx);
-    private native void setContext(long messageContext, long mCtx);
+    private native void deleteContext(long jniContext);
+    private native void setMessageContext(long messageContext, long jniContext);
 
-    private native void putObject(int key, Object obj, long mCtx);
-    private native void putMessage(int key, String msg, long mCtx);
-    private native void putContext(int key, long messageContext, long mCtx);
-    private native void putData(int key, byte[] data, int size, long mCtx);
-    private native long getContext(int key, long mCtx);
-    private native String getMessage(int key, long mCtx);
-    private native Object getObject(int key, long mCtx);
+    private native void putObject(int key, Object obj, long jniContext);
+    private native void putMessage(int key, String msg, long jniContext);
+    private native void putContext(int key, long messageContext, long jniContext);
+    private native void putData(int key, byte[] data, int size, long jniContext);
+    private native long getContext(int key, long jniContext);
+    private native String getMessage(int key, long jniContext);
+    private native Object getObject(int key, long jniContext);
 }

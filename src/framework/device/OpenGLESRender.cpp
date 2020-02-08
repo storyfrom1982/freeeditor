@@ -19,18 +19,13 @@ extern "C" {
 using namespace freee;
 
 
-OpenGLESRender::OpenGLESRender(MessageContext *ctx) {
-    SetContextHandler(ctx);
-//    m_processor.name = "OpenGLESRender";
-//    m_processor.handler = this;
-//    m_processor.process = OpenGLESRender::messageProcessorThread;
-//    m_queue = sr_message_queue_create();
-//    sr_message_queue_start_processor(m_queue, &m_processor);
+OpenGLESRender::OpenGLESRender() {
     SetContextName("OpenGLESRender");
     StartMessageProcessor();
 }
 
 OpenGLESRender::~OpenGLESRender() {
+    LOGD("~OpenGLESRender()\n");
     if (renderer){
         gl_renderer_release(&renderer);
     }
@@ -57,6 +52,12 @@ void OpenGLESRender::MessageProcessor(sr_message_t msg) {
             break;
         case OpenGLESRender_DrawPicture:
             drawPicture(msg);
+            break;
+        case OpenGLESRender_SurfaceCreated:
+            surfaceCreated(msg);
+            break;
+        case OpenGLESRender_SurfaceDestroyed:
+            surfaceDestroyed(msg);
             break;
         default:
             break;
@@ -91,10 +92,7 @@ void OpenGLESRender::init(sr_message_t msg) {
 
 void OpenGLESRender::setSurfaceView(sr_message_t msg) {
     NativeWindow *window = (NativeWindow*)msg.ptr;
-    gl_renderer_set_window(renderer, (gl_window_t*)window->getWindowHandler());
-    int w, h;
-    window->getWindowSize(&w, &h);
-    glViewport(0, 0, w, h);
+    window->SetRenderer(this);
 }
 
 void OpenGLESRender::drawPicture(sr_message_t msg) {
@@ -102,5 +100,23 @@ void OpenGLESRender::drawPicture(sr_message_t msg) {
     opengles_render(opengles, (const VideoPacket*)msg.ptr);
     gl_renderer_swap_buffers(renderer);
     videoPacket_Free(reinterpret_cast<VideoPacket **>(&msg.ptr));
+}
+
+void OpenGLESRender::surfaceCreated(sr_message_t msg) {
+    NativeWindow *window = (NativeWindow*)msg.ptr;
+    gl_renderer_set_window(renderer, (gl_window_t*)window->getWindowHandler());
+    int w, h;
+    window->getWindowSize(&w, &h);
+    glViewport(0, 0, w, h);
+}
+
+void OpenGLESRender::surfaceChanged(sr_message_t msg) {
+
+}
+
+void OpenGLESRender::surfaceDestroyed(sr_message_t msg) {
+    LOGD("OpenGLESRender::surfaceDestroyed enter\n");
+    gl_renderer_remove_window(renderer);
+    LOGD("OpenGLESRender::surfaceDestroyed exit\n");
 }
 
