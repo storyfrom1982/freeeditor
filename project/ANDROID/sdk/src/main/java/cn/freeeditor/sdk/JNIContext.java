@@ -1,100 +1,105 @@
 package cn.freeeditor.sdk;
 
-import android.content.Context;
-
-import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 
-public class JNIContext extends JNIHandler {
+public class JNIContext {
 
-    public static final int Cmd_GetRecord = 0;
-    public static final int Cmd_GetRecordConfig = 1;
 
-    private static final int Cmd_OnGet_Camera = 0;
-    private static final int Cmd_OnGet_Microphone = 1;
-
-    private static JNIContext jniContext = null;
-
-    public static JNIContext Instance(){
-        if (jniContext == null){
-            jniContext = new JNIContext();
-        }
-        return jniContext;
+    public interface JNIListener {
+        void onPutMessage(int key, String msg);
+        void onPutObject(int key, Object obj);
+        void onPutContext(int key, long ctx);
+        Object onGetObject(int key);
+        String onGetMessage(int key);
+        long onGetContext(int key);
     }
 
-    private WeakReference<Context> mAppCtxReference = null;
+    private JNIListener listener;
 
-    public void setApplicationContext(Context context){
-        mAppCtxReference = new WeakReference<>(context);
+    public JNIContext(){
+        mCtx = createContext();
+    }
+
+    public void setListener(JNIListener listener){
+        this.listener = listener;
+    }
+
+    public void setContext(long messageContext){
+        setContext(messageContext, mCtx);
+    }
+
+    public long getContext(){
+        return mCtx;
     }
 
     public void release(){
-        super.release();
         deleteContext(mCtx);
         mCtx = 0;
     }
 
-    private JNIContext(){
-        setListener(new IJNIListener() {
-            @Override
-            public int onPutObject(int type, long obj) {
-                return 0;
-            }
-
-            @Override
-            public int onPutMessage(int cmd, String msg) {
-                return 0;
-            }
-
-            @Override
-            public int onPutData(byte[] data, int size) {
-                return 0;
-            }
-
-            @Override
-            public long onGetObject(int type) {
-                switch (type){
-                    case Cmd_OnGet_Camera:
-                        return createCamera();
-                    case Cmd_OnGet_Microphone:
-                        break;
-                    default:
-                        break;
-                }
-                return 0;
-            }
-
-            @Override
-            public String onGetMessage(int cmd) {
-                return null;
-            }
-
-            @Override
-            public ByteBuffer onGetBuffer() {
-                return null;
-            }
-        });
-        mCtx = createContext();
-        setContext(mCtx);
+    public void onPutObject(int key, Object obj) {
+        listener.onPutObject(key, obj);
     }
 
-    private long createCamera(){
-        VideoCamera camera = new VideoCamera();
-        return camera.getContext();
+    public void onPutMessage(int key, String msg){
+        listener.onPutMessage(key, msg);
     }
 
-
-    static {
-        System.loadLibrary("freeeditor");
+    public void onPutContext(int key, long ctx){
+        listener.onPutContext(key, ctx);
     }
 
-    private long mCtx = 0;
+    public Object onGetObject(int key){
+        return listener.onGetObject(key);
+    }
+
+    public String onGetMessage(int key){
+        return listener.onGetMessage(key);
+    }
+
+    public long onGetContext(int key){
+        return listener.onGetContext(key);
+    }
+
+    public void putObject(int key, Object obj){
+        putObject(key, obj, mCtx);
+    }
+
+    public void putMessage(int key, String msg){
+        putMessage(key, msg, mCtx);
+    }
+
+    public void putContext(int key, long messageContext){
+        putContext(key, messageContext, mCtx);
+    }
+
+    public void putData(int key, byte[] data, int size){
+        putData(key, data, size, mCtx);
+    }
+
+    public long getContext(int key){
+        return getContext(key, mCtx);
+    }
+
+    public String getMessage(int key){
+        return getMessage(key, mCtx);
+    }
+
+    public Object getObject(int key){
+        return getObject(key, mCtx);
+    }
+
+    private long mCtx;
 
     private native long createContext();
-
     private native void deleteContext(long mCtx);
+    private native void setContext(long messageContext, long mCtx);
 
-    public native void debug();
-
-    public native void deleteObject(long jniObject);
+    private native void putObject(int key, Object obj, long mCtx);
+    private native void putMessage(int key, String msg, long mCtx);
+    private native void putContext(int key, long messageContext, long mCtx);
+    private native void putData(int key, byte[] data, int size, long mCtx);
+    private native long getContext(int key, long mCtx);
+    private native String getMessage(int key, long mCtx);
+    private native Object getObject(int key, long mCtx);
 }

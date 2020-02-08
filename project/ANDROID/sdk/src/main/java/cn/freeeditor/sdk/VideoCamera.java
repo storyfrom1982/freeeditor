@@ -7,7 +7,6 @@ import android.opengl.GLES20;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.app.NavUtils;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,7 +17,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class VideoCamera extends JNIHandler implements Runnable,
+public class VideoCamera extends JNIContext implements Runnable,
         Camera.PreviewCallback, Camera.ErrorCallback {
 
     private static final String TAG = "VideoCamera";
@@ -61,36 +60,36 @@ public class VideoCamera extends JNIHandler implements Runnable,
         }
 
         setContext(0);
-        setListener(new IJNIListener() {
+        setListener(new JNIListener() {
+
             @Override
-            public int onPutObject(int type, long obj) {
-                return 0;
+            public void onPutMessage(int key, String msg) {
+                mThreadHandler.sendMessage(mThreadHandler.obtainMessage(key, msg));
             }
 
             @Override
-            public int onPutMessage(int cmd, String msg) {
-                mThreadHandler.sendMessage(mThreadHandler.obtainMessage(cmd, msg));
-                return 0;
+            public void onPutObject(int key, Object obj) {
+
             }
 
             @Override
-            public int onPutData(byte[] data, int size) {
-                return 0;
+            public void onPutContext(int key, long messageContext) {
+
             }
 
             @Override
-            public long onGetObject(int type) {
-                return 0;
-            }
-
-            @Override
-            public String onGetMessage(int cmd) {
+            public Object onGetObject(int key) {
                 return null;
             }
 
             @Override
-            public ByteBuffer onGetBuffer() {
+            public String onGetMessage(int key) {
                 return null;
+            }
+
+            @Override
+            public long onGetContext(int key) {
+                return 0;
             }
         });
     }
@@ -244,7 +243,7 @@ public class VideoCamera extends JNIHandler implements Runnable,
     public void onPreviewFrame(byte[] data, Camera camera) {
 //        Log.e(TAG, "onPreviewFrame: data size: " + data.length);
 //        mMsgHandler.sendRequest(new Msg(MsgKey.Video_Source_ProvideFrame, data, 0));
-        putData(data, data.length);
+        putData(0, data, data.length);
         mCamera.addCallbackBuffer(data);
     }
 

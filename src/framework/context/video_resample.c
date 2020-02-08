@@ -54,7 +54,7 @@ VideoPacket* videoPacket_Alloc(int width, int height, uint32_t fourcc)
     return packet;
 }
 
-static void videoPacket_Free(VideoPacket **pp_packet)
+void videoPacket_Free(VideoPacket **pp_packet)
 {
     if (pp_packet != NULL && *pp_packet != NULL){
         VideoPacket *packet = *pp_packet;

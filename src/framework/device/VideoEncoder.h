@@ -14,7 +14,7 @@ namespace freee{
 
 //        void openEncoder(std::string config);
 //        void closeEncoder();
-//        void* getBuffer();
+//        void* getObject();
 
     };
 

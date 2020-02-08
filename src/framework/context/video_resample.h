@@ -33,5 +33,6 @@ VideoPacket* videoPacket_Alloc(int width, int height, uint32_t fourcc);
 int videoPacket_FillData(VideoPacket *packet, const uint8_t *data, int width, int height, uint32_t fourcc);
 int videoPacket_To_YUV420(VideoPacket *src, VideoPacket *dst, int rotate_degree);
 int videoPacket_From_YUV420(VideoPacket *src, VideoPacket *dst);
+void videoPacket_Free(VideoPacket **pp_packet);
 
 #endif //PROJECT_VIDEO_RESAMPLE_H

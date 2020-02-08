@@ -15,19 +15,19 @@ namespace freee {
 
     public:
 
-        StreamEditor(const sr_msg_t &msg);
+        StreamEditor(const sr_message_t &msg);
 
         ~StreamEditor();
 
     protected:
 
-        virtual void messageFromInputStream(sr_msg_t msg);
+        virtual void messageFromInputStream(sr_message_t msg);
 
-        virtual void messageFromOutputStream(sr_msg_t msg);
+        virtual void messageFromOutputStream(sr_message_t msg);
 
-        virtual sr_msg_t requestFromInputStream(sr_msg_t msg);
+        virtual sr_message_t requestFromInputStream(sr_message_t msg);
 
-        virtual sr_msg_t requestFromOutputStream(sr_msg_t msg);
+        virtual sr_message_t requestFromOutputStream(sr_message_t msg);
 
     };
 

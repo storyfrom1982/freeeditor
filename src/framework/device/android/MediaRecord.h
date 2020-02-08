@@ -6,7 +6,7 @@
 #define ANDROID_MEDIARECORD_H
 
 
-#include <DeviceContext.h>
+#include <MessageContext.h>
 #include <VideoSource.h>
 #include <NativeWindow.h>
 #include <OpenGLESRender.h>
@@ -22,37 +22,36 @@ namespace freee{
         Record_StopRecord,
         Record_ChangeCameraConfig,
         Record_ChangeEncodeConfig,
+        Record_StartPreview,
+        Record_DrawPicture,
     };
 
-    class MediaRecord : public DeviceContext{
+    class MediaRecord : public MessageContext{
 
     public:
-        MediaRecord(DeviceContext *ctx);
+        MediaRecord();
         ~MediaRecord();
 
+    public:
+        void OnPutDataBuffer(sr_message_t msg) override;
+
+//        void OnPutMessage(sr_message_t msg) override;
+
+        sr_message_t OnGetMessage(sr_message_t msg) override;
+
     protected:
-        int onPutObject(int type, void *obj) override;
+        void MessageProcessor(sr_message_t msg) override;
 
-        void *onGetObject(int type) override;
-
-        int onPutMessage(int cmd, std::string msg) override;
-
-        std::string onGetMessage(int cmd) override;
-
-        int onPutData(void *data, int size) override;
-
-        void *onGetBuffer() override;
+    private:
+        void init(sr_message_t msg);
+        void createWindow(sr_message_t msg);
+        void drawPicture(sr_message_t msg);
+//        static void messageProcessorThread(sr_message_processor_t *processor, sr_message_t msg);
 
 
     private:
-        void init(sr_msg_t msg);
-        void messageProcessorLoop(sr_msg_processor_t *processor, sr_msg_t msg);
-        static void messageProcessorThread(sr_msg_processor_t *processor, sr_msg_t msg);
-
-
-    private:
-        sr_msg_queue_t *m_queue;
-        sr_msg_processor_t m_processor;
+//        sr_message_queue_t *m_queue;
+//        sr_message_processor_t m_processor;
 
         VideoSource *videoSource;
         NativeWindow *window;

@@ -19,7 +19,7 @@ namespace freee {
 
         NativeWindow(void *p);
 
-        virtual ~NativeWindow(){};
+        virtual ~NativeWindow();
 
         void* getWindowHandler();
 
@@ -27,7 +27,8 @@ namespace freee {
 
     private:
 
-        void *windowHanler;
+        void *window;
+        void *windowHandler;
 
     };
 

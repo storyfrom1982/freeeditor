@@ -4,7 +4,7 @@
 
 #include "Window.h"
 
-#include <JNIHandler.h>
+#include <JNIContext.h>
 #include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <StreamProcessor.h>

@@ -13,7 +13,7 @@ class CaptureListener : public StreamProcessor {
 
 protected:
 
-    sr_msg_t requestFromInputStream(sr_msg_t msg) override {
+    sr_message_t requestFromInputStream(sr_message_t msg) override {
 //        StreamCapture *capture = nullptr;
 //        if (msg.key == MsgKey_EnvCtx_CreateCapture) {
 //            AutoLock lock(m_captureListLock);
@@ -73,23 +73,23 @@ void StreamCapture::release() {
     }
 }
 
-StreamCapture *StreamCapture::create(sr_msg_t msg) {
+StreamCapture *StreamCapture::create(sr_message_t msg) {
 //    return new Editor(msg);
     return NULL;
 }
 
-void StreamCapture::messageFromInputStream(sr_msg_t msg) {
+void StreamCapture::messageFromInputStream(sr_message_t msg) {
 
 }
 
-void StreamCapture::messageFromOutputStream(sr_msg_t msg) {
+void StreamCapture::messageFromOutputStream(sr_message_t msg) {
 
 }
 
-sr_msg_t StreamCapture::requestFromInputStream(sr_msg_t msg) {
+sr_message_t StreamCapture::requestFromInputStream(sr_message_t msg) {
     return __sr_null_msg;
 }
 
-sr_msg_t StreamCapture::requestFromOutputStream(sr_msg_t msg) {
+sr_message_t StreamCapture::requestFromOutputStream(sr_message_t msg) {
     return __sr_null_msg;
 }

@@ -44,9 +44,9 @@ namespace freee {
 
     protected:
 
-        void messageFromInputStream(sr_msg_t msg) override;
+        void messageFromInputStream(sr_message_t msg) override;
 
-        sr_msg_t requestFromInputStream(sr_msg_t msg) override;
+        sr_message_t requestFromInputStream(sr_message_t msg) override;
 
 
     private:

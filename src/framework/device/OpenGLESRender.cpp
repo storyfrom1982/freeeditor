@@ -19,56 +19,35 @@ extern "C" {
 using namespace freee;
 
 
-OpenGLESRender::OpenGLESRender(DeviceContext *ctx)
-    : DeviceContext(ctx) {
-    m_processor.name = "OpenGLESRender";
-    m_processor.handler = this;
-    m_processor.process = OpenGLESRender::messageProcessorThread;
-    m_queue = sr_msg_queue_create();
-    sr_msg_queue_start_processor(m_queue, &m_processor);
+OpenGLESRender::OpenGLESRender(MessageContext *ctx) {
+    SetContextHandler(ctx);
+//    m_processor.name = "OpenGLESRender";
+//    m_processor.handler = this;
+//    m_processor.process = OpenGLESRender::messageProcessorThread;
+//    m_queue = sr_message_queue_create();
+//    sr_message_queue_start_processor(m_queue, &m_processor);
+    SetContextName("OpenGLESRender");
+    StartMessageProcessor();
 }
 
 OpenGLESRender::~OpenGLESRender() {
-
+    if (renderer){
+        gl_renderer_release(&renderer);
+    }
+    if (opengles){
+        opengles_close(&opengles);
+    }
 }
 
-int OpenGLESRender::onPutObject(int type, void *obj) {
-//    LOGD("onPutObject data size: %d", type);
-    sr_msg_t msg;
-    msg.key = type;
-    msg.ptr = obj;
-    msg.size = 0;
-    sr_msg_queue_push(m_queue, msg);
-    return 0;
+//void OpenGLESRender::OnPutMessage(sr_message_t msg) {
+//    sr_message_queue_put(m_queue, msg);
+//}
+
+sr_message_t OpenGLESRender::OnGetMessage(sr_message_t msg) {
+    return sr_message_t();
 }
 
-void *OpenGLESRender::onGetObject(int type) {
-    return nullptr;
-}
-
-int OpenGLESRender::onPutMessage(int cmd, std::string str) {
-    sr_msg_t msg;
-    msg.key = cmd;
-    msg.size = str.length();
-    msg.ptr = strdup(str.c_str());
-    sr_msg_queue_push(m_queue, msg);
-    return 0;
-}
-
-std::string OpenGLESRender::onGetMessage(int cmd) {
-    return std::string();
-}
-
-int OpenGLESRender::onPutData(void *data, int size) {
-    return 0;
-}
-
-void *OpenGLESRender::onGetBuffer() {
-    return nullptr;
-}
-
-void OpenGLESRender::messageProcessorLoop(sr_msg_processor_t *processor, sr_msg_t msg) {
-
+void OpenGLESRender::MessageProcessor(sr_message_t msg) {
     switch (msg.key){
         case OpenGLESRender_Init:
             init(msg);
@@ -84,16 +63,33 @@ void OpenGLESRender::messageProcessorLoop(sr_msg_processor_t *processor, sr_msg_
     }
 }
 
-void OpenGLESRender::messageProcessorThread(sr_msg_processor_t *processor, sr_msg_t msg) {
-    ((OpenGLESRender*)processor->handler)->messageProcessorLoop(processor, msg);
-}
+//void OpenGLESRender::messageProcessorLoop(sr_message_processor_t *processor, sr_message_t msg) {
+//
+//    switch (msg.key){
+//        case OpenGLESRender_Init:
+//            init(msg);
+//            break;
+//        case OpenGLESRender_SetSurfaceView:
+//            setSurfaceView(msg);
+//            break;
+//        case OpenGLESRender_DrawPicture:
+//            drawPicture(msg);
+//            break;
+//        default:
+//            break;
+//    }
+//}
 
-void OpenGLESRender::init(sr_msg_t msg) {
+//void OpenGLESRender::messageProcessorThread(sr_message_processor_t *processor, sr_message_t msg) {
+//    ((OpenGLESRender*)processor->handler)->messageProcessorLoop(processor, msg);
+//}
+
+void OpenGLESRender::init(sr_message_t msg) {
     renderer = gl_renderer_create(16, 16);
     opengles_open(&opengles);
 }
 
-void OpenGLESRender::setSurfaceView(sr_msg_t msg) {
+void OpenGLESRender::setSurfaceView(sr_message_t msg) {
     NativeWindow *window = (NativeWindow*)msg.ptr;
     gl_renderer_set_window(renderer, (gl_window_t*)window->getWindowHandler());
     int w, h;
@@ -101,9 +97,10 @@ void OpenGLESRender::setSurfaceView(sr_msg_t msg) {
     glViewport(0, 0, w, h);
 }
 
-void OpenGLESRender::drawPicture(sr_msg_t msg) {
+void OpenGLESRender::drawPicture(sr_message_t msg) {
 //    LOGD("drawPicture data size: %d", msg.key);
     opengles_render(opengles, (const VideoPacket*)msg.ptr);
     gl_renderer_swap_buffers(renderer);
+    videoPacket_Free(reinterpret_cast<VideoPacket **>(&msg.ptr));
 }
 

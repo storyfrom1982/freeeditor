@@ -6,7 +6,7 @@
 #define ANDROID_OPENGLESRENDERER_H
 
 
-#include <DeviceContext.h>
+#include <MessageContext.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,38 +27,32 @@ namespace freee {
         OpenGLESRender_DrawPicture,
     };
 
-    class OpenGLESRender : public DeviceContext {
+    class OpenGLESRender : public MessageContext {
     public:
-        OpenGLESRender(DeviceContext *ctx);
+        OpenGLESRender(MessageContext *ctx);
 
         ~OpenGLESRender() override;
 
     public:
-        int onPutObject(int type, void *obj) override;
+//        void OnPutMessage(sr_message_t msg) override;
 
-        void *onGetObject(int type) override;
+        sr_message_t OnGetMessage(sr_message_t msg) override;
 
-        int onPutMessage(int cmd, std::string msg) override;
-
-        std::string onGetMessage(int cmd) override;
-
-        int onPutData(void *data, int size) override;
-
-        void *onGetBuffer() override;
-
+    protected:
+        void MessageProcessor(sr_message_t msg) override;
 
     private:
-        void messageProcessorLoop(sr_msg_processor_t *processor, sr_msg_t msg);
-        static void messageProcessorThread(sr_msg_processor_t *processor, sr_msg_t msg);
+//        void messageProcessorLoop(sr_message_processor_t *processor, sr_message_t msg);
+//        static void messageProcessorThread(sr_message_processor_t *processor, sr_message_t msg);
 
-        void init(sr_msg_t msg);
-        void setSurfaceView(sr_msg_t msg);
-        void drawPicture(sr_msg_t msg);
+        void init(sr_message_t msg);
+        void setSurfaceView(sr_message_t msg);
+        void drawPicture(sr_message_t msg);
 
     private:
 
-        sr_msg_queue_t *m_queue;
-        sr_msg_processor_t m_processor;
+//        sr_message_queue_t *m_queue;
+//        sr_message_processor_t m_processor;
 
         gl_window_t *window;
         gl_renderer_t *renderer;

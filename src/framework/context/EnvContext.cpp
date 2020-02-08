@@ -34,7 +34,7 @@ EnvContext::~EnvContext() {
     g_ctx = nullptr;
 }
 
-sr_msg_t EnvContext::requestFromInputStream(sr_msg_t msg) {
+sr_message_t EnvContext::requestFromInputStream(sr_message_t msg) {
     AutoLock lock(m_processorLock);
     if (!m_processorMap[msg.key].empty()){
         return m_processorMap[msg.key][0]->sendRequestToOutputStream(msg);
@@ -42,7 +42,7 @@ sr_msg_t EnvContext::requestFromInputStream(sr_msg_t msg) {
     return __sr_null_msg;
 }
 
-void EnvContext::messageFromInputStream(sr_msg_t msg) {
+void EnvContext::messageFromInputStream(sr_message_t msg) {
     AutoLock lock(m_processorLock);
     if (!m_processorMap[msg.key].empty()){
         for (int i = 0; i < m_processorMap[msg.key].size(); ++i){

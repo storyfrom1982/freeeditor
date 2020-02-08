@@ -6,7 +6,7 @@ import android.view.View;
 
 import java.nio.ByteBuffer;
 
-public class MediaRecord implements SurfaceHolder.Callback {
+public class MediaRecord extends JNIContext implements JNIContext.JNIListener, SurfaceHolder.Callback {
 
 
     private static final int Record_SetConfig = 0;
@@ -17,55 +17,52 @@ public class MediaRecord implements SurfaceHolder.Callback {
     private static final int Record_ChangeCameraConfig = 5;
     private static final int Record_ChangeEncodeConfig = 6;
 
-    private long jniObject;
-    private final JNIHandler jniHandler;
+    private long mCtx;
 
     private SurfaceView mVideoView;
 
     public MediaRecord(){
-        jniHandler = new JNIHandler();
-        jniHandler.setListener(new JNIHandler.IJNIListener() {
-            @Override
-            public int onPutObject(int type, long obj) {
-                return 0;
-            }
+        setListener(this);
 
-            @Override
-            public int onPutMessage(int cmd, String msg) {
-                Log.e("MediaRecord", msg);
-                return 0;
-            }
+        mCtx = MediaContext.Instance().getContext(MediaContext.Cmd_GetRecord);
+        setContext(mCtx);
 
-            @Override
-            public int onPutData(byte[] data, int size) {
-                return 0;
-            }
-
-            @Override
-            public long onGetObject(int type) {
-                return 0;
-            }
-
-            @Override
-            public String onGetMessage(int cmd) {
-                return null;
-            }
-
-            @Override
-            public ByteBuffer onGetBuffer() {
-                return null;
-            }
-        });
-
-        jniObject = JNIContext.Instance().getObject(JNIContext.Cmd_GetRecord);
-        jniHandler.setContext(jniObject);
-
-        String configStr = JNIContext.Instance().getMessage(JNIContext.Cmd_GetRecordConfig);
-        jniHandler.putMessage(Record_SetConfig, configStr);
+        String configStr = MediaContext.Instance().getMessage(MediaContext.Cmd_GetRecordConfig);
+        putMessage(Record_SetConfig, configStr);
     }
 
     public void startCapture(){
-        jniHandler.putMessage(Record_StartCapture, "");
+        putMessage(Record_StartCapture, null);
+    }
+
+    @Override
+    public void onPutObject(int type, Object obj) {
+
+    }
+
+    @Override
+    public void onPutMessage(int key, String msg) {
+        Log.e("MediaRecord", msg);
+    }
+
+    @Override
+    public void onPutContext(int key, long messageContext) {
+
+    }
+
+    @Override
+    public Object onGetObject(int key) {
+        return null;
+    }
+
+    @Override
+    public String onGetMessage(int key) {
+        return null;
+    }
+
+    @Override
+    public long onGetContext(int key) {
+        return 0;
     }
 
     public void startPreview(SurfaceView view){
@@ -78,13 +75,13 @@ public class MediaRecord implements SurfaceHolder.Callback {
     }
 
     public void release(){
-        JNIContext.Instance().deleteObject(jniObject);
-        jniHandler.release();
+        MediaContext.Instance().deleteObject(mCtx);
+        super.release();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        jniHandler.putObject(0, holder.getSurface());
+        putObject(7, holder.getSurface());
     }
 
     @Override

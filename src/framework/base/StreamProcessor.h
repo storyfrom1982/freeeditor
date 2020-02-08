@@ -92,7 +92,7 @@ namespace freee {
             }
         }
 
-        virtual void sendMessageToInputStream(sr_msg_t msg){
+        virtual void sendMessageToInputStream(sr_message_t msg){
             AutoLock lock(m_inputsLock);
             if (m_inputs.size() > 0){
                 for (int i = 0; i < m_inputs.size(); ++i){
@@ -105,7 +105,7 @@ namespace freee {
             }
         };
 
-        virtual void sendMessageToOutputStream(sr_msg_t msg){
+        virtual void sendMessageToOutputStream(sr_message_t msg){
             AutoLock lock(m_outputsLock);
             if (m_outputs.size() > 0){
                 for (int i = 0; i < m_outputs.size(); ++i){
@@ -118,7 +118,7 @@ namespace freee {
             }
         };
 
-        virtual sr_msg_t sendRequestToInputStream(sr_msg_t msg){
+        virtual sr_message_t sendRequestToInputStream(sr_message_t msg){
             AutoLock lock(m_inputsLock);
             if (m_inputs.empty()){
                 return requestFromOutputStream(msg);
@@ -126,7 +126,7 @@ namespace freee {
             return m_inputs.front()->requestFromOutputStream(msg);
         }
 
-        virtual sr_msg_t sendRequestToOutputStream(sr_msg_t msg){
+        virtual sr_message_t sendRequestToOutputStream(sr_message_t msg){
             AutoLock lock(m_outputsLock);
             if (m_outputs.empty()){
                 return requestFromInputStream(msg);
@@ -134,7 +134,7 @@ namespace freee {
             return m_outputs.front()->requestFromInputStream(msg);
         }
 
-        virtual sr_msg_t sendRequestToInputStream(sr_msg_t msg, unsigned int id){
+        virtual sr_message_t sendRequestToInputStream(sr_message_t msg, unsigned int id){
             AutoLock lock(m_inputsLock);
             if (id < m_inputs.size() && m_inputs[id] != NULL){
                 return m_inputs[id]->requestFromOutputStream(msg);
@@ -142,7 +142,7 @@ namespace freee {
             return requestFromOutputStream(msg);
         }
 
-        virtual sr_msg_t sendRequestToOutputStream(sr_msg_t msg, unsigned int id){
+        virtual sr_message_t sendRequestToOutputStream(sr_message_t msg, unsigned int id){
             AutoLock lock(m_outputsLock);
             if (id < m_outputs.size() && m_outputs[id] != NULL){
                 return m_outputs[id]->requestFromInputStream(msg);
@@ -153,19 +153,19 @@ namespace freee {
 
     protected:
 
-        virtual void messageFromInputStream(sr_msg_t msg){
+        virtual void messageFromInputStream(sr_message_t msg){
 
         }
 
-        virtual void messageFromOutputStream(sr_msg_t msg){
+        virtual void messageFromOutputStream(sr_message_t msg){
 
         }
 
-        virtual sr_msg_t requestFromInputStream(sr_msg_t msg){
+        virtual sr_message_t requestFromInputStream(sr_message_t msg){
             return __sr_null_msg;
         }
 
-        virtual sr_msg_t requestFromOutputStream(sr_msg_t msg){
+        virtual sr_message_t requestFromOutputStream(sr_message_t msg){
             return __sr_null_msg;
         }
 

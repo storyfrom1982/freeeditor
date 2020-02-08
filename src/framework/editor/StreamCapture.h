@@ -15,7 +15,7 @@ namespace freee{
 
     public:
 
-        StreamCapture(sr_msg_t msg){};
+        StreamCapture(sr_message_t msg){};
 
         virtual ~StreamCapture(){};
 
@@ -25,18 +25,18 @@ namespace freee{
 
         static StreamProcessor* getListener();
 
-        static StreamCapture* create(sr_msg_t msg);
+        static StreamCapture* create(sr_message_t msg);
 
 
     protected:
 
-        virtual void messageFromInputStream(sr_msg_t msg) override;
+        virtual void messageFromInputStream(sr_message_t msg) override;
 
-        virtual void messageFromOutputStream(sr_msg_t msg) override;
+        virtual void messageFromOutputStream(sr_message_t msg) override;
 
-        virtual sr_msg_t requestFromInputStream(sr_msg_t msg) override;
+        virtual sr_message_t requestFromInputStream(sr_message_t msg) override;
 
-        virtual sr_msg_t requestFromOutputStream(sr_msg_t msg) override;
+        virtual sr_message_t requestFromOutputStream(sr_message_t msg) override;
 
     };
 

@@ -13,7 +13,7 @@ import android.widget.Button;
 import java.io.File;
 
 import cn.freeeditor.android.utils.AppUpdateManager;
-import cn.freeeditor.sdk.JNIContext;
+import cn.freeeditor.sdk.MediaContext;
 import cn.freeeditor.sdk.Log;
 
 public class MainActivity extends AppCompatActivity {
@@ -50,8 +50,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 //        record.release();
 //        record = null;
-        JNIContext.Instance().release();
-        JNIContext.Instance().debug();
+        MediaContext.Instance().release();
+        MediaContext.Instance().debug();
     }
 
     private final View.OnClickListener openPublishListener = new View.OnClickListener() {

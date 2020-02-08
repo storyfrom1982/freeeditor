@@ -99,7 +99,7 @@ namespace freee {
         }
 
 
-        virtual void msgToUpstream(DataStream *processor, sr_msg_t msg){
+        virtual void msgToUpstream(DataStream *processor, sr_message_t msg){
             AutoLock lock(m_inputsLock);
             if (m_inputs.size() > 0){
                 for (int i = 0; i < m_inputs.size(); ++i){
@@ -108,7 +108,7 @@ namespace freee {
             }
         };
 
-        virtual void msgToDownstream(DataStream *processor, sr_msg_t msg){
+        virtual void msgToDownstream(DataStream *processor, sr_message_t msg){
             AutoLock lock(m_outputsLock);
             if (m_outputs.size() > 0){
                 for (int i = 0; i < m_outputs.size(); ++i){
@@ -120,9 +120,9 @@ namespace freee {
 
     protected:
 
-        virtual void msgFromUpstream(DataStream *processor, sr_msg_t msg){};
+        virtual void msgFromUpstream(DataStream *processor, sr_message_t msg){};
 
-        virtual void msgFromDownstream(DataStream *processor, sr_msg_t msg){};
+        virtual void msgFromDownstream(DataStream *processor, sr_message_t msg){};
 
 
     protected:

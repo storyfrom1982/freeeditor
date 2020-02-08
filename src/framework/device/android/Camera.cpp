@@ -10,66 +10,55 @@
 using namespace freee;
 
 
-Camera::Camera(DeviceContext *ctx)
-        : VideoSource(ctx) {
-
+Camera::Camera(MessageContext *ctx){
+    SetContextHandler(ctx);
 }
 
 Camera::~Camera() {
-
+    LOGD("Camera::~Camera enter");
+    sr_message_t msg = __sr_null_msg;
+    msg.key = -1;
+    PutMessage(msg);
+    LOGD("Camera::~Camera exit");
 }
 
 void freee::Camera::openSource(json cfg) {
-    std::string s = cfg.dump();
-    LOGD("AndroidCamera::openSource: %s", s.c_str());
-    putMessage(VideoSource_Open, cfg.dump());
+    sr_message_t msg;
+    std::string str = cfg.dump();
+    LOGD("AndroidCamera::openSource: %s", str.c_str());
+    msg.key = VideoSource_Open;
+    msg.size = str.length();
+    msg.ptr = strdup(str.c_str());
+    PutMessage(msg);
     LOGD("AndroidCamera::openSource: exit");
 }
 
 void freee::Camera::closeSource() {
-    putMessage(VideoSource_Close, "");
+    sr_message_t msg = __sr_null_msg;
+    msg.key = VideoSource_Close;
+    PutMessage(msg);
 }
 
 void freee::Camera::startCapture() {
     LOGD("AndroidCamera::startCapture enter");
-    putMessage(VideoSource_Start, "");
+    sr_message_t msg = __sr_null_msg;
+    msg.key = VideoSource_Start;
+    PutMessage(msg);
     LOGD("AndroidCamera::startCapture exit");
 }
 
 void freee::Camera::stopCapture() {
-    putMessage(VideoSource_Stop, "");
+    sr_message_t msg = __sr_null_msg;
+    msg.key = VideoSource_Stop;
+    PutMessage(msg);
 }
 
-int Camera::onPutObject(int type, void *obj) {
-    return 0;
+void Camera::OnPutMessage(sr_message_t msg) {
+    processData(msg);
 }
 
-void *Camera::onGetObject(int type) {
-    return nullptr;
-}
-
-int Camera::onPutMessage(int cmd, std::string msg) {
-    return 0;
-}
-
-std::string Camera::onGetMessage(int cmd) {
-    return std::string();
-}
-
-int Camera::onPutData(void *data, int size) {
-//    LOGD("camera data size: %d", size);
-    processData(data, size);
-    return 0;
-}
-
-void *Camera::onGetBuffer() {
-    return nullptr;
-}
-
-int
-Camera::imageFilter(void *src, int src_w, int src_h, int src_fmt, void *dst, int dst_w, int dst_h,
-                    int dst_fmt, int rotate) {
-    return VideoSource::imageFilter(src, src_w, src_h, src_fmt, dst, dst_w, dst_h, dst_fmt, rotate);
+sr_message_t Camera::OnGetMessage(sr_message_t msg) {
+    return sr_message_t();
 }
 
 //sr_msg_t freee::Camera::requestFromInputStream(sr_msg_t msg) {

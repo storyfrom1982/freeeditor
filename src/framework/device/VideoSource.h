@@ -7,7 +7,7 @@
 
 
 #include <MConfig.h>
-#include <DeviceContext.h>
+#include <MessageContext.h>
 #include "OpenGLESRender.h"
 
 
@@ -18,20 +18,21 @@ namespace freee {
         VideoSource_Open = 0,
         VideoSource_Start,
         VideoSource_Stop,
-        VideoSource_Close
+        VideoSource_Close,
+        VideoSource_Release
     };
 
 
-    class VideoSource : public DeviceContext {
+    class VideoSource : public MessageContext {
 
     public:
 
-        static VideoSource* openVideoSource(DeviceContext *ctx);
+        static VideoSource* openVideoSource(MessageContext *ctx);
 
-        VideoSource(DeviceContext *ctx);
+        VideoSource();
         virtual ~VideoSource();
 
-        void setEncoder(DeviceContext *ctx);
+        void setEncoder(MessageContext *ctx);
 
         virtual void openSource(json cfg) = 0;
         virtual void closeSource() = 0;
@@ -43,13 +44,11 @@ namespace freee {
     protected:
 
         void processData(void *data, int size);
-
-        virtual int imageFilter(void *src, int src_w, int src_h, int src_fmt,
-                void *dst, int dst_w, int dst_h, int dst_fmt, int rotate);
+        void processData(sr_message_t msg);
 
     private:
 
-        DeviceContext *outputCtx;
+        MessageContext *outputCtx;
 
     };
 
