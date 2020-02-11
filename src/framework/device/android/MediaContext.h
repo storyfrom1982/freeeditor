@@ -9,13 +9,6 @@
 
 namespace freee {
 
-    enum {
-        MediaMessage_CreateRecord = 1,
-        MediaMessage_CreateCamera,
-        MediaMessage_GetRecordConfig,
-        MediaMessage_GetVideoView = 5,
-    };
-
     class MediaContext : public MessageContext {
 
     public:
@@ -31,8 +24,10 @@ namespace freee {
     public:
 
         void OnPutMessage(sr_message_t msg) override;
-
         sr_message_t OnGetMessage(sr_message_t msg) override;
+
+        MessageContext* CreateCamera();
+        MessageContext* CreateMicrophone();
 
     private:
 

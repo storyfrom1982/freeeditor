@@ -26,6 +26,7 @@ OpenGLESRender::OpenGLESRender() {
 
 OpenGLESRender::~OpenGLESRender() {
     LOGD("~OpenGLESRender()\n");
+    StopMessageProcessor();
     if (renderer){
         gl_renderer_release(&renderer);
     }
@@ -92,21 +93,21 @@ void OpenGLESRender::init(sr_message_t msg) {
 
 void OpenGLESRender::setSurfaceView(sr_message_t msg) {
     NativeWindow *window = (NativeWindow*)msg.ptr;
-    window->SetRenderer(this);
+    window->SetStatusCallback(this);
 }
 
 void OpenGLESRender::drawPicture(sr_message_t msg) {
 //    LOGD("drawPicture data size: %d", msg.key);
     opengles_render(opengles, (const VideoPacket*)msg.ptr);
     gl_renderer_swap_buffers(renderer);
-    videoPacket_Free(reinterpret_cast<VideoPacket **>(&msg.ptr));
+//    videoPacket_Free(reinterpret_cast<VideoPacket **>(&msg.ptr));
 }
 
 void OpenGLESRender::surfaceCreated(sr_message_t msg) {
     NativeWindow *window = (NativeWindow*)msg.ptr;
-    gl_renderer_set_window(renderer, (gl_window_t*)window->getWindowHandler());
+    gl_renderer_set_window(renderer, (gl_window_t*) window->GetWindowHandler());
     int w, h;
-    window->getWindowSize(&w, &h);
+    window->GetWindowSize(&w, &h);
     glViewport(0, 0, w, h);
 }
 

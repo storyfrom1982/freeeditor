@@ -38,12 +38,12 @@ public class MainActivity extends AppCompatActivity {
         updateAppButton.setOnClickListener(updateAppListener);
 
 //        if (record == null){
-//            record = new MediaRecord();
+//            record = new MediaRecorder();
 //        }
 //        record.startCapture();
     }
 
-//    MediaRecord record;
+//    MediaRecorder record;
 
     @Override
     protected void onDestroy() {

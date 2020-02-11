@@ -24,11 +24,15 @@ namespace freee {
 
         virtual ~NativeWindow();
 
-        void SetRenderer(MessageContext *context);
+        bool IsReady();
 
-        void* getWindowHandler();
+        void ConnectContextHandler(MessageContext *contextHandler) override;
 
-        void getWindowSize(int *w, int *h);
+        void SetStatusCallback(MessageContext *callback);
+
+        void* GetWindowHandler();
+
+        void GetWindowSize(int *w, int *h);
 
         void OnPutMessage(sr_message_t msg) override;
 
@@ -36,10 +40,12 @@ namespace freee {
 
     private:
 
+        bool isReady;
+
         void *window;
         void *windowHandler;
 
-        MessageContext *context;
+        MessageContext *statusCallback;
 
     };
 

@@ -54,6 +54,7 @@ namespace freee{
 //        sr_message_processor_t m_processor;
 
         VideoSource *videoSource;
+        VideoEncoder *encoder;
         NativeWindow *window;
 
         OpenGLESRender *glesRender;

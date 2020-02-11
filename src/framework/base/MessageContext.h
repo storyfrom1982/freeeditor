@@ -14,6 +14,8 @@ extern "C" {
 
 # include <sr_malloc.h>
 # include <sr_library.h>
+#include <video_resample.h>
+#include <sr_buffer_pool.h>
 
 #ifdef __cplusplus
 }
@@ -42,7 +44,7 @@ namespace freee{
             contextName = name;
         }
 
-        void SetContextHandler(MessageContext *contextHandler){
+        virtual void ConnectContextHandler(MessageContext *contextHandler){
             if (contextHandler){
                 messageContext = contextHandler;
                 messageContext->messageContext = this;
@@ -92,6 +94,10 @@ namespace freee{
             messageProcessor.handler = this;
             messageProcessor.process = MessageProcessorThread;
             sr_message_queue_start_processor(messageQueue, &messageProcessor);
+        }
+
+        void StopMessageProcessor(){
+            sr_message_queue_release(&messageQueue);
         }
 
 

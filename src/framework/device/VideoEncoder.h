@@ -7,14 +7,27 @@
 
 
 #include <string>
+#include <MessageContext.h>
+#include <SmartPtr.h>
 
 namespace freee{
 
     class VideoEncoder {
 
-//        void openEncoder(std::string config);
-//        void closeEncoder();
-//        void* getObject();
+    public:
+
+        VideoEncoder();
+        ~VideoEncoder();
+
+        void openEncoder(std::string config);
+        void closeEncoder();
+        sr_message_t* GetBuffer();
+        void PutBuffer(SmartPtr<sr_buffer_t*> buffer);
+        void PutBuffer(sr_buffer_t *buffer);
+
+    private:
+
+        sr_message_queue_t *queue;
 
     };
 

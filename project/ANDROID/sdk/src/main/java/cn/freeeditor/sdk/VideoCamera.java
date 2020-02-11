@@ -13,7 +13,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -58,40 +57,6 @@ public class VideoCamera extends JNIContext implements Runnable,
                 }
             }
         }
-
-//        setMessageContext(0);
-//        setListener(new JNIListener() {
-//
-//            @Override
-//            public void onPutMessage(int key, String msg) {
-//                mThreadHandler.sendMessage(mThreadHandler.obtainMessage(key, msg));
-//            }
-//
-//            @Override
-//            public void onPutObject(int key, Object obj) {
-//
-//            }
-//
-//            @Override
-//            public void onPutContext(int key, long messageContext) {
-//
-//            }
-//
-//            @Override
-//            public Object onGetObject(int key) {
-//                return null;
-//            }
-//
-//            @Override
-//            public String onGetMessage(int key) {
-//                return null;
-//            }
-//
-//            @Override
-//            public long onGetContext(int key) {
-//                return 0;
-//            }
-//        });
     }
 
     public void release(){
@@ -104,40 +69,20 @@ public class VideoCamera extends JNIContext implements Runnable,
     }
 
     @Override
-    public void onPutObject(int key, Object obj) {
-
+    protected void onPutMessage(JNIMessage msg) {
+        mThreadHandler.sendMessage(mThreadHandler.obtainMessage(msg.key, msg));
     }
 
     @Override
-    public void onPutMessage(int key, String msg) {
-        mThreadHandler.sendMessage(mThreadHandler.obtainMessage(key, msg));
-    }
-
-    @Override
-    public void onPutContext(int key, long ctx) {
-
-    }
-
-    @Override
-    public Object onGetObject(int key) {
+    protected JNIMessage onGetMessage(int key) {
         return null;
     }
 
-    @Override
-    public String onGetMessage(int key) {
-        return null;
-    }
 
-    @Override
-    public long onGetContext(int key) {
-        return 0;
-    }
-
-
-    private void openCamera(String cfg){
+    private void openCamera(JNIMessage msg){
 
         try {
-            mConfig = new JSONObject(cfg);
+            mConfig = new JSONObject(msg.json);
             mFrameRate = mConfig.getInt("fps");
             mRequestWidth = mConfig.getInt("width");
             mRequestHeight = mConfig.getInt("height");
@@ -274,14 +219,14 @@ public class VideoCamera extends JNIContext implements Runnable,
     public void onPreviewFrame(byte[] data, Camera camera) {
 //        Log.e(TAG, "onPreviewFrame: data size: " + data.length);
 //        mMsgHandler.sendRequest(new Msg(MsgKey.Video_Source_ProvideFrame, data, 0));
-        putData(0, data, data.length);
+        putBuffer(0, data, data.length);
         mCamera.addCallbackBuffer(data);
     }
 
     @Override
     public void onError(int error, Camera camera) {
         Log.d(TAG, "onError: " + error);
-        putMessage(0, "" + error);
+        putJson(0, "" + error);
     }
 
 
@@ -302,7 +247,7 @@ public class VideoCamera extends JNIContext implements Runnable,
                         deviceCamera.internalRemove();
                         break;
                     case MSG_HandleOpen:
-                        deviceCamera.openCamera((String) msg.obj);
+                        deviceCamera.openCamera((JNIMessage) msg.obj);
                         break;
                     case MSG_HandleStart:
                         deviceCamera.startCapture();

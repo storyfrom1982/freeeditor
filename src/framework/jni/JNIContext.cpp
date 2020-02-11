@@ -41,12 +41,17 @@ public:
         JniEnv env;
         m_obj = env->NewGlobalRef(obj);
         jclass m_class = env->GetObjectClass(m_obj);
-        m_onPutMessage = env->GetMethodID(m_class, "onPutMessage", "(ILjava/lang/String;)V");
+
+        m_onPutMessage = env->GetMethodID(m_class, "onPutMessage", "(I)V");
+        m_onPutLong = env->GetMethodID(m_class, "onPutLong", "(IJ)V");
+        m_onPutFloat = env->GetMethodID(m_class, "onPutFloat", "(ID)V");
+        m_onPutJson = env->GetMethodID(m_class, "onPutJson", "(ILjava/lang/String;)V");
         m_onPutObject = env->GetMethodID(m_class, "onPutObject", "(ILjava/lang/Object;)V");
-        m_onPutContext = env->GetMethodID(m_class, "onPutContext", "(IJ)V");
-        m_onGetMessage = env->GetMethodID(m_class, "onGetMessage", "(I)Ljava/lang/String;");
+
+        m_onGetJson = env->GetMethodID(m_class, "onGetJson", "(I)Ljava/lang/String;");
         m_onGetObject = env->GetMethodID(m_class, "onGetObject", "(I)Ljava/lang/Object;");
-        m_onGetContext = env->GetMethodID(m_class, "onGetContext", "(I)J");
+        m_onGetPointer = env->GetMethodID(m_class, "onGetPointer", "(I)J");
+
         env->DeleteLocalRef(m_class);
     }
 
@@ -67,56 +72,61 @@ public:
 
     void OnPutMessage(sr_message_t msg) override {
         JniEnv env;
-        if (msg.size > MessageType_Command && msg.ptr){
-            jstring str = env->NewStringUTF(static_cast<const char *>(msg.ptr));
-            env->CallVoidMethod(m_obj, m_onPutMessage, msg.key, str);
+        if (__sr_msg_is_string(msg)){
+            jstring str = env->NewStringUTF(msg.str);
+            env->CallVoidMethod(m_obj, m_onPutJson, msg.key, str);
             env->DeleteLocalRef(str);
-            free(msg.ptr);
-        }else if (msg.size == MessageType_Command){
-            env->CallVoidMethod(m_obj, m_onPutMessage, msg.key, NULL);
-        }else if (msg.size == MessageType_Pointer){
-            env->CallVoidMethod(m_obj, m_onPutContext, msg.key, (jlong)msg.ptr);
-        }else if (msg.size == MessageType_Unknown){
+            free(msg.str);
+        }else if (__sr_msg_is_none(msg)){
+            env->CallVoidMethod(m_obj, m_onPutMessage, msg.key);
+        }else if (__sr_msg_is_pointer(msg)){
+            env->CallVoidMethod(m_obj, m_onPutLong, msg.key, (jlong)msg.ptr);
+        }else if (__sr_msg_is_native(msg)){
             env->CallVoidMethod(m_obj, m_onPutObject, msg.key, (jobject)msg.ptr);
+        }else if (__sr_msg_is_number(msg)){
+            env->CallVoidMethod(m_obj, m_onPutLong, msg.key, msg.i64);
+        }else if (__sr_msg_is_float(msg)){
+            env->CallVoidMethod(m_obj, m_onPutFloat, msg.key, msg.f64);
         }
     }
 
     sr_message_t OnGetMessage(sr_message_t msg) override {
         JniEnv env;
-        if (msg.size == MessageType_String){
-            jstring obj = (jstring)(env->CallObjectMethod(m_obj, m_onGetMessage, msg.key));
-            if (obj == nullptr){
-                return __sr_null_msg;
+        if (__sr_msg_is_json(msg)){
+            jstring obj = (jstring)(env->CallObjectMethod(m_obj, m_onGetJson, msg.key));
+            if (obj){
+                const char *s = env->GetStringUTFChars(obj, 0);
+                msg.type = env->GetStringUTFLength(obj);
+                msg.ptr = strdup(s);
+                env->ReleaseStringUTFChars(obj, s);
+                return msg;
             }
-            const char *s = env->GetStringUTFChars(obj, 0);
-            msg.size = env->GetStringUTFLength(obj);
-            msg.ptr = strdup(s);
-            env->ReleaseStringUTFChars(obj, s);
-        }else if (msg.size == MessageType_Pointer){
-            msg.ptr = reinterpret_cast<void *>(env->CallLongMethod(m_obj, m_onGetContext, msg.key));
-            if (msg.ptr == nullptr){
-                return __sr_null_msg;
+        }else if (__sr_msg_is_pointer(msg)){
+            msg.ptr = reinterpret_cast<void *>(env->CallLongMethod(m_obj, m_onGetPointer, msg.key));
+            if (msg.ptr){
+                return msg;
             }
-        }else if (msg.size == MessageType_Unknown){
+        }else if (__sr_msg_is_native(msg)){
             jobject obj = env->CallObjectMethod(m_obj, m_onGetObject, msg.key);
-            if (obj == nullptr){
-                return __sr_null_msg;
+            if (obj){
+                msg.ptr = obj;
+                return msg;
             }
-            msg.ptr = env->NewGlobalRef(obj);
-        }else {
-            return __sr_null_msg;
+
         }
-        return msg;
+        return __sr_null_msg;
     }
 
 private:
 
     jobject m_obj;
     jmethodID m_onPutMessage;
-    jmethodID m_onPutContext;
+    jmethodID m_onPutJson;
+    jmethodID m_onPutFloat;
+    jmethodID m_onPutLong;
     jmethodID m_onPutObject;
-    jmethodID m_onGetMessage;
-    jmethodID m_onGetContext;
+    jmethodID m_onGetJson;
+    jmethodID m_onGetPointer;
     jmethodID m_onGetObject;
 };
 
@@ -139,74 +149,108 @@ Java_cn_freeeditor_sdk_JNIContext_deleteContext(JNIEnv *env, jobject instance, j
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_JNIContext_setMessageContext__JJ(JNIEnv *env, jobject instance, jlong messageContext,
+Java_cn_freeeditor_sdk_JNIContext_connectContext__JJ(JNIEnv *env, jobject instance, jlong messageContext,
                                                  jlong mCtx) {
     MessageContext *pMessageContext = reinterpret_cast<MessageContext *>(messageContext);
     JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(mCtx);
     if (pMessageContext && pJNIContext){
-        pMessageContext->SetContextHandler(pJNIContext);
+        pMessageContext->ConnectContextHandler(pJNIContext);
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_cn_freeeditor_sdk_JNIContext_putMessage__IJ(JNIEnv *env, jobject instance, jint key,
+                                                 jlong jniContext) {
+    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(jniContext);
+    if (pJNIContext){
+        sr_message_t msg = __sr_null_msg;
+        msg.key = key;
+        pJNIContext->PutMessage(msg);
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_cn_freeeditor_sdk_JNIContext_putLong__IJJ(JNIEnv *env, jobject instance, jint key,
+                                               jlong number, jlong jniContext) {
+    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(jniContext);
+    if (pJNIContext){
+        sr_message_t msg = __sr_null_msg;
+        msg.key = key;
+        msg.i64 = number;
+        pJNIContext->PutMessage(msg);
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_cn_freeeditor_sdk_JNIContext_putFloat__IDJ(JNIEnv *env, jobject instance, jint key,
+                                                jdouble number, jlong jniContext) {
+    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(jniContext);
+    if (pJNIContext){
+        sr_message_t msg = __sr_null_msg;
+        msg.key = key;
+        msg.f64 = number;
+        pJNIContext->PutMessage(msg);
     }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
         Java_cn_freeeditor_sdk_JNIContext_putObject__ILjava_lang_Object_2J(
-                JNIEnv *env, jobject instance, jint key, jobject obj, jlong mCtx) {
-    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(mCtx);
+                JNIEnv *env, jobject instance, jint key, jobject obj, jlong jniContext) {
+    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(jniContext);
     if (pJNIContext){
-        sr_message_t msg;
+        sr_message_t msg = __sr_null_msg;
         msg.key = key;
-        msg.size = MessageType_Unknown;
-        LOGD("local obj: %p", obj);
+        msg.type = MessageType_Native;
         msg.ptr = env->NewGlobalRef(obj);
-        LOGD("global obj: %p", msg.ptr);
         pJNIContext->PutMessage(msg);
     }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-        Java_cn_freeeditor_sdk_JNIContext_putMessage__ILjava_lang_String_2J(
-                JNIEnv *env, jobject instance, jint key, jstring str, jlong mCtx) {
-    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(mCtx);
+        Java_cn_freeeditor_sdk_JNIContext_putJson__ILjava_lang_String_2J(
+                JNIEnv *env, jobject instance, jint key, jstring str, jlong jniContext) {
+    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(jniContext);
     if (pJNIContext){
         sr_message_t msg = __sr_null_msg;
         if (str != nullptr){
             const char *s = env->GetStringUTFChars(str, 0);
             msg.key = key;
-            msg.size = env->GetStringUTFLength(str);
+            msg.type = env->GetStringUTFLength(str);
             msg.ptr = strdup(s);
             env->ReleaseStringUTFChars(str, s);
-        }else {
-            msg.key = key;
+            pJNIContext->PutMessage(msg);
         }
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_cn_freeeditor_sdk_JNIContext_putPointer__IJJ(JNIEnv *env, jobject instance, jint key,
+                                                  jlong pointer, jlong jniContext) {
+    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(jniContext);
+    if (pJNIContext){
+        sr_message_t msg;
+        msg.key = key;
+        msg.type = MessageType_Pointer;
+        msg.ptr = reinterpret_cast<void *>(pointer);
         pJNIContext->PutMessage(msg);
     }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_JNIContext_putContext__IJJ(JNIEnv *env, jobject instance, jint key,
-                                                  jlong messageContext, jlong mCtx) {
-    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(mCtx);
+Java_cn_freeeditor_sdk_JNIContext_putBuffer__I_3BIJ(JNIEnv *env, jobject instance, jint key,
+                                                  jbyteArray data_, jint size, jlong jniContext) {
+    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(jniContext);
     if (pJNIContext){
         sr_message_t msg;
         msg.key = key;
-        msg.size = MessageType_Pointer;
-        msg.ptr = reinterpret_cast<void *>(messageContext);
-        pJNIContext->PutMessage(msg);
-    }
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_JNIContext_putData__I_3BIJ(JNIEnv *env, jobject instance, jint key,
-                                                  jbyteArray data_, jint size, jlong mCtx) {
-    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(mCtx);
-    if (pJNIContext){
-        sr_message_t msg;
-        msg.key = key;
-        msg.size = size;
+        msg.type = MessageType_Pointer;
         msg.ptr = env->GetByteArrayElements(data_, NULL);
         pJNIContext->PutMessage(msg);
         env->ReleaseByteArrayElements(data_, static_cast<jbyte *>(msg.ptr), 0);
@@ -215,15 +259,15 @@ Java_cn_freeeditor_sdk_JNIContext_putData__I_3BIJ(JNIEnv *env, jobject instance,
 
 extern "C"
 JNIEXPORT jlong JNICALL
-        Java_cn_freeeditor_sdk_JNIContext_getContext__IJ(
-                JNIEnv *env, jobject instance, jint key, jlong mCtx) {
-    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(mCtx);
+        Java_cn_freeeditor_sdk_JNIContext_getPointer__IJ(
+                JNIEnv *env, jobject instance, jint key, jlong jniContext) {
+    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(jniContext);
     if (pJNIContext == NULL){
         return 0;
     }
     sr_message_t msg;
     msg.key = key;
-    msg.size = MessageType_Pointer;
+    msg.type = MessageType_Pointer;
     msg = pJNIContext->GetMessage(msg);
     if (msg.key != key){
         return 0;
@@ -233,17 +277,17 @@ JNIEXPORT jlong JNICALL
 
 extern "C"
 JNIEXPORT jstring JNICALL
-        Java_cn_freeeditor_sdk_JNIContext_getMessage__IJ(
-                JNIEnv *env, jobject instance, jint key, jlong mCtx) {
-    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(mCtx);
+        Java_cn_freeeditor_sdk_JNIContext_getJson__IJ(
+                JNIEnv *env, jobject instance, jint key, jlong jniContext) {
+    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(jniContext);
     if (pJNIContext == nullptr){
         return env->NewStringUTF("");
     }
     sr_message_t msg;
     msg.key = key;
-    msg.size = MessageType_String;
+    msg.type = MessageType_Json;
     msg = pJNIContext->GetMessage(msg);
-    if (msg.key == key && msg.size > MessageType_String){
+    if (msg.key == key && msg.type > MessageType_None){
         jstring str = env->NewStringUTF(static_cast<const char *>(msg.ptr));
         free(msg.ptr);
         return str;
@@ -261,7 +305,7 @@ Java_cn_freeeditor_sdk_JNIContext_getObject__IJ(JNIEnv *env, jobject instance, j
     }
     sr_message_t msg;
     msg.key = key;
-    msg.size = MessageType_Unknown;
+    msg.type = MessageType_Native;
     msg = pJNIContext->GetMessage(msg);
     if (msg.key == key){
         return (jobject)msg.ptr;
@@ -272,14 +316,14 @@ Java_cn_freeeditor_sdk_JNIContext_getObject__IJ(JNIEnv *env, jobject instance, j
 extern "C"
 JNIEXPORT jlong JNICALL
 Java_cn_freeeditor_sdk_MediaContext_createContext(JNIEnv *env, jobject instance) {
-    MediaContext *device = MediaContext::Instance();
-    return (jlong)device;
+    MediaContext *pMediaContext = MediaContext::Instance();
+    return (jlong)pMediaContext;
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_MediaContext_deleteContext(JNIEnv *env, jobject instance, jlong jniContext) {
-    MessageContext *pMessageContext = (MessageContext*)jniContext;
+Java_cn_freeeditor_sdk_MediaContext_deleteContext(JNIEnv *env, jobject instance, jlong mediaContext) {
+    MessageContext *pMessageContext = (MessageContext*)mediaContext;
     if (pMessageContext){
         delete pMessageContext;
     }

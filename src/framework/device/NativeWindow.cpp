@@ -16,6 +16,7 @@ using namespace freee;
 
 
 NativeWindow::NativeWindow() {
+    isReady = false;
     window = NULL;
     windowHandler = NULL;
     SetContextName("NativeWindow");
@@ -33,11 +34,11 @@ NativeWindow::~NativeWindow() {
 #endif
 }
 
-void *NativeWindow::getWindowHandler() {
+void *NativeWindow::GetWindowHandler() {
     return windowHandler;
 }
 
-void NativeWindow::getWindowSize(int *w, int *h) {
+void NativeWindow::GetWindowSize(int *w, int *h) {
 #ifdef __ANDROID__
     *w = ANativeWindow_getWidth((ANativeWindow*)windowHandler);
     *h = ANativeWindow_getHeight((ANativeWindow*)windowHandler);
@@ -50,10 +51,10 @@ void NativeWindow::OnPutMessage(sr_message_t msg) {
 #ifdef __ANDROID__
         JniEnv env;
         windowHandler = ANativeWindow_fromSurface(env.m_pEnv, (jobject)window);
-        if (context){
+        if (statusCallback){
             msg.key = OpenGLESRender_SurfaceCreated;
             msg.ptr = this;
-            context->OnPutMessage(msg);
+            statusCallback->OnPutMessage(msg);
         }
 #endif
     }else if (msg.key == 2){
@@ -66,7 +67,7 @@ void NativeWindow::OnPutMessage(sr_message_t msg) {
     }else if (msg.key == 3){
         msg.key = OpenGLESRender_SurfaceDestroyed;
         msg.ptr = this;
-        context->OnPutMessage(msg);
+        statusCallback->OnPutMessage(msg);
     }
 }
 
@@ -74,9 +75,19 @@ sr_message_t NativeWindow::OnGetMessage(sr_message_t msg) {
     return MessageContext::OnGetMessage(msg);
 }
 
-void NativeWindow::SetRenderer(MessageContext *context) {
-    this->context = context;
+void NativeWindow::SetStatusCallback(MessageContext *callback) {
+    statusCallback = callback;
     sr_message_t msg = __sr_null_msg;
     msg.key = 1;
     PutMessage(msg);
+    isReady = true;
+    LOGD("NativeWindow::SetStatusCallback: %d\n", __is_true(isReady));
+}
+
+bool NativeWindow::IsReady() {
+    return isReady;
+}
+
+void NativeWindow::ConnectContextHandler(MessageContext *contextHandler) {
+    MessageContext::ConnectContextHandler(contextHandler);
 }

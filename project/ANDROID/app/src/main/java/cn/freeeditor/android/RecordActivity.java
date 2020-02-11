@@ -20,7 +20,7 @@ import android.widget.EditText;
 
 import java.lang.ref.WeakReference;
 
-import cn.freeeditor.sdk.MediaRecord;
+import cn.freeeditor.sdk.MediaRecorder;
 import cn.freeeditor.sdk.permission.PermissionEverywhere;
 import cn.freeeditor.sdk.permission.PermissionResponse;
 import cn.freeeditor.sdk.permission.PermissionResultCallback;
@@ -46,7 +46,7 @@ public class RecordActivity extends Activity {
     private Button swapOrientationButton;
     private Button quitButton;
 
-    private MediaRecord recorder;
+    private MediaRecorder recorder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +96,7 @@ public class RecordActivity extends Activity {
 
 
     private void openRecorder(String url){
-        recorder = new MediaRecord();
+        recorder = new MediaRecorder();
         recorder.startCapture();
         recorder.startPreview(surfaceView);
     }

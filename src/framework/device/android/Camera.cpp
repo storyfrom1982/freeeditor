@@ -11,7 +11,7 @@ using namespace freee;
 
 
 Camera::Camera(MessageContext *ctx){
-    SetContextHandler(ctx);
+    ConnectContextHandler(ctx);
     SetContextName("Camera");
 }
 
@@ -23,12 +23,12 @@ Camera::~Camera() {
     LOGD("Camera::~Camera exit");
 }
 
-void freee::Camera::openSource(json cfg) {
+void freee::Camera::Open(json cfg) {
     sr_message_t msg;
     std::string str = cfg.dump();
     LOGD("AndroidCamera::openSource: %s", str.c_str());
     msg.key = VideoSource_Open;
-    msg.size = str.length();
+    msg.type = str.length();
     msg.ptr = strdup(str.c_str());
     PutMessage(msg);
     LOGD("AndroidCamera::openSource: exit");
@@ -55,7 +55,8 @@ void freee::Camera::stopCapture() {
 }
 
 void Camera::OnPutMessage(sr_message_t msg) {
-    processData(msg);
+//    processData(msg);
+    processData(msg.ptr, msg.type);
 }
 
 sr_message_t Camera::OnGetMessage(sr_message_t msg) {

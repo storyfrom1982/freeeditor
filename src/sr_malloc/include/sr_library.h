@@ -317,24 +317,38 @@ extern unsigned int sr_pipe_block_write(sr_pipe_t *pipe, char *data, unsigned in
 ///////////////////////////////////////////////////////////////
 
 enum {
-	MessageType_Unknown = -2,
+    MessageType_Float = -4,
+    MessageType_Number = -3,
+	MessageType_Native = -2,
 	MessageType_Pointer = -1,
-	MessageType_Command = 0,
-	MessageType_String = 1,
+	MessageType_None = 0,
+	MessageType_Json
 };
 
 typedef struct sr_message{
 	int32_t key;
-	int32_t size;
+	int32_t type;
 	union {
-        void *ptr; //size > 0 is string; size == 0 is object pointer
+        void *ptr;
+        char *str;
+        double f64;
 		int64_t i64;
-        int32_t i32[2];
 	};
 }sr_message_t;
 
 #define __sr_null_msg       ((sr_message_t){0})
-#define __sr_error_msg       ((sr_message_t){-1, -1, 0})
+
+#define __sr_msg_is_json(msg)    (msg.type == MessageType_Json)
+#define __sr_msg_is_none(msg)    (msg.type == MessageType_None)
+#define __sr_msg_is_pointer(msg)    (msg.type == MessageType_Pointer)
+#define __sr_msg_is_native(msg)    (msg.type == MessageType_Native)
+#define __sr_msg_is_number(msg)    (msg.type == MessageType_Number)
+#define __sr_msg_is_float(msg)    (msg.type == MessageType_Float)
+#define __sr_msg_is_string(msg)    (msg.type > MessageType_None && msg.str)
+
+#define __sr_msg_clear(msg) \
+    if (msg.type > MessageType_None && msg.str) \
+    	free(msg.str)
 
 typedef struct sr_msg_processor_t{
     const char *name;
@@ -348,8 +362,9 @@ extern sr_message_queue_t* sr_message_queue_create();
 extern void sr_message_queue_release(sr_message_queue_t **pp_queue);
 extern int sr_message_queue_start_processor(sr_message_queue_t *queue, sr_message_processor_t *processor);
 
-extern int sr_message_queue_get(sr_message_queue_t *queue, sr_message_t *msg);
+extern sr_message_t* sr_message_queue_get(sr_message_queue_t *queue);
 extern int sr_message_queue_put(sr_message_queue_t *queue, sr_message_t msg);
+sr_message_t* sr_message_queue_get_buffer(sr_message_queue_t *queue);
 
 extern unsigned int sr_message_queue_getable(sr_message_queue_t *queue);
 extern unsigned int sr_message_queue_putable(sr_message_queue_t *queue);

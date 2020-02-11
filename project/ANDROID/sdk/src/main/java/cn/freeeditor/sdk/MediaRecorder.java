@@ -2,12 +2,9 @@ package cn.freeeditor.sdk;
 
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 
 
-
-
-public class MediaRecord extends JNIContext implements SurfaceHolder.Callback {
+public class MediaRecorder extends JNIContext implements SurfaceHolder.Callback {
 
     private static final int Record_SetConfig = 0;
     private static final int Record_StartCapture = 1;
@@ -17,20 +14,20 @@ public class MediaRecord extends JNIContext implements SurfaceHolder.Callback {
     private static final int Record_ChangeCameraConfig = 5;
     private static final int Record_ChangeEncodeConfig = 6;
 
-    private long messageContext;
+    private long recorderContext;
 
     private SurfaceView mVideoView;
     private VideoView videoView;
 
-    public MediaRecord(){
-        messageContext = MediaContext.Instance().getContext(MediaContext.Cmd_GetRecord);
-        setMessageContext(messageContext);
-        String configStr = MediaContext.Instance().getMessage(MediaContext.Cmd_GetRecordConfig);
-        putMessage(Record_SetConfig, configStr);
+    public MediaRecorder(){
+        recorderContext = MediaContext.Instance().createRecorder();
+        connectContext(recorderContext);
+        String configStr = MediaContext.Instance().getRecorderConfig();
+        putJson(Record_SetConfig, configStr);
     }
 
     public void release(){
-        MediaContext.Instance().deleteContext(messageContext);
+        MediaContext.Instance().deleteContext(recorderContext);
         super.release();
         if (videoView != null){
             videoView.release();
@@ -38,22 +35,7 @@ public class MediaRecord extends JNIContext implements SurfaceHolder.Callback {
     }
 
     public void startCapture(){
-        putMessage(Record_StartCapture, null);
-    }
-
-    @Override
-    public void onPutObject(int type, Object obj) {
-
-    }
-
-    @Override
-    public void onPutMessage(int key, String msg) {
-        Log.e("MediaRecord", msg);
-    }
-
-    @Override
-    public void onPutContext(int key, long messageContext) {
-
+        putMessage(Record_StartCapture);
     }
 
     @Override
@@ -62,18 +44,28 @@ public class MediaRecord extends JNIContext implements SurfaceHolder.Callback {
     }
 
     @Override
-    public String onGetMessage(int key) {
+    public String onGetJson(int key) {
         return null;
     }
 
     @Override
-    public long onGetContext(int key) {
+    public long onGetPointer(int key) {
         return 0;
+    }
+
+    @Override
+    protected void onPutMessage(JNIMessage msg) {
+
+    }
+
+    @Override
+    protected JNIMessage onGetMessage(int key) {
+        return null;
     }
 
     public void startPreview(SurfaceView view){
         videoView = new VideoView(view);
-        putContext(7,videoView.getMessageContext());
+        putPointer(7, videoView.getJniContext());
 //        mVideoView = view;
 //        if (mVideoView != null) {
 //            mVideoView.setVisibility(View.INVISIBLE);

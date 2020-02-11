@@ -9,7 +9,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        MediaContext.Instance().setApplicationContext(getApplicationContext());
+        MediaContext.Instance().setAppContext(getApplicationContext());
 //        MContext.Apply(getApplicationContext());
     }
 

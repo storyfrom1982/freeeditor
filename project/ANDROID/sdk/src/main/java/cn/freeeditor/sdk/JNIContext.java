@@ -12,52 +12,90 @@ abstract public class JNIContext {
         jniContext = 0;
     }
 
-    public void setMessageContext(long messageContext){
-        setMessageContext(messageContext, jniContext);
-    }
-
-    public long getMessageContext(){
+    public long getJniContext(){
         return jniContext;
     }
 
-    protected abstract void onPutObject(int key, Object obj);
+    public void connectContext(long messageContext){
+        connectContext(messageContext, jniContext);
+    }
 
-    protected abstract void onPutMessage(int key, String msg);
+    protected abstract void onPutMessage(JNIMessage msg);
+    protected abstract JNIMessage onGetMessage(int key);
 
-    protected abstract void onPutContext(int key, long ctx);
+    protected String onGetJson(int key){
+        return onGetMessage(key).json;
+    }
 
-    protected abstract Object onGetObject(int key);
+    protected Object onGetObject(int key){
+        return onGetMessage(key).obj;
+    }
 
-    protected abstract String onGetMessage(int key);
+    protected long onGetPointer(int key){
+        return onGetMessage(key).i64;
+    }
 
-    protected abstract long onGetContext(int key);
+    protected void onPutMessage(int key){
+        onPutMessage(new JNIMessage(key));
+    }
 
+    protected void onPutLong(int key, long number){
+        onPutMessage(new JNIMessage(key, number));
+    }
 
-    public void putObject(int key, Object obj){
+    protected void onPutFloat(int key, double number){
+        onPutMessage(new JNIMessage(key, number));
+    }
+
+    protected void onPutJson(int key, String msg){
+        onPutMessage(new JNIMessage(key, msg));
+    }
+
+    protected void onPutObject(int key, Object obj){
+        onPutMessage(new JNIMessage(key, obj));
+    }
+
+    protected void onPutPointer(int key, long pointer){
+        onPutMessage(new JNIMessage(key, pointer));
+    }
+
+    protected void putMessage(int key){
+        putMessage(key, jniContext);
+    }
+
+    protected void putLong(int key, long number){
+        putLong(key, number, jniContext);
+    }
+
+    protected void putFloat(int key, double number){
+        putFloat(key, number, jniContext);
+    }
+
+    protected void putJson(int key, String msg){
+        putJson(key, msg, jniContext);
+    }
+
+    protected void putObject(int key, Object obj){
         putObject(key, obj, jniContext);
     }
 
-    public void putMessage(int key, String msg){
-        putMessage(key, msg, jniContext);
+    public void putPointer(int key, long pointer){
+        putPointer(key, pointer, jniContext);
     }
 
-    public void putContext(int key, long messageContext){
-        putContext(key, messageContext, jniContext);
+    protected void putBuffer(int key, byte[] data, int size){
+        putBuffer(key, data, size, jniContext);
     }
 
-    public void putData(int key, byte[] data, int size){
-        putData(key, data, size, jniContext);
+    protected String getJson(int key){
+        return getJson(key, jniContext);
     }
 
-    public long getContext(int key){
-        return getContext(key, jniContext);
+    protected long getPointer(int key){
+        return getPointer(key, jniContext);
     }
 
-    public String getMessage(int key){
-        return getMessage(key, jniContext);
-    }
-
-    public Object getObject(int key){
+    protected Object getObject(int key){
         return getObject(key, jniContext);
     }
 
@@ -70,13 +108,17 @@ abstract public class JNIContext {
 
     private native long createContext();
     private native void deleteContext(long jniContext);
-    private native void setMessageContext(long messageContext, long jniContext);
+    private native void connectContext(long messageContext, long jniContext);
 
+    private native void putMessage(int key, long jniContext);
+    private native void putLong(int key, long number, long jniContext);
+    private native void putFloat(int key, double number, long jniContext);
+    private native void putJson(int key, String json, long jniContext);
     private native void putObject(int key, Object obj, long jniContext);
-    private native void putMessage(int key, String msg, long jniContext);
-    private native void putContext(int key, long messageContext, long jniContext);
-    private native void putData(int key, byte[] data, int size, long jniContext);
-    private native long getContext(int key, long jniContext);
-    private native String getMessage(int key, long jniContext);
+    private native void putPointer(int key, long pointer, long jniContext);
+    private native void putBuffer(int key, byte[] data, int size, long jniContext);
+
+    private native String getJson(int key, long jniContext);
+    private native long getPointer(int key, long jniContext);
     private native Object getObject(int key, long jniContext);
 }

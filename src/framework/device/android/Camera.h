@@ -17,7 +17,7 @@ namespace freee {
         Camera(MessageContext *ctx);
         ~Camera();
 
-        virtual void openSource(json cfg) override ;
+        virtual void Open(json cfg) override ;
         virtual void closeSource() override ;
 
         virtual void startCapture() override ;

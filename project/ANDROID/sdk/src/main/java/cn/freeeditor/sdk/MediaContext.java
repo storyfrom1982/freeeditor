@@ -6,12 +6,11 @@ import java.lang.ref.WeakReference;
 
 public class MediaContext extends JNIContext {
 
-    public static final int Cmd_GetRecord = 1;
-    public static final int Cmd_GetRecordConfig = 3;
-    public static final int Cmd_GetVideoView = 5;
+    private static final int GetMsg_CrateRecorder = 1;
+    private static final int GetMsg_GetRecorderConfig = 2;
 
-    private static final int Cmd_OnGet_Camera = 2;
-    private static final int Cmd_OnGet_Microphone = 4;
+    private static final int OnGetMsg_CreateCamera = 1;
+    private static final int OnGetMsg_CreateMicrophone = 2;
 
     private static MediaContext jniContext = null;
 
@@ -24,73 +23,61 @@ public class MediaContext extends JNIContext {
 
     private WeakReference<Context> mAppCtxReference = null;
 
-    public void setApplicationContext(Context context){
+    public void setAppContext(Context context){
         mAppCtxReference = new WeakReference<>(context);
+    }
+
+    public Context getAppContext(){
+        return mAppCtxReference.get();
     }
 
     public void release(){
         super.release();
-        deleteContext(messageContext);
-        messageContext = 0;
+        deleteContext(mediaContext);
+        mediaContext = 0;
+    }
+
+    public long createRecorder(){
+        return getPointer(GetMsg_CrateRecorder);
+    }
+
+    public String getRecorderConfig(){
+        return getJson(GetMsg_GetRecorderConfig);
     }
 
     @Override
-    public void onPutObject(int key, Object obj) {
-
-    }
-
-    @Override
-    public void onPutMessage(int key, String msg) {
-
-    }
-
-    @Override
-    public void onPutContext(int key, long ctx) {
+    protected void onPutMessage(JNIMessage msg) {
 
     }
 
     @Override
-    public Object onGetObject(int key) {
-        return null;
-    }
-
-    @Override
-    public String onGetMessage(int key) {
-        return null;
-    }
-
-    public long newVideoViewContext(){
-        return getContext(Cmd_GetVideoView);
-    }
-
-    @Override
-    public long onGetContext(int key) {
+    protected JNIMessage onGetMessage(int key) {
         switch (key){
-            case Cmd_OnGet_Camera:
-                return createCamera();
-            case Cmd_OnGet_Microphone:
+            case OnGetMsg_CreateCamera:
+                return new JNIMessage(key, createCamera());
+            case OnGetMsg_CreateMicrophone:
                 break;
             default:
                 break;
         }
-        return 0;
+        return new JNIMessage(0);
     }
 
     private MediaContext(){
-        messageContext = createContext();
-        setMessageContext(messageContext);
+        mediaContext = createContext();
+        connectContext(mediaContext);
     }
 
     private long createCamera(){
         VideoCamera camera = new VideoCamera();
-        return camera.getMessageContext();
+        return camera.getJniContext();
     }
 
-    private long messageContext;
+    private long mediaContext;
 
     private native long createContext();
 
-    public native void deleteContext(long messageContext);
+    public native void deleteContext(long mediaContext);
 
     public native void debug();
 }

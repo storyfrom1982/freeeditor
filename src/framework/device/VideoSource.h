@@ -9,6 +9,8 @@
 #include <MConfig.h>
 #include <MessageContext.h>
 #include "OpenGLESRender.h"
+#include "NativeWindow.h"
+#include "VideoEncoder.h"
 
 
 namespace freee {
@@ -27,14 +29,18 @@ namespace freee {
 
     public:
 
-        static VideoSource* openVideoSource(MessageContext *ctx);
+        static VideoSource* CreateVideoSource();
 
         VideoSource();
         virtual ~VideoSource();
 
-        void setEncoder(MessageContext *ctx);
+        void SetEncoder(VideoEncoder *videoEncoder);
+        void SetWindow(MessageContext *windowContext);
 
-        virtual void openSource(json cfg) = 0;
+        void StartPreview();
+        void StopPreview();
+
+        virtual void Open(json cfg) = 0;
         virtual void closeSource() = 0;
 
         virtual void startCapture() = 0;
@@ -48,7 +54,14 @@ namespace freee {
 
     private:
 
-        MessageContext *outputCtx;
+        bool isPreview;
+
+        VideoEncoder *encoder;
+
+        NativeWindow *window;
+        OpenGLESRender *render;
+
+        sr_buffer_pool_t *pool;
 
     };
 
