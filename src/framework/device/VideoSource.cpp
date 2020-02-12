@@ -5,16 +5,13 @@
 #include "VideoSource.h"
 #include "VideoEncoder.h"
 
-#ifdef __ANDROID__
-#include <Camera.h>
-#endif
 
 //#ifdef __cplusplus
 //extern "C" {
 //#endif
 
 #include <libyuv.h>
-#include <android/MediaContext.h>
+#include <MediaContext.h>
 
 //#ifdef __cplusplus
 //}
@@ -23,42 +20,137 @@
 
 using namespace freee;
 
-freee::VideoSource *freee::VideoSource::CreateVideoSource() {
 
-    VideoSource *camera = NULL;
+enum {
+    VideoSource_Open = 1,
+    VideoSource_Start,
+    VideoSource_Stop,
+    VideoSource_Close,
+    VideoSource_Destroy,
+};
 
-#ifdef __ANDROID__
-    MessageContext *cameraContext = MediaContext::Instance()->CreateCamera();
-    camera = new Camera(cameraContext);
-#endif
+enum {
+    OnVideoSource_Opened = 1,
+    OnVideoSource_Started,
+    OnVideoSource_Stopped,
+    OnVideoSource_Closed,
+    OnVideoSource_ProcessPicture,
+    OnVideoSource_Destroy,
+};
 
-    return camera;
-}
+//freee::VideoSource *freee::VideoSource::CreateVideoSource() {
+//    MessageContext *sourceContext = MediaContext::Instance()->CreateCamera();
+//    VideoSource *videoSource = new VideoSource();
+//    videoSource->ConnectContextHandler(sourceContext);
+//    return videoSource;
+//}
 
 VideoSource::VideoSource() {
-    __set_false(isPreview);
+    SetContextName("VideoSource");
+    MessageContext *sourceContext = MediaContext::Instance()->CreateCamera();
+    ConnectContextHandler(sourceContext);
+    isPreview = false;
+    isClosed = false;
     window = new NativeWindow();
     render = new OpenGLESRender();
     sr_message_t msg = __sr_null_msg;
     msg.key = OpenGLESRender_Init;
     render->OnPutMessage(msg);
-    pool = sr_buffer_pool_create(2);
+    pool = sr_buffer_pool_create(8);
     while (sr_buffer_pool_fill(pool, videoPacket_Alloc(360, 640, libyuv::FOURCC_I420)) > 0){}
 }
 
 VideoSource::~VideoSource() {
+    LOGD("VideoSource::~VideoSource: enter");
+    sr_message_t msg = __sr_null_msg;
+    msg.key = VideoSource_Stop;
+    PutMessage(msg);
+    msg.key = VideoSource_Close;
+    PutMessage(msg);
+
+    while (!isClosed){
+        nanosleep((const struct timespec[]){{0, 100000L}}, NULL);
+    }
+
     delete render;
     delete window;
+
     sr_buffer_t *buffer;
     while((buffer = sr_buffer_pool_get(pool)) != NULL){
-        VideoPacket *packet = static_cast<VideoPacket *>(buffer->p);
+        VideoPacket *packet = static_cast<VideoPacket *>(buffer->ptr);
         videoPacket_Free(&packet);
     }
     sr_buffer_pool_release(&pool);
+
+    isClosed = true;
+    LOGD("VideoSource::~VideoSource: exit");
+}
+
+void VideoSource::Open(json cfg) {
+    sr_message_t msg;
+    std::string str = cfg.dump();
+    LOGD("VideoSource::Open: %s\n", str.c_str());
+    msg.key = VideoSource_Open;
+    msg.type = str.length();
+    msg.ptr = strndup(str.c_str(), msg.type);
+    PutMessage(msg);
+    LOGD("VideoSource::Open exit\n");
+}
+
+void VideoSource::Close() {
+    LOGD("VideoSource::Close enter\n");
+    sr_message_t msg = __sr_null_msg;
+    msg.key = VideoSource_Close;
+    PutMessage(msg);
+    LOGD("VideoSource::Close exit\n");
+}
+
+void VideoSource::Start() {
+    LOGD("VideoSource::Start enter\n");
+    sr_message_t msg = __sr_null_msg;
+    msg.key = VideoSource_Start;
+    PutMessage(msg);
+    LOGD("VideoSource::Start exit\n");
+}
+
+void VideoSource::Stop() {
+    LOGD("VideoSource::Stop enter\n");
+    sr_message_t msg = __sr_null_msg;
+    msg.key = VideoSource_Stop;
+    PutMessage(msg);
+    LOGD("VideoSource::Stop exit\n");
 }
 
 void VideoSource::SetEncoder(VideoEncoder *videoEncoder) {
     encoder = videoEncoder;
+}
+
+void VideoSource::OnPutMessage(sr_message_t msg) {
+    switch (msg.key){
+        case OnVideoSource_ProcessPicture:
+            processData(msg.ptr, msg.type);
+            break;
+        case OnVideoSource_Opened:
+            LOGD("config: %s\n", msg.str);
+            __sr_msg_clear(msg);
+            break;
+        case OnVideoSource_Started:
+            LOGD("VideoSource::OnPutMessage OnVideoSource_Started\n");
+            break;
+        case OnVideoSource_Stopped:
+            LOGD("VideoSource::OnPutMessage OnVideoSource_Stopped\n");
+            break;
+        case OnVideoSource_Closed:
+            isClosed = true;
+            LOGD("VideoSource::OnPutMessage OnVideoSource_Closed\n");
+            break;
+        default:
+            break;
+    }
+}
+
+sr_message_t VideoSource::OnGetMessage(sr_message_t msg) {
+    return MessageContext::OnGetMessage(msg);
 }
 
 void VideoSource::processData(void *data, int size) {
@@ -83,7 +175,7 @@ void VideoSource::processData(void *data, int size) {
         LOGD("isPreview:%d  isReady:%d\n", __is_true(isPreview), window->IsReady());
         return;
     }
-    y420Pkt = static_cast<VideoPacket *>(buffer->p);
+    y420Pkt = static_cast<VideoPacket *>(buffer->ptr);
     videoPacket_To_YUV420(&nv21Pkt, y420Pkt, 270);
 
     SmartPtr<sr_buffer_t*> sb(buffer);
@@ -92,7 +184,8 @@ void VideoSource::processData(void *data, int size) {
         sr_message_t msg = __sr_null_msg;
         msg.key = OpenGLESRender_DrawPicture;
         msg.type = MessageType_Pointer;
-        msg.ptr = y420Pkt;
+        msg.ptr = buffer;
+        buffer->reference_count ++;
         render->OnPutMessage(msg);
     }else {
 //        videoPacket_Free(&y420Pkt);
@@ -122,5 +215,9 @@ void VideoSource::StartPreview() {
 
 void VideoSource::StopPreview() {
     isPreview = false;
+}
+
+void VideoSource::Release() {
+
 }
 

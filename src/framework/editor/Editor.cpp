@@ -164,7 +164,7 @@ using namespace freee;
 //}
 //
 //void Editor::stopPreview() {
-//    m_videoSource->stopCapture();
+//    m_videoSource->Stop();
 //}
 //
 //void Editor::startPushStream() {
@@ -185,7 +185,7 @@ using namespace freee;
 //
 //void Editor::removeVideoSource() {
 //    if (m_videoSource){
-//        m_videoSource->closeSource();
+//        m_videoSource->Close();
 //        delete m_videoSource;
 //        m_videoSource = NULL;
 //    }

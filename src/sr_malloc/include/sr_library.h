@@ -317,8 +317,6 @@ extern unsigned int sr_pipe_block_write(sr_pipe_t *pipe, char *data, unsigned in
 ///////////////////////////////////////////////////////////////
 
 enum {
-    MessageType_Float = -4,
-    MessageType_Number = -3,
 	MessageType_Native = -2,
 	MessageType_Pointer = -1,
 	MessageType_None = 0,
@@ -331,44 +329,35 @@ typedef struct sr_message{
 	union {
         void *ptr;
         char *str;
-        double f64;
 		int64_t i64;
 	};
 }sr_message_t;
 
 #define __sr_null_msg       ((sr_message_t){0})
 
-#define __sr_msg_is_json(msg)    (msg.type == MessageType_Json)
+#define __sr_msg_is_json(msg)    (msg.type > MessageType_None)
 #define __sr_msg_is_none(msg)    (msg.type == MessageType_None)
 #define __sr_msg_is_pointer(msg)    (msg.type == MessageType_Pointer)
 #define __sr_msg_is_native(msg)    (msg.type == MessageType_Native)
-#define __sr_msg_is_number(msg)    (msg.type == MessageType_Number)
-#define __sr_msg_is_float(msg)    (msg.type == MessageType_Float)
-#define __sr_msg_is_string(msg)    (msg.type > MessageType_None && msg.str)
 
 #define __sr_msg_clear(msg) \
-    if (msg.type > MessageType_None && msg.str) \
+    if (__sr_msg_is_json(msg) && msg.str) \
     	free(msg.str)
 
 typedef struct sr_msg_processor_t{
-    const char *name;
 	void *handler;
 	void (*process)(struct sr_msg_processor_t *processor, sr_message_t msg);
 }sr_message_processor_t;
 
 typedef struct sr_message_queue sr_message_queue_t;
 
-extern sr_message_queue_t* sr_message_queue_create();
+extern sr_message_queue_t* sr_message_queue_create(unsigned int size, const char *name);
 extern void sr_message_queue_release(sr_message_queue_t **pp_queue);
 extern int sr_message_queue_start_processor(sr_message_queue_t *queue, sr_message_processor_t *processor);
+extern void sr_message_queue_stop_processor(sr_message_queue_t *queue);
 
-extern sr_message_t* sr_message_queue_get(sr_message_queue_t *queue);
-extern int sr_message_queue_put(sr_message_queue_t *queue, sr_message_t msg);
-sr_message_t* sr_message_queue_get_buffer(sr_message_queue_t *queue);
-
-extern unsigned int sr_message_queue_getable(sr_message_queue_t *queue);
 extern unsigned int sr_message_queue_putable(sr_message_queue_t *queue);
-extern void sr_message_queue_clear(sr_message_queue_t *queue);
+extern int sr_message_queue_put(sr_message_queue_t *queue, sr_message_t msg);
 
 
 ///////////////////////////////////////////////////////////////

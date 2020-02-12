@@ -98,7 +98,9 @@ void OpenGLESRender::setSurfaceView(sr_message_t msg) {
 
 void OpenGLESRender::drawPicture(sr_message_t msg) {
 //    LOGD("drawPicture data size: %d", msg.key);
-    opengles_render(opengles, (const VideoPacket*)msg.ptr);
+    sr_buffer_t *buffer = reinterpret_cast<sr_buffer_t *>(msg.str);
+    opengles_render(opengles, (const VideoPacket*)buffer->ptr);
+    sr_buffer_pool_free(buffer);
     gl_renderer_swap_buffers(renderer);
 //    videoPacket_Free(reinterpret_cast<VideoPacket **>(&msg.ptr));
 }

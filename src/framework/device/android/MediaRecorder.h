@@ -26,11 +26,11 @@ namespace freee{
         Record_DrawPicture,
     };
 
-    class MediaRecord : public MessageContext{
+    class MediaRecorder : public MessageContext{
 
     public:
-        MediaRecord();
-        ~MediaRecord();
+        MediaRecorder();
+        ~MediaRecorder();
 
     public:
         void OnPutDataBuffer(sr_message_t msg) override;

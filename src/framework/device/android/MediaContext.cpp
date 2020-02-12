@@ -4,7 +4,7 @@
 
 #include <MConfig.h>
 #include "MediaContext.h"
-#include "MediaRecord.h"
+#include "MediaRecorder.h"
 
 using namespace freee;
 
@@ -19,6 +19,7 @@ enum {
 };
 
 MediaContext::MediaContext(MessageContext *ctx){
+    SetContextName("MediaContext");
     ConnectContextHandler(ctx);
 }
 
@@ -35,7 +36,7 @@ MediaContext *MediaContext::Instance() {
 
 sr_message_t MediaContext::OnGetMessage(sr_message_t msg) {
     if (msg.key == OnGetMsg_CreateRecorder){
-        msg.ptr = new MediaRecord();
+        msg.ptr = new MediaRecorder();
         msg.type = MessageType_Pointer;
     }else if (msg.key == OnGetMsg_GetRecorderConfig){
         json js;

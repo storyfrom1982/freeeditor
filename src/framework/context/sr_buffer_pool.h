@@ -8,8 +8,9 @@
 typedef struct sr_buffer_pool sr_buffer_pool_t;
 
 typedef struct sr_buffer{
+    int reference_count;
     sr_buffer_pool_t *pool;
-    void *p;
+    void *ptr;
 }sr_buffer_t;
 
 sr_buffer_pool_t* sr_buffer_pool_create(unsigned int buffer_count);

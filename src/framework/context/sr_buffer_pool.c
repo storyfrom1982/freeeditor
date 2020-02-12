@@ -32,7 +32,7 @@ void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool){
 
 unsigned int sr_buffer_pool_fill(sr_buffer_pool_t *pool, void *buffer){
     if ((pool->count - pool->put_index + pool->get_index) > 0){
-        pool->buf_array[pool->put_index & (pool->count - 1)].p = buffer;
+        pool->buf_array[pool->put_index & (pool->count - 1)].ptr = buffer;
         pool->buf_array[pool->put_index & (pool->count - 1)].pool = pool;
         pool->put_index ++;
     }
@@ -47,16 +47,19 @@ unsigned int sr_buffer_pool_getable(sr_buffer_pool_t *pool){
 sr_buffer_t* sr_buffer_pool_get(sr_buffer_pool_t *pool){
     if ((pool->put_index - pool->get_index) > 0){
         pool->get_index ++;
-        LOGD("get pool get_index:%u\n", pool->get_index);
+//        LOGD("get pool get_index:%u\n", pool->get_index);
+        pool->buf_array[pool->get_index & (pool->count - 1)].reference_count = 1;
         return &pool->buf_array[pool->get_index & (pool->count - 1)];
     }
     return NULL;
 }
 
 void sr_buffer_pool_free(sr_buffer_t *buffer){
-    sr_buffer_pool_t *pool = buffer->pool;
-    if ((pool->count - pool->put_index + pool->get_index) > 0){
-        pool->put_index ++;
-        LOGD("put pool put_index:%u get_index:%u\n", pool->put_index, pool->get_index);
+    if (--buffer->reference_count == 0){
+        sr_buffer_pool_t *pool = buffer->pool;
+        if ((pool->count - pool->put_index + pool->get_index) > 0){
+            pool->put_index ++;
+//            LOGD("put pool put_index:%u get_index:%u\n", pool->put_index, pool->get_index);
+        }
     }
 }

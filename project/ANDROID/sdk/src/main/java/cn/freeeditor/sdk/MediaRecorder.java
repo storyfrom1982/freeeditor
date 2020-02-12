@@ -49,7 +49,7 @@ public class MediaRecorder extends JNIContext implements SurfaceHolder.Callback 
     }
 
     @Override
-    public long onGetPointer(int key) {
+    public long onGetLong(int key) {
         return 0;
     }
 
@@ -65,7 +65,7 @@ public class MediaRecorder extends JNIContext implements SurfaceHolder.Callback 
 
     public void startPreview(SurfaceView view){
         videoView = new VideoView(view);
-        putPointer(7, videoView.getJniContext());
+        putLong(7, videoView.getJniContext());
 //        mVideoView = view;
 //        if (mVideoView != null) {
 //            mVideoView.setVisibility(View.INVISIBLE);

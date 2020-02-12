@@ -19,6 +19,8 @@
 #include <stdlib.h>
 
 
+static const char *g_default_name = "default";
+
 #define __log_text_size			1024
 
 #define __path_clear(path) \
@@ -1081,23 +1083,25 @@ struct sr_message_queue
 	bool running;
 	bool stopped;
 
+    const char *name;
+
     unsigned int length;
 	unsigned int put_index;
     unsigned int get_index;
 
-	sr_message_t *message_array;
     pthread_t tid;
 	sr_mutex_t *mutex;
+	sr_message_t *message_array;
 	sr_message_processor_t *processor;
 };
 
 
-static void *sr_msg_queue_loop(void *p)
+static void *sr_message_queue_loop(void *p)
 {
 	sr_message_t msg;
 	sr_message_queue_t *queue = (sr_message_queue_t *) p;
 
-    LOGD("message processor [%s] enter\n", queue->processor->name);
+    LOGD("message processor [%s] enter\n", queue->name);
 
 	while (__is_true(queue->running)) {
 
@@ -1109,7 +1113,7 @@ static void *sr_msg_queue_loop(void *p)
             }else {
                 sr_mutex_unlock(queue->mutex);
                 __set_true(queue->stopped);
-                LOGD("message processor [%s] exit\n", queue->processor->name);
+                LOGD("message processor [%s] exit\n", queue->name);
                 return NULL;
             }
         }
@@ -1128,15 +1132,18 @@ static void *sr_msg_queue_loop(void *p)
 
 	__set_true(queue->stopped);
 
-    LOGD("message processor [%s] exit\n", queue->processor->name);
+    LOGD("message processor [%s] exit\n", queue->name);
 
 	return NULL;
 }
 
-
-sr_message_queue_t* sr_message_queue_create()
+sr_message_queue_t* sr_message_queue_create(unsigned int size, const char *name)
 {
-	LOGD("sr_message_queue_create enter\n");
+    if (name == NULL){
+        name = g_default_name;
+    }
+
+	LOGD("sr_message_queue_create [%s] enter\n", name);
 
 	sr_message_queue_t *queue = NULL;
 
@@ -1144,12 +1151,18 @@ sr_message_queue_t* sr_message_queue_create()
 		LOGF("calloc failed\n");
 	}
 
-	queue->length = 256;
+    if ( ( size & ( size - 1 ) ) == 0 ){
+        queue->length = size;
+    }else {
+        queue->length = 256;
+    }
+
+    queue->name = name;
 	queue->put_index = queue->get_index = 0;
 	queue->mutex = sr_mutex_create();
-	queue->message_array = (sr_message_t*) calloc(256, sizeof(sr_message_t));
+	queue->message_array = (sr_message_t*) calloc(queue->length, sizeof(sr_message_t));
 
-	LOGD("sr_message_queue_create exit\n");
+	LOGD("sr_message_queue_create [%s] exit\n", name);
 
 	return queue;
 }
@@ -1162,19 +1175,10 @@ void sr_message_queue_release(sr_message_queue_t **pp_queue)
 	if (pp_queue && *pp_queue) {
 		sr_message_queue_t *queue = *pp_queue;
 		*pp_queue = NULL;
-		__set_false(queue->running);
-		if (queue->tid != 0){
-			while(__is_false(queue->stopped)){
-                sr_mutex_lock(queue->mutex);
-                sr_mutex_broadcast(queue->mutex);
-                sr_mutex_unlock(queue->mutex);
-				nanosleep((const struct timespec[]){{0, 100000L}}, NULL);
-			}
-			pthread_join(queue->tid, NULL);
-		}
-		sr_mutex_remove(&queue->mutex);
-		free(queue->message_array);
-		free(queue);
+		sr_message_queue_stop_processor(queue);
+        sr_mutex_remove(&queue->mutex);
+        free(queue->message_array);
+        free(queue);
 	}
 
 	LOGD("sr_message_queue_release exit\n");
@@ -1183,40 +1187,53 @@ void sr_message_queue_release(sr_message_queue_t **pp_queue)
 
 int sr_message_queue_start_processor(sr_message_queue_t *queue, sr_message_processor_t *processor)
 {
+    LOGD("sr_message_queue_start_processor [%s] enter\n", queue->name);
+
     if (processor == NULL
-        || processor->name == NULL
         || processor->handler == NULL
         || processor->process == NULL) {
-        LOGE("Invalid parameter: processor=%p processor->name=%p processor->handler=%p processor->process=%p\n",
-             processor, processor->name, processor->handler, processor->process);
+        LOGE("Invalid parameter: processor->name=%p  processor=%p processor->handler=%p processor->process=%p\n",
+             queue->name, processor, processor->handler, processor->process);
         return -1;
     }
 
     queue->processor = processor;
     __set_true(queue->running);
 
-    if (pthread_create(&(queue->tid), NULL, sr_msg_queue_loop, queue) != 0) {
+    if (pthread_create(&(queue->tid), NULL, sr_message_queue_loop, queue) != 0) {
         LOGF("pthread_create failed\n");
         return -1;
     }
 
+    LOGD("sr_message_queue_start_processor [%s] exit\n", queue->name);
+
     return 0;
 }
 
 
-unsigned int sr_message_queue_getable(sr_message_queue_t *queue)
+void sr_message_queue_stop_processor(sr_message_queue_t *queue)
 {
-    if (queue != NULL){
-        return queue->put_index - queue->get_index;
-    }
-    return 0;
-}
+    LOGD("sr_message_queue_stop_processor [%s] enter\n", queue->name);
 
+    __set_false(queue->running);
+    pthread_t tid = queue->tid;
+    queue->tid = 0;
+    if (tid != 0){
+        while(__is_false(queue->stopped)){
+            sr_mutex_lock(queue->mutex);
+            sr_mutex_broadcast(queue->mutex);
+            sr_mutex_unlock(queue->mutex);
+            nanosleep((const struct timespec[]){{0, 100000L}}, NULL);
+        }
+        pthread_join(tid, NULL);
+    }
+
+    LOGD("sr_message_queue_stop_processor [%s] exit\n", queue->name);
+}
 
 unsigned int sr_message_queue_putable(sr_message_queue_t *queue)
 {
     if (queue != NULL){
-        LOGD("sr_message_queue_put: put index:%u(%u:%u:%u)\n", queue->length - queue->put_index + queue->get_index, queue->length, queue->put_index, queue->get_index);
         return (queue->length - queue->put_index + queue->get_index);
     }
     return 0;
@@ -1253,73 +1270,4 @@ int sr_message_queue_put(sr_message_queue_t *queue, sr_message_t msg)
     sr_mutex_unlock(queue->mutex);
 
 	return 0;
-}
-
-
-sr_message_t* sr_message_queue_get_buffer(sr_message_queue_t *queue)
-{
-    if (queue == NULL) {
-        LOGE("Invalid parameter: queue=%p\n", queue);
-        return NULL;
-    }
-
-//    if (__is_false(queue->running)){
-//        return NULL;
-//    }
-
-    sr_mutex_lock(queue->mutex);
-
-    while (0 == (queue->length - queue->put_index + queue->get_index)){
-        if (__is_true(queue->running)){
-            sr_mutex_wait(queue->mutex);
-        }
-        if (__is_false(queue->running)){
-            sr_mutex_unlock(queue->mutex);
-            return NULL;
-        }
-    }
-
-    sr_message_t *msg = &queue->message_array[queue->put_index & (queue->length - 1)];
-
-    sr_mutex_signal(queue->mutex);
-    sr_mutex_unlock(queue->mutex);
-
-    return msg;
-}
-
-sr_message_t* sr_message_queue_get(sr_message_queue_t *queue)
-{
-	if (queue == NULL) {
-		LOGE("Invalid parameter: queue=%p\n", queue);
-		return NULL;
-	}
-
-
-    sr_mutex_lock(queue->mutex);
-
-    while (0 == (queue->put_index - queue->get_index)){
-        if (__is_true(queue->running)){
-            sr_mutex_wait(queue->mutex);
-        }
-        if (__is_false(queue->running)){
-            sr_mutex_unlock(queue->mutex);
-            return NULL;
-        }
-    }
-
-    sr_message_t *msg = &queue->message_array[queue->get_index & (queue->length - 1)];
-    queue->get_index ++;
-
-    sr_mutex_signal(queue->mutex);
-    sr_mutex_unlock(queue->mutex);
-
-    return msg;
-}
-
-
-void sr_message_queue_clear(sr_message_queue_t *queue)
-{
-    if (queue){
-        queue->get_index = queue->put_index = 0;
-    }
 }

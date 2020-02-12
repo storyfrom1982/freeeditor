@@ -15,7 +15,7 @@ void freee::VideoEncoder::closeEncoder() {
 sr_message_t *freee::VideoEncoder::GetBuffer() {
     if (sr_message_queue_putable(queue)){
 //        LOGD("sr_message_queue_putable = %u\n", sr_message_queue_putable(queue));
-        return sr_message_queue_get_buffer(queue);
+//        return sr_message_queue_get_buffer(queue);
     }
     return nullptr;
 }
@@ -27,15 +27,15 @@ void freee::VideoEncoder::PutBuffer(SmartPtr<sr_buffer_t*> buffer) {
 }
 
 freee::VideoEncoder::VideoEncoder() {
-    queue = sr_message_queue_create();
+    queue = sr_message_queue_create(256, "videoEncoder");
 }
 
 freee::VideoEncoder::~VideoEncoder() {
-    while (sr_message_queue_getable(queue)){
-        sr_message_t *msg = sr_message_queue_get(queue);
-        VideoPacket *packet = static_cast<VideoPacket *>(msg->ptr);
-        videoPacket_Free(&packet);
-    }
+//    while (sr_message_queue_getable(queue)){
+//        sr_message_t *msg = sr_message_queue_get(queue);
+//        VideoPacket *packet = static_cast<VideoPacket *>(msg->ptr);
+//        videoPacket_Free(&packet);
+//    }
     sr_message_queue_release(&queue);
 }
 

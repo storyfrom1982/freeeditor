@@ -34,10 +34,11 @@ namespace freee{
         }
 
         virtual ~MessageContext(){
-            LOGD("~MessageContext()[%s]\n", contextName.c_str());
+            LOGD("~MessageContext[%s] enter\n", contextName.c_str());
             if (messageQueue){
                 sr_message_queue_release(&messageQueue);
             }
+            LOGD("~MessageContext[%s] exit\n", contextName.c_str());
         };
 
         void SetContextName(std::string name){
@@ -89,14 +90,14 @@ namespace freee{
         virtual void MessageProcessor(sr_message_t msg){};
 
         void StartMessageProcessor(){
-            messageQueue = sr_message_queue_create();
-            messageProcessor.name = contextName.c_str();
+            messageQueue = sr_message_queue_create(256, contextName.c_str());
             messageProcessor.handler = this;
             messageProcessor.process = MessageProcessorThread;
             sr_message_queue_start_processor(messageQueue, &messageProcessor);
         }
 
         void StopMessageProcessor(){
+            sr_message_queue_stop_processor(messageQueue);
             sr_message_queue_release(&messageQueue);
         }
 

@@ -16,23 +16,18 @@
 namespace freee {
 
 
-    enum {
-        VideoSource_Open = 0,
-        VideoSource_Start,
-        VideoSource_Stop,
-        VideoSource_Close,
-        VideoSource_Release
-    };
-
-
     class VideoSource : public MessageContext {
 
     public:
 
-        static VideoSource* CreateVideoSource();
+//        static VideoSource* CreateVideoSource();
 
         VideoSource();
-        virtual ~VideoSource();
+        virtual ~VideoSource() override ;
+
+        void OnPutMessage(sr_message_t msg) override;
+
+        sr_message_t OnGetMessage(sr_message_t msg) override;
 
         void SetEncoder(VideoEncoder *videoEncoder);
         void SetWindow(MessageContext *windowContext);
@@ -40,11 +35,11 @@ namespace freee {
         void StartPreview();
         void StopPreview();
 
-        virtual void Open(json cfg) = 0;
-        virtual void closeSource() = 0;
+        virtual void Open(json cfg);
+        virtual void Close();
 
-        virtual void startCapture() = 0;
-        virtual void stopCapture() = 0;
+        virtual void Start();
+        virtual void Stop();
 
 
     protected:
@@ -54,7 +49,12 @@ namespace freee {
 
     private:
 
+        void Release();
+
+    private:
+
         bool isPreview;
+        bool isClosed;
 
         VideoEncoder *encoder;
 

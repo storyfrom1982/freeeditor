@@ -8,8 +8,11 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
+//import org.json.JSONException;
+//import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -44,10 +47,8 @@ public class VideoCamera extends JNIContext implements Runnable,
 
 
     public VideoCamera(){
-
         mThread = new Thread(this);
         mThread.start();
-
         synchronized (isRunning){
             if (!isRunning.get()){
                 try {
@@ -60,7 +61,7 @@ public class VideoCamera extends JNIContext implements Runnable,
     }
 
     public void release(){
-        mThreadHandler.sendEmptyMessage(MSG_HandleRemove);
+        mThreadHandler.sendEmptyMessage(OnPutMsg_Destroy);
         try {
             mThread.join();
         } catch (InterruptedException e) {
@@ -75,21 +76,17 @@ public class VideoCamera extends JNIContext implements Runnable,
 
     @Override
     protected JNIMessage onGetMessage(int key) {
-        return null;
+        return new JNIMessage();
     }
 
 
     private void openCamera(JNIMessage msg){
 
-        try {
-            mConfig = new JSONObject(msg.json);
-            mFrameRate = mConfig.getInt("fps");
-            mRequestWidth = mConfig.getInt("width");
-            mRequestHeight = mConfig.getInt("height");
-            mCameraPosition = mConfig.getString("position");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        mConfig = JSON.parseObject(msg.json);
+        mFrameRate = mConfig.getIntValue("fps");
+        mRequestWidth = mConfig.getIntValue("width");
+        mRequestHeight = mConfig.getIntValue("height");
+        mCameraPosition = mConfig.getString("position");
 
         if (mCameraPosition.equals("front")){
             mDeviceId = Camera.CameraInfo.CAMERA_FACING_FRONT;
@@ -121,7 +118,7 @@ public class VideoCamera extends JNIContext implements Runnable,
 
         mCamera.setErrorCallback(this);
 
-        fixedOutputRotation(90);
+        fixedOutputRotation(MediaContext.Instance().getScreenRotation());
         fixedOutputSize(mCamera.getParameters(), mRequestWidth, mRequestHeight);
 
         Camera.Parameters parameters = mCamera.getParameters();
@@ -146,15 +143,17 @@ public class VideoCamera extends JNIContext implements Runnable,
             e.printStackTrace();
         }
 
-        JSONObject newConfig = new JSONObject();
-        try {
-            newConfig.put("width", mOutputWidth).put("height", mOutputHeight)
-                    .put("croppedWidth", mCroppedWidth).put("croppedHeight", mCroppedHeight)
-                    .put("format", 0).put("rotate", 90);
-//            mMsgHandler.sendRequest(new Msg(MsgKey.Video_Source_FinalConfig, newConfig.toString()));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        JSONObject json = new JSONObject();
+        json.put("width", mOutputWidth);
+        json.put("height", mOutputHeight);
+        json.put("croppedWidth", mCroppedWidth);
+        json.put("croppedHeight", mCroppedHeight);
+        json.put("format", 0);
+        json.put("rotate", mRotation);
+//            newConfig.put("width", mOutputWidth).put("height", mOutputHeight)
+//                    .put("croppedWidth", mCroppedWidth).put("croppedHeight", mCroppedHeight)
+//                    .put("format", 0).put("rotate", mRotation);
+        putJson(PutMsg_Opened, json.toString());
     }
 
 
@@ -162,23 +161,24 @@ public class VideoCamera extends JNIContext implements Runnable,
         if (mCamera != null){
             stopCapture();
             mCamera.setErrorCallback(null);
-            mCamera.setPreviewCallback(null);
             mCamera.release();
             mCamera = null;
+            putMessage(PutMsg_Closed);
         }
     }
 
 
     private void startCapture(){
-        Log.d(TAG, "startCapture: enter");
+        Log.d(TAG, "Start: enter");
         if (mCamera != null){
             mCamera.startPreview();
             mCamera.setPreviewCallbackWithBuffer(this);
             for (int i = 0; i < 4; ++i){
                 mCamera.addCallbackBuffer(new byte[(mOutputWidth * mOutputHeight * 3) >> 1]);
             }
+            putMessage(PutMsg_Started);
         }
-        Log.d(TAG, "startCapture: exit");
+        Log.d(TAG, "Start: exit");
     }
 
 
@@ -186,13 +186,14 @@ public class VideoCamera extends JNIContext implements Runnable,
         if (mCamera != null){
             mCamera.setPreviewCallbackWithBuffer(null);
             mCamera.stopPreview();
+            putMessage(PutMsg_Stopped);
         }
     }
 
 
-    private void internalRemove(){
-        super.release();
+    private void destroy(){
         Looper.myLooper().quit();
+        super.release();
     }
 
     @Override
@@ -206,20 +207,25 @@ public class VideoCamera extends JNIContext implements Runnable,
         Looper.loop();
     }
 
-    private static final int MSG_HandleRemove = -1;
-    private static final int MSG_HandleOpen = 0;
-    private static final int MSG_HandleStart = 1;
-    private static final int MSG_HandleStop = 2;
-    private static final int MSG_HandleClose = 3;
+    private static final int PutMsg_Opened = 1;
+    private static final int PutMsg_Started = 2;
+    private static final int PutMsg_Stopped = 3;
+    private static final int PutMsg_Closed = 4;
+    private static final int PutMsg_ProcessPicture = 5;
+    private static final int PutMsg_Destroy = 6;
+
+    private static final int OnPutMsg_Open = 1;
+    private static final int OnPutMsg_Start = 2;
+    private static final int OnPutMsg_Stop = 3;
+    private static final int OnPutMsg_Close = 4;
+    private static final int OnPutMsg_Destroy = 5;
 
 
     private MessageHandler mThreadHandler;
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-//        Log.e(TAG, "onPreviewFrame: data size: " + data.length);
-//        mMsgHandler.sendRequest(new Msg(MsgKey.Video_Source_ProvideFrame, data, 0));
-        putBuffer(0, data, data.length);
+        putBuffer(PutMsg_ProcessPicture, data, data.length);
         mCamera.addCallbackBuffer(data);
     }
 
@@ -240,23 +246,23 @@ public class VideoCamera extends JNIContext implements Runnable,
 
         @Override
         public void handleMessage(Message msg) {
-            VideoCamera deviceCamera = weakReference.get();
-            if (deviceCamera != null){
+            VideoCamera videoCamera = weakReference.get();
+            if (videoCamera != null){
                 switch (msg.what){
-                    case MSG_HandleRemove:
-                        deviceCamera.internalRemove();
+                    case OnPutMsg_Open:
+                        videoCamera.openCamera((JNIMessage) msg.obj);
                         break;
-                    case MSG_HandleOpen:
-                        deviceCamera.openCamera((JNIMessage) msg.obj);
+                    case OnPutMsg_Start:
+                        videoCamera.startCapture();
                         break;
-                    case MSG_HandleStart:
-                        deviceCamera.startCapture();
+                    case OnPutMsg_Stop:
+                        videoCamera.stopCapture();
                         break;
-                    case MSG_HandleStop:
-                        deviceCamera.stopCapture();
+                    case OnPutMsg_Close:
+                        videoCamera.closeCamera();
                         break;
-                    case MSG_HandleClose:
-                        deviceCamera.closeCamera();
+                    case OnPutMsg_Destroy:
+                        videoCamera.destroy();
                         break;
                     default:
                         break;

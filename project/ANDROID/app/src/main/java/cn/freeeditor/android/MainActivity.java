@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 //        if (record == null){
 //            record = new MediaRecorder();
 //        }
-//        record.startCapture();
+//        record.Start();
     }
 
 //    MediaRecorder record;

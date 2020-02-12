@@ -4,23 +4,23 @@
 
 #include <MConfig.h>
 #include <VideoEncoder.h>
-#include "MediaRecord.h"
+#include "MediaRecorder.h"
 #include "MediaContext.h"
 
 
 using namespace freee;
 
-MediaRecord::MediaRecord(){
+MediaRecorder::MediaRecorder(){
     glesRender = NULL;
     videoSource = NULL;
     SetContextName("MediaRecorder");
     StartMessageProcessor();
 }
 
-MediaRecord::~MediaRecord() {
+MediaRecorder::~MediaRecorder() {
     LOGD("MediaRecorder::~MediaRecorder");
     if (videoSource){
-        videoSource->closeSource();
+        videoSource->Close();
         delete videoSource;
     }
     if (glesRender){
@@ -50,17 +50,17 @@ MediaRecord::~MediaRecord() {
 //    ProcessorMessage(msg);
 //}
 
-sr_message_t MediaRecord::OnGetMessage(sr_message_t msg) {
+sr_message_t MediaRecorder::OnGetMessage(sr_message_t msg) {
     return sr_message_t();
 }
 
-void MediaRecord::MessageProcessor(sr_message_t msg) {
+void MediaRecorder::MessageProcessor(sr_message_t msg) {
     switch (msg.key){
         case Record_SetConfig:
             init(msg);
             break;
         case Record_StartCapture:
-            videoSource->startCapture();
+            videoSource->Start();
             break;
         case Record_StartPreview:
             StartPreview(msg);
@@ -77,12 +77,12 @@ void MediaRecord::MessageProcessor(sr_message_t msg) {
 //    static_cast<MediaRecorder *>(processor->handler)->MessageProcessor(msg);
 //}
 
-void MediaRecord::init(sr_message_t msg) {
+void MediaRecorder::init(sr_message_t msg) {
     json cfg = json::parse(msg.str);
     __sr_msg_clear(msg);
 //    LOGD("camera %s", cfg["videoSource"].dump().c_str());
 //    MessageContext *camera = MediaContext::Instance()->CreateCamera();
-    videoSource = VideoSource::CreateVideoSource();
+    videoSource = new VideoSource();
     videoSource->Open(cfg["videoSource"]);
     encoder = new VideoEncoder;
     videoSource->SetEncoder(encoder);
@@ -91,14 +91,14 @@ void MediaRecord::init(sr_message_t msg) {
 //    glesRender->OnPutMessage(msg);
 }
 
-void MediaRecord::StartPreview(sr_message_t msg) {
+void MediaRecorder::StartPreview(sr_message_t msg) {
 //    msg.key = OpenGLESRender_SetSurfaceView;
 //    glesRender->OnPutMessage(msg);
     videoSource->SetWindow((MessageContext*)msg.ptr);
     videoSource->StartPreview();
 }
 
-void MediaRecord::drawPicture(sr_message_t msg) {
+void MediaRecorder::drawPicture(sr_message_t msg) {
     VideoPacket nv21Pkt = {0};
     videoPacket_FillData(&nv21Pkt, (uint8_t*)msg.ptr, 640, 360, libyuv::FOURCC_NV21);
 
@@ -110,7 +110,7 @@ void MediaRecord::drawPicture(sr_message_t msg) {
     glesRender->OnPutMessage(msg);
 }
 
-void MediaRecord::OnPutDataBuffer(sr_message_t msg) {
+void MediaRecorder::OnPutDataBuffer(sr_message_t msg) {
     drawPicture(msg);
 }
 
