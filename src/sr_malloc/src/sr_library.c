@@ -1125,9 +1125,7 @@ static void *sr_message_queue_loop(void *p)
         sr_mutex_unlock(queue->mutex);
 
 		queue->processor->process(queue->processor, msg);
-		if (msg.type > MessageType_None && msg.ptr){
-            free(msg.ptr);
-		}
+		__sr_msg_clear(msg);
 	}
 
 	__set_true(queue->stopped);

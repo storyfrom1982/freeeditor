@@ -20,7 +20,7 @@ enum {
 
 MediaContext::MediaContext(MessageContext *ctx){
     SetContextName("MediaContext");
-    ConnectContextHandler(ctx);
+    ConnectContext(ctx);
 }
 
 MediaContext::~MediaContext() = default;

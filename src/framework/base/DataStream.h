@@ -127,13 +127,13 @@ namespace freee {
 
     protected:
 
-        Mutex m_inputsLock;
+        Lock m_inputsLock;
         std::vector<DataStream*> m_inputs;
 
-        Mutex m_outputsLock;
+        Lock m_outputsLock;
         std::vector<DataStream*> m_outputs;
 
-        Mutex statusProcessorLock;
+        Lock statusProcessorLock;
         DataStream *statusProcessor;
 
     };

@@ -341,8 +341,7 @@ typedef struct sr_message{
 #define __sr_msg_is_native(msg)    (msg.type == MessageType_Native)
 
 #define __sr_msg_clear(msg) \
-    if (__sr_msg_is_json(msg) && msg.str) \
-    	free(msg.str)
+    if (__sr_msg_is_json(msg) && msg.str) free(msg.str)
 
 typedef struct sr_msg_processor_t{
 	void *handler;

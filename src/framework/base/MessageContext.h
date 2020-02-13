@@ -45,10 +45,17 @@ namespace freee{
             contextName = name;
         }
 
-        virtual void ConnectContextHandler(MessageContext *contextHandler){
-            if (contextHandler){
-                messageContext = contextHandler;
+        void ConnectContext(MessageContext *context){
+            if (context){
+                messageContext = context;
                 messageContext->messageContext = this;
+            }
+        }
+
+        void DisconnectContext(){
+            if (messageContext){
+                messageContext->messageContext = NULL;
+                messageContext = NULL;
             }
         }
 

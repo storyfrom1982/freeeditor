@@ -77,7 +77,7 @@ GLSurface AndroidEGL::createOffscreenSurface(int w, int h) {
 GLSurface AndroidEGL::createWindowSurface(void *nativeWindow) {
     LOGD("AndroidEGL::createWindowSurface enter\n");
     if (nativeWindow == NULL){
-        LOGE("Invalid native window\n");
+        LOGE("Invalid native mWindowHolder\n");
         return NULL;
     }
     EGLSurface eglSurface = eglCreateWindowSurface(mEGLDisplay, mEGLConfig, (EGLNativeWindowType)nativeWindow, NULL);

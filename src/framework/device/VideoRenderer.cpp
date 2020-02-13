@@ -1,8 +1,8 @@
 //
 // Created by yongge on 20-2-4.
 //
-#include "OpenGLESRender.h"
-#include "NativeWindow.h"
+#include "VideoRenderer.h"
+#include "VideoWindow.h"
 
 
 #ifdef __cplusplus
@@ -19,13 +19,13 @@ extern "C" {
 using namespace freee;
 
 
-OpenGLESRender::OpenGLESRender() {
-    SetContextName("OpenGLESRender");
+VideoRenderer::VideoRenderer() {
+    SetContextName("VideoRenderer");
     StartMessageProcessor();
 }
 
-OpenGLESRender::~OpenGLESRender() {
-    LOGD("~OpenGLESRender()\n");
+VideoRenderer::~VideoRenderer() {
+    LOGD("VideoRenderer)\n");
     StopMessageProcessor();
     if (renderer){
         gl_renderer_release(&renderer);
@@ -35,15 +35,23 @@ OpenGLESRender::~OpenGLESRender() {
     }
 }
 
-//void OpenGLESRender::OnPutMessage(sr_message_t msg) {
-//    sr_message_queue_put(m_queue, msg);
-//}
+void VideoRenderer::OnPutMessage(sr_message_t msg) {
 
-sr_message_t OpenGLESRender::OnGetMessage(sr_message_t msg) {
+//    if (msg.key == OpenGLESRender_SurfaceDestroyed){
+//        AutoLock lock(m_lock);
+//        MessageContext::OnPutMessage(msg);
+//        lock.wait();
+//    }else {
+//        MessageContext::OnPutMessage(msg);
+//    }
+    MessageContext::OnPutMessage(msg);
+}
+
+sr_message_t VideoRenderer::OnGetMessage(sr_message_t msg) {
     return sr_message_t();
 }
 
-void OpenGLESRender::MessageProcessor(sr_message_t msg) {
+void VideoRenderer::MessageProcessor(sr_message_t msg) {
     switch (msg.key){
         case OpenGLESRender_Init:
             init(msg);
@@ -65,7 +73,7 @@ void OpenGLESRender::MessageProcessor(sr_message_t msg) {
     }
 }
 
-//void OpenGLESRender::messageProcessorLoop(sr_message_processor_t *processor, sr_message_t msg) {
+//void VideoRenderer::messageProcessorLoop(sr_message_processor_t *processor, sr_message_t msg) {
 //
 //    switch (msg.key){
 //        case OpenGLESRender_Init:
@@ -82,44 +90,44 @@ void OpenGLESRender::MessageProcessor(sr_message_t msg) {
 //    }
 //}
 
-//void OpenGLESRender::messageProcessorThread(sr_message_processor_t *processor, sr_message_t msg) {
-//    ((OpenGLESRender*)processor->handler)->messageProcessorLoop(processor, msg);
+//void VideoRenderer::messageProcessorThread(sr_message_processor_t *processor, sr_message_t msg) {
+//    ((VideoRenderer*)processor->handler)->messageProcessorLoop(processor, msg);
 //}
 
-void OpenGLESRender::init(sr_message_t msg) {
+void VideoRenderer::init(sr_message_t msg) {
     renderer = gl_renderer_create(16, 16);
     opengles_open(&opengles);
 }
 
-void OpenGLESRender::setSurfaceView(sr_message_t msg) {
-    NativeWindow *window = (NativeWindow*)msg.ptr;
-    window->SetStatusCallback(this);
+void VideoRenderer::setSurfaceView(sr_message_t msg) {
+    VideoWindow *window = (VideoWindow*)msg.ptr;
+    window->RegisterCallback(this);
 }
 
-void OpenGLESRender::drawPicture(sr_message_t msg) {
-//    LOGD("drawPicture data size: %d", msg.key);
+void VideoRenderer::drawPicture(sr_message_t msg) {
     sr_buffer_t *buffer = reinterpret_cast<sr_buffer_t *>(msg.str);
     opengles_render(opengles, (const VideoPacket*)buffer->ptr);
-    sr_buffer_pool_free(buffer);
     gl_renderer_swap_buffers(renderer);
-//    videoPacket_Free(reinterpret_cast<VideoPacket **>(&msg.ptr));
+    sr_buffer_pool_free(buffer);
 }
 
-void OpenGLESRender::surfaceCreated(sr_message_t msg) {
-    NativeWindow *window = (NativeWindow*)msg.ptr;
-    gl_renderer_set_window(renderer, (gl_window_t*) window->GetWindowHandler());
+void VideoRenderer::surfaceCreated(sr_message_t msg) {
+    VideoWindow *window = (VideoWindow*)msg.ptr;
+    gl_renderer_set_window(renderer, (gl_window_t*) window->GetNativeWindow());
     int w, h;
     window->GetWindowSize(&w, &h);
     glViewport(0, 0, w, h);
 }
 
-void OpenGLESRender::surfaceChanged(sr_message_t msg) {
+void VideoRenderer::surfaceChanged(sr_message_t msg) {
 
 }
 
-void OpenGLESRender::surfaceDestroyed(sr_message_t msg) {
-    LOGD("OpenGLESRender::surfaceDestroyed enter\n");
+void VideoRenderer::surfaceDestroyed(sr_message_t msg) {
+    LOGD("VideoRenderer::surfaceDestroyed enter\n");
+//    AutoLock lock(m_lock);
     gl_renderer_remove_window(renderer);
-    LOGD("OpenGLESRender::surfaceDestroyed exit\n");
+//    lock.signal();
+    LOGD("VideoRenderer::surfaceDestroyed exit\n");
 }
 

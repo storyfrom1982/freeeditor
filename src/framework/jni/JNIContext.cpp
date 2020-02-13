@@ -166,7 +166,7 @@ Java_cn_freeeditor_sdk_JNIContext_connectContext__JJ(JNIEnv *env, jobject instan
     MessageContext *pMessageContext = reinterpret_cast<MessageContext *>(messageContext);
     JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(mCtx);
     if (pMessageContext && pJNIContext){
-        pMessageContext->ConnectContextHandler(pJNIContext);
+        pMessageContext->ConnectContext(pJNIContext);
     }
 }
 

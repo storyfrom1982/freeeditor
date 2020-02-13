@@ -12,26 +12,53 @@
 namespace freee {
 
 
-    class Mutex {
+    class Lock {
     public:
-        Mutex() : m_mutex(PTHREAD_MUTEX_INITIALIZER){};
-        ~Mutex(){}
+        Lock() : m_mutex(PTHREAD_MUTEX_INITIALIZER), m_cond(PTHREAD_COND_INITIALIZER){};
+        ~Lock(){}
 
-        void lock(){ pthread_mutex_lock(&m_mutex); }
-        void unlock(){ pthread_mutex_unlock(&m_mutex); }
+        void lock(){
+            pthread_mutex_lock(&m_mutex);
+        }
+        void unlock(){
+            pthread_mutex_unlock(&m_mutex);
+        }
+        void signal(){
+            pthread_cond_signal(&m_cond);
+        }
+        void broadcast(){
+            pthread_cond_broadcast(&m_cond);
+        }
+        void wait(){
+            pthread_cond_wait(&m_cond, &m_mutex);
+        }
 
     private:
+        pthread_cond_t m_cond;
         pthread_mutex_t m_mutex;
     };
 
 
     class AutoLock {
     public:
-        AutoLock(Mutex &mutex) : m_lock(mutex){ m_lock.lock(); }
-        ~AutoLock(){ m_lock.unlock(); }
+        AutoLock(Lock &lock) : m_lock(lock){
+            m_lock.lock();
+        }
+        void signal(){
+            m_lock.signal();
+        }
+        void broadcast(){
+            m_lock.broadcast();
+        }
+        void wait(){
+            m_lock.wait();
+        }
+        ~AutoLock(){
+            m_lock.unlock();
+        }
 
     private:
-        Mutex &m_lock;
+        Lock &m_lock;
     };
 
 }

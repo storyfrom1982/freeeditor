@@ -7,7 +7,7 @@
 
 
 #include <MessageContext.h>
-#include "OpenGLESRender.h"
+#include "VideoRenderer.h"
 
 #ifdef __ANDROID__
 
@@ -16,21 +16,23 @@
 
 namespace freee {
 
-    class NativeWindow : public MessageContext {
+    class VideoWindow : public MessageContext {
 
     public:
 
-        NativeWindow();
+        VideoWindow();
 
-        virtual ~NativeWindow();
+        virtual ~VideoWindow();
 
         bool IsReady();
 
-        void ConnectContextHandler(MessageContext *contextHandler) override;
+        void RegisterCallback(MessageContext *callback);
 
-        void SetStatusCallback(MessageContext *callback);
+        void* GetNativeWindow();
 
-        void* GetWindowHandler();
+        int GetWindowWidth();
+
+        int GetWindowHeight();
 
         void GetWindowSize(int *w, int *h);
 
@@ -42,10 +44,10 @@ namespace freee {
 
         bool isReady;
 
-        void *window;
-        void *windowHandler;
+        void *mWindowHolder;
+        void *mNativeWindow;
 
-        MessageContext *statusCallback;
+        MessageContext *mCallback;
 
     };
 

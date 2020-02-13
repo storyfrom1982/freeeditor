@@ -41,48 +41,33 @@ enum {
 //freee::VideoSource *freee::VideoSource::CreateVideoSource() {
 //    MessageContext *sourceContext = MediaContext::Instance()->CreateCamera();
 //    VideoSource *videoSource = new VideoSource();
-//    videoSource->ConnectContextHandler(sourceContext);
+//    videoSource->ConnectContext(sourceContext);
 //    return videoSource;
 //}
 
 VideoSource::VideoSource() {
     SetContextName("VideoSource");
     MessageContext *sourceContext = MediaContext::Instance()->CreateCamera();
-    ConnectContextHandler(sourceContext);
+    ConnectContext(sourceContext);
     isPreview = false;
     isClosed = false;
-    window = new NativeWindow();
-    render = new OpenGLESRender();
+    window = new VideoWindow();
+    render = new VideoRenderer();
     sr_message_t msg = __sr_null_msg;
     msg.key = OpenGLESRender_Init;
     render->OnPutMessage(msg);
-    pool = sr_buffer_pool_create(8);
-    while (sr_buffer_pool_fill(pool, videoPacket_Alloc(360, 640, libyuv::FOURCC_I420)) > 0){}
 }
 
 VideoSource::~VideoSource() {
     LOGD("VideoSource::~VideoSource: enter");
-    sr_message_t msg = __sr_null_msg;
-    msg.key = VideoSource_Stop;
-    PutMessage(msg);
-    msg.key = VideoSource_Close;
-    PutMessage(msg);
-
+    Close();
     while (!isClosed){
         nanosleep((const struct timespec[]){{0, 100000L}}, NULL);
     }
-
     delete render;
     delete window;
-
-    sr_buffer_t *buffer;
-    while((buffer = sr_buffer_pool_get(pool)) != NULL){
-        VideoPacket *packet = static_cast<VideoPacket *>(buffer->ptr);
-        videoPacket_Free(&packet);
-    }
-    sr_buffer_pool_release(&pool);
-
-    isClosed = true;
+    Release();
+//    DisconnectContext();
     LOGD("VideoSource::~VideoSource: exit");
 }
 
@@ -132,7 +117,7 @@ void VideoSource::OnPutMessage(sr_message_t msg) {
             break;
         case OnVideoSource_Opened:
             LOGD("config: %s\n", msg.str);
-            __sr_msg_clear(msg);
+            updateConfig(msg);
             break;
         case OnVideoSource_Started:
             LOGD("VideoSource::OnPutMessage OnVideoSource_Started\n");
@@ -155,9 +140,9 @@ sr_message_t VideoSource::OnGetMessage(sr_message_t msg) {
 
 void VideoSource::processData(void *data, int size) {
     VideoPacket nv21Pkt = {0};
-    videoPacket_FillData(&nv21Pkt, (uint8_t*)data, 640, 360, libyuv::FOURCC_NV21);
+    videoPacket_FillData(&nv21Pkt, (uint8_t*)data, mInputWidth, mInputHeight, libyuv::FOURCC_NV21);
 
-//    sr_message_t *msg = encoder->GetBuffer();
+//    sr_message_t *msg = videoEncoder->GetBuffer();
 //    if (!msg){
 //        return;
 //    }
@@ -176,7 +161,7 @@ void VideoSource::processData(void *data, int size) {
         return;
     }
     y420Pkt = static_cast<VideoPacket *>(buffer->ptr);
-    videoPacket_To_YUV420(&nv21Pkt, y420Pkt, 270);
+    videoPacket_To_YUV420(&nv21Pkt, y420Pkt, mRotation);
 
     SmartPtr<sr_buffer_t*> sb(buffer);
 
@@ -191,18 +176,18 @@ void VideoSource::processData(void *data, int size) {
 //        videoPacket_Free(&y420Pkt);
     }
 
-//    encoder->PutBuffer(buffer);
+//    videoEncoder->PutBuffer(buffer);
     encoder->PutBuffer(sb);
 }
 
 void VideoSource::processData(sr_message_t msg) {
 //    msg.key = 8;
 //    msg.size = MessageType_Pointer;
-//    encoder->OnPutDataBuffer(msg);
+//    videoEncoder->OnPutDataBuffer(msg);
 }
 
 void VideoSource::SetWindow(MessageContext *windowContext) {
-    window->ConnectContextHandler(windowContext);
+    window->ConnectContext(windowContext);
     sr_message_t msg = __sr_null_msg;
     msg.key = OpenGLESRender_SetSurfaceView;
     msg.ptr = window;
@@ -218,6 +203,23 @@ void VideoSource::StopPreview() {
 }
 
 void VideoSource::Release() {
+    sr_buffer_t *buffer;
+    while((buffer = sr_buffer_pool_get(pool)) != NULL){
+        VideoPacket *packet = static_cast<VideoPacket *>(buffer->ptr);
+        videoPacket_Free(&packet);
+    }
+    sr_buffer_pool_release(&pool);
+}
 
+void VideoSource::updateConfig(sr_message_t msg) {
+    json cfg = json::parse(msg.str);
+    mRotation = cfg["rotate"];
+    mInputWidth = cfg["width"];
+    mInputHeight = cfg["height"];
+    mOutputWidth = cfg["croppedWidth"];
+    mOutputHeight = cfg["croppedHeight"];
+    pool = sr_buffer_pool_create(8);
+    while (sr_buffer_pool_fill(pool, videoPacket_Alloc(mOutputWidth, mOutputHeight, libyuv::FOURCC_I420)) > 0){}
+    __sr_msg_clear(msg);
 }
 

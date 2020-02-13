@@ -17,7 +17,7 @@ public class MediaRecorder extends JNIContext implements SurfaceHolder.Callback 
     private long recorderContext;
 
     private SurfaceView mVideoView;
-    private VideoView videoView;
+    private VideoSurfaceView videoView;
 
     public MediaRecorder(){
         recorderContext = MediaContext.Instance().createRecorder();
@@ -64,7 +64,7 @@ public class MediaRecorder extends JNIContext implements SurfaceHolder.Callback 
     }
 
     public void startPreview(SurfaceView view){
-        videoView = new VideoView(view);
+        videoView = new VideoSurfaceView(view);
         putLong(7, videoView.getJniContext());
 //        mVideoView = view;
 //        if (mVideoView != null) {

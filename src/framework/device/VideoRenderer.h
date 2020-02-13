@@ -7,6 +7,7 @@
 
 
 #include <MessageContext.h>
+#include <AutoLock.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,21 +23,21 @@ extern "C" {
 namespace freee {
 
     enum {
-        OpenGLESRender_Init = 0,
+        OpenGLESRender_Init = 1,
         OpenGLESRender_SetSurfaceView,
         OpenGLESRender_DrawPicture,
         OpenGLESRender_SurfaceCreated,
         OpenGLESRender_SurfaceDestroyed,
     };
 
-    class OpenGLESRender : public MessageContext {
+    class VideoRenderer : public MessageContext {
 
     public:
-        OpenGLESRender();
-        ~OpenGLESRender() override;
+        VideoRenderer();
+        ~VideoRenderer() override;
 
     public:
-//        void OnPutMessage(sr_message_t msg) override;
+        void OnPutMessage(sr_message_t msg) override;
 
         sr_message_t OnGetMessage(sr_message_t msg) override;
 
@@ -63,6 +64,8 @@ namespace freee {
         gl_window_t *window;
         gl_renderer_t *renderer;
         opengles_t *opengles;
+
+        Lock m_lock;
 
     };
 

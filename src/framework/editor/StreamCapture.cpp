@@ -43,7 +43,7 @@ protected:
 
 private:
 
-    Mutex m_captureListLock;
+    Lock m_captureListLock;
     std::vector<StreamCapture *> m_captureList;
 };
 

@@ -204,7 +204,7 @@ int gl_renderer_set_window(gl_renderer_t *renderer, void *window)
     LOGD("gl_renderer_set_view enter\n");
 
     if (window == NULL){
-        LOGE("Invalid native window\n");
+        LOGE("Invalid native mWindowHolder\n");
         return -1;
     }
 

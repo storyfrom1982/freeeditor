@@ -8,8 +8,8 @@
 
 #include <MessageContext.h>
 #include <VideoSource.h>
-#include <NativeWindow.h>
-#include <OpenGLESRender.h>
+#include <VideoWindow.h>
+#include <VideoRenderer.h>
 
 namespace freee{
 
@@ -32,32 +32,17 @@ namespace freee{
         MediaRecorder();
         ~MediaRecorder();
 
-    public:
-        void OnPutDataBuffer(sr_message_t msg) override;
-
-//        void OnPutMessage(sr_message_t msg) override;
-
-        sr_message_t OnGetMessage(sr_message_t msg) override;
-
     protected:
         void MessageProcessor(sr_message_t msg) override;
 
     private:
-        void init(sr_message_t msg);
+        void Initialize(sr_message_t msg);
         void StartPreview(sr_message_t msg);
-        void drawPicture(sr_message_t msg);
-//        static void messageProcessorThread(sr_message_processor_t *processor, sr_message_t msg);
-
 
     private:
-//        sr_message_queue_t *m_queue;
-//        sr_message_processor_t m_processor;
 
         VideoSource *videoSource;
-        VideoEncoder *encoder;
-        NativeWindow *window;
-
-        OpenGLESRender *glesRender;
+        VideoEncoder *videoEncoder;
     };
 }
 

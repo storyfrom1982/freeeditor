@@ -172,8 +172,8 @@ namespace freee {
 
     protected:
 
-        Mutex m_inputsLock;
-        Mutex m_outputsLock;
+        Lock m_inputsLock;
+        Lock m_outputsLock;
 
         std::vector<StreamProcessor*> m_inputs;
         std::vector<StreamProcessor*> m_outputs;

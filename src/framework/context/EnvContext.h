@@ -56,7 +56,7 @@ namespace freee {
 
     private:
 
-        Mutex m_processorLock;
+        Lock m_processorLock;
         std::map<int32_t, std::vector<StreamProcessor*>> m_processorMap;
 
     };

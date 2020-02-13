@@ -16,8 +16,12 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
 
 public class VideoCamera extends JNIContext implements Runnable,
         Camera.PreviewCallback, Camera.ErrorCallback {
@@ -44,6 +48,10 @@ public class VideoCamera extends JNIContext implements Runnable,
     private String mCameraPosition;
     private JSONObject mConfig;
 
+    private boolean isCapture = false;
+
+    private int bufferCount = 4;
+    private ArrayList<byte[]> bufferList = new ArrayList<>();
 
 
     public VideoCamera(){
@@ -119,7 +127,12 @@ public class VideoCamera extends JNIContext implements Runnable,
         mCamera.setErrorCallback(this);
 
         fixedOutputRotation(MediaContext.Instance().getScreenRotation());
-        fixedOutputSize(mCamera.getParameters(), mRequestWidth, mRequestHeight);
+
+        if (mRequestWidth >= mRequestHeight){
+            fixedOutputSize(mCamera.getParameters(), mRequestWidth, mRequestHeight);
+        }else {
+            fixedOutputSize(mCamera.getParameters(), mRequestHeight, mRequestWidth);
+        }
 
         Camera.Parameters parameters = mCamera.getParameters();
         int minValue = parameters.getMinExposureCompensation();
@@ -146,14 +159,24 @@ public class VideoCamera extends JNIContext implements Runnable,
         JSONObject json = new JSONObject();
         json.put("width", mOutputWidth);
         json.put("height", mOutputHeight);
-        json.put("croppedWidth", mCroppedWidth);
-        json.put("croppedHeight", mCroppedHeight);
+        int orientation = MediaContext.Instance().getScreenOrientation();
+        if (orientation == SCREEN_ORIENTATION_PORTRAIT || orientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT){
+            json.put("croppedWidth", mCroppedHeight);
+            json.put("croppedHeight", mCroppedWidth);
+        }else {
+            json.put("croppedWidth", mCroppedWidth);
+            json.put("croppedHeight", mCroppedHeight);
+        }
         json.put("format", 0);
         json.put("rotate", mRotation);
 //            newConfig.put("width", mOutputWidth).put("height", mOutputHeight)
 //                    .put("croppedWidth", mCroppedWidth).put("croppedHeight", mCroppedHeight)
 //                    .put("format", 0).put("rotate", mRotation);
         putJson(PutMsg_Opened, json.toString());
+
+        for (int i = 0; i < bufferCount; ++i){
+            bufferList.add(new byte[(mOutputWidth * mOutputHeight * 3) >> 1]);
+        }
     }
 
 
@@ -173,9 +196,10 @@ public class VideoCamera extends JNIContext implements Runnable,
         if (mCamera != null){
             mCamera.startPreview();
             mCamera.setPreviewCallbackWithBuffer(this);
-            for (int i = 0; i < 4; ++i){
-                mCamera.addCallbackBuffer(new byte[(mOutputWidth * mOutputHeight * 3) >> 1]);
+            for (int i = 0; i < bufferCount; ++i){
+                mCamera.addCallbackBuffer(bufferList.get(i));
             }
+            isCapture = true;
             putMessage(PutMsg_Started);
         }
         Log.d(TAG, "Start: exit");
@@ -183,7 +207,8 @@ public class VideoCamera extends JNIContext implements Runnable,
 
 
     private void stopCapture(){
-        if (mCamera != null){
+        if (mCamera != null && isCapture){
+            isCapture = false;
             mCamera.setPreviewCallbackWithBuffer(null);
             mCamera.stopPreview();
             putMessage(PutMsg_Stopped);

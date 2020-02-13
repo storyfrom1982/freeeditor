@@ -8,8 +8,8 @@
 
 #include <MConfig.h>
 #include <MessageContext.h>
-#include "OpenGLESRender.h"
-#include "NativeWindow.h"
+#include "VideoRenderer.h"
+#include "VideoWindow.h"
 #include "VideoEncoder.h"
 
 
@@ -50,16 +50,21 @@ namespace freee {
     private:
 
         void Release();
+        void updateConfig(sr_message_t msg);
 
     private:
 
         bool isPreview;
         bool isClosed;
 
+        int mRotation;
+        int mInputWidth, mInputHeight;
+        int mOutputWidth, mOutputHeight;
+
         VideoEncoder *encoder;
 
-        NativeWindow *window;
-        OpenGLESRender *render;
+        VideoWindow *window;
+        VideoRenderer *render;
 
         sr_buffer_pool_t *pool;
 

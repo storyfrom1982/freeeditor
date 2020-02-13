@@ -5,7 +5,7 @@
 #ifndef ANDROID_ANDROIDWINDOW_H
 #define ANDROID_ANDROIDWINDOW_H
 
-#include "../NativeWindow.h"
+#include "VideoWindow.h"
 
 
 #ifdef __cplusplus
