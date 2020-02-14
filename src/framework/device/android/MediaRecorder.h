@@ -30,6 +30,9 @@ namespace freee{
 
     public:
         MediaRecorder();
+
+        void OnPutMessage(sr_message_t msg) override;
+
         ~MediaRecorder();
 
     protected:
@@ -43,6 +46,8 @@ namespace freee{
 
         VideoSource *videoSource;
         VideoEncoder *videoEncoder;
+
+        json mConfig;
     };
 }
 

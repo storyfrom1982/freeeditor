@@ -71,13 +71,14 @@ VideoSource::~VideoSource() {
     LOGD("VideoSource::~VideoSource: exit");
 }
 
-void VideoSource::Open(json cfg) {
+void VideoSource::Open(json &cfg) {
+    mConfig = cfg;
     sr_message_t msg;
-    std::string str = cfg.dump();
+    std::string str = mConfig.dump();
     LOGD("VideoSource::Open: %s\n", str.c_str());
     msg.key = VideoSource_Open;
     msg.type = str.length();
-    msg.ptr = strndup(str.c_str(), msg.type);
+    msg.ptr = strdup(str.c_str());
     PutMessage(msg);
     LOGD("VideoSource::Open exit\n");
 }
@@ -222,5 +223,7 @@ void VideoSource::updateConfig(sr_message_t msg) {
     pool = sr_buffer_pool_create(8);
     while (sr_buffer_pool_fill(pool, videoPacket_Alloc(mOutputWidth, mOutputHeight, libyuv::FOURCC_I420)) > 0){}
     __sr_msg_clear(msg);
+    mConfig["width"] = mOutputWidth;
+    mConfig["height"] = mOutputHeight;
 }
 

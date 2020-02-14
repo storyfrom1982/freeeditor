@@ -96,7 +96,7 @@ public:
                 size_t n = env->GetStringUTFLength(obj);
                 const char *s = env->GetStringUTFChars(obj, 0);
                 msg.type = env->GetStringUTFLength(obj);
-                msg.str = strndup(s, n);
+                msg.str = strdup(s);
                 env->ReleaseStringUTFChars(obj, s);
                 return msg;
             }

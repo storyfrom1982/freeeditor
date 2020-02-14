@@ -35,7 +35,7 @@ namespace freee {
         void StartPreview();
         void StopPreview();
 
-        virtual void Open(json cfg);
+        virtual void Open(json &cfg);
         virtual void Close();
 
         virtual void Start();
@@ -68,6 +68,7 @@ namespace freee {
 
         sr_buffer_pool_t *pool;
 
+        json mConfig;
     };
 
 

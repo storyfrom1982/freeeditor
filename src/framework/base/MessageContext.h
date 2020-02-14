@@ -62,11 +62,11 @@ namespace freee{
     public:
 
         virtual void OnPutMessage(sr_message_t msg) {
-            sr_message_queue_put(messageQueue, msg);
+
         };
 
         virtual void OnPutDataBuffer(sr_message_t msg){
-            sr_message_queue_put(messageQueue, msg);
+
         }
 
         virtual sr_message_t OnGetMessage(sr_message_t msg){
@@ -95,6 +95,10 @@ namespace freee{
     protected:
 
         virtual void MessageProcessor(sr_message_t msg){};
+
+        void ProcessMessage(sr_message_t msg){
+            sr_message_queue_put(messageQueue, msg);
+        }
 
         void StartMessageProcessor(){
             messageQueue = sr_message_queue_create(256, contextName.c_str());
