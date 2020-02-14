@@ -39,10 +39,10 @@ public class VideoCamera extends JNIContext implements Runnable,
     private int mRotation;
     private int mRequestWidth;
     private int mRequestHeight;
-    private int mOutputWidth;
-    private int mOutputHeight;
-    private int mCroppedWidth;
-    private int mCroppedHeight;
+    private int mPictureWidth;
+    private int mPictureHeight;
+    private int mFinalWidth;
+    private int mFinalHeight;
     private boolean isCropped = false;
     private int mFrameRate;
     private String mCameraPosition;
@@ -148,7 +148,7 @@ public class VideoCamera extends JNIContext implements Runnable,
             }
         }
 
-        parameters.setPreviewSize(mOutputWidth, mOutputHeight);
+        parameters.setPreviewSize(mPictureWidth, mPictureHeight);
         mCamera.setParameters(parameters);
         try {
             mCamera.setPreviewTexture(mSurfaceTexture);
@@ -156,27 +156,24 @@ public class VideoCamera extends JNIContext implements Runnable,
             e.printStackTrace();
         }
 
+        for (int i = 0; i < bufferCount; ++i){
+            bufferList.add(new byte[(mPictureWidth * mPictureHeight * 3) >> 1]);
+        }
+
         JSONObject json = new JSONObject();
-        json.put("width", mOutputWidth);
-        json.put("height", mOutputHeight);
+        json.put("pictureWidth", mPictureWidth);
+        json.put("pictureHeight", mPictureHeight);
         int orientation = MediaContext.Instance().getScreenOrientation();
         if (orientation == SCREEN_ORIENTATION_PORTRAIT || orientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT){
-            json.put("croppedWidth", mCroppedHeight);
-            json.put("croppedHeight", mCroppedWidth);
+            json.put("finalWidth", mFinalHeight);
+            json.put("finalHeight", mFinalWidth);
         }else {
-            json.put("croppedWidth", mCroppedWidth);
-            json.put("croppedHeight", mCroppedHeight);
+            json.put("finalWidth", mFinalWidth);
+            json.put("finalHeight", mFinalHeight);
         }
         json.put("format", 0);
         json.put("rotate", mRotation);
-//            newConfig.put("width", mOutputWidth).put("height", mOutputHeight)
-//                    .put("croppedWidth", mCroppedWidth).put("croppedHeight", mCroppedHeight)
-//                    .put("format", 0).put("rotate", mRotation);
         putJson(PutMsg_Opened, json.toString());
-
-        for (int i = 0; i < bufferCount; ++i){
-            bufferList.add(new byte[(mOutputWidth * mOutputHeight * 3) >> 1]);
-        }
     }
 
 
@@ -299,49 +296,54 @@ public class VideoCamera extends JNIContext implements Runnable,
     private void fixedOutputSize(Camera.Parameters parameters, final int width, final int height){
 
         Log.d(TAG, "fixedOutputSize: request size : " + width + "x" + height);
-        int minimumDifference = Integer.MAX_VALUE;
+
+        int difference = Integer.MAX_VALUE;
         List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
 
         for (Camera.Size size : sizes) {
-
-            Log.d(TAG, "fixedOutputSize: supported output size: " + size.width + "x" + size.height);
-            float ar = (float) (Math.round(((float) size.width / size.height) * 1000.0f)) / 1000.0f;
-            float aspectRatio = (float) (Math.round(((float) width / height) * 1000.0f)) / 1000.0f;
-
-            boolean isCrop = false;
-            int closestWidth = size.width;
-            int closestHeight = size.height;
-
-            if (ar != aspectRatio || (closestWidth & 0xf) != 0) {
-                isCrop = true;
-                int cropWidth = (int) (size.height * aspectRatio);
-                int cropHeight = (int) (size.width / aspectRatio);
-                cropWidth = ((cropWidth + 15) & ~15);
-                cropHeight = (cropHeight + 1) & ~1;
-                if (cropWidth <= size.width && size.height >= height){
-                    closestWidth = cropWidth;
-                    closestHeight = size.height;
-                }else if (cropHeight <= size.height && size.width >= width){
-                    closestWidth = size.width;
-                    closestHeight = cropHeight;
-                }else {
-                    continue;
+            if (size.width >= width && size.height >= height) {
+                int d = size.width * size.height - width * height;
+                if (difference > d){
+                    difference = d;
+                    mPictureWidth = size.width;
+                    mPictureHeight = size.height;
+                    mFinalWidth = width;
+                    mFinalHeight = height;
                 }
-            }
-
-            int difference = size.width * size.height - width * height;
-            if (difference < minimumDifference) {
-                minimumDifference = difference;
-                isCropped = isCrop;
-                mCroppedWidth = closestWidth;
-                mCroppedHeight = closestHeight;
-                mOutputWidth = size.width;
-                mOutputHeight = size.height;
             }
         }
 
-        Log.d(TAG, "fixedOutputSize: output size: " + mOutputWidth + "x" + mOutputHeight
-                + " is crop: " + isCropped + " cropped size: " + mCroppedWidth + "x" + mCroppedHeight);
+        if (difference == Integer.MAX_VALUE){
+            for (Camera.Size size : sizes) {
+
+                float ar = (float) (Math.round(((float) width / height) * 1000.0f)) / 1000.0f;
+                float AR = (float) (Math.round(((float) size.width / size.height) * 1000.0f)) / 1000.0f;
+
+                int w = size.width;
+                int h = size.height;
+
+                if (ar >= AR){
+                    h = (int) (size.width / ar);
+                }else {
+                    w = (int) (size.height * ar);
+                }
+
+                w = (w + 3) & ~3;
+                h = (h + 3) & ~3;
+                int d = Math.abs(width * height - w * h);
+
+                if (difference > d && size.width >= w && size.height >= h){
+                    difference = d;
+                    mPictureWidth = size.width;
+                    mPictureHeight = size.height;
+                    mFinalWidth = w;
+                    mFinalHeight = h;
+                }
+            }
+        }
+
+        Log.d(TAG, "fixedOutputSize: picture size: " + mPictureWidth + "x" + mPictureHeight
+                + " is crop: " + isCropped + " final size: " + mFinalWidth + "x" + mFinalHeight);
     }
 
     private void fixedOutputRotation(int rotate){

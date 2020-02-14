@@ -12,18 +12,20 @@
 
 namespace freee{
 
-    class VideoEncoder {
+    class VideoEncoder : public MessageContext {
 
     public:
 
         VideoEncoder();
         ~VideoEncoder();
 
-        void openEncoder(std::string config);
-        void closeEncoder();
-        sr_message_t* GetBuffer();
+        void OpenEncoder(std::string config);
+        void CloseEncoder();
+
         void PutBuffer(SmartPtr<sr_buffer_t*> buffer);
         void PutBuffer(sr_buffer_t *buffer);
+
+        virtual sr_buffer_t* GetBuffer();
 
     private:
 

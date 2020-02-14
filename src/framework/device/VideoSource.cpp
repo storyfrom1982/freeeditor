@@ -116,7 +116,7 @@ void VideoSource::OnPutMessage(sr_message_t msg) {
             processData(msg.ptr, msg.type);
             break;
         case OnVideoSource_Opened:
-            LOGD("config: %s\n", msg.str);
+            LOGD("VideoSource::OnPutMessage OnVideoSource_Opened\n");
             updateConfig(msg);
             break;
         case OnVideoSource_Started:
@@ -213,11 +213,12 @@ void VideoSource::Release() {
 
 void VideoSource::updateConfig(sr_message_t msg) {
     json cfg = json::parse(msg.str);
+    LOGD("VideoSource::updateConfig: %s\n", cfg.dump(4).c_str());
     mRotation = cfg["rotate"];
-    mInputWidth = cfg["width"];
-    mInputHeight = cfg["height"];
-    mOutputWidth = cfg["croppedWidth"];
-    mOutputHeight = cfg["croppedHeight"];
+    mInputWidth = cfg["pictureWidth"];
+    mInputHeight = cfg["pictureHeight"];
+    mOutputWidth = cfg["finalWidth"];
+    mOutputHeight = cfg["finalHeight"];
     pool = sr_buffer_pool_create(8);
     while (sr_buffer_pool_fill(pool, videoPacket_Alloc(mOutputWidth, mOutputHeight, libyuv::FOURCC_I420)) > 0){}
     __sr_msg_clear(msg);

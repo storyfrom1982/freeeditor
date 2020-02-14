@@ -47,7 +47,7 @@ void MediaRecorder::MessageProcessor(sr_message_t msg) {
 void MediaRecorder::Initialize(sr_message_t msg) {
     json cfg = json::parse(msg.str);
     videoSource = new VideoSource();
-    videoSource->Open(cfg["videoSource"]);
+    videoSource->Open(cfg["video"]);
     videoEncoder = new VideoEncoder;
     videoSource->SetEncoder(videoEncoder);
 }

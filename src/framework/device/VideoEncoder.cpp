@@ -4,41 +4,35 @@
 
 #include "VideoEncoder.h"
 
-void freee::VideoEncoder::openEncoder(std::string config) {
+
+using namespace freee;
+
+
+VideoEncoder::VideoEncoder() {
 
 }
 
-void freee::VideoEncoder::closeEncoder() {
+VideoEncoder::~VideoEncoder() {
 
 }
 
-sr_message_t *freee::VideoEncoder::GetBuffer() {
-    if (sr_message_queue_putable(queue)){
-//        LOGD("sr_message_queue_putable = %u\n", sr_message_queue_putable(queue));
-//        return sr_message_queue_get_buffer(queue);
-    }
+void VideoEncoder::OpenEncoder(std::string config) {
+
+}
+
+void VideoEncoder::CloseEncoder() {
+
+}
+
+sr_buffer_t* VideoEncoder::GetBuffer() {
+
     return nullptr;
 }
 
-void freee::VideoEncoder::PutBuffer(SmartPtr<sr_buffer_t*> buffer) {
-//    sr_buffer_pool_free(buffer.get());
-//    sr_message_queue_put(queue, *msg);
-//    LOGD("sr_message_queue_putable = %u\n", sr_message_queue_getable(queue));
+void VideoEncoder::PutBuffer(SmartPtr<sr_buffer_t*> buffer) {
+
 }
 
-freee::VideoEncoder::VideoEncoder() {
-    queue = sr_message_queue_create(256, "videoEncoder");
-}
-
-freee::VideoEncoder::~VideoEncoder() {
-//    while (sr_message_queue_getable(queue)){
-//        sr_message_t *msg = sr_message_queue_get(queue);
-//        VideoPacket *packet = static_cast<VideoPacket *>(msg->ptr);
-//        videoPacket_Free(&packet);
-//    }
-    sr_message_queue_release(&queue);
-}
-
-void freee::VideoEncoder::PutBuffer(sr_buffer_t *buffer) {
+void VideoEncoder::PutBuffer(sr_buffer_t *buffer) {
     sr_buffer_pool_free(buffer);
 }

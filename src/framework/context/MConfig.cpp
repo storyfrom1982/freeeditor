@@ -71,41 +71,41 @@ void MConfig::buildDefaultConfig(json &config) {
 
     config = {
 
-            {"videoSource", {
+            {"video", {
+
                 {"width", 640},
                 {"height", 360},
                 {"fps", 25},
+
                 {"position", "front"},
                 {"rotation", 0},
                 {"mirror", false},
+
+                {"codeType", "h264"},
+                {"codeName", "x264"},
+                {"bitRate", 1024},
+                {"keyFrameInterval", 1},
             }},
 
             {"videoEffect", {
                 {"applyList", {"none"}},
             }},
 
-            {"videoEncoder", {
-                {"name", "x264"},
-                {"bitRate", 1024},
-                {"keyFrameInterval", 1},
-            }},
 
-
-            {"audioSource", {
+            {"audio", {
                 {"sampleRate", 48000},
                 {"channelCount", 1},
                 {"bitsPerSample", 16},
                 {"position", "center"},
                 {"aec", false},
+
+                {"codeType", "aac"},
+                {"codeName", "faac"},
+                {"bitRate", 128},
             }},
 
             {"audioEffect", {
                 {"applyList", {"none"}},
-            }},
-
-            {"audioEncoder", {
-                {"name", "aac"},
-                {"bitRate", 128},
             }},
     };
 }
