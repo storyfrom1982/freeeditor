@@ -164,8 +164,6 @@ void VideoSource::processData(void *data, int size) {
     y420Pkt = static_cast<VideoPacket *>(buffer->ptr);
     videoPacket_To_YUV420(&nv21Pkt, y420Pkt, mRotation);
 
-    SmartPtr<sr_buffer_t*> sb(buffer);
-
     if (isPreview && window->IsReady()){
         sr_message_t msg = __sr_null_msg;
         msg.key = OpenGLESRender_DrawPicture;
@@ -173,12 +171,9 @@ void VideoSource::processData(void *data, int size) {
         msg.ptr = buffer;
         buffer->reference_count ++;
         render->OnPutMessage(msg);
-    }else {
-//        videoPacket_Free(&y420Pkt);
     }
 
-//    videoEncoder->PutBuffer(buffer);
-    encoder->PutBuffer(sb);
+    encoder->EncodeVideo(buffer);
 }
 
 void VideoSource::processData(sr_message_t msg) {
@@ -225,5 +220,6 @@ void VideoSource::updateConfig(sr_message_t msg) {
     __sr_msg_clear(msg);
     mConfig["width"] = mOutputWidth;
     mConfig["height"] = mOutputHeight;
+    encoder->OpenEncoder(mConfig);
 }
 

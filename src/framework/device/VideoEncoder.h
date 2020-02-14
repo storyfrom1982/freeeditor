@@ -9,6 +9,7 @@
 #include <string>
 #include <MessageContext.h>
 #include <SmartPtr.h>
+#include <MConfig.h>
 
 namespace freee{
 
@@ -16,20 +17,21 @@ namespace freee{
 
     public:
 
-        VideoEncoder();
-        ~VideoEncoder();
+        static VideoEncoder* Create(std::string name);
 
-        void OpenEncoder(std::string config);
+        virtual ~VideoEncoder();
+
+        void OpenEncoder(json& cfg);
         void CloseEncoder();
+        void EncodeVideo(sr_buffer_t *buffer);
 
-        void PutBuffer(SmartPtr<sr_buffer_t*> buffer);
-        void PutBuffer(sr_buffer_t *buffer);
+    protected:
 
-        virtual sr_buffer_t* GetBuffer();
+        VideoEncoder();
 
-    private:
-
-        sr_message_queue_t *queue;
+        virtual int OnOpenEncoder(json& cfg) = 0;
+        virtual void OnCloseEncoder() = 0;
+        virtual void OnEncodeVideo(sr_buffer_t *buffer) = 0;
 
     };
 

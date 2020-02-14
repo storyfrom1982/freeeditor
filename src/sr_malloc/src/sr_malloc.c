@@ -828,6 +828,11 @@ void* aligned_alloc(size_t alignment, size_t size)
 	return NULL;
 }
 
+void* memalign(size_t boundary, size_t size)
+{
+	return aligned_alloc(boundary, size);
+}
+
 void* _aligned_alloc(size_t alignment, size_t size)
 {
     return aligned_alloc(alignment, size);
@@ -857,6 +862,22 @@ char* strdup(const char *s)
 		if (result != NULL){
 		    memcpy(result, s, len);
 		    result[len] = '\0';
+		}
+	}
+
+	return result;
+}
+
+char* strndup(const char *s, size_t n)
+{
+	char *result = NULL;
+	if (s && n > 0){
+
+		result = (char *)malloc(n + 1);
+
+		if (result != NULL){
+			memcpy(result, s, n);
+			result[n] = '\0';
 		}
 	}
 

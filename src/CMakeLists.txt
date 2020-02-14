@@ -5,6 +5,18 @@ cmake_minimum_required(VERSION 3.4.1)
 set(LIBS_PATH ${CMAKE_SOURCE_DIR}/../thirdpart/android/libs)
 set(INCLUDE_PATH ${CMAKE_SOURCE_DIR}/../thirdpart/src)
 
+add_library(lib_fdkaac STATIC IMPORTED)
+set_target_properties(lib_fdkaac PROPERTIES IMPORTED_LOCATION
+        ${LIBS_PATH}/${ANDROID_ABI}/libFraunhoferAAC.a)
+
+add_library(lib_opus STATIC IMPORTED)
+set_target_properties(lib_opus PROPERTIES IMPORTED_LOCATION
+        ${LIBS_PATH}/${ANDROID_ABI}/libopus.a)
+
+add_library(lib_x264 STATIC IMPORTED)
+set_target_properties(lib_x264 PROPERTIES IMPORTED_LOCATION
+        ${LIBS_PATH}/${ANDROID_ABI}/libx264.a)
+
 add_library(lib_yuv STATIC IMPORTED)
 set_target_properties(lib_yuv PROPERTIES IMPORTED_LOCATION
     ${LIBS_PATH}/${ANDROID_ABI}/libyuv.a)
@@ -99,6 +111,10 @@ target_link_libraries(
     freeeditor
 
     lib_yuv
+    lib_x264
+    lib_opus
+    lib_fdkaac
+
         lib_avformat
         lib_avcodec
         lib_swresample

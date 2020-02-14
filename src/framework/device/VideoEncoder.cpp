@@ -3,6 +3,7 @@
 //
 
 #include "VideoEncoder.h"
+#include "X264Encoder.h"
 
 
 using namespace freee;
@@ -16,23 +17,18 @@ VideoEncoder::~VideoEncoder() {
 
 }
 
-void VideoEncoder::OpenEncoder(std::string config) {
-
+void VideoEncoder::OpenEncoder(json& cfg) {
+    OnOpenEncoder(cfg);
 }
 
 void VideoEncoder::CloseEncoder() {
-
+    OnCloseEncoder();
 }
 
-sr_buffer_t* VideoEncoder::GetBuffer() {
-
-    return nullptr;
+void VideoEncoder::EncodeVideo(sr_buffer_t *buffer) {
+    OnEncodeVideo(buffer);
 }
 
-void VideoEncoder::PutBuffer(SmartPtr<sr_buffer_t*> buffer) {
-
-}
-
-void VideoEncoder::PutBuffer(sr_buffer_t *buffer) {
-    sr_buffer_pool_free(buffer);
+VideoEncoder *VideoEncoder::Create(std::string name) {
+    return new X264Encoder;
 }

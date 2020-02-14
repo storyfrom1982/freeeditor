@@ -48,7 +48,7 @@ void MediaRecorder::Initialize(sr_message_t msg) {
     mConfig = json::parse(msg.str);
     videoSource = new VideoSource();
     videoSource->Open(mConfig["video"]);
-    videoEncoder = new VideoEncoder;
+    videoEncoder = VideoEncoder::Create("x264");
     videoSource->SetEncoder(videoEncoder);
 }
 
