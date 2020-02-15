@@ -15,6 +15,11 @@
 namespace freee {
 
     class X264Encoder : public VideoEncoder {
+
+    public:
+        X264Encoder(){}
+        ~X264Encoder();
+
     protected:
         int OnOpenEncoder(json& cfg) override;
 
@@ -24,8 +29,9 @@ namespace freee {
 
     private:
 
+        ino64_t m_frameId;
         x264_t   *m_handle;
-        x264_param_t m_param;
+        x264_param_t param;
     };
 }
 

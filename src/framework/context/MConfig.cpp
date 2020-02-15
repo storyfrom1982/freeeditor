@@ -84,6 +84,7 @@ void MConfig::buildDefaultConfig(json &config) {
                 {"codeType", "h264"},
                 {"codeName", "x264"},
                 {"bitRate", 1024},
+                {"vbr", true},
                 {"keyFrameInterval", 1},
             }},
 

@@ -38,9 +38,9 @@ VideoRenderer::~VideoRenderer() {
 void VideoRenderer::OnPutMessage(sr_message_t msg) {
 
     if (msg.key == OpenGLESRender_SurfaceDestroyed){
-//        AutoLock lock(m_lock);
+        AutoLock lock(m_lock);
         ProcessMessage(msg);
-//        lock.wait();
+        lock.wait();
     }else {
         ProcessMessage(msg);
     }
@@ -124,9 +124,9 @@ void VideoRenderer::surfaceChanged(sr_message_t msg) {
 
 void VideoRenderer::surfaceDestroyed(sr_message_t msg) {
     LOGD("VideoRenderer::surfaceDestroyed enter\n");
-//    AutoLock lock(m_lock);
+    AutoLock lock(m_lock);
     gl_renderer_remove_window(renderer);
-//    lock.signal();
+    lock.signal();
     LOGD("VideoRenderer::surfaceDestroyed exit\n");
 }
 

@@ -790,6 +790,10 @@ void* realloc(void *address, size_t size)
 
 void* aligned_alloc(size_t alignment, size_t size)
 {
+    if (alignment == __align_size){
+        return malloc(size);
+    }
+
 	void *address = NULL, *aligned_address = NULL;
 	pointer_t *pointer = NULL, *aligned_pointer = NULL;
 
