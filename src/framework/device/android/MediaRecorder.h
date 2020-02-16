@@ -10,6 +10,9 @@
 #include <VideoSource.h>
 #include <VideoWindow.h>
 #include <VideoRenderer.h>
+#include <AudioSource.h>
+#include <AudioEncoder.h>
+#include <MediaProtocol.h>
 
 namespace freee{
 
@@ -24,6 +27,7 @@ namespace freee{
         Record_ChangeEncodeConfig,
         Record_StartPreview,
         Record_DrawPicture,
+        Record_SetUrl,
     };
 
     class MediaRecorder : public MessageContext{
@@ -44,8 +48,11 @@ namespace freee{
 
     private:
 
+        AudioSource *audioSource;
         VideoSource *videoSource;
         VideoEncoder *videoEncoder;
+        AudioEncoder *audioEncoder;
+        MediaProtocol *mediaProtocol;
 
         json mConfig;
     };

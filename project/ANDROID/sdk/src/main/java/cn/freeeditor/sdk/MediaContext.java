@@ -24,6 +24,7 @@ public class MediaContext extends JNIContext {
     private int currentOrientation;
 
     private VideoCamera camera;
+    private Microphone microphone;
 
     private static MediaContext sMediaContext = null;
 
@@ -175,7 +176,7 @@ public class MediaContext extends JNIContext {
             case OnGetMsg_CreateCamera:
                 return new JNIMessage(key, createCamera());
             case OnGetMsg_CreateMicrophone:
-                break;
+                return new JNIMessage(key, createMicrophone());
             default:
                 break;
         }
@@ -192,6 +193,13 @@ public class MediaContext extends JNIContext {
             camera = new VideoCamera();
         }
         return camera.getJniContext();
+    }
+
+    private long createMicrophone(){
+        if (microphone == null){
+            microphone = new Microphone();
+        }
+        return microphone.getJniContext();
     }
 
     private long mediaContext;

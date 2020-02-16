@@ -96,7 +96,7 @@ namespace freee{
 
         virtual void MessageProcessor(sr_message_t msg){};
 
-        void ProcessMessage(sr_message_t msg){
+        virtual void ProcessMessage(sr_message_t msg){
             sr_message_queue_put(messageQueue, msg);
         }
 

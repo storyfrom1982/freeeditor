@@ -10,6 +10,7 @@
 #include <MessageContext.h>
 #include <SmartPtr.h>
 #include <MConfig.h>
+#include "MediaProtocol.h"
 
 namespace freee{
 
@@ -24,6 +25,14 @@ namespace freee{
         void OpenEncoder(json& cfg);
         void CloseEncoder();
         void EncodeVideo(sr_buffer_t *buffer);
+
+        void SetProtocol(MediaProtocol *aProtocol){
+            mediaProtocol = aProtocol;
+        }
+
+    protected:
+
+        MediaProtocol *mediaProtocol;
 
     protected:
 

@@ -24,6 +24,9 @@ MediaRecorder::~MediaRecorder() {
     if (videoEncoder){
         delete videoEncoder;
     }
+    if (audioSource){
+        delete audioSource;
+    }
 }
 
 void MediaRecorder::MessageProcessor(sr_message_t msg) {
@@ -33,11 +36,17 @@ void MediaRecorder::MessageProcessor(sr_message_t msg) {
             break;
         case Record_StartCapture:
             videoSource->Start();
+            audioSource->Start();
             break;
         case Record_StartPreview:
             StartPreview(msg);
             break;
         case Record_DrawPicture:
+            break;
+        case Record_SetUrl:
+            mediaProtocol = MediaProtocol::Create(msg.str);
+            audioEncoder->SetProtocol(mediaProtocol);
+            videoEncoder->SetProtocol(mediaProtocol);
             break;
         default:
             break;
@@ -47,9 +56,15 @@ void MediaRecorder::MessageProcessor(sr_message_t msg) {
 void MediaRecorder::Initialize(sr_message_t msg) {
     mConfig = json::parse(msg.str);
     videoSource = new VideoSource();
-    videoSource->Open(mConfig["video"]);
     videoEncoder = VideoEncoder::Create("x264");
     videoSource->SetEncoder(videoEncoder);
+    videoSource->Open(mConfig["video"]);
+
+    audioSource = new AudioSource();
+    audioEncoder = AudioEncoder::Create("aac");
+    audioSource->SetEncoder(audioEncoder);
+    audioSource->Open(mConfig["audio"]);
+
 }
 
 void MediaRecorder::StartPreview(sr_message_t msg) {

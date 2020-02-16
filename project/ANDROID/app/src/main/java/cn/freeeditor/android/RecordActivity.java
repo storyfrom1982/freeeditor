@@ -97,6 +97,7 @@ public class RecordActivity extends Activity {
 
     private void openRecorder(String url){
         recorder = new MediaRecorder();
+        recorder.setUrl(url);
         recorder.startCapture();
         recorder.startPreview(surfaceView);
     }

@@ -76,6 +76,7 @@ namespace freee {
             }
         }
 
+        //AddOutputChannel
         virtual void addOutputStream(StreamProcessor *stream){
             AutoLock lock(m_outputsLock);
             stream->m_inputs.push_back(this);
@@ -105,6 +106,7 @@ namespace freee {
             }
         };
 
+        //SendtoOutputChannel
         virtual void sendMessageToOutputStream(sr_message_t msg){
             AutoLock lock(m_outputsLock);
             if (m_outputs.size() > 0){
@@ -118,6 +120,7 @@ namespace freee {
             }
         };
 
+        //GetFromInputChannel
         virtual sr_message_t sendRequestToInputStream(sr_message_t msg){
             AutoLock lock(m_inputsLock);
             if (m_inputs.empty()){
@@ -153,22 +156,27 @@ namespace freee {
 
     protected:
 
+        //onRecvfromInputChannel
         virtual void messageFromInputStream(sr_message_t msg){
 
         }
 
+        //onRecvfromOutputChannel
         virtual void messageFromOutputStream(sr_message_t msg){
 
         }
 
+        //onGetFromInputChannel
         virtual sr_message_t requestFromInputStream(sr_message_t msg){
             return __sr_null_msg;
         }
 
+        //onGetFromOutputChannel
         virtual sr_message_t requestFromOutputStream(sr_message_t msg){
             return __sr_null_msg;
         }
 
+        //onOpened(MessageContext *p)
 
     protected:
 
@@ -177,6 +185,8 @@ namespace freee {
 
         std::vector<StreamProcessor*> m_inputs;
         std::vector<StreamProcessor*> m_outputs;
+
+        std::vector<StreamProcessor*> m_callbacks;
     };
 
 

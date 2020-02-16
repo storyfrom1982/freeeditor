@@ -96,7 +96,8 @@ void MConfig::buildDefaultConfig(json &config) {
             {"audio", {
                 {"sampleRate", 48000},
                 {"channelCount", 1},
-                {"bitsPerSample", 16},
+                {"bitPerSample", 16},
+                {"samplePerFrame", 1024},
                 {"position", "center"},
                 {"aec", false},
 

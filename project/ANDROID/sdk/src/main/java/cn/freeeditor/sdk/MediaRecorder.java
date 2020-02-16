@@ -53,6 +53,10 @@ public class MediaRecorder extends JNIContext implements SurfaceHolder.Callback 
         }
     }
 
+    public void setUrl(String url){
+        putMessage(8);
+    }
+
     public void startCapture(){
         putMessage(Record_StartCapture);
     }

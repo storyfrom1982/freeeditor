@@ -73,6 +73,21 @@ int X264Encoder::OnOpenEncoder(json& cfg) {
 
     m_handle = x264_encoder_open(&param);
 
+    x264_nal_t* encoded;
+    int nal;
+
+    if (x264_encoder_headers(m_handle, &encoded, &nal) < 0){
+        return -1;
+    }
+
+    if (nal < 2)
+        return -1;
+
+    unsigned char *sps = encoded[0].p_payload + 4;
+    unsigned char *pps = encoded[1].p_payload + 4;
+    short sps_size = encoded[0].i_payload-4;
+    short pps_size = encoded[1].i_payload - 4;
+
     m_frameId = 0;
     LOGD("X264Encoder::OnOpenEncoder: %p\n", m_handle);
     return 0;
@@ -131,7 +146,7 @@ void X264Encoder::OnEncodeVideo(sr_buffer_t *buffer) {
     long long tmStamp = param.b_vfr_input ? pic_out.i_dts :
                         pic_out.i_dts*1000000*param.i_fps_den/param.i_fps_num;
 
-    LOGD("X264Encoder::OnOpenEncoder: size=%d  timestamp=%ld\n", frameLen, tmStamp);
+//    LOGD("X264Encoder::OnOpenEncoder: size=%d  timestamp=%ld\n", frameLen, tmStamp);
 }
 
 X264Encoder::~X264Encoder() {
