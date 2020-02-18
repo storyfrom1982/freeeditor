@@ -176,7 +176,7 @@ static void InitializeTexture(int name, int id, int width, int height)
 			GL_UNSIGNED_BYTE, NULL);
 }
 
-static void SetupTextures(opengles_t *gles, const VideoPacket *frameToRender)
+static void SetupTextures(opengles_t *gles, const sr_buffer_frame_t *frameToRender)
 {
 	LOGD("width %d, height %d", frameToRender->width, frameToRender->height);
 
@@ -217,7 +217,7 @@ static void GlTexSubImage2D(GLsizei width, GLsizei height, int stride,
 	}
 }
 
-static void UpdateTextures(opengles_t *gles, const VideoPacket *frameToRender)
+static void UpdateTextures(opengles_t *gles, const sr_buffer_frame_t *frameToRender)
 {
 	const GLsizei width = frameToRender->width;
 	const GLsizei height = frameToRender->height;
@@ -315,7 +315,7 @@ int32_t Setup(opengles_t *gles)
 	return 0;
 }
 
-int opengles_render(opengles_t *gles, const VideoPacket *frameToRender)
+int opengles_render(opengles_t *gles, const sr_buffer_frame_t *frameToRender)
 {
 	if (frameToRender == NULL)
 	{

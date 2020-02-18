@@ -8,7 +8,7 @@
 #include <libyuv.h>
 
 
-VideoPacket* videoPacket_Alloc(int width, int height, uint32_t fourcc)
+sr_buffer_frame_t* sr_buffer_frame_alloc(uint32_t width, uint32_t height, uint32_t fourcc)
 {
     if (fourcc != FOURCC_I420
         && fourcc != FOURCC_NV21
@@ -16,50 +16,53 @@ VideoPacket* videoPacket_Alloc(int width, int height, uint32_t fourcc)
         return NULL;
     }
 
-    VideoPacket *packet = (VideoPacket *)malloc(sizeof(VideoPacket));
+    sr_buffer_frame_t *frame = (sr_buffer_frame_t *)malloc(sizeof(sr_buffer_frame_t));
 
-    packet->type = fourcc;
-    packet->width = width;
-    packet->height = height;
+    frame->is_pointer = 1;
 
-    packet->plane[0].stride = packet->width;
-    packet->plane[0].size = (size_t)(packet->width * packet->height);
-    packet->size = packet->plane[0].size + (packet->plane[0].size >> 1);
+    frame->media_type = fourcc;
+    frame->width = width;
+    frame->height = height;
 
-    packet->is_malloc = 1;
-    packet->data = (uint8_t *)malloc(packet->size);
-    packet->plane[0].data = packet->data;
+    frame->plane[0].stride = frame->width;
+    frame->plane[0].size = (size_t)(frame->width * frame->height);
+    frame->size = frame->plane[0].size + (frame->plane[0].size >> 1);
 
-    switch (packet->type){
+    frame->data = (uint8_t *)malloc(frame->size);
+    frame->plane[0].data = frame->data;
+
+    switch (frame->media_type){
         case FOURCC_I420:
-            packet->nb_planes = 3;
-            packet->plane[1].stride = packet->plane[0].stride >> 1;
-            packet->plane[1].size = packet->plane[0].size >> 2;
-            packet->plane[1].data = packet->plane[0].data + packet->plane[0].size;
-            packet->plane[2].stride = packet->plane[1].stride;
-            packet->plane[2].size = packet->plane[1].size;
-            packet->plane[2].data = packet->plane[1].data + packet->plane[1].size;
+            frame->max_plane = 3;
+            frame->plane[1].stride = frame->plane[0].stride >> 1;
+            frame->plane[1].size = frame->plane[0].size >> 2;
+            frame->plane[1].data = frame->plane[0].data + frame->plane[0].size;
+            frame->plane[2].stride = frame->plane[1].stride;
+            frame->plane[2].size = frame->plane[1].size;
+            frame->plane[2].data = frame->plane[1].data + frame->plane[1].size;
             break;
         case FOURCC_NV12:
         case FOURCC_NV21:
-            packet->nb_planes = 2;
-            packet->plane[1].stride = packet->plane[0].stride;
-            packet->plane[1].size = packet->plane[0].size >> 1;
-            packet->plane[1].data = packet->plane[0].data + packet->plane[0].size;
+            frame->max_plane = 2;
+            frame->plane[1].stride = frame->plane[0].stride;
+            frame->plane[1].size = frame->plane[0].size >> 1;
+            frame->plane[1].data = frame->plane[0].data + frame->plane[0].size;
             break;
         default:
             break;
     }
 
-    return packet;
+    frame->size = 0;
+
+    return frame;
 }
 
-void videoPacket_Free(VideoPacket **pp_packet)
+void sr_buffer_frame_free(sr_buffer_frame_t **pp_frame)
 {
-    if (pp_packet != NULL && *pp_packet != NULL){
-        VideoPacket *packet = *pp_packet;
-        *pp_packet = NULL;
-        if (packet->is_malloc){
+    if (pp_frame != NULL && *pp_frame != NULL){
+        sr_buffer_frame_t *packet = *pp_frame;
+        *pp_frame = NULL;
+        if (packet->is_pointer){
             if (packet->data){
                 free(packet->data);
             }
@@ -68,53 +71,60 @@ void videoPacket_Free(VideoPacket **pp_packet)
     }
 }
 
-int videoPacket_FillData(VideoPacket *packet, const uint8_t *data, int width, int height, uint32_t fourcc)
+int sr_buffer_frame_fill(sr_buffer_frame_t *frame, const uint8_t *data, uint32_t width, uint32_t height,
+                         uint32_t fourcc)
 {
-    if (packet == NULL || data == NULL){
+    if (frame == NULL || data == NULL){
         return -1;
     }
 
-    packet->type = fourcc;
-    packet->width = width;
-    packet->height = height;
+    frame->is_pointer = 0;
 
-    packet->plane[0].stride = packet->width;
-    packet->plane[0].size = (size_t)(packet->width * packet->height);
-    packet->size = packet->plane[0].size + (packet->plane[0].size >> 1);
+    frame->media_type = fourcc;
+    frame->width = width;
+    frame->height = height;
 
-    packet->is_malloc = 0;
-    packet->data = (uint8_t*)data;
-    packet->plane[0].data = packet->data;
+    frame->plane[0].stride = frame->width;
+    frame->plane[0].size = (size_t)(frame->width * frame->height);
 
-    switch (packet->type){
+    frame->data = (uint8_t*)data;
+    frame->plane[0].data = frame->data;
+
+    switch (frame->media_type){
         case FOURCC_I420:
-            packet->nb_planes = 3;
-            packet->plane[1].stride = packet->plane[0].stride >> 1;
-            packet->plane[1].size = packet->plane[0].size >> 2;
-            packet->plane[1].data = packet->plane[0].data + packet->plane[0].size;
-            packet->plane[2].stride = packet->plane[1].stride;
-            packet->plane[2].size = packet->plane[1].size;
-            packet->plane[2].data = packet->plane[1].data + packet->plane[1].size;
+            frame->max_plane = 3;
+            frame->plane[1].stride = frame->plane[0].stride >> 1;
+            frame->plane[1].size = frame->plane[0].size >> 2;
+            frame->plane[1].data = frame->plane[0].data + frame->plane[0].size;
+            frame->plane[2].stride = frame->plane[1].stride;
+            frame->plane[2].size = frame->plane[1].size;
+            frame->plane[2].data = frame->plane[1].data + frame->plane[1].size;
             break;
         case FOURCC_NV12:
         case FOURCC_NV21:
-            packet->nb_planes = 2;
-            packet->plane[1].stride = packet->plane[0].stride;
-            packet->plane[1].size = packet->plane[0].size >> 1;
-            packet->plane[1].data = packet->plane[0].data + packet->plane[0].size;
+            frame->max_plane = 2;
+            frame->plane[1].stride = frame->plane[0].stride;
+            frame->plane[1].size = frame->plane[0].size >> 1;
+            frame->plane[1].data = frame->plane[0].data + frame->plane[0].size;
             break;
         default:
             return -1;
     }
 
+    frame->size = 0;
+
+    for (int i = 0; i < frame->max_plane; ++i){
+        frame->size += frame->plane[i].size;
+    }
+
     return 0;
 }
 
-int videoPacket_To_YUV420(VideoPacket *src, VideoPacket *dst, int rotate_degree)
+int sr_buffer_frame_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst, int rotate_degree)
 {
     if (src == NULL || dst == NULL
-        || (src->type != FOURCC_NV12
-            && src->type != FOURCC_NV21)){
+        || (src->media_type != FOURCC_NV12
+            && src->media_type != FOURCC_NV21)){
         return -1;
     }
 
@@ -145,16 +155,16 @@ int videoPacket_To_YUV420(VideoPacket *src, VideoPacket *dst, int rotate_degree)
             crop_x, crop_y,
             src->width, src->height,
             width, height,
-            rotation, src->type);
+            rotation, src->media_type);
 }
 
-int videoPacket_From_YUV420(VideoPacket *src, VideoPacket *dst)
+int sr_buffer_frame_from_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst)
 {
-    if (src->type != FOURCC_I420){
+    if (src->media_type != FOURCC_I420){
         return -1;
     }
 
-    if (dst->type == FOURCC_NV21){
+    if (dst->media_type == FOURCC_NV21){
         return I420ToNV21(
                 src->plane[0].data, src->plane[0].stride,
                 src->plane[1].data, src->plane[1].stride,
@@ -162,7 +172,7 @@ int videoPacket_From_YUV420(VideoPacket *src, VideoPacket *dst)
                 dst->plane[0].data, dst->plane[0].stride,
                 dst->plane[1].data, dst->plane[1].stride,
                 dst->width, dst->height);
-    }else if (dst->type == FOURCC_NV12){
+    }else if (dst->media_type == FOURCC_NV12){
         return I420ToNV12(
                 src->plane[0].data, src->plane[0].stride,
                 src->plane[1].data, src->plane[1].stride,

@@ -557,7 +557,7 @@ void* malloc(size_t size)
 
 		}else{
 
-			pool->tid = pthread_self();
+			pool->m_tid = pthread_self();
 			for (size_t page_id = 0; page_id < mm->preloading_page; ++page_id){
 				pool->page[page_id].file_id = page_id;
 				if (assign_page(pool, &(pool->page[page_id]), mm->page_size) != 0){

@@ -9,30 +9,46 @@
 #include <libyuv.h>
 
 
-typedef struct VideoPacket {
+typedef struct sr_buffer_frame_t {
 
-    uint32_t type;
-    int is_malloc;
-    int nb_planes;
+    int key;
+
+    char *js;
+
+    int is_pointer;
+
+    union {
+        void *ptr;
+        double f64;
+        int64_t i64;
+        uint64_t u64;
+    };
 
     struct {
-        int stride;
         size_t size;
+        uint32_t stride;
         uint8_t *data;
     }plane[4];
 
-    int width;
-    int height;
+    int media_type;
+
+    int max_plane;
+
+    int width, height;
+
     size_t size;
+
     uint8_t *data;
-}VideoPacket;
+
+}sr_buffer_frame_t;
 
 
-VideoPacket* videoPacket_Alloc(int width, int height, uint32_t fourcc);
+sr_buffer_frame_t* sr_buffer_frame_alloc(uint32_t width, uint32_t height, uint32_t fourcc);
+void sr_buffer_frame_free(sr_buffer_frame_t **pp_frame);
 
-int videoPacket_FillData(VideoPacket *packet, const uint8_t *data, int width, int height, uint32_t fourcc);
-int videoPacket_To_YUV420(VideoPacket *src, VideoPacket *dst, int rotate_degree);
-int videoPacket_From_YUV420(VideoPacket *src, VideoPacket *dst);
-void videoPacket_Free(VideoPacket **pp_packet);
+int sr_buffer_frame_fill(sr_buffer_frame_t *frame, const uint8_t *data, uint32_t width, uint32_t height, uint32_t fourcc);
+int sr_buffer_frame_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst, int rotate_degree);
+int sr_buffer_frame_from_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst);
+
 
 #endif //PROJECT_VIDEO_RESAMPLE_H

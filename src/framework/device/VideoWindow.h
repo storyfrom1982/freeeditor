@@ -26,7 +26,7 @@ namespace freee {
 
         bool IsReady();
 
-        void RegisterCallback(MessageContext *callback);
+        void RegisterCallback(VideoRenderer *callback);
 
         void* GetNativeWindow();
 
@@ -47,7 +47,7 @@ namespace freee {
         void *mWindowHolder;
         void *mNativeWindow;
 
-        MessageContext *mCallback;
+        VideoRenderer *mCallback;
 
     };
 

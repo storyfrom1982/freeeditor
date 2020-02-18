@@ -90,7 +90,7 @@ static _Unwind_Reason_Code UnwindBacktraceWithSkippingCallback(
     assert(state);
 
     // Skip some initial addresses, because they belong
-    // to the signal handler frame.
+    // to the signal handler buffer.
     if (state->address_skip_count > 0) {
         state->address_skip_count--;
         return _URC_NO_REASON;

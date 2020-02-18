@@ -8,6 +8,7 @@
 
 #include <MConfig.h>
 #include <MessageContext.h>
+#include <SrBufferPool.h>
 #include "VideoRenderer.h"
 #include "VideoWindow.h"
 #include "VideoEncoder.h"
@@ -66,6 +67,7 @@ namespace freee {
         VideoWindow *window;
         VideoRenderer *render;
 
+        SrBufferPool *bp;
         sr_buffer_pool_t *pool;
 
         json mConfig;

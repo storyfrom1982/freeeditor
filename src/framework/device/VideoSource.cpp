@@ -55,7 +55,9 @@ VideoSource::VideoSource() {
     render = new VideoRenderer();
     sr_message_t msg = __sr_null_msg;
     msg.key = OpenGLESRender_Init;
-    render->OnPutMessage(msg);
+    SrMessage b;
+    b.frame.key = OpenGLESRender_Init;
+    render->OnPutMessage(b);
 }
 
 VideoSource::~VideoSource() {
@@ -140,40 +142,30 @@ sr_message_t VideoSource::OnGetMessage(sr_message_t msg) {
 }
 
 void VideoSource::processData(void *data, int size) {
-    VideoPacket nv21Pkt = {0};
-    videoPacket_FillData(&nv21Pkt, (uint8_t*)data, mInputWidth, mInputHeight, libyuv::FOURCC_NV21);
 
-//    sr_message_t *msg = videoEncoder->GetBuffer();
-//    if (!msg){
-//        return;
-//    }
+    sr_buffer_frame_t nv21Pkt = {0};
+    sr_buffer_frame_fill(&nv21Pkt, (uint8_t *) data, mInputWidth, mInputHeight, libyuv::FOURCC_NV21);
 
-    VideoPacket *y420Pkt;
-//    if (msg->ptr == NULL){
-//        y420Pkt = videoPacket_Alloc(360, 640, libyuv::FOURCC_I420);
-//        msg->ptr = y420Pkt;
-//    }else {
-//        y420Pkt = static_cast<VideoPacket *>(msg->ptr);
-//    }
+    sr_buffer_frame_t *y420Pkt;
 
-    sr_buffer_t *buffer = sr_buffer_pool_get(pool);
-    if (!buffer){
-        LOGD("isPreview:%d  isReady:%d\n", __is_true(isPreview), window->IsReady());
+    SrMessage sb = bp->GetBuffer();
+    if (!sb.buffer){
+        LOGD("cannot allocate buffer\n");
         return;
     }
-    y420Pkt = static_cast<VideoPacket *>(buffer->ptr);
-    videoPacket_To_YUV420(&nv21Pkt, y420Pkt, mRotation);
+
+    y420Pkt = &sb.frame;
+    sr_buffer_frame_fill(y420Pkt, sb.buffer->data, mOutputWidth, mOutputHeight,
+                         libyuv::FOURCC_I420);
+
+    sr_buffer_frame_to_yuv420p(&nv21Pkt, y420Pkt, mRotation);
 
     if (isPreview && window->IsReady()){
-        sr_message_t msg = __sr_null_msg;
-        msg.key = OpenGLESRender_DrawPicture;
-        msg.type = MessageType_Pointer;
-        msg.ptr = buffer;
-        buffer->reference_count ++;
-        render->OnPutMessage(msg);
+        sb.frame.key = OpenGLESRender_DrawPicture;
+        render->OnPutMessage(sb);
     }
 
-    encoder->EncodeVideo(buffer);
+    encoder->EncodeVideo(sb);
 }
 
 void VideoSource::processData(sr_message_t msg) {
@@ -187,7 +179,10 @@ void VideoSource::SetWindow(MessageContext *windowContext) {
     sr_message_t msg = __sr_null_msg;
     msg.key = OpenGLESRender_SetSurfaceView;
     msg.ptr = window;
-    render->OnPutMessage(msg);
+    SrMessage b;
+    b.frame.key = OpenGLESRender_SetSurfaceView;
+    b.frame.data = reinterpret_cast<uint8_t *>(window);
+    render->OnPutMessage(b);
 }
 
 void VideoSource::StartPreview() {
@@ -199,12 +194,13 @@ void VideoSource::StopPreview() {
 }
 
 void VideoSource::Release() {
-    sr_buffer_t *buffer;
-    while((buffer = sr_buffer_pool_get(pool)) != NULL){
-        VideoPacket *packet = static_cast<VideoPacket *>(buffer->ptr);
-        videoPacket_Free(&packet);
-    }
-    sr_buffer_pool_release(&pool);
+//    sr_buffer_t *buffer;
+//    while((buffer = sr_buffer_pool_get(pool)) != NULL){
+//        sr_buffer_frame_t *packet = static_cast<sr_buffer_frame_t *>(buffer->ptr);
+//        sr_buffer_frame_free(&packet);
+//    }
+//    sr_buffer_pool_release(&pool);
+    delete bp;
 }
 
 void VideoSource::updateConfig(sr_message_t msg) {
@@ -215,8 +211,11 @@ void VideoSource::updateConfig(sr_message_t msg) {
     mInputHeight = cfg["pictureHeight"];
     mOutputWidth = cfg["finalWidth"];
     mOutputHeight = cfg["finalHeight"];
-    pool = sr_buffer_pool_create(8);
-    while (sr_buffer_pool_fill(pool, videoPacket_Alloc(mOutputWidth, mOutputHeight, libyuv::FOURCC_I420)) > 0){}
+
+    bp = new SrBufferPool(1, mOutputWidth * mOutputHeight / 2 * 3);
+//    pool = sr_buffer_pool_create(8);
+//    while (sr_buffer_pool_fill(pool, sr_buffer_frame_alloc(mOutputWidth, mOutputHeight,
+//                                                           libyuv::FOURCC_I420)) > 0){}
     __sr_msg_clear(msg);
     mConfig["width"] = mOutputWidth;
     mConfig["height"] = mOutputHeight;

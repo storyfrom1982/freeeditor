@@ -25,10 +25,14 @@ void VideoEncoder::CloseEncoder() {
     OnCloseEncoder();
 }
 
-void VideoEncoder::EncodeVideo(sr_buffer_t *buffer) {
-    OnEncodeVideo(buffer);
-}
-
 VideoEncoder *VideoEncoder::Create(std::string name) {
     return new X264Encoder;
+}
+
+void VideoEncoder::EncodeVideo(SrMessage buffer) {
+//    SrMessage *b = new SrMessage;
+//    *b = buffer;
+}
+
+void VideoEncoder::OnEncodeVideo(SrMessage buffer) {
 }

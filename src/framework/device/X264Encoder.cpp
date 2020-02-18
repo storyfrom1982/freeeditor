@@ -25,14 +25,14 @@ int X264Encoder::OnOpenEncoder(json& cfg) {
     uint32_t fr = cfg["fps"];
     uint32_t bitrate = cfg["bitRate"];
 
-    // if input frame rate is reliable, use the frame rate for calc bitrate
+    // if input buffer rate is reliable, use the buffer rate for calc bitrate
     if ( fr > 0){
         param.i_fps_num = fr*1000;
         param.i_fps_den=1000;
         param.b_vfr_input = 0;
     }
     else{
-        // if input frame rate is not reliable, use the timestamp for calc bitrate
+        // if input buffer rate is not reliable, use the i64 for calc bitrate
         param.b_vfr_input = 1;
         param.i_timebase_num = 1;
         param.i_timebase_den = 1000000;
@@ -99,11 +99,11 @@ void X264Encoder::OnCloseEncoder() {
     }
 }
 
-void X264Encoder::OnEncodeVideo(sr_buffer_t *buffer) {
+void X264Encoder::OnEncodeVideo(SrMessage buffer) {
 
 //    LOGD("X264Encoder::OnOpenEncoder: enter\n");
 
-    VideoPacket *pkt = static_cast<VideoPacket *>(buffer->ptr);
+    sr_buffer_frame_t *pkt = &buffer.frame;
 
     x264_picture_t pic_out;
     x264_picture_t  pic;
@@ -135,8 +135,6 @@ void X264Encoder::OnEncodeVideo(sr_buffer_t *buffer) {
         LOGD("x264_encoder_encode failed\n");
     }
 
-    sr_buffer_pool_free(buffer);
-
     int frameLen = 0;
     for (int i=0; i<i_nal; i++){
         int nal_len = nal[i].i_payload;
@@ -146,7 +144,7 @@ void X264Encoder::OnEncodeVideo(sr_buffer_t *buffer) {
     long long tmStamp = param.b_vfr_input ? pic_out.i_dts :
                         pic_out.i_dts*1000000*param.i_fps_den/param.i_fps_num;
 
-//    LOGD("X264Encoder::OnOpenEncoder: size=%d  timestamp=%ld\n", frameLen, tmStamp);
+//    LOGD("X264Encoder::OnOpenEncoder: size=%d  i64=%ld\n", frameLen, tmStamp);
 }
 
 X264Encoder::~X264Encoder() {

@@ -243,7 +243,7 @@ sr_mutex_t* sr_mutex_create()
 	return mutex;
 }
 
-void sr_mutex_remove(sr_mutex_t **pp_mutex)
+void sr_mutex_release(sr_mutex_t **pp_mutex)
 {
 	if (pp_mutex && *pp_mutex){
 		sr_mutex_t *mutex = *pp_mutex;
@@ -359,7 +359,7 @@ void sr_queue_release(sr_queue_t **pp_queue)
         		|| queue->push_waiting > 0 ){
         	sr_queue_stop(queue);
         }
-        sr_mutex_remove(&queue->mutex);
+        sr_mutex_release(&queue->mutex);
         free(queue);
     }
 }
@@ -853,7 +853,7 @@ void sr_pipe_remove(sr_pipe_t **pp_pipe)
 		sr_pipe_t *pipe = *pp_pipe;
 		*pp_pipe = NULL;
 		sr_pipe_stop(pipe);
-        sr_mutex_remove(&pipe->mutex);
+        sr_mutex_release(&pipe->mutex);
 		free(pipe->buf);
 		free(pipe);
 	}
@@ -1174,7 +1174,7 @@ void sr_message_queue_release(sr_message_queue_t **pp_queue)
 		sr_message_queue_t *queue = *pp_queue;
 		*pp_queue = NULL;
 		sr_message_queue_stop_processor(queue);
-        sr_mutex_remove(&queue->mutex);
+        sr_mutex_release(&queue->mutex);
         free(queue->message_array);
         free(queue);
 	}

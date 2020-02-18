@@ -37,9 +37,9 @@ AudioSource::~AudioSource() {
 
 void AudioSource::OnPutMessage(sr_message_t msg) {
 //    LOGD("AudioSource::OnPutMessage data size=%d\n", msg.type);
-    sr_buffer_t buffer;
-    buffer.ptr = msg.ptr;
-    mEncoder->EncodeAudioData(&buffer);
+//    SrMessage buffer;
+//    buffer.buffer->data = static_cast<unsigned char *>(msg.ptr);
+//    mEncoder->EncodeAudioData(buffer);
 }
 
 sr_message_t AudioSource::OnGetMessage(sr_message_t msg) {

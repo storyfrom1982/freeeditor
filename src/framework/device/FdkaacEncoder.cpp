@@ -85,7 +85,7 @@ void FdkaacEncoder::CloseAudioEncoder() {
     aacEncClose(&m_pHandle);
 }
 
-int FdkaacEncoder::EncodeAudioData(sr_buffer_t *buffer) {
+int FdkaacEncoder::EncodeAudioData(SrMessage buffer) {
 
     AACENC_BufDesc in_buf = { 0 }, out_buf = { 0 };
     AACENC_InArgs in_args = { 0 };
@@ -97,7 +97,7 @@ int FdkaacEncoder::EncodeAudioData(sr_buffer_t *buffer) {
     int out_size, out_elem_size;
     void *in_ptr, *out_ptr;
 
-    in_ptr = buffer->ptr;
+    in_ptr = buffer.buffer->data;
     in_size = m_intputSamples*2;
     in_elem_size = 2;
 

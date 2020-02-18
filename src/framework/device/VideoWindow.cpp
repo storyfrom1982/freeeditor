@@ -78,17 +78,26 @@ void VideoWindow::OnPutMessage(sr_message_t msg) {
         if (mCallback){
             msg.key = OpenGLESRender_SurfaceCreated;
             msg.ptr = this;
-            mCallback->OnPutMessage(msg);
+            SrMessage b;
+            b.frame.key = OpenGLESRender_SurfaceCreated;
+            b.frame.data = reinterpret_cast<uint8_t *>(this);
+            mCallback->OnPutMessage(b);
         }
 #endif
     }else if (msg.key == OnPutMsg_WindowChanged){
         msg.key = OpenGLESRender_SurfaceCreated;
         msg.ptr = this;
-        mCallback->OnPutMessage(msg);
+        SrMessage b;
+        b.frame.key = OpenGLESRender_SurfaceCreated;
+        b.frame.data = reinterpret_cast<uint8_t *>(this);
+        mCallback->OnPutMessage(b);
     }else if (msg.key == OnPutMsg_WindowDestroyed){
         msg.key = OpenGLESRender_SurfaceDestroyed;
         msg.ptr = this;
-        mCallback->OnPutMessage(msg);
+        SrMessage b;
+        b.frame.key = OpenGLESRender_SurfaceDestroyed;
+        b.frame.data = reinterpret_cast<uint8_t *>(this);
+        mCallback->OnPutMessage(b);
     }
 }
 
@@ -96,7 +105,7 @@ sr_message_t VideoWindow::OnGetMessage(sr_message_t msg) {
     return MessageContext::OnGetMessage(msg);
 }
 
-void VideoWindow::RegisterCallback(MessageContext *callback) {
+void VideoWindow::RegisterCallback(VideoRenderer *callback) {
     mCallback = callback;
     sr_message_t msg = __sr_null_msg;
     msg.key = PutMsg_RegisterCallback;

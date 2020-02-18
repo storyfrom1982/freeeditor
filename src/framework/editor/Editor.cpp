@@ -101,7 +101,7 @@ using namespace freee;
 //        case MsgKey_Editor_SaveConfig:
 //            return saveConfig(msg);
 //        default:
-//            LOGD("video frame: %p\n", msg.p64);
+//            LOGD("video buffer: %p\n", msg.p64);
 //            break;
 //    }
 //
@@ -110,7 +110,7 @@ using namespace freee;
 //
 //sr_msg_t Editor::requestFromOutputStream(sr_msg_t msg) {
 //
-//    LOGD("video frame: %p\n", msg.p64);
+//    LOGD("video buffer: %p\n", msg.p64);
 //
 //    return __sr_null_msg;
 //}

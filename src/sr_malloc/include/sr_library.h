@@ -49,7 +49,7 @@ static inline int64_t sr_time_passed(int64_t begin_microsecond)
 
 #define __sr_atom_sub(x, y)		__sync_sub_and_fetch(&(x), (y))
 #define __sr_atom_add(x, y)		__sync_add_and_fetch(&(x), (y))
-#define __sr_atom_lock(x)		while(!__set_true(x)) nanosleep((const struct timespec[]){{0, 1000L}}, NULL)
+#define __sr_atom_lock(x)		while(!__set_true(x)) nanosleep((const struct timespec[]){{0, 100000L}}, NULL)
 #define __sr_atom_trylock(x)	__set_true(x)
 #define __sr_atom_unlock(x)		__set_false(x)
 
@@ -195,7 +195,7 @@ extern void sr_log_debug(int level, const char *file, const char *func, int line
 typedef struct sr_mutex_t sr_mutex_t;
 
 extern sr_mutex_t* sr_mutex_create();
-extern void sr_mutex_remove(sr_mutex_t **pp_mutex);
+extern void sr_mutex_release(sr_mutex_t **pp_mutex);
 
 extern void sr_mutex_lock(sr_mutex_t *mutex);
 extern void sr_mutex_unlock(sr_mutex_t *mutex);

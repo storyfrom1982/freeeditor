@@ -8,6 +8,7 @@
 
 #include <MessageContext.h>
 #include <AutoLock.h>
+#include <SrMessageQueue.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,31 +31,32 @@ namespace freee {
         OpenGLESRender_SurfaceDestroyed,
     };
 
-    class VideoRenderer : public MessageContext {
+    class VideoRenderer : public SrMessageQueue {
 
     public:
         VideoRenderer();
         ~VideoRenderer() override;
 
     public:
-        void OnPutMessage(sr_message_t msg) override;
-
-        sr_message_t OnGetMessage(sr_message_t msg) override;
+        void OnPutMessage(SrMessage msg);
 
     protected:
-        void MessageProcessor(sr_message_t msg) override;
+        void MessageProcessor(SrMessage msg) override;
+
+    protected:
+
 
     private:
 //        void messageProcessorLoop(sr_message_processor_t *processor, sr_message_t msg);
 //        static void messageProcessorThread(sr_message_processor_t *processor, sr_message_t msg);
 
-        void init(sr_message_t msg);
-        void surfaceCreated(sr_message_t msg);
-        void surfaceChanged(sr_message_t msg);
-        void surfaceDestroyed(sr_message_t msg);
+        void init(SrMessage msg);
+        void surfaceCreated(SrMessage msg);
+        void surfaceChanged(SrMessage msg);
+        void surfaceDestroyed(SrMessage msg);
 
-        void setSurfaceView(sr_message_t msg);
-        void drawPicture(sr_message_t msg);
+        void setSurfaceView(SrMessage msg);
+        void drawPicture(SrMessage msg);
 
     private:
 
