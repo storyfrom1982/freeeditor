@@ -27,7 +27,7 @@ enum {
 
 
 AudioSource::AudioSource() {
-    MessageContext *context = MediaContext::Instance()->CreateMicrophone();
+    MessageContext *context = MediaContext::Instance().CreateMicrophone();
     ConnectContext(context);
 }
 

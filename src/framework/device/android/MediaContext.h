@@ -13,7 +13,7 @@ namespace freee {
 
     public:
 
-        static MediaContext* Instance();
+        static MediaContext& Instance();
 
         ~MediaContext() override ;
 
@@ -30,7 +30,7 @@ namespace freee {
 
     private:
 
-        MediaContext(MessageContext *ctx);
+        MediaContext();
     };
 }
 

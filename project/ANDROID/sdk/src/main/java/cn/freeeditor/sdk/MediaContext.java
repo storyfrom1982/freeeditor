@@ -152,9 +152,11 @@ public class MediaContext extends JNIContext {
             camera.release();
             camera = null;
         }
-        super.release();
-        deleteContext(mediaContext);
-        mediaContext = 0;
+        if (microphone != null){
+            microphone.release();
+            microphone = null;
+        }
+//        super.release();
     }
 
     public long createRecorder(){
@@ -186,8 +188,7 @@ public class MediaContext extends JNIContext {
     }
 
     private MediaContext(){
-        mediaContext = createContext();
-        connectContext(mediaContext);
+        connectMediaContext(getContextPointer());
     }
 
     private long createCamera(){
@@ -204,11 +205,9 @@ public class MediaContext extends JNIContext {
         return microphone.getContextPointer();
     }
 
-    private long mediaContext;
+    private native void connectMediaContext(long contextPointer);
 
-    private native long createContext();
-
-    public native void deleteContext(long mediaContext);
+    public native void deleteContext(long contextPointer);
 
     public native void debug();
 }

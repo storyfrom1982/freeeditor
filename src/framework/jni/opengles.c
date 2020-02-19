@@ -369,6 +369,7 @@ void opengles_close(opengles_t **pp_gles)
 	if (pp_gles && *pp_gles){
 		opengles_t *gles = *pp_gles;
 		*pp_gles = NULL;
+		glDeleteProgram(gles->_program);
 		free(gles);
 	}
 }

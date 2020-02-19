@@ -47,7 +47,7 @@ enum {
 
 VideoSource::VideoSource() {
 //    SetContextName("VideoSource");
-    MessageContext *sourceContext = MediaContext::Instance()->CreateCamera();
+    MessageContext *sourceContext = MediaContext::Instance().CreateCamera();
     ConnectContext(sourceContext);
     isPreview = false;
     isClosed = false;

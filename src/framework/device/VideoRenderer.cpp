@@ -53,7 +53,7 @@ void VideoRenderer::drawPicture(SrPkt pkt) {
 
 void VideoRenderer::surfaceCreated(SrPkt pkt) {
     VideoWindow *window = (VideoWindow*)pkt.msg.ptr;
-    gl_renderer_set_window(renderer, (gl_window_t*) window->GetNativeWindow());
+    gl_renderer_set_window(renderer, window->GetNativeWindow());
     int w, h;
     window->GetWindowSize(&w, &h);
     glViewport(0, 0, w, h);

@@ -42,7 +42,7 @@ public class MediaRecorder extends JNIContext {
             videoCfg.put("width", height);
             videoCfg.put("height", width);
         }
-        Log.e(TAG, "encoder config: " + JSON.toJSONString(mediaCfg, true));
+        Log.d(TAG, "encoder config: " + JSON.toJSONString(mediaCfg, true));
         sendMessage(new JNIMessage(Record_SetConfig, mediaCfg.toJSONString()));
     }
 

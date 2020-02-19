@@ -18,6 +18,7 @@ MediaRecorder::MediaRecorder(){
 
 MediaRecorder::~MediaRecorder() {
     LOGD("MediaRecorder::~MediaRecorder");
+    StopProcessor();
     if (videoSource){
         delete videoSource;
     }
@@ -36,7 +37,7 @@ void MediaRecorder::MessageProcessor(SrPkt pkt) {
             break;
         case Record_StartCapture:
             videoSource->Start();
-            audioSource->Start();
+//            audioSource->Start();
             break;
         case Record_StartPreview:
             StartPreview(pkt);
@@ -44,9 +45,9 @@ void MediaRecorder::MessageProcessor(SrPkt pkt) {
         case Record_DrawPicture:
             break;
         case Record_SetUrl:
-            mediaProtocol = MediaProtocol::Create(pkt.msg.js);
-            audioEncoder->SetProtocol(mediaProtocol);
-            videoEncoder->SetProtocol(mediaProtocol);
+//            mediaProtocol = MediaProtocol::Create(pkt.msg.js);
+//            audioEncoder->SetProtocol(mediaProtocol);
+//            videoEncoder->SetProtocol(mediaProtocol);
             break;
         default:
             break;
@@ -60,10 +61,10 @@ void MediaRecorder::Initialize(SrPkt pkt) {
     videoSource->SetEncoder(videoEncoder);
     videoSource->Open(mConfig["video"]);
 
-    audioSource = new AudioSource();
-    audioEncoder = AudioEncoder::Create("aac");
-    audioSource->SetEncoder(audioEncoder);
-    audioSource->Open(mConfig["audio"]);
+//    audioSource = new AudioSource();
+//    audioEncoder = AudioEncoder::Create("aac");
+//    audioSource->SetEncoder(audioEncoder);
+//    audioSource->Open(mConfig["audio"]);
 
 }
 

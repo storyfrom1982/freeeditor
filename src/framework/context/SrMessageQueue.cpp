@@ -51,30 +51,28 @@ void SrMessageQueue::MessageProcessorLoop() {
 
     LOGD("message processor [%s] enter\n", name.c_str());
 
-    while (__is_true(running)) {
+    while (true) {
 
-        {
-            mLock.lock();
+        mLock.lock();
 
-            while (mMessageList.empty()){
-                if (__is_true(running)){
-                    mLock.wait();
-                }else {
-                    __set_true(stopped);
-                    LOGD("message processor [%s] exit\n", name.c_str());
-                    return;
-                }
+        while (mMessageList.empty()){
+            if (__is_true(running)){
+                mLock.wait();
+            }else {
+                __set_true(stopped);
+                LOGD("message processor [%s] exit\n", name.c_str());
+                return;
             }
-
-            auto it = mMessageList.begin();
-            SrPkt msg = *it;
-            mMessageList.erase(it);
-
-            mLock.signal();
-            mLock.unlock();
-
-            MessageProcessor(msg);
         }
+
+        auto it = mMessageList.begin();
+        SrPkt msg = *it;
+        mMessageList.erase(it);
+
+        mLock.signal();
+        mLock.unlock();
+
+        MessageProcessor(msg);
     }
 
     __set_true(stopped);

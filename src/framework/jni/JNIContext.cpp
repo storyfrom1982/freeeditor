@@ -270,10 +270,9 @@ Java_cn_freeeditor_sdk_JNIContext_getMessage__IJ(JNIEnv *env, jobject instance, 
 }
 
 extern "C"
-JNIEXPORT jlong JNICALL
-Java_cn_freeeditor_sdk_MediaContext_createContext(JNIEnv *env, jobject instance) {
-    MediaContext *pMediaContext = MediaContext::Instance();
-    return (jlong)pMediaContext;
+JNIEXPORT void JNICALL
+Java_cn_freeeditor_sdk_MediaContext_connectMediaContext(JNIEnv *env, jobject instance, jlong contextPointer) {
+    MediaContext::Instance().ConnectContext(reinterpret_cast<MessageContext *>(contextPointer));
 }
 
 extern "C"

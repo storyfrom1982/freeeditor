@@ -18,18 +18,19 @@ enum {
     GetMsg_CreateMicrophone = 2,
 };
 
-MediaContext::MediaContext(MessageContext *ctx){
-    ConnectContext(ctx);
+MediaContext::MediaContext(){
+//    ConnectContext(ctx);
 }
 
 MediaContext::~MediaContext() = default;
 
-static MediaContext *globalMediaContext = nullptr;
+//static MediaContext *globalMediaContext = nullptr;
 
-MediaContext *MediaContext::Instance() {
-    if (!globalMediaContext){
-        globalMediaContext = new MediaContext(nullptr);
-    }
+MediaContext& MediaContext::Instance() {
+    static MediaContext globalMediaContext;
+//    if (!globalMediaContext){
+//        globalMediaContext = new MediaContext();
+//    }
     return globalMediaContext;
 }
 
