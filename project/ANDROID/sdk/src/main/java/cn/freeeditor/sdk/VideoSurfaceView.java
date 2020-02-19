@@ -28,12 +28,17 @@ public class VideoSurfaceView extends JNIContext implements SurfaceHolder.Callba
 //    }
 
 //    @Override
-//    public long getJniContext() {
+//    public long getContextPointer() {
 //        return messageContext;
 //    }
 
     @Override
-    protected void onPutMessage(JNIMessage msg) {
+    protected JNIMessage onObtainMessage(int key) {
+        return null;
+    }
+
+    @Override
+    protected void onReceiveMessage(JNIMessage msg) {
         if (msg.key == OnPutMsg_RegisterCallback){
             if (surfaceView != null) {
                 surfaceView.getHolder().addCallback(this);
@@ -42,22 +47,17 @@ public class VideoSurfaceView extends JNIContext implements SurfaceHolder.Callba
     }
 
     @Override
-    protected JNIMessage onGetMessage(int key) {
-        return new JNIMessage();
-    }
-
-    @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        putObject(PutMsg_SurfaceCreated, holder.getSurface());
+        sendMessage(new JNIMessage(PutMsg_SurfaceCreated, holder.getSurface()));
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        putMessage(PutMsg_SurfaceChanged);
+        sendMessage(PutMsg_SurfaceChanged);
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        putMessage(PutMsg_SurfaceDestroyed);
+        sendMessage(PutMsg_SurfaceDestroyed);
     }
 }

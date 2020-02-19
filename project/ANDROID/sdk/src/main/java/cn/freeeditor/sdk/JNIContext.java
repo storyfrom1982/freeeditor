@@ -4,105 +4,64 @@ package cn.freeeditor.sdk;
 abstract public class JNIContext {
 
     public JNIContext(){
-        jniContext = createContext();
-        setContextName(super.getClass().getName(), jniContext);
+        contextPointer = createContext();
+        setContextName(super.getClass().getName(), contextPointer);
     }
 
     public void release(){
-        deleteContext(jniContext);
-        jniContext = 0;
+        deleteContext(contextPointer);
+        contextPointer = 0;
     }
 
-    public long getJniContext(){
-        return jniContext;
+    public long getContextPointer(){
+        return contextPointer;
     }
 
     public void connectContext(long messageContext){
-        connectContext(messageContext, jniContext);
+        connectContext(messageContext, contextPointer);
     }
 
-    protected abstract void onPutMessage(JNIMessage msg);
-    protected abstract JNIMessage onGetMessage(int key);
+    public void disconnectContext(long messageContext){
 
-    protected long onGetLong(int key){
-        return onGetMessage(key).i64;
     }
 
-    protected String onGetJson(int key){
-        return onGetMessage(key).json;
+    protected abstract JNIMessage onObtainMessage(int key);
+    protected abstract void onReceiveMessage(JNIMessage msg);
+
+    protected void sendMessage(int key){
+        sendMessage(key, contextPointer);
     }
 
-    protected Object onGetObject(int key){
-        return onGetMessage(key).obj;
+    protected void sendMessage(JNIMessage msg){
+        sendMessage(msg, contextPointer);
     }
 
-    protected void onPutMessage(int key){
-        onPutMessage(new JNIMessage(key));
+    protected void sendMessage(int key, byte[] buffer, int size){
+        sendMessage(key, buffer, size, contextPointer);
     }
 
-    protected void onPutLong(int key, long number){
-        onPutMessage(new JNIMessage(key, number));
+    protected JNIMessage getMessage(int key){
+        return getMessage(key, contextPointer);
     }
 
-    protected void onPutJson(int key, String msg){
-        onPutMessage(new JNIMessage(key, msg));
+    protected JNIMessage createJniMessage(int key, long number, double decimal, Object obj, String string){
+        return new JNIMessage(key, number, decimal, obj, string);
     }
-
-    protected void onPutObject(int key, Object obj){
-        onPutMessage(new JNIMessage(key, obj));
-    }
-
-    protected void putMessage(int key){
-        putMessage(key, jniContext);
-    }
-
-    protected void putLong(int key, long number){
-        putLong(key, number, jniContext);
-    }
-
-    protected void putJson(int key, String msg){
-        putJson(key, msg, jniContext);
-    }
-
-    protected void putObject(int key, Object obj){
-        putObject(key, obj, jniContext);
-    }
-
-    protected void putBuffer(int key, byte[] data, int size){
-        putBuffer(key, data, size, jniContext);
-    }
-
-    protected long getLong(int key){
-        return getLong(key, jniContext);
-    }
-
-    protected String getJson(int key){
-        return getJson(key, jniContext);
-    }
-
-    protected Object getObject(int key){
-        return getObject(key, jniContext);
-    }
-
 
     static {
         System.loadLibrary("freeeditor");
     }
 
-    private long jniContext;
+    private long contextPointer;
 
     private native long createContext();
-    private native void deleteContext(long jniContext);
-    private native void setContextName(String name, long jniContext);
-    private native void connectContext(long messageContext, long jniContext);
+    private native void deleteContext(long contextPointer);
+    private native void setContextName(String name, long contextPointer);
+    private native void connectContext(long messageContext, long contextPointer);
+    private native void disconnectContext(long messageContext, long contextPointer);
 
-    private native void putMessage(int key, long jniContext);
-    private native void putLong(int key, long number, long jniContext);
-    private native void putJson(int key, String json, long jniContext);
-    private native void putObject(int key, Object obj, long jniContext);
-    private native void putBuffer(int key, byte[] data, int size, long jniContext);
-
-    private native String getJson(int key, long jniContext);
-    private native long getLong(int key, long jniContext);
-    private native Object getObject(int key, long jniContext);
+    private native JNIMessage getMessage(int key, long contextPointer);
+    private native void sendMessage(int key, long contextPointer);
+    private native void sendMessage(int key, byte[] buffer, int size, long contextPointer);
+    private native void sendMessage(JNIMessage msg, long contextPointer);
 }

@@ -158,20 +158,17 @@ public class MediaContext extends JNIContext {
     }
 
     public long createRecorder(){
-        return getLong(GetMsg_CrateRecorder);
+        JNIMessage msg = getMessage(GetMsg_CrateRecorder);
+        return msg.number;
     }
 
     public String getRecorderConfig(){
-        return getJson(GetMsg_GetRecorderConfig);
+        JNIMessage msg = getMessage(GetMsg_GetRecorderConfig);
+        return msg.string;
     }
 
     @Override
-    protected void onPutMessage(JNIMessage msg) {
-
-    }
-
-    @Override
-    protected JNIMessage onGetMessage(int key) {
+    protected JNIMessage onObtainMessage(int key) {
         switch (key){
             case OnGetMsg_CreateCamera:
                 return new JNIMessage(key, createCamera());
@@ -180,7 +177,12 @@ public class MediaContext extends JNIContext {
             default:
                 break;
         }
-        return new JNIMessage(0);
+        return new JNIMessage();
+    }
+
+    @Override
+    protected void onReceiveMessage(JNIMessage msg) {
+
     }
 
     private MediaContext(){
@@ -192,14 +194,14 @@ public class MediaContext extends JNIContext {
         if (camera == null){
             camera = new VideoCamera();
         }
-        return camera.getJniContext();
+        return camera.getContextPointer();
     }
 
     private long createMicrophone(){
         if (microphone == null){
             microphone = new Microphone();
         }
-        return microphone.getJniContext();
+        return microphone.getContextPointer();
     }
 
     private long mediaContext;

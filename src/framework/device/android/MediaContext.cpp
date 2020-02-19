@@ -19,7 +19,6 @@ enum {
 };
 
 MediaContext::MediaContext(MessageContext *ctx){
-    SetContextName("MediaContext");
     ConnectContext(ctx);
 }
 
@@ -34,52 +33,46 @@ MediaContext *MediaContext::Instance() {
     return globalMediaContext;
 }
 
-sr_message_t MediaContext::OnGetMessage(sr_message_t msg) {
-    if (msg.key == OnGetMsg_CreateRecorder){
-        msg.ptr = new MediaRecorder();
-        msg.type = MessageType_Pointer;
-    }else if (msg.key == OnGetMsg_GetRecorderConfig){
+SrPkt MediaContext::onObtainMessage(int key) {
+    SrPkt pkt;
+    if (key == OnGetMsg_CreateRecorder){
+        pkt.msg.key = key;
+        pkt.msg.ptr = new MediaRecorder();
+    }else if (key == OnGetMsg_GetRecorderConfig){
         json js;
         MConfig::load(js, "");
         std::string str = js.dump();
-        msg.type = str.length();
-        msg.ptr = strdup(str.c_str());
-    }else {
-        msg = __sr_null_msg;
+        pkt.msg.key = key;
+        pkt.msg.size = str.length();
+        pkt.msg.js = strndup(str.c_str(), pkt.msg.size);
     }
-    return msg;
+    return pkt;
 }
 
-void MediaContext::OnPutMessage(sr_message_t msg) {
+void MediaContext::onReceiveMessage(SrPkt msg) {
 
 }
 
-void MediaContext::PutMessage(sr_message_t msg) {
-    MessageContext::PutMessage(msg);
+void MediaContext::SendMessage(SrPkt msg) {
+    MessageContext::SendMessage(msg);
 }
 
-sr_message_t MediaContext::GetMessage(sr_message_t msg) {
-    return MessageContext::GetMessage(msg);
+SrPkt MediaContext::GetMessage(int key) {
+    return MessageContext::GetMessage(key);
 }
 
 MessageContext *MediaContext::CreateCamera() {
-    sr_message_t msg = __sr_null_msg;
-    msg.key = GetMsg_CreateCamera;
-    msg.type = MessageType_Pointer;
-    msg = MessageContext::GetMessage(msg);
-    if (msg.key != GetMsg_CreateCamera){
+    SrPkt pkt = MessageContext::GetMessage(GetMsg_CreateCamera);
+    if (pkt.msg.key != GetMsg_CreateCamera || pkt.msg.ptr == NULL){
         return nullptr;
     }
-    return static_cast<MessageContext *>(msg.ptr);
+    return static_cast<MessageContext *>(pkt.msg.ptr);
 }
 
 MessageContext *MediaContext::CreateMicrophone() {
-    sr_message_t msg = __sr_null_msg;
-    msg.key = GetMsg_CreateMicrophone;
-    msg.type = MessageType_Pointer;
-    msg = MessageContext::GetMessage(msg);
-    if (msg.key != GetMsg_CreateMicrophone){
+    SrPkt pkt = MessageContext::GetMessage(GetMsg_CreateMicrophone);
+    if (pkt.msg.key != GetMsg_CreateMicrophone || pkt.msg.ptr == NULL){
         return nullptr;
     }
-    return static_cast<MessageContext *>(msg.ptr);
+    return static_cast<MessageContext *>(pkt.msg.ptr);
 }

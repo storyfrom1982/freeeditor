@@ -36,9 +36,9 @@ namespace freee {
 
         void GetWindowSize(int *w, int *h);
 
-        void OnPutMessage(sr_message_t msg) override;
+        void onReceiveMessage(SrPkt pkt) override;
 
-        sr_message_t OnGetMessage(sr_message_t msg) override;
+        SrPkt onObtainMessage(int key) override;
 
     private:
 

@@ -11,18 +11,7 @@
 
 typedef struct sr_buffer_frame_t {
 
-    int key;
-
-    char *js;
-
     int is_pointer;
-
-    union {
-        void *ptr;
-        double f64;
-        int64_t i64;
-        uint64_t u64;
-    };
 
     struct {
         size_t size;
@@ -35,6 +24,8 @@ typedef struct sr_buffer_frame_t {
     int max_plane;
 
     int width, height;
+
+    int64_t timestamp;
 
     size_t size;
 

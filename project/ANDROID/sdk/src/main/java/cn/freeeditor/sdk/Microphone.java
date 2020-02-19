@@ -222,7 +222,7 @@ public class Microphone extends JNIContext implements Runnable {
                 }
 //                Log.d(TAG, "CloudAudioCapture ============>>>>>>>>>>>>>> " + mSampleBufferSize);
 //                recordFrame(buffer, mSampleBufferSize, mNativeInstance);
-                putBuffer(PutMsg_ProcessSound, buffer, mSampleBufferSize);
+                sendMessage(PutMsg_ProcessSound, buffer, mSampleBufferSize);
             }
         }
 
@@ -252,11 +252,16 @@ public class Microphone extends JNIContext implements Runnable {
 
 
     @Override
-    protected void onPutMessage(JNIMessage msg) {
+    protected JNIMessage onObtainMessage(int key) {
+        return null;
+    }
+
+    @Override
+    protected void onReceiveMessage(JNIMessage msg) {
         switch (msg.key){
 
             case OnPutMsg_OpenRecord:
-                open(msg.json);
+                open(msg.string);
                 break;
 
             case OnPutMsg_StartRecord:
@@ -275,11 +280,6 @@ public class Microphone extends JNIContext implements Runnable {
                 break;
 
         }
-    }
-
-    @Override
-    protected JNIMessage onGetMessage(int key) {
-        return null;
     }
 
 }

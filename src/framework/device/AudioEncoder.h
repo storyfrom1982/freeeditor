@@ -23,7 +23,7 @@ namespace freee {
 
         virtual int OpenAudioEncoder(json& cfg) = 0;
         virtual void CloseAudioEncoder() = 0;
-        virtual int EncodeAudioData(SrMessage buffer) = 0;
+        virtual int EncodeAudioData(SrPkt buffer) = 0;
 
         void SetProtocol(MediaProtocol *aProtocol){
             mediaProtocol = aProtocol;

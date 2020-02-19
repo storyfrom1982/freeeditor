@@ -30,21 +30,22 @@ namespace freee{
         Record_SetUrl,
     };
 
-    class MediaRecorder : public MessageContext{
+    class MediaRecorder :public MessageContext, SrMessageQueue {
 
     public:
         MediaRecorder();
 
-        void OnPutMessage(sr_message_t msg) override;
+        void onReceiveMessage(SrPkt msg) override;
 
         ~MediaRecorder();
 
     protected:
-        void MessageProcessor(sr_message_t msg) override;
+    private:
+        void MessageProcessor(SrPkt pkt) override;
 
     private:
-        void Initialize(sr_message_t msg);
-        void StartPreview(sr_message_t msg);
+        void Initialize(SrPkt pkt);
+        void StartPreview(SrPkt pkt);
 
     private:
 

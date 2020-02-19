@@ -323,7 +323,7 @@ enum {
 	MessageType_Json
 };
 
-typedef struct sr_message{
+typedef struct sr_message_t{
 	int32_t key;
 	int32_t type;
 	union {

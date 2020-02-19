@@ -38,10 +38,10 @@ namespace freee {
         ~VideoRenderer() override;
 
     public:
-        void OnPutMessage(SrMessage msg);
+        void OnPutMessage(SrPkt pkt);
 
     protected:
-        void MessageProcessor(SrMessage msg) override;
+        void MessageProcessor(SrPkt pkt) override;
 
     protected:
 
@@ -50,13 +50,13 @@ namespace freee {
 //        void messageProcessorLoop(sr_message_processor_t *processor, sr_message_t msg);
 //        static void messageProcessorThread(sr_message_processor_t *processor, sr_message_t msg);
 
-        void init(SrMessage msg);
-        void surfaceCreated(SrMessage msg);
-        void surfaceChanged(SrMessage msg);
-        void surfaceDestroyed(SrMessage msg);
+        void init(SrPkt pkt);
+        void surfaceCreated(SrPkt pkt);
+        void surfaceChanged(SrPkt msg);
+        void surfaceDestroyed(SrPkt msg);
 
-        void setSurfaceView(SrMessage msg);
-        void drawPicture(SrMessage msg);
+        void setSurfaceView(SrPkt pkt);
+        void drawPicture(SrPkt pkt);
 
     private:
 

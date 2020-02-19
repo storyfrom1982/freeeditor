@@ -8,7 +8,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 
-public class MediaRecorder extends JNIContext implements SurfaceHolder.Callback {
+public class MediaRecorder extends JNIContext {
 
     private static final String TAG = "MediaRecorder";
 
@@ -29,6 +29,7 @@ public class MediaRecorder extends JNIContext implements SurfaceHolder.Callback 
         recorderContext = MediaContext.Instance().createRecorder();
         connectContext(recorderContext);
         String mediaCfgStr = MediaContext.Instance().getRecorderConfig();
+
         JSONObject mediaCfg = JSON.parseObject(mediaCfgStr);
         JSONObject videoCfg = mediaCfg.getJSONObject("video");
         int width = videoCfg.getIntValue("width");
@@ -42,7 +43,7 @@ public class MediaRecorder extends JNIContext implements SurfaceHolder.Callback 
             videoCfg.put("height", width);
         }
         Log.e(TAG, "encoder config: " + JSON.toJSONString(mediaCfg, true));
-        putJson(Record_SetConfig, mediaCfg.toJSONString());
+        sendMessage(new JNIMessage(Record_SetConfig, mediaCfg.toJSONString()));
     }
 
     public void release(){
@@ -54,61 +55,31 @@ public class MediaRecorder extends JNIContext implements SurfaceHolder.Callback 
     }
 
     public void setUrl(String url){
-        putMessage(8);
+        sendMessage(8);
     }
 
     public void startCapture(){
-        putMessage(Record_StartCapture);
+        sendMessage(Record_StartCapture);
     }
 
     @Override
-    public Object onGetObject(int key) {
+    protected JNIMessage onObtainMessage(int key) {
         return null;
     }
 
     @Override
-    public String onGetJson(int key) {
-        return null;
-    }
+    protected void onReceiveMessage(JNIMessage msg) {
 
-    @Override
-    public long onGetLong(int key) {
-        return 0;
-    }
-
-    @Override
-    protected void onPutMessage(JNIMessage msg) {
-
-    }
-
-    @Override
-    protected JNIMessage onGetMessage(int key) {
-        return null;
     }
 
     public void startPreview(SurfaceView view){
         videoView = new VideoSurfaceView(view);
-        putLong(7, videoView.getJniContext());
+        sendMessage(new JNIMessage(7, videoView.getContextPointer()));
 //        mVideoView = view;
 //        if (mVideoView != null) {
 //            mVideoView.setVisibility(View.INVISIBLE);
 //            mVideoView.getHolder().addCallback(this);
 //            mVideoView.setVisibility(View.VISIBLE);
 //        }
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        putObject(7, holder.getSurface());
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-
     }
 }

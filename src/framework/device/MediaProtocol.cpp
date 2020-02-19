@@ -24,33 +24,32 @@ MediaProtocol *MediaProtocol::Create(std::string url) {
 }
 
 MediaProtocol::MediaProtocol(std::string url) {
-    StopMessageProcessor();
+    StopProcessor();
 }
 
 MediaProtocol::~MediaProtocol() {
-    StopMessageProcessor();
+    StopProcessor();
 }
 
-void MediaProtocol::ProcessMessage(sr_message_t msg) {
+void MediaProtocol::onReceiveMessage(SrPkt msg) {
+    MessageProcessor(msg);
+}
 
-    switch (msg.key){
+void MediaProtocol::MessageProcessor(SrPkt pkt) {
+    switch (pkt.msg.key){
         case ProtocolOpen:
-            Connect(msg.str);
+            Connect(pkt.msg.js);
             break;
         case ProtocolClose:
             DisconnectContext();
             break;
         case ProtocolSendData:
-            Write(msg);
+            Write(pkt);
             break;
         case ProtocolReadData:
-            Read(msg);
+            Read(pkt);
             break;
         default:
             break;
     }
-}
-
-void MediaProtocol::OnPutMessage(sr_message_t msg) {
-    MessageProcessor(msg);
 }

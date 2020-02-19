@@ -99,7 +99,7 @@ void X264Encoder::OnCloseEncoder() {
     }
 }
 
-void X264Encoder::OnEncodeVideo(SrMessage buffer) {
+void X264Encoder::OnEncodeVideo(SrPkt buffer) {
 
 //    LOGD("X264Encoder::OnOpenEncoder: enter\n");
 

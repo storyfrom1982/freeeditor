@@ -20,7 +20,7 @@ namespace freee {
 
         void CloseAudioEncoder() override;
 
-        int EncodeAudioData(SrMessage buffer) override;
+        int EncodeAudioData(SrPkt buffer) override;
 
     private:
 

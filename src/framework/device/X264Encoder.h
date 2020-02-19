@@ -21,7 +21,7 @@ namespace freee {
         ~X264Encoder();
 
     protected:
-        void OnEncodeVideo(SrMessage buffer) override;
+        void OnEncodeVideo(SrPkt buffer) override;
 
     protected:
         int OnOpenEncoder(json& cfg) override;

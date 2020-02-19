@@ -8,13 +8,14 @@
 
 #include <cstddef>
 
-#include <MessageContext.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+# include <sr_malloc.h>
+# include <sr_library.h>
 #include <sr_buffer_pool.h>
+#include <video_resample.h>
 
 #ifdef __cplusplus
 }
@@ -23,48 +24,63 @@ extern "C" {
 
 namespace freee {
 
+    typedef struct sr_msg_t{
+        int key;
+        int size;
+        char *js;
+        void *obj;
+        union {
+            void *ptr;
+            int64_t number;
+        };
+        double decimal;
+    }sr_msg_t;
 
-    class SrMessage {
+    class SrPkt {
 
     public:
-        SrMessage (sr_buffer_data_t *buffer = NULL)
+        SrPkt (sr_buffer_data_t *buffer = NULL)
         {
             this->buffer = buffer;
             this->frame = (sr_buffer_frame_t){0};
+            this->msg = (sr_msg_t){0};
             reference_count = new int(1);
         }
-        SrMessage(const SrMessage &msg)
+        SrPkt(const SrPkt &pkt)
         {
-            if (this != &msg){
-                this->buffer = msg.buffer;
-                this->frame = msg.frame;
-                this->reference_count = msg.reference_count;
+            if (this != &pkt){
+                this->msg = pkt.msg;
+                this->buffer = pkt.buffer;
+                this->frame = pkt.frame;
+                this->reference_count = pkt.reference_count;
                 __sr_atom_add(*reference_count, 1);
             }
         }
-        ~SrMessage()
+        ~SrPkt()
         {
             __sr_atom_sub(*reference_count, 1);
             if ((*reference_count) == 0){
                 if (buffer){
                     sr_buffer_pool_put(buffer);
-                }else if (frame.js){
-                    free(frame.js);
+                }else if (msg.js){
+                    free(msg.js);
                 }
                 delete reference_count;
             }
         }
-        const SrMessage& operator =(const SrMessage& msg)
+        const SrPkt& operator =(const SrPkt& pkt)
         {
-            this->~SrMessage();
-            this->buffer = msg.buffer;
-            this->frame = msg.frame;
-            this->reference_count = msg.reference_count;
+            this->~SrPkt();
+            this->msg = pkt.msg;
+            this->frame = pkt.frame;
+            this->buffer = pkt.buffer;
+            this->reference_count = pkt.reference_count;
             __sr_atom_add(*reference_count, 1);
             return *this;
         }
 
     public:
+        sr_msg_t msg;
         sr_buffer_data_t *buffer;
         sr_buffer_frame_t frame;
 
@@ -85,9 +101,9 @@ namespace freee {
         {
             sr_buffer_pool_release(&pool);
         }
-        SrMessage GetBuffer()
+        SrPkt GetBuffer()
         {
-            return SrMessage(sr_buffer_pool_get(pool));
+            return SrPkt(sr_buffer_pool_get(pool));
         }
 
     private:

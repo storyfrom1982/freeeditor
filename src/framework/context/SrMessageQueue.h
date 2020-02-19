@@ -21,10 +21,10 @@ namespace freee {
         virtual ~SrMessageQueue(){}
 
     protected:
-        void StartProcessor(std::string &name);
+        void StartProcessor(std::string name);
         void StopProcessor();
-        void PutMessage(SrMessage msg);
-        virtual void MessageProcessor(SrMessage msg){}
+        void PutMessage(SrPkt msg);
+        virtual void MessageProcessor(SrPkt msg){}
 
     private:
         void MessageProcessorLoop();
@@ -38,7 +38,7 @@ namespace freee {
 
         Lock mLock;
         pthread_t mTid;
-        std::vector<SrMessage> mMessageList;
+        std::vector<SrPkt> mMessageList;
     };
 
 }

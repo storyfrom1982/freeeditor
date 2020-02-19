@@ -26,9 +26,9 @@ namespace freee {
         VideoSource();
         virtual ~VideoSource() override ;
 
-        void OnPutMessage(sr_message_t msg) override;
+        void onReceiveMessage(SrPkt msg) override;
 
-        sr_message_t OnGetMessage(sr_message_t msg) override;
+        SrPkt onObtainMessage(int key) override;
 
         void SetEncoder(VideoEncoder *videoEncoder);
         void SetWindow(MessageContext *windowContext);
@@ -46,12 +46,11 @@ namespace freee {
     protected:
 
         void processData(void *data, int size);
-        void processData(sr_message_t msg);
 
     private:
 
         void Release();
-        void updateConfig(sr_message_t msg);
+        void updateConfig(SrPkt pkt);
 
     private:
 

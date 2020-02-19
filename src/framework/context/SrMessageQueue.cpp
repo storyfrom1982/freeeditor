@@ -12,7 +12,7 @@ void *SrMessageQueue::MessageProcessorThread(void *p) {
     return nullptr;
 }
 
-void SrMessageQueue::StartProcessor(std::string &name) {
+void SrMessageQueue::StartProcessor(std::string name) {
     running = true;
     stopped = false;
     this->name = name;
@@ -38,7 +38,7 @@ void SrMessageQueue::StopProcessor() {
     LOGD("StopProcessor [%s] exit\n", name.c_str());
 }
 
-void SrMessageQueue::PutMessage(SrMessage msg) {
+void SrMessageQueue::PutMessage(SrPkt msg) {
     if (__is_true(running)){
         mLock.lock();
         mMessageList.push_back(msg);
@@ -67,7 +67,7 @@ void SrMessageQueue::MessageProcessorLoop() {
             }
 
             auto it = mMessageList.begin();
-            SrMessage msg = *it;
+            SrPkt msg = *it;
             mMessageList.erase(it);
 
             mLock.signal();

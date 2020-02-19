@@ -21,6 +21,8 @@ extern "C" {
 }
 #endif
 
+#include <SrBufferPool.h>
+
 
 namespace freee{
 
@@ -29,21 +31,12 @@ namespace freee{
     public:
 
         MessageContext(){
-            messageQueue = NULL;
             messageContext = NULL;
         }
 
         virtual ~MessageContext(){
-            LOGD("~MessageContext[%s] enter\n", contextName.c_str());
-            if (messageQueue){
-                sr_message_queue_release(&messageQueue);
-            }
-            LOGD("~MessageContext[%s] exit\n", contextName.c_str());
+            LOGD("~MessageContext()[%s]\n", name.c_str());
         };
-
-        void SetContextName(std::string name){
-            contextName = name;
-        }
 
         void ConnectContext(MessageContext *context){
             if (context){
@@ -59,75 +52,36 @@ namespace freee{
             }
         }
 
-    public:
+        void SetContextName(std::string name){
+            this->name = name;
+        }
 
-        virtual void OnPutMessage(sr_message_t msg) {
+    public:
+        virtual void onReceiveMessage(SrPkt pkt) {
 
         };
 
-        virtual void OnPutDataBuffer(sr_message_t msg){
-
-        }
-
-        virtual sr_message_t OnGetMessage(sr_message_t msg){
-            return __sr_null_msg;
-        }
-
-        virtual sr_message_t OnGetDataBuffer(){
-            return __sr_null_msg;
+        virtual SrPkt onObtainMessage(int key){
+            return SrPkt();
         }
 
     protected:
-
-        virtual void PutMessage(sr_message_t msg){
+        virtual void SendMessage(SrPkt pkt){
             if (messageContext){
-                messageContext->OnPutMessage(msg);
+                messageContext->onReceiveMessage(pkt);
             }
         }
 
-        virtual sr_message_t GetMessage(sr_message_t msg){
+        virtual SrPkt GetMessage(int key){
             if (messageContext){
-                return messageContext->OnGetMessage(msg);
+                return messageContext->onObtainMessage(key);
             }
-            return __sr_null_msg;
+            return SrPkt();
         }
-
-    protected:
-
-        virtual void MessageProcessor(sr_message_t msg){};
-
-        virtual void ProcessMessage(sr_message_t msg){
-            sr_message_queue_put(messageQueue, msg);
-        }
-
-        void StartMessageProcessor(){
-            messageQueue = sr_message_queue_create(256, contextName.c_str());
-            messageProcessor.handler = this;
-            messageProcessor.process = MessageProcessorThread;
-            sr_message_queue_start_processor(messageQueue, &messageProcessor);
-        }
-
-        void StopMessageProcessor(){
-            sr_message_queue_stop_processor(messageQueue);
-            sr_message_queue_release(&messageQueue);
-        }
-
 
     private:
-
-        static void MessageProcessorThread(sr_message_processor_t *processor, sr_message_t msg){
-            static_cast<MessageContext *>(processor->handler)->MessageProcessor(msg);
-        }
-
-
-    private:
-
-        std::string contextName;
-
+        std::string name;
         MessageContext *messageContext;
-
-        sr_message_queue_t *messageQueue;
-        sr_message_processor_t messageProcessor;
     };
 
 }

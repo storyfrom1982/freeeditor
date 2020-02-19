@@ -29,8 +29,8 @@ enum {
 
 VideoWindow::VideoWindow() {
     isReady = false;
-    mWindowHolder = NULL;
-    mNativeWindow = NULL;
+    mWindowHolder = nullptr;
+    mNativeWindow = nullptr;
     SetContextName("VideoWindow");
 }
 
@@ -69,47 +69,39 @@ int VideoWindow::GetWindowHeight() {
 #endif
 }
 
-void VideoWindow::OnPutMessage(sr_message_t msg) {
-    if (msg.key == OnPutMsg_WindowCreated){
-        mWindowHolder = msg.ptr;
+void VideoWindow::onReceiveMessage(SrPkt pkt) {
+    if (pkt.msg.key == OnPutMsg_WindowCreated){
+        mWindowHolder = pkt.msg.obj;
 #ifdef __ANDROID__
         JniEnv env;
+        mWindowHolder = env->NewGlobalRef(static_cast<jobject>(pkt.msg.obj));
         mNativeWindow = ANativeWindow_fromSurface(env.m_pEnv, (jobject)mWindowHolder);
         if (mCallback){
-            msg.key = OpenGLESRender_SurfaceCreated;
-            msg.ptr = this;
-            SrMessage b;
-            b.frame.key = OpenGLESRender_SurfaceCreated;
-            b.frame.data = reinterpret_cast<uint8_t *>(this);
-            mCallback->OnPutMessage(b);
+            pkt.msg.key = OpenGLESRender_SurfaceCreated;
+            pkt.msg.ptr = this;
+            mCallback->OnPutMessage(pkt);
         }
 #endif
-    }else if (msg.key == OnPutMsg_WindowChanged){
-        msg.key = OpenGLESRender_SurfaceCreated;
-        msg.ptr = this;
-        SrMessage b;
-        b.frame.key = OpenGLESRender_SurfaceCreated;
-        b.frame.data = reinterpret_cast<uint8_t *>(this);
-        mCallback->OnPutMessage(b);
-    }else if (msg.key == OnPutMsg_WindowDestroyed){
-        msg.key = OpenGLESRender_SurfaceDestroyed;
-        msg.ptr = this;
-        SrMessage b;
-        b.frame.key = OpenGLESRender_SurfaceDestroyed;
-        b.frame.data = reinterpret_cast<uint8_t *>(this);
-        mCallback->OnPutMessage(b);
+    }else if (pkt.msg.key == OnPutMsg_WindowChanged){
+        pkt.msg.key = OpenGLESRender_SurfaceCreated;
+        pkt.msg.ptr = this;
+        mCallback->OnPutMessage(pkt);
+    }else if (pkt.msg.key == OnPutMsg_WindowDestroyed){
+        pkt.msg.key = OpenGLESRender_SurfaceDestroyed;
+        pkt.msg.ptr = this;
+        mCallback->OnPutMessage(pkt);
     }
 }
 
-sr_message_t VideoWindow::OnGetMessage(sr_message_t msg) {
-    return MessageContext::OnGetMessage(msg);
+SrPkt VideoWindow::onObtainMessage(int key) {
+    return MessageContext::onObtainMessage(key);
 }
 
 void VideoWindow::RegisterCallback(VideoRenderer *callback) {
     mCallback = callback;
-    sr_message_t msg = __sr_null_msg;
-    msg.key = PutMsg_RegisterCallback;
-    PutMessage(msg);
+    SrPkt pkt;
+    pkt.msg.key = PutMsg_RegisterCallback;
+    SendMessage(pkt);
     isReady = true;
     LOGD("VideoWindow::RegisterCallback: %d\n", __is_true(isReady));
 }

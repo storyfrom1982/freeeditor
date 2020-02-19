@@ -7,12 +7,13 @@
 
 
 #include <MessageContext.h>
+#include <SrMessageQueue.h>
 
 
 namespace freee {
 
 
-    class MediaProtocol : public MessageContext {
+    class MediaProtocol : public MessageContext, SrMessageQueue {
 
     public:
 
@@ -21,19 +22,21 @@ namespace freee {
         MediaProtocol(std::string url);
         ~MediaProtocol();
 
-        void OnPutMessage(sr_message_t msg) override;
+        void onReceiveMessage(SrPkt msg) override;
 
     protected:
+    private:
+        void MessageProcessor(SrPkt pkt) override;
 
-        void ProcessMessage(sr_message_t msg) override;
+    protected:
 
         virtual void Connect(std::string url) = 0;
 
         virtual void Disconnect() = 0;
 
-        virtual void Write(sr_message_t msg) = 0;
+        virtual void Write(SrPkt msg) = 0;
 
-        virtual void Read(sr_message_t msg) = 0;
+        virtual void Read(SrPkt msg) = 0;
     };
 
 

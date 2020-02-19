@@ -25,7 +25,7 @@ namespace freee{
 
         void OpenEncoder(json& cfg);
         void CloseEncoder();
-        void EncodeVideo(SrMessage buffer);
+        void EncodeVideo(SrPkt buffer);
 
         void SetProtocol(MediaProtocol *aProtocol){
             mediaProtocol = aProtocol;
@@ -41,7 +41,7 @@ namespace freee{
 
         virtual int OnOpenEncoder(json& cfg) = 0;
         virtual void OnCloseEncoder() = 0;
-        virtual void OnEncodeVideo(SrMessage buffer);
+        virtual void OnEncodeVideo(SrPkt buffer);
     };
 
 }

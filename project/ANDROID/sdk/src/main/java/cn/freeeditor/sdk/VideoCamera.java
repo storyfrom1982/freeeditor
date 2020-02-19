@@ -78,19 +78,19 @@ public class VideoCamera extends JNIContext implements Runnable,
     }
 
     @Override
-    protected void onPutMessage(JNIMessage msg) {
-        mThreadHandler.sendMessage(mThreadHandler.obtainMessage(msg.key, msg));
+    protected JNIMessage onObtainMessage(int key) {
+        return null;
     }
 
     @Override
-    protected JNIMessage onGetMessage(int key) {
-        return new JNIMessage();
+    protected void onReceiveMessage(JNIMessage msg) {
+        mThreadHandler.sendMessage(mThreadHandler.obtainMessage(msg.key, msg));
     }
 
 
     private void openCamera(JNIMessage msg){
 
-        mConfig = JSON.parseObject(msg.json);
+        mConfig = JSON.parseObject(msg.string);
         mFrameRate = mConfig.getIntValue("fps");
         mRequestWidth = mConfig.getIntValue("width");
         mRequestHeight = mConfig.getIntValue("height");
@@ -173,7 +173,7 @@ public class VideoCamera extends JNIContext implements Runnable,
         }
         json.put("format", 0);
         json.put("rotate", mRotation);
-        putJson(PutMsg_Opened, json.toString());
+        sendMessage(new JNIMessage(PutMsg_Opened, json.toString()));
     }
 
 
@@ -183,7 +183,7 @@ public class VideoCamera extends JNIContext implements Runnable,
             mCamera.setErrorCallback(null);
             mCamera.release();
             mCamera = null;
-            putMessage(PutMsg_Closed);
+            sendMessage(PutMsg_Closed);
         }
     }
 
@@ -197,7 +197,7 @@ public class VideoCamera extends JNIContext implements Runnable,
                 mCamera.addCallbackBuffer(bufferList.get(i));
             }
             isCapture = true;
-            putMessage(PutMsg_Started);
+            sendMessage(PutMsg_Started);
         }
         Log.d(TAG, "Start: exit");
     }
@@ -208,7 +208,7 @@ public class VideoCamera extends JNIContext implements Runnable,
             isCapture = false;
             mCamera.setPreviewCallbackWithBuffer(null);
             mCamera.stopPreview();
-            putMessage(PutMsg_Stopped);
+            sendMessage(PutMsg_Stopped);
         }
     }
 
@@ -247,14 +247,13 @@ public class VideoCamera extends JNIContext implements Runnable,
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        putBuffer(PutMsg_ProcessPicture, data, data.length);
+        sendMessage(PutMsg_ProcessPicture, data, data.length);
         mCamera.addCallbackBuffer(data);
     }
 
     @Override
     public void onError(int error, Camera camera) {
         Log.d(TAG, "onError: " + error);
-        putJson(0, "" + error);
     }
 
 

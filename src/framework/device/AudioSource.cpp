@@ -35,44 +35,44 @@ AudioSource::~AudioSource() {
     Close();
 }
 
-void AudioSource::OnPutMessage(sr_message_t msg) {
-//    LOGD("AudioSource::OnPutMessage data size=%d\n", msg.type);
+void AudioSource::onReceiveMessage(SrPkt msg) {
+//    LOGD("AudioSource::onRecvFrom data size=%d\n", msg.type);
 //    SrMessage buffer;
 //    buffer.buffer->data = static_cast<unsigned char *>(msg.ptr);
 //    mEncoder->EncodeAudioData(buffer);
 }
 
-sr_message_t AudioSource::OnGetMessage(sr_message_t msg) {
-    return MessageContext::OnGetMessage(msg);
+SrPkt AudioSource::onObtainMessage(int key) {
+    return MessageContext::onObtainMessage(key);
 }
 
 void AudioSource::Open(json& cfg) {
-    sr_message_t msg = __sr_null_msg;
+    SrPkt pkt;
     std::string str = cfg.dump();
-    msg.key = PutMsg_Open;
-    msg.type = str.length();
-    msg.str = strdup(str.c_str());
-    PutMessage(msg);
+    pkt.msg.key = PutMsg_Open;
+    pkt.msg.size = str.length();
+    pkt.msg.js = strdup(str.c_str());
+    SendMessage(pkt);
     mEncoder->OpenAudioEncoder(cfg);
 }
 
 void AudioSource::Close() {
-    sr_message_t msg = __sr_null_msg;
-    msg.key = PutMsg_Close;
-    PutMessage(msg);
+    SrPkt pkt;
+    pkt.msg.key = PutMsg_Close;
+    SendMessage(pkt);
     mEncoder->CloseAudioEncoder();
 }
 
 void AudioSource::Start() {
-    sr_message_t msg = __sr_null_msg;
-    msg.key = PutMsg_Start;
-    PutMessage(msg);
+    SrPkt pkt;
+    pkt.msg.key = PutMsg_Start;
+    SendMessage(pkt);
 }
 
 void AudioSource::Stop() {
-    sr_message_t msg = __sr_null_msg;
-    msg.key = PutMsg_Stop;
-    PutMessage(msg);
+    SrPkt pkt;
+    pkt.msg.key = PutMsg_Stop;
+    SendMessage(pkt);
 }
 
 void AudioSource::SetEncoder(AudioEncoder *encoder) {

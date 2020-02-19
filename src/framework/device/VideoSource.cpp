@@ -46,7 +46,7 @@ enum {
 //}
 
 VideoSource::VideoSource() {
-    SetContextName("VideoSource");
+//    SetContextName("VideoSource");
     MessageContext *sourceContext = MediaContext::Instance()->CreateCamera();
     ConnectContext(sourceContext);
     isPreview = false;
@@ -55,8 +55,8 @@ VideoSource::VideoSource() {
     render = new VideoRenderer();
     sr_message_t msg = __sr_null_msg;
     msg.key = OpenGLESRender_Init;
-    SrMessage b;
-    b.frame.key = OpenGLESRender_Init;
+    SrPkt b;
+    b.msg.key = OpenGLESRender_Init;
     render->OnPutMessage(b);
 }
 
@@ -75,37 +75,37 @@ VideoSource::~VideoSource() {
 
 void VideoSource::Open(json &cfg) {
     mConfig = cfg;
-    sr_message_t msg;
+    SrPkt msg;
     std::string str = mConfig.dump();
     LOGD("VideoSource::Open: %s\n", str.c_str());
-    msg.key = VideoSource_Open;
-    msg.type = str.length();
-    msg.ptr = strdup(str.c_str());
-    PutMessage(msg);
+    msg.msg.key = VideoSource_Open;
+    msg.msg.size = str.length();
+    msg.msg.js = strdup(str.c_str());
+    SendMessage(msg);
     LOGD("VideoSource::Open exit\n");
 }
 
 void VideoSource::Close() {
     LOGD("VideoSource::Close enter\n");
-    sr_message_t msg = __sr_null_msg;
-    msg.key = VideoSource_Close;
-    PutMessage(msg);
+    SrPkt msg;
+    msg.msg.key = VideoSource_Close;
+    SendMessage(msg);
     LOGD("VideoSource::Close exit\n");
 }
 
 void VideoSource::Start() {
     LOGD("VideoSource::Start enter\n");
-    sr_message_t msg = __sr_null_msg;
-    msg.key = VideoSource_Start;
-    PutMessage(msg);
+    SrPkt msg;
+    msg.msg.key = VideoSource_Start;
+    SendMessage(msg);
     LOGD("VideoSource::Start exit\n");
 }
 
 void VideoSource::Stop() {
     LOGD("VideoSource::Stop enter\n");
-    sr_message_t msg = __sr_null_msg;
-    msg.key = VideoSource_Stop;
-    PutMessage(msg);
+    SrPkt msg;
+    msg.msg.key = VideoSource_Stop;
+    SendMessage(msg);
     LOGD("VideoSource::Stop exit\n");
 }
 
@@ -113,32 +113,32 @@ void VideoSource::SetEncoder(VideoEncoder *videoEncoder) {
     encoder = videoEncoder;
 }
 
-void VideoSource::OnPutMessage(sr_message_t msg) {
-    switch (msg.key){
+void VideoSource::onReceiveMessage(SrPkt msg) {
+    switch (msg.msg.key){
         case OnVideoSource_ProcessPicture:
-            processData(msg.ptr, msg.type);
+            processData(msg.msg.ptr, msg.msg.size);
             break;
         case OnVideoSource_Opened:
-            LOGD("VideoSource::OnPutMessage OnVideoSource_Opened\n");
+            LOGD("VideoSource::onRecvFrom OnVideoSource_Opened\n");
             updateConfig(msg);
             break;
         case OnVideoSource_Started:
-            LOGD("VideoSource::OnPutMessage OnVideoSource_Started\n");
+            LOGD("VideoSource::onRecvFrom OnVideoSource_Started\n");
             break;
         case OnVideoSource_Stopped:
-            LOGD("VideoSource::OnPutMessage OnVideoSource_Stopped\n");
+            LOGD("VideoSource::onRecvFrom OnVideoSource_Stopped\n");
             break;
         case OnVideoSource_Closed:
             isClosed = true;
-            LOGD("VideoSource::OnPutMessage OnVideoSource_Closed\n");
+            LOGD("VideoSource::onRecvFrom OnVideoSource_Closed\n");
             break;
         default:
             break;
     }
 }
 
-sr_message_t VideoSource::OnGetMessage(sr_message_t msg) {
-    return MessageContext::OnGetMessage(msg);
+SrPkt VideoSource::onObtainMessage(int key) {
+    return MessageContext::onObtainMessage(key);
 }
 
 void VideoSource::processData(void *data, int size) {
@@ -148,41 +148,32 @@ void VideoSource::processData(void *data, int size) {
 
     sr_buffer_frame_t *y420Pkt;
 
-    SrMessage sb = bp->GetBuffer();
-    if (!sb.buffer){
+    SrPkt pkt = bp->GetBuffer();
+    if (!pkt.buffer){
         LOGD("cannot allocate buffer\n");
         return;
     }
 
-    y420Pkt = &sb.frame;
-    sr_buffer_frame_fill(y420Pkt, sb.buffer->data, mOutputWidth, mOutputHeight,
+    y420Pkt = &pkt.frame;
+    sr_buffer_frame_fill(y420Pkt, pkt.buffer->data, mOutputWidth, mOutputHeight,
                          libyuv::FOURCC_I420);
 
     sr_buffer_frame_to_yuv420p(&nv21Pkt, y420Pkt, mRotation);
 
     if (isPreview && window->IsReady()){
-        sb.frame.key = OpenGLESRender_DrawPicture;
-        render->OnPutMessage(sb);
+        pkt.msg.key = OpenGLESRender_DrawPicture;
+        render->OnPutMessage(pkt);
     }
 
-    encoder->EncodeVideo(sb);
-}
-
-void VideoSource::processData(sr_message_t msg) {
-//    msg.key = 8;
-//    msg.size = MessageType_Pointer;
-//    videoEncoder->OnPutDataBuffer(msg);
+    encoder->EncodeVideo(pkt);
 }
 
 void VideoSource::SetWindow(MessageContext *windowContext) {
     window->ConnectContext(windowContext);
-    sr_message_t msg = __sr_null_msg;
-    msg.key = OpenGLESRender_SetSurfaceView;
-    msg.ptr = window;
-    SrMessage b;
-    b.frame.key = OpenGLESRender_SetSurfaceView;
-    b.frame.data = reinterpret_cast<uint8_t *>(window);
-    render->OnPutMessage(b);
+    SrPkt pkt;
+    pkt.msg.key = OpenGLESRender_SetSurfaceView;
+    pkt.msg.ptr = window;
+    render->OnPutMessage(pkt);
 }
 
 void VideoSource::StartPreview() {
@@ -203,8 +194,8 @@ void VideoSource::Release() {
     delete bp;
 }
 
-void VideoSource::updateConfig(sr_message_t msg) {
-    json cfg = json::parse(msg.str);
+void VideoSource::updateConfig(SrPkt pkt) {
+    json cfg = json::parse(pkt.msg.js);
     LOGD("VideoSource::updateConfig: %s\n", cfg.dump(4).c_str());
     mRotation = cfg["rotate"];
     mInputWidth = cfg["pictureWidth"];
@@ -213,10 +204,6 @@ void VideoSource::updateConfig(sr_message_t msg) {
     mOutputHeight = cfg["finalHeight"];
 
     bp = new SrBufferPool(1, mOutputWidth * mOutputHeight / 2 * 3);
-//    pool = sr_buffer_pool_create(8);
-//    while (sr_buffer_pool_fill(pool, sr_buffer_frame_alloc(mOutputWidth, mOutputHeight,
-//                                                           libyuv::FOURCC_I420)) > 0){}
-    __sr_msg_clear(msg);
     mConfig["width"] = mOutputWidth;
     mConfig["height"] = mOutputHeight;
     encoder->OpenEncoder(mConfig);

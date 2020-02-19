@@ -17,14 +17,13 @@ namespace freee {
 
         ~MediaContext() override ;
 
-        void PutMessage(sr_message_t msg) override;
-
-        sr_message_t GetMessage(sr_message_t msg) override;
+        void SendMessage(SrPkt msg) override;
+        SrPkt GetMessage(int key) override;
 
     public:
 
-        void OnPutMessage(sr_message_t msg) override;
-        sr_message_t OnGetMessage(sr_message_t msg) override;
+        void onReceiveMessage(SrPkt msg) override;
+        SrPkt onObtainMessage(int key) override;
 
         MessageContext* CreateCamera();
         MessageContext* CreateMicrophone();

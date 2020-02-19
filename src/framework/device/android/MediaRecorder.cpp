@@ -12,8 +12,8 @@ using namespace freee;
 
 MediaRecorder::MediaRecorder(){
     videoSource = NULL;
-    SetContextName("MediaRecorder");
-    StartMessageProcessor();
+    audioSource = NULL;
+    StartProcessor("MediaRecorder");
 }
 
 MediaRecorder::~MediaRecorder() {
@@ -29,22 +29,22 @@ MediaRecorder::~MediaRecorder() {
     }
 }
 
-void MediaRecorder::MessageProcessor(sr_message_t msg) {
-    switch (msg.key){
+void MediaRecorder::MessageProcessor(SrPkt pkt) {
+    switch (pkt.msg.key){
         case Record_SetConfig:
-            Initialize(msg);
+            Initialize(pkt);
             break;
         case Record_StartCapture:
             videoSource->Start();
             audioSource->Start();
             break;
         case Record_StartPreview:
-            StartPreview(msg);
+            StartPreview(pkt);
             break;
         case Record_DrawPicture:
             break;
         case Record_SetUrl:
-            mediaProtocol = MediaProtocol::Create(msg.str);
+            mediaProtocol = MediaProtocol::Create(pkt.msg.js);
             audioEncoder->SetProtocol(mediaProtocol);
             videoEncoder->SetProtocol(mediaProtocol);
             break;
@@ -53,8 +53,8 @@ void MediaRecorder::MessageProcessor(sr_message_t msg) {
     }
 }
 
-void MediaRecorder::Initialize(sr_message_t msg) {
-    mConfig = json::parse(msg.str);
+void MediaRecorder::Initialize(SrPkt pkt) {
+    mConfig = json::parse(pkt.msg.js);
     videoSource = new VideoSource();
     videoEncoder = VideoEncoder::Create("x264");
     videoSource->SetEncoder(videoEncoder);
@@ -67,12 +67,12 @@ void MediaRecorder::Initialize(sr_message_t msg) {
 
 }
 
-void MediaRecorder::StartPreview(sr_message_t msg) {
-    videoSource->SetWindow((MessageContext*)msg.ptr);
+void MediaRecorder::StartPreview(SrPkt pkt) {
+    videoSource->SetWindow((MessageContext*)pkt.msg.ptr);
     videoSource->StartPreview();
 }
 
-void MediaRecorder::OnPutMessage(sr_message_t msg) {
-    ProcessMessage(msg);
+void MediaRecorder::onReceiveMessage(SrPkt msg) {
+    PutMessage(msg);
 }
 

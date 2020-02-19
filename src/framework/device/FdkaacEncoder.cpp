@@ -85,7 +85,7 @@ void FdkaacEncoder::CloseAudioEncoder() {
     aacEncClose(&m_pHandle);
 }
 
-int FdkaacEncoder::EncodeAudioData(SrMessage buffer) {
+int FdkaacEncoder::EncodeAudioData(SrPkt buffer) {
 
     AACENC_BufDesc in_buf = { 0 }, out_buf = { 0 };
     AACENC_InArgs in_args = { 0 };
