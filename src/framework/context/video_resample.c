@@ -8,77 +8,76 @@
 #include <libyuv.h>
 
 
-sr_buffer_frame_t* sr_buffer_frame_alloc(uint32_t width, uint32_t height, uint32_t fourcc)
-{
-    if (fourcc != FOURCC_I420
-        && fourcc != FOURCC_NV21
-        && fourcc != FOURCC_NV12){
-        return NULL;
-    }
+//sr_buffer_frame_t* sr_buffer_frame_alloc(uint32_t width, uint32_t height, uint32_t fourcc)
+//{
+//    if (fourcc != FOURCC_I420
+//        && fourcc != FOURCC_NV21
+//        && fourcc != FOURCC_NV12){
+//        return NULL;
+//    }
+//
+//    sr_buffer_frame_t *frame = (sr_buffer_frame_t *)malloc(sizeof(sr_buffer_frame_t));
+//
+//    frame->is_pointer = 1;
+//
+//    frame->media_type = fourcc;
+//    frame->width = width;
+//    frame->height = height;
+//
+//    frame->plane[0].stride = frame->width;
+//    frame->plane[0].size = (size_t)(frame->width * frame->height);
+//    frame->size = frame->plane[0].size + (frame->plane[0].size >> 1);
+//
+//    frame->data = (uint8_t *)malloc(frame->size);
+//    frame->plane[0].data = frame->data;
+//
+//    switch (frame->media_type){
+//        case FOURCC_I420:
+//            frame->max_plane = 3;
+//            frame->plane[1].stride = frame->plane[0].stride >> 1;
+//            frame->plane[1].size = frame->plane[0].size >> 2;
+//            frame->plane[1].data = frame->plane[0].data + frame->plane[0].size;
+//            frame->plane[2].stride = frame->plane[1].stride;
+//            frame->plane[2].size = frame->plane[1].size;
+//            frame->plane[2].data = frame->plane[1].data + frame->plane[1].size;
+//            break;
+//        case FOURCC_NV12:
+//        case FOURCC_NV21:
+//            frame->max_plane = 2;
+//            frame->plane[1].stride = frame->plane[0].stride;
+//            frame->plane[1].size = frame->plane[0].size >> 1;
+//            frame->plane[1].data = frame->plane[0].data + frame->plane[0].size;
+//            break;
+//        default:
+//            break;
+//    }
+//
+//    frame->size = 0;
+//
+//    return frame;
+//}
+//
+//void sr_buffer_frame_free(sr_buffer_frame_t **pp_frame)
+//{
+//    if (pp_frame != NULL && *pp_frame != NULL){
+//        sr_buffer_frame_t *packet = *pp_frame;
+//        *pp_frame = NULL;
+//        if (packet->is_pointer){
+//            if (packet->data){
+//                free(packet->data);
+//            }
+//            free(packet);
+//        }
+//    }
+//}
 
-    sr_buffer_frame_t *frame = (sr_buffer_frame_t *)malloc(sizeof(sr_buffer_frame_t));
-
-    frame->is_pointer = 1;
-
-    frame->media_type = fourcc;
-    frame->width = width;
-    frame->height = height;
-
-    frame->plane[0].stride = frame->width;
-    frame->plane[0].size = (size_t)(frame->width * frame->height);
-    frame->size = frame->plane[0].size + (frame->plane[0].size >> 1);
-
-    frame->data = (uint8_t *)malloc(frame->size);
-    frame->plane[0].data = frame->data;
-
-    switch (frame->media_type){
-        case FOURCC_I420:
-            frame->max_plane = 3;
-            frame->plane[1].stride = frame->plane[0].stride >> 1;
-            frame->plane[1].size = frame->plane[0].size >> 2;
-            frame->plane[1].data = frame->plane[0].data + frame->plane[0].size;
-            frame->plane[2].stride = frame->plane[1].stride;
-            frame->plane[2].size = frame->plane[1].size;
-            frame->plane[2].data = frame->plane[1].data + frame->plane[1].size;
-            break;
-        case FOURCC_NV12:
-        case FOURCC_NV21:
-            frame->max_plane = 2;
-            frame->plane[1].stride = frame->plane[0].stride;
-            frame->plane[1].size = frame->plane[0].size >> 1;
-            frame->plane[1].data = frame->plane[0].data + frame->plane[0].size;
-            break;
-        default:
-            break;
-    }
-
-    frame->size = 0;
-
-    return frame;
-}
-
-void sr_buffer_frame_free(sr_buffer_frame_t **pp_frame)
-{
-    if (pp_frame != NULL && *pp_frame != NULL){
-        sr_buffer_frame_t *packet = *pp_frame;
-        *pp_frame = NULL;
-        if (packet->is_pointer){
-            if (packet->data){
-                free(packet->data);
-            }
-            free(packet);
-        }
-    }
-}
-
-int sr_buffer_frame_fill(sr_buffer_frame_t *frame, const uint8_t *data, uint32_t width, uint32_t height,
-                         uint32_t fourcc)
+int sr_buffer_frame_fill_picture(sr_buffer_frame_t *frame, const uint8_t *data, uint32_t width,
+                                 uint32_t height,
+                                 uint32_t fourcc)
 {
     if (frame == NULL || data == NULL){
         return -1;
     }
-
-    frame->is_pointer = 0;
 
     frame->media_type = fourcc;
     frame->width = width;

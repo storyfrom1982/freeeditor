@@ -17,10 +17,10 @@ void MediaFile::Disconnect() {
 
 }
 
-void MediaFile::Write(SrPkt msg) {
+void MediaFile::Write(MediaPacket msg) {
 
 }
 
-void MediaFile::Read(SrPkt msg) {
+void MediaFile::Read(MediaPacket msg) {
 
 }

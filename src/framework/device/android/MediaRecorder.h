@@ -7,55 +7,51 @@
 
 
 #include <MessageContext.h>
-#include <VideoSource.h>
+#include <MyVideoSource.h>
 #include <VideoWindow.h>
 #include <VideoRenderer.h>
 #include <AudioSource.h>
 #include <AudioEncoder.h>
 #include <MediaProtocol.h>
+#include <MediaProcessor.h>
 
 namespace freee{
 
-
-    enum {
-        Record_SetConfig = 0,
-        Record_StartCapture,
-        Record_StartRecord,
-        Record_StopCapture,
-        Record_StopRecord,
-        Record_ChangeCameraConfig,
-        Record_ChangeEncodeConfig,
-        Record_StartPreview,
-        Record_DrawPicture,
-        Record_SetUrl,
-    };
-
-    class MediaRecorder :public MessageContext, SrMessageQueue {
+    class MediaRecorder :public MediaProcessor, MessageContext {
 
     public:
         MediaRecorder();
-
-        void onReceiveMessage(SrPkt msg) override;
-
         ~MediaRecorder();
 
     protected:
     private:
-        void MessageProcessor(SrPkt pkt) override;
+        void onReceiveMessage(MediaPacket pkt) override;
+
+    protected:
+        void ProcessPacket(MediaPacket pkt) override;
 
     private:
-        void Initialize(SrPkt pkt);
-        void StartPreview(SrPkt pkt);
+        void StartPreview(MediaPacket pkt);
+        void Open(MediaPacket pkt);
+        void Close();
+        void Start();
+        void Stop();
+        void StartRecord();
+        void StopRecord();
+        void StopPreview();
 
     private:
 
-        AudioSource *audioSource;
-        VideoSource *videoSource;
-        VideoEncoder *videoEncoder;
-        AudioEncoder *audioEncoder;
-        MediaProtocol *mediaProtocol;
+        MyVideoSource *videoSource;
 
         json mConfig;
+
+        bool isRecording;
+        bool isPreviewing;
+
+        int mStatus;
+
+        Lock mLock;
     };
 }
 

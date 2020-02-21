@@ -7,21 +7,8 @@
 
 
 #include <string>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-# include <sr_malloc.h>
-# include <sr_library.h>
-#include <video_resample.h>
-#include <sr_buffer_pool.h>
-
-#ifdef __cplusplus
-}
-#endif
-
-#include <SrBufferPool.h>
+#include <MediaBufferPool.h>
+#include <AutoLock.h>
 
 
 namespace freee{
@@ -39,6 +26,7 @@ namespace freee{
         };
 
         void ConnectContext(MessageContext *context){
+            AutoLock lock(mLock);
             if (context){
                 messageContext = context;
                 messageContext->messageContext = this;
@@ -46,6 +34,7 @@ namespace freee{
         }
 
         void DisconnectContext(){
+            AutoLock lock(mLock);
             if (messageContext){
                 messageContext->messageContext = NULL;
                 messageContext = NULL;
@@ -57,30 +46,34 @@ namespace freee{
         }
 
     public:
-        virtual void onReceiveMessage(SrPkt pkt) {
+        virtual void onReceiveMessage(MediaPacket pkt) {
 
         };
 
-        virtual SrPkt onObtainMessage(int key){
-            return SrPkt();
+        virtual MediaPacket onObtainMessage(int key){
+            return MediaPacket();
         }
 
     protected:
-        virtual void SendMessage(SrPkt pkt){
+        virtual void SendMessage(MediaPacket pkt){
+            AutoLock lock(mLock);
             if (messageContext){
                 messageContext->onReceiveMessage(pkt);
             }
         }
 
-        virtual SrPkt GetMessage(int key){
+        virtual MediaPacket GetMessage(int key){
+            AutoLock lock(mLock);
             if (messageContext){
                 return messageContext->onObtainMessage(key);
             }
-            return SrPkt();
+            return MediaPacket();
         }
 
     private:
         std::string name;
+
+        Lock mLock;
         MessageContext *messageContext;
     };
 

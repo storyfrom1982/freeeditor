@@ -8,7 +8,7 @@
 
 #include <StreamProcessor.h>
 #include <MConfig.h>
-#include <VideoSource.h>
+#include <MyVideoSource.h>
 #include <VideoWindow.h>
 #include <VideoRenderer.h>
 #include "StreamCapture.h"
@@ -61,7 +61,7 @@ namespace freee {
 //        sr_msg_queue_t *m_queue;
 //        sr_msg_processor_t m_processor;
 //
-//        VideoSource *m_videoSource;
+//        MyVideoSource *m_videoSource;
 //
 //        VideoWindow *mNativeWindow;
 //        VideoRenderer *videoRenderer;

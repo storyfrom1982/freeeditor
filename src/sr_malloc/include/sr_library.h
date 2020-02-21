@@ -359,6 +359,20 @@ extern unsigned int sr_message_queue_putable(sr_message_queue_t *queue);
 extern int sr_message_queue_put(sr_message_queue_t *queue, sr_message_t msg);
 
 
+
+typedef struct sr_buffer_data_t {
+	unsigned char *head;
+	unsigned char *data;
+}sr_buffer_data_t;
+
+typedef struct sr_buffer_pool sr_buffer_pool_t;
+
+sr_buffer_pool_t* sr_buffer_pool_create(size_t buffer_count, size_t buffer_size);
+void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool);
+
+sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool);
+void sr_buffer_pool_put(sr_buffer_data_t *buffer);
+
 ///////////////////////////////////////////////////////////////
 ////signal
 ///////////////////////////////////////////////////////////////

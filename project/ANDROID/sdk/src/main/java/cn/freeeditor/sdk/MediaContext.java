@@ -23,7 +23,7 @@ public class MediaContext extends JNIContext {
 
     private int currentOrientation;
 
-    private VideoCamera camera;
+    private VideoSource camera;
     private Microphone microphone;
 
     private static MediaContext sMediaContext = null;
@@ -193,7 +193,7 @@ public class MediaContext extends JNIContext {
 
     private long createCamera(){
         if (camera == null){
-            camera = new VideoCamera();
+            camera = new VideoSource();
         }
         return camera.getContextPointer();
     }

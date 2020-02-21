@@ -10,70 +10,166 @@
 
 using namespace freee;
 
+
+enum {
+    RecvMsg_None = 0,
+    RecvMsg_Open = 1,
+    RecvMsg_Start = 2,
+    RecvMsg_Stop = 3,
+    RecvMsg_Close = 4,
+    RecvMsg_StartRecord = 5,
+    RecvMsg_StopRecord = 6,
+    RecvMsg_StartPreview = 7,
+    RecvMsg_StopPreview = 8,
+    RecvMsg_UpdateConfig = 9,
+};
+
+
+enum {
+    Status_Closed = 0,
+    Status_Opened = 1,
+    Status_Started = 2,
+    Status_Stopped = 3,
+};
+
+
 MediaRecorder::MediaRecorder(){
-    videoSource = NULL;
-    audioSource = NULL;
+    videoSource = nullptr;
+//    audioSource = nullptr;
+    mStatus = Status_Closed;
+    SetContextName("MediaRecorder");
     StartProcessor("MediaRecorder");
 }
 
 MediaRecorder::~MediaRecorder() {
-    LOGD("MediaRecorder::~MediaRecorder");
+    SendMessage(MediaPacket(RecvMsg_Close));
     StopProcessor();
-    if (videoSource){
-        delete videoSource;
-    }
-    if (videoEncoder){
-        delete videoEncoder;
-    }
-    if (audioSource){
-        delete audioSource;
-    }
 }
 
-void MediaRecorder::MessageProcessor(SrPkt pkt) {
+void MediaRecorder::ProcessPacket(MediaPacket pkt) {
     switch (pkt.msg.key){
-        case Record_SetConfig:
-            Initialize(pkt);
+        case RecvMsg_Open:
+            Open(pkt);
             break;
-        case Record_StartCapture:
-            videoSource->Start();
-//            audioSource->Start();
+        case RecvMsg_Close:
+            Close();
             break;
-        case Record_StartPreview:
+        case RecvMsg_StartRecord:
+            StartRecord();
+            break;
+        case RecvMsg_StopRecord:
+            StopRecord();
+            break;
+        case RecvMsg_StartPreview:
             StartPreview(pkt);
             break;
-        case Record_DrawPicture:
+        case RecvMsg_StopPreview:
+            StopPreview();
             break;
-        case Record_SetUrl:
-//            mediaProtocol = MediaProtocol::Create(pkt.msg.js);
-//            audioEncoder->SetProtocol(mediaProtocol);
-//            videoEncoder->SetProtocol(mediaProtocol);
+        case RecvMsg_Start:
+            Start();
+            break;
+        case RecvMsg_Stop:
+            Stop();
+            break;
+        case RecvMsg_UpdateConfig:
             break;
         default:
             break;
     }
 }
 
-void MediaRecorder::Initialize(SrPkt pkt) {
-    mConfig = json::parse(pkt.msg.js);
-    videoSource = new VideoSource();
-    videoEncoder = VideoEncoder::Create("x264");
-    videoSource->SetEncoder(videoEncoder);
-    videoSource->Open(mConfig["video"]);
-
-//    audioSource = new AudioSource();
-//    audioEncoder = AudioEncoder::Create("aac");
-//    audioSource->SetEncoder(audioEncoder);
-//    audioSource->Open(mConfig["audio"]);
-
+void MediaRecorder::onReceiveMessage(MediaPacket pkt) {
+    ProcessPacket(pkt);
 }
 
-void MediaRecorder::StartPreview(SrPkt pkt) {
-    videoSource->SetWindow((MessageContext*)pkt.msg.ptr);
-    videoSource->StartPreview();
+void MediaRecorder::Open(MediaPacket pkt) {
+    if (mStatus == Status_Closed){
+
+        mConfig = json::parse(pkt.msg.json);
+        videoSource = new MyVideoSource();
+        videoSource->Open(mConfig["video"]);
+
+        mStatus = Status_Opened;
+    }
 }
 
-void MediaRecorder::onReceiveMessage(SrPkt msg) {
-    PutMessage(msg);
+void MediaRecorder::Close() {
+    if (mStatus == Status_Started){
+        videoSource->Stop();
+    }
+    if (mStatus == Status_Opened
+        || mStatus == Status_Stopped){
+
+        videoSource->Close();
+        delete videoSource;
+
+        mStatus = Status_Closed;
+    }
+}
+
+void MediaRecorder::StartRecord() {
+    if (!isRecording){
+        if (mStatus != Status_Started){
+            Start();
+        }
+        if (mStatus == Status_Started){
+//            videoSource->SetEncoder(videoEncoder);
+            isRecording = true;
+        }
+    }
+}
+
+void MediaRecorder::StopRecord() {
+    if (isRecording){
+        isRecording = false;
+//        videoSource->SetEncoder(nullptr);
+        if (!isPreviewing){
+            Stop();
+        }
+    }
+}
+
+void MediaRecorder::StartPreview(MediaPacket pkt) {
+    if (!isPreviewing){
+        if (mStatus != Status_Started){
+            Start();
+        }
+        if (mStatus == Status_Started){
+            videoSource->SetWindow((MessageContext*)pkt.msg.ptr);
+            videoSource->StartPreview();
+            isPreviewing = true;
+        }
+    }
+}
+
+void MediaRecorder::StopPreview() {
+    if (isPreviewing){
+        isPreviewing = false;
+        videoSource->StopPreview();
+        if (!isRecording){
+            Stop();
+        }
+    }
+}
+
+void MediaRecorder::Start() {
+    if (mStatus != Status_Started){
+        if (mStatus == Status_Opened || mStatus == Status_Stopped){
+
+            videoSource->Start();
+
+            mStatus = Status_Started;
+        }
+    }
+}
+
+void MediaRecorder::Stop() {
+    if (mStatus == Status_Started){
+
+        videoSource->Stop();
+
+        mStatus = Status_Stopped;
+    }
 }
 

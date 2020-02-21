@@ -15,10 +15,10 @@ public class VideoSurfaceView extends JNIContext implements SurfaceHolder.Callba
 
     private static final int OnPutMsg_RegisterCallback = 1;
 
-    public VideoSurfaceView(SurfaceView view){
+    public VideoSurfaceView(){
 //        messageContext = MediaContext.Instance().newVideoViewContext();
 //        connectContext(messageContext);
-        surfaceView = view;
+//        surfaceView = view;
     }
 
 //    @Override
@@ -31,6 +31,14 @@ public class VideoSurfaceView extends JNIContext implements SurfaceHolder.Callba
 //    public long getContextPointer() {
 //        return messageContext;
 //    }
+
+    public SurfaceView getSurfaceView(){
+        return surfaceView;
+    }
+
+    public void setSurfaceView(SurfaceView view){
+        surfaceView = view;
+    }
 
     @Override
     protected JNIMessage onObtainMessage(int key) {

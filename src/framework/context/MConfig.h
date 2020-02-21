@@ -20,7 +20,7 @@ namespace freee {
 
     public:
 
-        static void load(json &config, std::string configPath);
+        static json load(std::string configPath = "");
         static void save(json &config, std::string configPath);
 
 

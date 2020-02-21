@@ -1,7 +1,7 @@
 //
 // Created by yongge on 20-2-4.
 //
-#include <SrBufferPool.h>
+#include <MediaBufferPool.h>
 #include "VideoRenderer.h"
 #include "VideoWindow.h"
 
@@ -36,22 +36,22 @@ VideoRenderer::~VideoRenderer() {
     }
 }
 
-void VideoRenderer::init(SrPkt pkt) {
+void VideoRenderer::init(MediaPacket pkt) {
     renderer = gl_renderer_create(16, 16);
     opengles_open(&opengles);
 }
 
-void VideoRenderer::setSurfaceView(SrPkt pkt) {
+void VideoRenderer::setSurfaceView(MediaPacket pkt) {
     VideoWindow *window = (VideoWindow*)pkt.msg.ptr;
     window->RegisterCallback(this);
 }
 
-void VideoRenderer::drawPicture(SrPkt pkt) {
+void VideoRenderer::drawPicture(MediaPacket pkt) {
     opengles_render(opengles, &pkt.frame);
     gl_renderer_swap_buffers(renderer);
 }
 
-void VideoRenderer::surfaceCreated(SrPkt pkt) {
+void VideoRenderer::surfaceCreated(MediaPacket pkt) {
     VideoWindow *window = (VideoWindow*)pkt.msg.ptr;
     gl_renderer_set_window(renderer, window->GetNativeWindow());
     int w, h;
@@ -59,17 +59,17 @@ void VideoRenderer::surfaceCreated(SrPkt pkt) {
     glViewport(0, 0, w, h);
 }
 
-void VideoRenderer::surfaceChanged(SrPkt msg) {
+void VideoRenderer::surfaceChanged(MediaPacket msg) {
 
 }
 
-void VideoRenderer::surfaceDestroyed(SrPkt msg) {
+void VideoRenderer::surfaceDestroyed(MediaPacket msg) {
     AutoLock lock(m_lock);
     gl_renderer_remove_window(renderer);
     lock.signal();
 }
 
-void VideoRenderer::MessageProcessor(SrPkt pkt) {
+void VideoRenderer::MessageProcessor(MediaPacket pkt) {
     switch (pkt.msg.key){
         case OpenGLESRender_Init:
             init(pkt);
@@ -91,7 +91,7 @@ void VideoRenderer::MessageProcessor(SrPkt pkt) {
     }
 }
 
-void VideoRenderer::OnPutMessage(SrPkt pkt) {
+void VideoRenderer::OnPutMessage(MediaPacket pkt) {
     if (pkt.msg.key == OpenGLESRender_SurfaceDestroyed){
         AutoLock lock(m_lock);
         PutMessage(pkt);

@@ -68,13 +68,13 @@ public:
     }
 
     void SendKeyMessage(int key){
-        SrPkt msg;
+        MediaPacket msg;
         msg.msg.key = key;
         MessageContext::SendMessage(msg);
     }
 
     void SendBufferMessage(int key, jbyte *buffer, int size){
-        SrPkt pkt;
+        MediaPacket pkt;
         pkt.msg.key = key;
         pkt.msg.ptr = buffer;
         pkt.msg.size = size;
@@ -83,7 +83,7 @@ public:
 
     void SendJNIMessage(jobject jmsg) {
         JniEnv env;
-        SrPkt pkt;
+        MediaPacket pkt;
         pkt.msg.key = env->GetIntField(jmsg, m_keyField);
         pkt.msg.number = env->GetLongField(jmsg, m_numberField);
         pkt.msg.decimal = env->GetDoubleField(jmsg, m_decimalField);
@@ -91,7 +91,7 @@ public:
         jstring str = static_cast<jstring>(env->GetObjectField(jmsg, m_stringField));
         if (str != nullptr){
             const char *js = env->GetStringUTFChars(str, 0);
-            pkt.msg.js = strdup(js);
+            pkt.msg.json = strdup(js);
             env->ReleaseStringUTFChars(str, js);
         }
         MessageContext::SendMessage(pkt);
@@ -100,9 +100,9 @@ public:
     jobject GetJNIMessage(JNIEnv *env, int key) {
         jobject obj = nullptr;
         jstring str = nullptr;
-        SrPkt pkt = MessageContext::GetMessage(key);
-        if (pkt.msg.js != nullptr){
-            str = env->NewStringUTF(pkt.msg.js);
+        MediaPacket pkt = MessageContext::GetMessage(key);
+        if (pkt.msg.json != nullptr){
+            str = env->NewStringUTF(pkt.msg.json);
         }
         if (pkt.msg.obj != nullptr){
             obj = static_cast<jobject>(pkt.msg.obj);
@@ -118,12 +118,12 @@ public:
         return jmsg;
     }
 
-    void onReceiveMessage(SrPkt pkt) override {
+    void onReceiveMessage(MediaPacket pkt) override {
         JniEnv env;
         jobject obj = nullptr;
         jstring str = nullptr;
-        if (pkt.msg.js != nullptr){
-            str = env->NewStringUTF(pkt.msg.js);
+        if (pkt.msg.json != nullptr){
+            str = env->NewStringUTF(pkt.msg.json);
         }
         if (pkt.msg.obj != nullptr){
             obj = static_cast<jobject>(pkt.msg.obj);
@@ -140,10 +140,10 @@ public:
         }
     }
 
-    SrPkt onObtainMessage(int key) override {
+    MediaPacket onObtainMessage(int key) override {
         JniEnv env;
         jobject jmsg = env->CallObjectMethod(m_obj, m_onObtainMessage, key);
-        SrPkt pkt;
+        MediaPacket pkt;
         pkt.msg.key = env->GetIntField(jmsg, m_keyField);
         pkt.msg.number = env->GetLongField(jmsg, m_numberField);
         pkt.msg.decimal = env->GetDoubleField(jmsg, m_decimalField);
@@ -151,7 +151,7 @@ public:
         jstring str = static_cast<jstring>(env->GetObjectField(jmsg, m_stringField));
         if (str != nullptr){
             const char *js = env->GetStringUTFChars(str, 0);
-            pkt.msg.js = strdup(js);
+            pkt.msg.json = strdup(js);
             env->ReleaseStringUTFChars(str, js);
         }
         return pkt;

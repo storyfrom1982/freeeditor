@@ -8,7 +8,7 @@
 
 #include <MConfig.h>
 #include <MessageContext.h>
-#include <SrBufferPool.h>
+#include <MediaBufferPool.h>
 #include "VideoRenderer.h"
 #include "VideoWindow.h"
 #include "VideoEncoder.h"
@@ -17,18 +17,18 @@
 namespace freee {
 
 
-    class VideoSource : public MessageContext {
+    class MyVideoSource : public MessageContext {
 
     public:
 
-//        static VideoSource* CreateVideoSource();
+//        static MyVideoSource* CreateVideoSource();
 
-        VideoSource();
-        virtual ~VideoSource() override ;
+        MyVideoSource();
+        virtual ~MyVideoSource() override ;
 
-        void onReceiveMessage(SrPkt msg) override;
+        void onReceiveMessage(MediaPacket msg) override;
 
-        SrPkt onObtainMessage(int key) override;
+        MediaPacket onObtainMessage(int key) override;
 
         void SetEncoder(VideoEncoder *videoEncoder);
         void SetWindow(MessageContext *windowContext);
@@ -50,7 +50,7 @@ namespace freee {
     private:
 
         void Release();
-        void updateConfig(SrPkt pkt);
+        void updateConfig(MediaPacket pkt);
 
     private:
 
@@ -61,12 +61,14 @@ namespace freee {
         int mInputWidth, mInputHeight;
         int mOutputWidth, mOutputHeight;
 
+
+        Lock mLock;
         VideoEncoder *encoder;
 
         VideoWindow *window;
         VideoRenderer *render;
 
-        SrBufferPool *bp;
+        MediaBufferPool *bp;
         sr_buffer_pool_t *pool;
 
         json mConfig;

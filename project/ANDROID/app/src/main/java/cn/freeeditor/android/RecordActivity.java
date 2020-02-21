@@ -97,13 +97,15 @@ public class RecordActivity extends Activity {
 
     private void openRecorder(String url){
         recorder = new MediaRecorder();
-        recorder.setUrl(url);
         recorder.startCapture();
+        recorder.startRecord(url);
         recorder.startPreview(surfaceView);
     }
 
 
     private void closeRecorder(){
+        recorder.stopRecord();
+        recorder.stopCapture();
         recorder.release();
     }
 

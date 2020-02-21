@@ -13,12 +13,14 @@ void *SrMessageQueue::MessageProcessorThread(void *p) {
 }
 
 void SrMessageQueue::StartProcessor(std::string name) {
+    LOGD("StartProcessor [%s] enter\n", name.c_str());
     running = true;
     stopped = false;
     this->name = name;
     if (pthread_create(&mTid, NULL, MessageProcessorThread, this) != 0) {
         LOGF("pthread_create failed\n");
     }
+    LOGD("StartProcessor [%s] exit\n", name.c_str());
 }
 
 void SrMessageQueue::StopProcessor() {
@@ -38,7 +40,7 @@ void SrMessageQueue::StopProcessor() {
     LOGD("StopProcessor [%s] exit\n", name.c_str());
 }
 
-void SrMessageQueue::PutMessage(SrPkt msg) {
+void SrMessageQueue::PutMessage(MediaPacket msg) {
     if (__is_true(running)){
         mLock.lock();
         mMessageList.push_back(msg);
@@ -66,7 +68,7 @@ void SrMessageQueue::MessageProcessorLoop() {
         }
 
         auto it = mMessageList.begin();
-        SrPkt msg = *it;
+        MediaPacket msg = *it;
         mMessageList.erase(it);
 
         mLock.signal();
@@ -74,8 +76,4 @@ void SrMessageQueue::MessageProcessorLoop() {
 
         MessageProcessor(msg);
     }
-
-    __set_true(stopped);
-
-    LOGD("message processor [%s] exit\n", name.c_str());
 }

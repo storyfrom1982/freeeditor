@@ -10,7 +10,7 @@
 #include <vector>
 #include <AutoLock.h>
 
-#include "SrBufferPool.h"
+#include "MediaBufferPool.h"
 
 
 namespace freee {
@@ -23,8 +23,8 @@ namespace freee {
     protected:
         void StartProcessor(std::string name);
         void StopProcessor();
-        void PutMessage(SrPkt msg);
-        virtual void MessageProcessor(SrPkt msg){}
+        void PutMessage(MediaPacket msg);
+        virtual void MessageProcessor(MediaPacket msg){}
 
     private:
         void MessageProcessorLoop();
@@ -38,7 +38,7 @@ namespace freee {
 
         Lock mLock;
         pthread_t mTid;
-        std::vector<SrPkt> mMessageList;
+        std::vector<MediaPacket> mMessageList;
     };
 
 }

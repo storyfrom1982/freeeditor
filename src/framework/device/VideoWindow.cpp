@@ -69,7 +69,7 @@ int VideoWindow::GetWindowHeight() {
 #endif
 }
 
-void VideoWindow::onReceiveMessage(SrPkt pkt) {
+void VideoWindow::onReceiveMessage(MediaPacket pkt) {
     if (pkt.msg.key == OnPutMsg_WindowCreated){
         mWindowHolder = pkt.msg.obj;
 #ifdef __ANDROID__
@@ -93,13 +93,13 @@ void VideoWindow::onReceiveMessage(SrPkt pkt) {
     }
 }
 
-SrPkt VideoWindow::onObtainMessage(int key) {
+MediaPacket VideoWindow::onObtainMessage(int key) {
     return MessageContext::onObtainMessage(key);
 }
 
 void VideoWindow::RegisterCallback(VideoRenderer *callback) {
     mCallback = callback;
-    SrPkt pkt;
+    MediaPacket pkt;
     pkt.msg.key = PutMsg_RegisterCallback;
     SendMessage(pkt);
     isReady = true;

@@ -5,17 +5,13 @@
 #ifndef ANDROID_SRBUFFERPOOL_H
 #define ANDROID_SRBUFFERPOOL_H
 
-
-#include <cstddef>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 # include <sr_malloc.h>
 # include <sr_library.h>
-#include <sr_buffer_pool.h>
-#include <video_resample.h>
+# include <video_resample.h>
 
 #ifdef __cplusplus
 }
@@ -24,29 +20,25 @@ extern "C" {
 
 namespace freee {
 
-    typedef struct sr_msg_t{
-        int key;
-        int size;
-        char *js;
-        void *obj;
-        union {
-            void *ptr;
-            int64_t number;
-        };
-        double decimal;
-    }sr_msg_t;
-
-    class SrPkt {
+    class MediaPacket {
 
     public:
-        SrPkt (sr_buffer_data_t *buffer = NULL)
+        MediaPacket (int key = 0)
+        {
+            this->buffer = nullptr;
+            this->frame = (sr_buffer_frame_t){0};
+            this->msg = (struct message){0};
+            this->msg.key = key;
+            reference_count = new int(1);
+        }
+        MediaPacket (sr_buffer_data_t *buffer)
         {
             this->buffer = buffer;
             this->frame = (sr_buffer_frame_t){0};
-            this->msg = (sr_msg_t){0};
+            this->msg = (struct message){0};
             reference_count = new int(1);
         }
-        SrPkt(const SrPkt &pkt)
+        MediaPacket(const MediaPacket &pkt)
         {
             if (this != &pkt){
                 this->msg = pkt.msg;
@@ -56,21 +48,22 @@ namespace freee {
                 __sr_atom_add(*reference_count, 1);
             }
         }
-        ~SrPkt()
+        ~MediaPacket()
         {
             __sr_atom_sub(*reference_count, 1);
             if ((*reference_count) == 0){
                 if (buffer){
                     sr_buffer_pool_put(buffer);
-                }else if (msg.js){
-                    free(msg.js);
+                }
+                if (msg.json){
+                    free(msg.json);
                 }
                 delete reference_count;
             }
         }
-        const SrPkt& operator =(const SrPkt& pkt)
+        const MediaPacket& operator =(const MediaPacket& pkt)
         {
-            this->~SrPkt();
+            this->~MediaPacket();
             this->msg = pkt.msg;
             this->frame = pkt.frame;
             this->buffer = pkt.buffer;
@@ -80,9 +73,20 @@ namespace freee {
         }
 
     public:
-        sr_msg_t msg;
         sr_buffer_data_t *buffer;
         sr_buffer_frame_t frame;
+
+        struct message {
+            int key;
+            int size;
+            char *json;
+            void *obj;
+            union {
+                void *ptr;
+                int64_t number;
+            };
+            double decimal;
+        }msg;
 
     private:
         int *reference_count;
@@ -90,20 +94,20 @@ namespace freee {
 
 
 
-    class SrBufferPool {
+    class MediaBufferPool {
 
     public:
-        SrBufferPool(size_t count, size_t size)
+        MediaBufferPool(size_t count, size_t size)
         {
             pool = sr_buffer_pool_create(count, size);
         }
-        ~SrBufferPool()
+        ~MediaBufferPool()
         {
             sr_buffer_pool_release(&pool);
         }
-        SrPkt GetBuffer()
+        MediaPacket GetBuffer()
         {
-            return SrPkt(sr_buffer_pool_get(pool));
+            return MediaPacket(sr_buffer_pool_get(pool));
         }
 
     private:

@@ -69,6 +69,7 @@ file(GLOB sdk_sources
     framework/device/*.cpp
     framework/device/android/*.cpp
     framework/media/*.c
+    framework/media/*.cpp
     )
 
 

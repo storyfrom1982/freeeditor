@@ -27,7 +27,7 @@ enum {
 
 
 AudioSource::AudioSource() {
-    MessageContext *context = MediaContext::Instance().CreateMicrophone();
+    MessageContext *context = MediaContext::Instance().ConnectMicrophone();
     ConnectContext(context);
 }
 
@@ -35,42 +35,42 @@ AudioSource::~AudioSource() {
     Close();
 }
 
-void AudioSource::onReceiveMessage(SrPkt msg) {
+void AudioSource::onReceiveMessage(MediaPacket msg) {
 //    LOGD("AudioSource::onRecvFrom data size=%d\n", msg.type);
 //    SrMessage buffer;
 //    buffer.buffer->data = static_cast<unsigned char *>(msg.ptr);
 //    mEncoder->EncodeAudioData(buffer);
 }
 
-SrPkt AudioSource::onObtainMessage(int key) {
+MediaPacket AudioSource::onObtainMessage(int key) {
     return MessageContext::onObtainMessage(key);
 }
 
 void AudioSource::Open(json& cfg) {
-    SrPkt pkt;
+    MediaPacket pkt;
     std::string str = cfg.dump();
     pkt.msg.key = PutMsg_Open;
     pkt.msg.size = str.length();
-    pkt.msg.js = strdup(str.c_str());
+    pkt.msg.json = strdup(str.c_str());
     SendMessage(pkt);
     mEncoder->OpenAudioEncoder(cfg);
 }
 
 void AudioSource::Close() {
-    SrPkt pkt;
+    MediaPacket pkt;
     pkt.msg.key = PutMsg_Close;
     SendMessage(pkt);
     mEncoder->CloseAudioEncoder();
 }
 
 void AudioSource::Start() {
-    SrPkt pkt;
+    MediaPacket pkt;
     pkt.msg.key = PutMsg_Start;
     SendMessage(pkt);
 }
 
 void AudioSource::Stop() {
-    SrPkt pkt;
+    MediaPacket pkt;
     pkt.msg.key = PutMsg_Stop;
     SendMessage(pkt);
 }

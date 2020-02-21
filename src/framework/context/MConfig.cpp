@@ -14,7 +14,8 @@ using namespace freee;
 
 
 
-void MConfig::load(json &config, std::string configPath) {
+json MConfig::load(std::string configPath) {
+    json config;
     std::ifstream i(configPath);
     if (i){
         LOGD("load %s\n", configPath.c_str());
@@ -26,6 +27,7 @@ void MConfig::load(json &config, std::string configPath) {
             buildDefaultConfig(config);
         }
     }
+    return config;
 }
 
 void MConfig::save(json &config, std::string configPath) {
@@ -73,19 +75,25 @@ void MConfig::buildDefaultConfig(json &config) {
 
             {"video", {
 
-                {"width", 640},
-                {"height", 360},
-                {"fps", 25},
+                {"srcWidth", 640},
+                {"srcHeight", 360},
+                {"srcFormat", "YV21"},
+                {"srcPosition", "front"},
+                {"srcRotation", 0},
+                {"srcMirror", false},
 
-                {"position", "front"},
-                {"rotation", 0},
-                {"mirror", false},
+                {"previewMode", "default"},
+                {"previewMirror", false},
+                {"previewRotation", 0},
 
-                {"codeType", "h264"},
-                {"codeName", "x264"},
-                {"bitRate", 1024},
-                {"vbr", true},
-                {"keyFrameInterval", 1},
+                {"codecFPS", 25},
+                {"codecWidth", 640},
+                {"codecHeight", 360},
+                {"codecType", "h264"},
+                {"codecName", "x264"},
+                {"codecBitRate", 1024},
+                {"codecVBR", true},
+                {"codecKeyFrameInterval", 1},
             }},
 
             {"videoEffect", {

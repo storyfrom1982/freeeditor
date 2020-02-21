@@ -31,14 +31,14 @@ MediaProtocol::~MediaProtocol() {
     StopProcessor();
 }
 
-void MediaProtocol::onReceiveMessage(SrPkt msg) {
+void MediaProtocol::onReceiveMessage(MediaPacket msg) {
     MessageProcessor(msg);
 }
 
-void MediaProtocol::MessageProcessor(SrPkt pkt) {
+void MediaProtocol::MessageProcessor(MediaPacket pkt) {
     switch (pkt.msg.key){
         case ProtocolOpen:
-            Connect(pkt.msg.js);
+            Connect(pkt.msg.json);
             break;
         case ProtocolClose:
             DisconnectContext();

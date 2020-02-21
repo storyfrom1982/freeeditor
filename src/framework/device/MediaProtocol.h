@@ -22,11 +22,11 @@ namespace freee {
         MediaProtocol(std::string url);
         ~MediaProtocol();
 
-        void onReceiveMessage(SrPkt msg) override;
+        void onReceiveMessage(MediaPacket msg) override;
 
     protected:
     private:
-        void MessageProcessor(SrPkt pkt) override;
+        void MessageProcessor(MediaPacket pkt) override;
 
     protected:
 
@@ -34,9 +34,9 @@ namespace freee {
 
         virtual void Disconnect() = 0;
 
-        virtual void Write(SrPkt msg) = 0;
+        virtual void Write(MediaPacket msg) = 0;
 
-        virtual void Read(SrPkt msg) = 0;
+        virtual void Read(MediaPacket msg) = 0;
     };
 
 

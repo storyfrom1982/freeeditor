@@ -14,66 +14,58 @@ enum {
 };
 
 enum {
-    GetMsg_CreateCamera = 1,
-    GetMsg_CreateMicrophone = 2,
+    GetMsg_ConnectCamera = 1,
+    GetMsg_ConnectMicrophone = 2,
 };
 
-MediaContext::MediaContext(){
-//    ConnectContext(ctx);
-}
+
+MediaContext::MediaContext() = default;
 
 MediaContext::~MediaContext() = default;
 
-//static MediaContext *globalMediaContext = nullptr;
 
 MediaContext& MediaContext::Instance() {
     static MediaContext globalMediaContext;
-//    if (!globalMediaContext){
-//        globalMediaContext = new MediaContext();
-//    }
     return globalMediaContext;
 }
 
-SrPkt MediaContext::onObtainMessage(int key) {
-    SrPkt pkt;
+MediaPacket MediaContext::onObtainMessage(int key) {
+    MediaPacket pkt(key);
     if (key == OnGetMsg_CreateRecorder){
-        pkt.msg.key = key;
         pkt.msg.ptr = new MediaRecorder();
     }else if (key == OnGetMsg_GetRecorderConfig){
-        json js;
-        MConfig::load(js, "");
+        json js = MConfig::load();
         std::string str = js.dump();
-        pkt.msg.key = key;
         pkt.msg.size = str.length();
-        pkt.msg.js = strndup(str.c_str(), pkt.msg.size);
+        pkt.msg.json = strndup(str.c_str(), pkt.msg.size);
+    }else{
+        return MediaPacket();
     }
     return pkt;
 }
 
-void MediaContext::onReceiveMessage(SrPkt msg) {
+void MediaContext::onReceiveMessage(MediaPacket msg) {
 
 }
 
-void MediaContext::SendMessage(SrPkt msg) {
+void MediaContext::SendMessage(MediaPacket msg) {
     MessageContext::SendMessage(msg);
 }
 
-SrPkt MediaContext::GetMessage(int key) {
+MediaPacket MediaContext::GetMessage(int key) {
     return MessageContext::GetMessage(key);
 }
 
-MessageContext *MediaContext::CreateCamera() {
-    SrPkt pkt = MessageContext::GetMessage(GetMsg_CreateCamera);
-    if (pkt.msg.key != GetMsg_CreateCamera || pkt.msg.ptr == NULL){
-        return nullptr;
-    }
+MessageContext *MediaContext::ConnectCamera() {
+    MediaPacket pkt = MessageContext::GetMessage(GetMsg_ConnectCamera);
+    assert(pkt.msg.ptr);
+    assert(pkt.msg.key == GetMsg_ConnectCamera);
     return static_cast<MessageContext *>(pkt.msg.ptr);
 }
 
-MessageContext *MediaContext::CreateMicrophone() {
-    SrPkt pkt = MessageContext::GetMessage(GetMsg_CreateMicrophone);
-    if (pkt.msg.key != GetMsg_CreateMicrophone || pkt.msg.ptr == NULL){
-        return nullptr;
-    }
+MessageContext *MediaContext::ConnectMicrophone() {
+    MediaPacket pkt = MessageContext::GetMessage(GetMsg_ConnectMicrophone);
+    assert(pkt.msg.ptr);
+    assert(pkt.msg.key == GetMsg_ConnectMicrophone);
     return static_cast<MessageContext *>(pkt.msg.ptr);
 }
