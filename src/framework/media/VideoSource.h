@@ -28,23 +28,19 @@ namespace freee {
 
         void ProcessMedia(MediaChain *chain, MediaPacket pkt) override;
 
-        int GetMediaType(MediaChain *chain) override;
-
-        int GetMediaNumber(MediaChain *chain) override;
-
-        std::string GetMediaName(MediaChain *chain) override;
-
-        json &GetMediaConfig(MediaChain *chain) override;
-
     private:
         void onReceiveMessage(MediaPacket pkt) override;
 
-        void onOpened(MediaPacket pkt);
+        void UpdateMediaConfig(MediaPacket pkt);
 
     private:
-        json mConfig;
 
-        std::string mModuleName;
+        int mSrcRotation;
+        int mSrcWidth, mSrcHeight;
+        int mCodecWidth, mCodecHeight;
+
+        size_t mBufferSize;
+        MediaBufferPool *mPool;
     };
 
 }

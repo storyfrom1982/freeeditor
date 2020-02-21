@@ -11,14 +11,35 @@
 
 namespace freee {
 
+    enum {
+        Status_Closed = 0,
+        Status_Opened = 1,
+        Status_Started = 2,
+        Status_Stopped = 3,
+    };
 
     class MediaChainImpl : public MediaChain {
 
     public:
+        MediaChainImpl(int mediaType, int mediaNumber, std::string mediaName) :
+            mMediaType(mediaType),
+            mMediaNumber(mediaNumber),
+            mMediaName(mediaName){}
+
         virtual ~MediaChainImpl(){
             AutoLock lock(mOutputChainLock);
             mOutputChain.clear();
         }
+
+        void Open(MediaChain *chain) override {}
+
+        void Close(MediaChain *chain) override {}
+
+        void Start(MediaChain *chain) override {}
+
+        void Stop(MediaChain *chain) override {}
+
+        void ProcessMedia(MediaChain *chain, MediaPacket pkt) override {}
 
         virtual void AddOutputChain(MediaChain *chain) override {
             if (chain){
@@ -37,36 +58,38 @@ namespace freee {
             }
         }
 
-        void SetCallback(MediaChain::Callback *callback){
-            AutoLock lock(mCallbackLock);
-            mCallback = callback;
+        int GetMediaType(MediaChain *chain) override {
+            return mMediaType;
+        }
+
+        json &GetMediaConfig(MediaChain *chain) override {
+            return mMediaConfig;
+        }
+
+        int GetMediaNumber(MediaChain *chain) override {
+            return mMediaNumber;
+        }
+
+        std::string GetMediaName(MediaChain *chain) override {
+            return mMediaName;
         }
 
         void Control(MediaChain *chain, MediaPacket pkt) override {}
 
+        void SetCallback(MediaChain::Callback *callback) override {
+            AutoLock lock(mCallbackLock);
+            mCallback = callback;
+        }
+
     protected:
-        void onEvent(MediaPacket pkt) {
+        void ReportEvent(MediaPacket pkt) {
             AutoLock lock(mCallbackLock);
             if (mCallback){
                 mCallback->onEvent(this, pkt);
             }
         }
 
-        void onError(MediaPacket pkt) {
-            AutoLock lock(mCallbackLock);
-            if (mCallback){
-                mCallback->onError(this, pkt);
-            }
-        }
-
-        void onProcessMedia(MediaPacket pkt) {
-            AutoLock lock(mCallbackLock);
-            if (mCallback){
-                mCallback->onProcessMedia(this, pkt);
-            }
-        }
-
-        void OutputMediaPacket(MediaPacket pkt){
+        virtual void OutputMediaPacket(MediaPacket pkt){
             AutoLock lock(mOutputChainLock);
             for (int i = 0; i < mOutputChain.size(); ++i){
                 mOutputChain[i]->ProcessMedia(this, pkt);
@@ -75,6 +98,12 @@ namespace freee {
 
 
     protected:
+        int mMediaType;
+        int mMediaNumber;
+
+        json mMediaConfig;
+        std::string mMediaName;
+
         Lock mCallbackLock;
         MediaChain::Callback *mCallback;
 

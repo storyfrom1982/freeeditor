@@ -25,8 +25,8 @@ enum {
 };
 
 
-VideoSource::VideoSource(MessageContext *context) :
-    mModuleName("VideoSource") {
+VideoSource::VideoSource(MessageContext *context)
+    : MediaChainImpl(MediaType_Video, MediaNumber_VideoSource, "VideoSource") {
     if (context == nullptr){
         context = MediaContext::Instance().ConnectCamera();
     }
@@ -42,8 +42,8 @@ VideoSource::~VideoSource() {
 
 void VideoSource::Open(MediaChain *chain) {
     LOGD("VideoSource::Open enter\n");
-    mConfig = chain->GetMediaConfig(this);
-    std::string cfg = mConfig.dump();
+    mMediaConfig = chain->GetMediaConfig(this);
+    std::string cfg = mMediaConfig.dump();
     LOGD("VideoSource::Open: %s\n", cfg.c_str());
     MediaPacket pkt(SendMsg_Open);
     pkt.msg.json = strdup(cfg.c_str());
@@ -70,23 +70,11 @@ void VideoSource::Stop(MediaChain *chain) {
 }
 
 void VideoSource::ProcessMedia(MediaChain *chain, MediaPacket pkt) {
+    sr_buffer_frame_fill_picture(&pkt.frame, (uint8_t*)pkt.msg.ptr, mSrcWidth, mSrcHeight, libyuv::FOURCC_NV21);
+    MediaPacket y420 = mPool->GetBuffer();
+    sr_buffer_frame_fill_picture(&y420.frame, y420.buffer->data, mCodecWidth, mCodecHeight, libyuv::FOURCC_I420);
+    sr_buffer_frame_to_yuv420p(&pkt.frame, &y420.frame, mSrcRotation);
     OutputMediaPacket(pkt);
-}
-
-int VideoSource::GetMediaType(MediaChain *chain) {
-    return MediaType_Video;
-}
-
-json &VideoSource::GetMediaConfig(MediaChain *chain) {
-    return mConfig;
-}
-
-int VideoSource::GetMediaNumber(MediaChain *chain) {
-    return MediaNumber_VideoSource;
-}
-
-string VideoSource::GetMediaName(MediaChain *chain) {
-    return mModuleName;
 }
 
 void VideoSource::onReceiveMessage(MediaPacket pkt) {
@@ -96,7 +84,7 @@ void VideoSource::onReceiveMessage(MediaPacket pkt) {
             break;
         case RecvMsg_Opened:
             LOGD("VideoSource Opened\n");
-            onOpened(pkt);
+            UpdateMediaConfig(pkt);
             break;
         case RecvMsg_Started:
             LOGD("VideoSource Started\n");
@@ -112,6 +100,14 @@ void VideoSource::onReceiveMessage(MediaPacket pkt) {
     }
 }
 
-void VideoSource::onOpened(MediaPacket pkt) {
-    mConfig = json::parse(pkt.msg.json);
+void VideoSource::UpdateMediaConfig(MediaPacket pkt) {
+    LOGD("VideoSource::UpdateMediaConfig >> %s\n", pkt.msg.json);
+    mMediaConfig = json::parse(pkt.msg.json);
+    mSrcWidth = mMediaConfig["srcWidth"];
+    mSrcHeight = mMediaConfig["srcHeight"];
+    mSrcRotation = mMediaConfig["srcRotation"];
+    mCodecWidth = mMediaConfig["codecWidth"];
+    mCodecHeight = mMediaConfig["codecHeight"];
+    mBufferSize = mCodecWidth * mCodecHeight / 2 * 3;
+    mPool = new MediaBufferPool(1, mBufferSize);
 }

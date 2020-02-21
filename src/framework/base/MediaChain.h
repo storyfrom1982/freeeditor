@@ -34,8 +34,8 @@ namespace freee {
         MediaNumber_VideoEncoder = 53000,
         MediaNumber_OutputProtocal = 54000,
 
-        MediaNumber_AudioEffect = 100000,
-        MediaNumber_VideoEffect = 500000,
+        MediaNumber_AudioFilter = 100000,
+        MediaNumber_VideoFilter = 500000,
     };
 
     class MediaChain {
@@ -50,9 +50,8 @@ namespace freee {
         virtual void ProcessMedia(MediaChain *chain, MediaPacket pkt) = 0;
 
         virtual int GetMediaType(MediaChain *chain) = 0;
-        virtual json& GetMediaConfig(MediaChain *chain) = 0;
-
         virtual int GetMediaNumber(MediaChain *chain) = 0;
+        virtual json& GetMediaConfig(MediaChain *chain) = 0;
         virtual std::string GetMediaName(MediaChain *chain) = 0;
 
         virtual void AddOutputChain(MediaChain *chain) = 0;
@@ -61,9 +60,9 @@ namespace freee {
         class Callback {
         public:
             virtual void onEvent(MediaChain *chain, MediaPacket pkt) = 0;
-            virtual void onError(MediaChain *chain, MediaPacket pkt) = 0;
-            virtual void onProcessMedia(MediaChain *chain, MediaPacket pkt) = 0;
         };
+
+        virtual void SetCallback(Callback *callback) = 0;
     };
 
 }

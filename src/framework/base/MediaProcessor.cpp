@@ -38,7 +38,7 @@ void MediaProcessor::StopProcessor() {
     LOGD("MediaProcessor::StopProcessor [%s] exit\n", name.c_str());
 }
 
-void MediaProcessor::ProcessPacket(MediaPacket pkt) {
+void MediaProcessor::ProcessMessage(MediaPacket pkt) {
     if (__is_true(isRunning)){
         mLock.lock();
         mPktList.push_back(pkt);
@@ -72,7 +72,7 @@ void MediaProcessor::MediaProcessorLoop() {
         mLock.signal();
         mLock.unlock();
 
-        PacketProcess(pkt);
+        MessageProcess(pkt);
     }
 }
 

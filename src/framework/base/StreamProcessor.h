@@ -176,7 +176,7 @@ namespace freee {
             return __sr_null_msg;
         }
 
-        //onOpened(MessageContext *p)
+        //UpdateMediaConfig(MessageContext *p)
 
     protected:
 

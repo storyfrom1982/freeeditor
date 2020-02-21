@@ -14,21 +14,21 @@
 #include <AudioEncoder.h>
 #include <MediaProtocol.h>
 #include <MediaProcessor.h>
+#include <MediaModule.h>
 
 namespace freee{
 
-    class MediaRecorder :public MediaProcessor, MessageContext {
+    class MediaRecorder : public MessageContext, MediaChainImpl, MediaProcessor {
 
     public:
         MediaRecorder();
         ~MediaRecorder();
 
-    protected:
     private:
         void onReceiveMessage(MediaPacket pkt) override;
 
     protected:
-        void ProcessPacket(MediaPacket pkt) override;
+        void ProcessMessage(MediaPacket pkt) override;
 
     private:
         void StartPreview(MediaPacket pkt);
@@ -41,17 +41,12 @@ namespace freee{
         void StopPreview();
 
     private:
-
-        MyVideoSource *videoSource;
-
-        json mConfig;
+        int mStatus;
 
         bool isRecording;
         bool isPreviewing;
 
-        int mStatus;
-
-        Lock mLock;
+        MyVideoSource *videoSource;
     };
 }
 

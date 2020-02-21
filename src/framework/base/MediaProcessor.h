@@ -23,8 +23,8 @@ namespace freee {
         void StartProcessor(std::string name);
         void StopProcessor();
 
-        virtual void ProcessPacket(MediaPacket pkt);
-        virtual void PacketProcess(MediaPacket pkt){}
+        virtual void ProcessMessage(MediaPacket pkt);
+        virtual void MessageProcess(MediaPacket pkt){}
 
     private:
         void MediaProcessorLoop();

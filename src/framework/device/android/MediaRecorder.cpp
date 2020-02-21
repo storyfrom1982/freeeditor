@@ -25,15 +25,8 @@ enum {
 };
 
 
-enum {
-    Status_Closed = 0,
-    Status_Opened = 1,
-    Status_Started = 2,
-    Status_Stopped = 3,
-};
-
-
-MediaRecorder::MediaRecorder(){
+MediaRecorder::MediaRecorder()
+        : MediaChainImpl(MediaType_All, MediaNumber_Recorder, "MediaRecorder") {
     videoSource = nullptr;
 //    audioSource = nullptr;
     mStatus = Status_Closed;
@@ -46,7 +39,7 @@ MediaRecorder::~MediaRecorder() {
     StopProcessor();
 }
 
-void MediaRecorder::ProcessPacket(MediaPacket pkt) {
+void MediaRecorder::ProcessMessage(MediaPacket pkt) {
     switch (pkt.msg.key){
         case RecvMsg_Open:
             Open(pkt);
@@ -80,15 +73,15 @@ void MediaRecorder::ProcessPacket(MediaPacket pkt) {
 }
 
 void MediaRecorder::onReceiveMessage(MediaPacket pkt) {
-    ProcessPacket(pkt);
+    ProcessMessage(pkt);
 }
 
 void MediaRecorder::Open(MediaPacket pkt) {
     if (mStatus == Status_Closed){
 
-        mConfig = json::parse(pkt.msg.json);
+        mMediaConfig = json::parse(pkt.msg.json);
         videoSource = new MyVideoSource();
-        videoSource->Open(mConfig["video"]);
+        videoSource->Open(mMediaConfig["video"]);
 
         mStatus = Status_Opened;
     }
