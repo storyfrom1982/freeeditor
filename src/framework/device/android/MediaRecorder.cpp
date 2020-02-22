@@ -103,11 +103,13 @@ void MediaRecorder::Close() {
     if (mStatus == Status_Opened
         || mStatus == Status_Stopped){
 
-        mVideoSource->Close(this);
-        delete mVideoSource;
+        mVideoSource->RemoveOutputChain(mVideoRenderer);
 
         mVideoRenderer->Close(this);
         delete mVideoRenderer;
+
+        mVideoSource->Close(this);
+        delete mVideoSource;
 
         mStatus = Status_Closed;
     }
