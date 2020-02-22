@@ -37,7 +37,7 @@ VideoSource::VideoSource(MessageContext *context)
 
 VideoSource::~VideoSource() {
     LOGD("VideoSource::~VideoSource enter\n");
-    SendMessage(MediaPacket(SendMsg_Close));
+    SendMessage(SmartPkt(SendMsg_Close));
     DisconnectContext();
     if (mPool){
         delete mPool;
@@ -51,7 +51,7 @@ void VideoSource::Open(MediaChain *chain) {
     mMediaConfig = chain->GetMediaConfig(this);
     std::string cfg = mMediaConfig.dump();
     LOGD("VideoSource::Open: %s\n", cfg.c_str());
-    MediaPacket pkt(SendMsg_Open);
+    SmartPkt pkt(SendMsg_Open);
     pkt.msg.json = strdup(cfg.c_str());
     SendMessage(pkt);
     LOGD("VideoSource::Open exit\n");
@@ -59,31 +59,31 @@ void VideoSource::Open(MediaChain *chain) {
 
 void VideoSource::Close(MediaChain *chain) {
     LOGD("VideoSource::Close enter\n");
-    SendMessage(MediaPacket(SendMsg_Close));
+    SendMessage(SmartPkt(SendMsg_Close));
     LOGD("VideoSource::Close exit\n");
 }
 
 void VideoSource::Start(MediaChain *chain) {
     LOGD("VideoSource::Start enter\n");
-    SendMessage(MediaPacket(SendMsg_Start));
+    SendMessage(SmartPkt(SendMsg_Start));
     LOGD("VideoSource::Start exit\n");
 }
 
 void VideoSource::Stop(MediaChain *chain) {
     LOGD("VideoSource::Stop enter\n");
-    SendMessage(MediaPacket(SendMsg_Stop));
+    SendMessage(SmartPkt(SendMsg_Stop));
     LOGD("VideoSource::Stop exit\n");
 }
 
-void VideoSource::Control(MediaChain *chain, MediaPacket pkt) {
+void VideoSource::Control(MediaChain *chain, SmartPkt pkt) {
 
 }
 
-void VideoSource::ProcessMedia(MediaChain *chain, MediaPacket pkt) {
+void VideoSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
     sr_buffer_frame_fill_picture(&pkt.frame, (uint8_t*)pkt.msg.ptr, mSrcWidth, mSrcHeight, libyuv::FOURCC_NV21);
-    MediaPacket y420;
+    SmartPkt y420;
     if (mPool){
-        y420 = mPool->GetBuffer();
+        y420 = mPool->GetPkt();
     }
     if (y420.buffer){
         sr_buffer_frame_fill_picture(&y420.frame, y420.buffer->data, mCodecWidth, mCodecHeight, libyuv::FOURCC_I420);
@@ -92,7 +92,7 @@ void VideoSource::ProcessMedia(MediaChain *chain, MediaPacket pkt) {
     }
 }
 
-void VideoSource::onRecvMessage(MediaPacket pkt) {
+void VideoSource::onRecvMessage(SmartPkt pkt) {
     switch (pkt.msg.key){
         case OnRecvMsg_ProcessPicture:
             ProcessMedia(this, pkt);
@@ -119,7 +119,7 @@ void VideoSource::onRecvMessage(MediaPacket pkt) {
     }
 }
 
-void VideoSource::UpdateMediaConfig(MediaPacket pkt) {
+void VideoSource::UpdateMediaConfig(SmartPkt pkt) {
     LOGD("VideoSource::UpdateMediaConfig >> %s\n", pkt.msg.json);
     mMediaConfig = json::parse(pkt.msg.json);
     mSrcWidth = mMediaConfig["srcWidth"];
@@ -128,5 +128,5 @@ void VideoSource::UpdateMediaConfig(MediaPacket pkt) {
     mCodecWidth = mMediaConfig["codecWidth"];
     mCodecHeight = mMediaConfig["codecHeight"];
     mBufferSize = mCodecWidth * mCodecHeight / 2 * 3;
-    mPool = new MediaBufferPool(1, mBufferSize);
+    mPool = new BufferPool(1, mBufferSize);
 }

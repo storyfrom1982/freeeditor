@@ -27,14 +27,14 @@ namespace freee{
         ~MediaRecorder();
 
     private:
-        void onRecvMessage(MediaPacket pkt) override;
+        void onRecvMessage(SmartPkt pkt) override;
 
     protected:
-        void ProcessMessage(MediaPacket pkt) override;
+        void ProcessMessage(SmartPkt pkt) override;
 
     private:
-        void StartPreview(MediaPacket pkt);
-        void Open(MediaPacket pkt);
+        void StartPreview(SmartPkt pkt);
+        void Open(SmartPkt pkt);
         void Close();
         void Start();
         void Stop();

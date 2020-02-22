@@ -99,7 +99,7 @@ void X264Encoder::OnCloseEncoder() {
     }
 }
 
-void X264Encoder::OnEncodeVideo(MediaPacket buffer) {
+void X264Encoder::OnEncodeVideo(SmartPkt buffer) {
 
 //    LOGD("X264Encoder::OnOpenEncoder: enter\n");
 

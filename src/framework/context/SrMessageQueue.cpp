@@ -40,7 +40,7 @@ void SrMessageQueue::StopProcessor() {
     LOGD("StopProcessor [%s] exit\n", name.c_str());
 }
 
-void SrMessageQueue::PutMessage(MediaPacket msg) {
+void SrMessageQueue::PutMessage(SmartPkt msg) {
     if (__is_true(running)){
         mLock.lock();
         mMessageList.push_back(msg);
@@ -68,7 +68,7 @@ void SrMessageQueue::MessageProcessorLoop() {
         }
 
         auto it = mMessageList.begin();
-        MediaPacket msg = *it;
+        SmartPkt msg = *it;
         mMessageList.erase(it);
 
         mLock.signal();

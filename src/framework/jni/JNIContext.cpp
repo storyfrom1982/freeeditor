@@ -68,13 +68,13 @@ public:
     }
 
     void SendKeyMessage(int key){
-        MediaPacket msg;
+        SmartPkt msg;
         msg.msg.key = key;
         MessageContext::SendMessage(msg);
     }
 
     void SendBufferMessage(int key, jbyte *buffer, int size){
-        MediaPacket pkt;
+        SmartPkt pkt;
         pkt.msg.key = key;
         pkt.msg.ptr = buffer;
         pkt.msg.size = size;
@@ -83,7 +83,7 @@ public:
 
     void SendJNIMessage(jobject jmsg) {
         JniEnv env;
-        MediaPacket pkt;
+        SmartPkt pkt;
         pkt.msg.key = env->GetIntField(jmsg, m_keyField);
         pkt.msg.number = env->GetLongField(jmsg, m_numberField);
         pkt.msg.decimal = env->GetDoubleField(jmsg, m_decimalField);
@@ -100,7 +100,7 @@ public:
     jobject GetJNIMessage(JNIEnv *env, int key) {
         jobject obj = nullptr;
         jstring str = nullptr;
-        MediaPacket pkt = MessageContext::GetMessage(key);
+        SmartPkt pkt = MessageContext::GetMessage(key);
         if (pkt.msg.json != nullptr){
             str = env->NewStringUTF(pkt.msg.json);
         }
@@ -118,7 +118,7 @@ public:
         return jmsg;
     }
 
-    void onRecvMessage(MediaPacket pkt) override {
+    void onRecvMessage(SmartPkt pkt) override {
         JniEnv env;
         jobject obj = nullptr;
         jstring str = nullptr;
@@ -140,10 +140,10 @@ public:
         }
     }
 
-    MediaPacket onObtainMessage(int key) override {
+    SmartPkt onObtainMessage(int key) override {
         JniEnv env;
         jobject jmsg = env->CallObjectMethod(m_obj, m_onObtainMessage, key);
-        MediaPacket pkt;
+        SmartPkt pkt;
         pkt.msg.key = env->GetIntField(jmsg, m_keyField);
         pkt.msg.number = env->GetLongField(jmsg, m_numberField);
         pkt.msg.decimal = env->GetDoubleField(jmsg, m_decimalField);

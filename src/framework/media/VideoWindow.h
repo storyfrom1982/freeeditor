@@ -24,14 +24,14 @@ namespace freee {
 
         class VideoSurfaceCallback {
         public:
-            virtual void onSurfaceCreated(MediaPacket msg) = 0;
-            virtual void onSurfaceChanged(MediaPacket msg) = 0;
-            virtual void onSurfaceDestroyed(MediaPacket msg) = 0;
+            virtual void onSurfaceCreated(SmartPkt msg) = 0;
+            virtual void onSurfaceChanged(SmartPkt msg) = 0;
+            virtual void onSurfaceDestroyed(SmartPkt msg) = 0;
         };
 
         void SetCallback(VideoSurfaceCallback *callback);
 
-        void onRecvMessage(MediaPacket pkt) override;
+        void onRecvMessage(SmartPkt pkt) override;
 
     private:
         void *mWindowHolder;

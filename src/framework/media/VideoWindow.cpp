@@ -66,7 +66,7 @@ int VideoWindow::height() {
 #endif
 }
 
-void VideoWindow::onRecvMessage(MediaPacket pkt) {
+void VideoWindow::onRecvMessage(SmartPkt pkt) {
     if (pkt.msg.key == RecvMsg_SurfaceCreated){
         mWindowHolder = pkt.msg.obj;
 #ifdef __ANDROID__
@@ -95,5 +95,5 @@ void VideoWindow::onRecvMessage(MediaPacket pkt) {
 void VideoWindow::SetCallback(VideoWindow::VideoSurfaceCallback *callback) {
     AutoLock lock(mLock);
     mCallback = callback;
-    SendMessage(MediaPacket(SendMsg_RegisterCallback));
+    SendMessage(SmartPkt(SendMsg_RegisterCallback));
 }

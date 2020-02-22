@@ -39,7 +39,7 @@ void MessageProcessor::StopProcessor() {
     LOGD("MediaProcessor::StopProcessor [%s] exit\n", name.c_str());
 }
 
-void MessageProcessor::ProcessMessage(MediaPacket pkt) {
+void MessageProcessor::ProcessMessage(SmartPkt pkt) {
     if (__is_true(isRunning)){
         mLock.lock();
         mPktList.push_back(pkt);
@@ -68,7 +68,7 @@ void MessageProcessor::MediaProcessorLoop() {
         }
 
         auto it = mPktList.begin();
-        MediaPacket pkt = *it;
+        SmartPkt pkt = *it;
         mPktList.erase(it);
 
         mLock.signal();

@@ -7,7 +7,7 @@
 
 
 #include <string>
-#include <MediaBufferPool.h>
+#include <BufferPool.h>
 #include <AutoLock.h>
 
 
@@ -48,26 +48,26 @@ namespace freee{
         }
 
     public:
-        virtual void onRecvMessage(MediaPacket pkt) {};
+        virtual void onRecvMessage(SmartPkt pkt) {};
 
-        virtual MediaPacket onObtainMessage(int key){
-            return MediaPacket();
+        virtual SmartPkt onObtainMessage(int key){
+            return SmartPkt();
         }
 
     protected:
-        virtual void SendMessage(MediaPacket pkt){
+        virtual void SendMessage(SmartPkt pkt){
             AutoLock lock(mLock);
             if (messageContext){
                 messageContext->onRecvMessage(pkt);
             }
         }
 
-        virtual MediaPacket GetMessage(int key){
+        virtual SmartPkt GetMessage(int key){
             AutoLock lock(mLock);
             if (messageContext){
                 return messageContext->onObtainMessage(key);
             }
-            return MediaPacket();
+            return SmartPkt();
         }
 
     private:

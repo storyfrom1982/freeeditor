@@ -37,38 +37,38 @@ namespace freee {
 
 
     public:
-        void SetVideoWindow(MediaPacket pkt);
+        void SetVideoWindow(SmartPkt pkt);
 
     private:
-        void MessageSetVideoWindow(MediaPacket pkt);
+        void MessageSetVideoWindow(SmartPkt pkt);
 
-        void MessageWindowCreated(MediaPacket pkt);
+        void MessageWindowCreated(SmartPkt pkt);
 
-        void MessageWindowDestroyed(MediaPacket pkt);
+        void MessageWindowDestroyed(SmartPkt pkt);
 
-        void MessageWindowChanged(MediaPacket pkt);
+        void MessageWindowChanged(SmartPkt pkt);
 
-        void onSurfaceCreated(MediaPacket msg) override;
+        void onSurfaceCreated(SmartPkt msg) override;
 
-        void onSurfaceChanged(MediaPacket msg) override;
+        void onSurfaceChanged(SmartPkt msg) override;
 
-        void onSurfaceDestroyed(MediaPacket msg) override;
+        void onSurfaceDestroyed(SmartPkt msg) override;
 
         void UpdateViewport(int width, int height);
 
 
     private:
-        void MessageOpen(MediaPacket pkt) override;
+        void MessageOpen(SmartPkt pkt) override;
 
-        void MessageClose(MediaPacket pkt) override;
+        void MessageClose(SmartPkt pkt) override;
 
-        void MessageStart(MediaPacket pkt) override;
+        void MessageStart(SmartPkt pkt) override;
 
-        void MessageStop(MediaPacket pkt) override;
+        void MessageStop(SmartPkt pkt) override;
 
-        void MessagePacket(MediaPacket pkt) override;
+        void MessagePacket(SmartPkt pkt) override;
 
-        void MessageControl(MediaPacket pkt) override;
+        void MessageControl(SmartPkt pkt) override;
 
 
     private:
@@ -76,7 +76,7 @@ namespace freee {
 
         void ModuleImplClose() override;
 
-        int ModuleImplProcessMedia(MediaPacket pkt) override;
+        int ModuleImplProcessMedia(SmartPkt pkt) override;
 
 
     private:

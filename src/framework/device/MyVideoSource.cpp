@@ -45,7 +45,7 @@ MyVideoSource::MyVideoSource() {
     render = new MyVideoRenderer();
     sr_message_t msg = __sr_null_msg;
     msg.key = OpenGLESRender_Init;
-    MediaPacket b;
+    SmartPkt b;
     b.msg.key = OpenGLESRender_Init;
     render->OnPutMessage(b);
 }
@@ -65,7 +65,7 @@ MyVideoSource::~MyVideoSource() {
 
 void MyVideoSource::Open(json &cfg) {
     mConfig = cfg;
-    MediaPacket msg;
+    SmartPkt msg;
     std::string str = mConfig.dump();
     LOGD("MyVideoSource::Open: %s\n", str.c_str());
     msg.msg.key = SendMsg_Open;
@@ -77,7 +77,7 @@ void MyVideoSource::Open(json &cfg) {
 
 void MyVideoSource::Close() {
     LOGD("MyVideoSource::Close enter\n");
-    MediaPacket msg;
+    SmartPkt msg;
     msg.msg.key = SendMsg_Close;
     SendMessage(msg);
     LOGD("MyVideoSource::Close exit\n");
@@ -85,7 +85,7 @@ void MyVideoSource::Close() {
 
 void MyVideoSource::Start() {
     LOGD("MyVideoSource::Start enter\n");
-    MediaPacket msg;
+    SmartPkt msg;
     msg.msg.key = SendMsg_Start;
     SendMessage(msg);
     LOGD("MyVideoSource::Start exit\n");
@@ -93,7 +93,7 @@ void MyVideoSource::Start() {
 
 void MyVideoSource::Stop() {
     LOGD("MyVideoSource::Stop enter\n");
-    MediaPacket msg;
+    SmartPkt msg;
     msg.msg.key = SendMsg_Stop;
     SendMessage(msg);
     LOGD("MyVideoSource::Stop exit\n");
@@ -104,7 +104,7 @@ void MyVideoSource::SetEncoder(VideoEncoder *videoEncoder) {
     encoder = videoEncoder;
 }
 
-void MyVideoSource::onRecvMessage(MediaPacket msg) {
+void MyVideoSource::onRecvMessage(SmartPkt msg) {
     switch (msg.msg.key){
         case OnRecvMsg_ProcessPicture:
             processData(msg.msg.ptr, msg.msg.size);
@@ -128,7 +128,7 @@ void MyVideoSource::onRecvMessage(MediaPacket msg) {
     }
 }
 
-MediaPacket MyVideoSource::onObtainMessage(int key) {
+SmartPkt MyVideoSource::onObtainMessage(int key) {
     return MessageContext::onObtainMessage(key);
 }
 
@@ -142,7 +142,7 @@ void MyVideoSource::processData(void *data, int size) {
 
     sr_buffer_frame_t *y420Pkt;
 
-    MediaPacket pkt = bp->GetBuffer();
+    SmartPkt pkt = bp->GetPkt();
     if (!pkt.buffer){
         LOGD("cannot allocate buffer\n");
         return;
@@ -165,7 +165,7 @@ void MyVideoSource::processData(void *data, int size) {
 void MyVideoSource::SetWindow(MessageContext *windowContext) {
     AutoLock lock(mLock);
     window->ConnectContext(windowContext);
-    MediaPacket pkt;
+    SmartPkt pkt;
     pkt.msg.key = OpenGLESRender_SetSurfaceView;
     pkt.msg.ptr = window;
     render->OnPutMessage(pkt);
@@ -186,7 +186,7 @@ void MyVideoSource::Release() {
     }
 }
 
-void MyVideoSource::updateConfig(MediaPacket pkt) {
+void MyVideoSource::updateConfig(SmartPkt pkt) {
     json cfg = json::parse(pkt.msg.json);
     LOGD("MyVideoSource::updateConfig: %s\n", cfg.dump(4).c_str());
     mRotation = cfg["srcRotation"];
@@ -194,6 +194,6 @@ void MyVideoSource::updateConfig(MediaPacket pkt) {
     mInputHeight = cfg["srcHeight"];
     mOutputWidth = cfg["codecWidth"];
     mOutputHeight = cfg["codecHeight"];
-    bp = new MediaBufferPool(1, mOutputWidth * mOutputHeight / 2 * 3);
+    bp = new BufferPool(1, mOutputWidth * mOutputHeight / 2 * 3);
 }
 

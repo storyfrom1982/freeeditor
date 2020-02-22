@@ -36,9 +36,9 @@ namespace freee {
 
         void GetWindowSize(int *w, int *h);
 
-        void onRecvMessage(MediaPacket pkt) override;
+        void onRecvMessage(SmartPkt pkt) override;
 
-        MediaPacket onObtainMessage(int key) override;
+        SmartPkt onObtainMessage(int key) override;
 
     private:
 

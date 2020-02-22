@@ -31,11 +31,11 @@ MediaProtocol::~MediaProtocol() {
     StopProcessor();
 }
 
-void MediaProtocol::onRecvMessage(MediaPacket msg) {
+void MediaProtocol::onRecvMessage(SmartPkt msg) {
     MessageProcessor(msg);
 }
 
-void MediaProtocol::MessageProcessor(MediaPacket pkt) {
+void MediaProtocol::MessageProcessor(SmartPkt pkt) {
     switch (pkt.msg.key){
         case ProtocolOpen:
             Connect(pkt.msg.json);

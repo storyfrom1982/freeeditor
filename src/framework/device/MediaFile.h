@@ -21,9 +21,9 @@ namespace freee {
 
         void Disconnect() override;
 
-        void Write(MediaPacket msg) override;
+        void Write(SmartPkt msg) override;
 
-        void Read(MediaPacket msg) override;
+        void Read(SmartPkt msg) override;
     };
 
 }

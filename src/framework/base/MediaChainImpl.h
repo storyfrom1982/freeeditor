@@ -43,36 +43,36 @@ namespace freee {
         }
 
         void Open(MediaChain *chain) override {
-            MediaPacket pkt(RecvMsg_Open);
+            SmartPkt pkt(RecvMsg_Open);
             pkt.msg.ptr = chain;
             ProcessMessage(pkt);
         }
 
         void Close(MediaChain *chain) override {
-            MediaPacket pkt(RecvMsg_Close);
+            SmartPkt pkt(RecvMsg_Close);
             pkt.msg.ptr = chain;
             ProcessMessage(pkt);
         }
 
         void Start(MediaChain *chain) override {
-            MediaPacket pkt(RecvMsg_Start);
+            SmartPkt pkt(RecvMsg_Start);
             pkt.msg.ptr = chain;
             ProcessMessage(pkt);
         }
 
         void Stop(MediaChain *chain) override {
-            MediaPacket pkt(RecvMsg_Stop);
+            SmartPkt pkt(RecvMsg_Stop);
             pkt.msg.ptr = chain;
             ProcessMessage(pkt);
         }
 
-        void ProcessMedia(MediaChain *chain, MediaPacket pkt) override {
+        void ProcessMedia(MediaChain *chain, SmartPkt pkt) override {
             pkt.msg.key = RecvMsg_ProcessMedia;
             pkt.msg.ptr = chain;
             ProcessMessage(pkt);
         }
 
-        void Control(MediaChain *chain, MediaPacket pkt) override {
+        void Control(MediaChain *chain, SmartPkt pkt) override {
             pkt.msg.key = RecvMsg_Control;
             pkt.msg.ptr = chain;
             ProcessMessage(pkt);
@@ -117,14 +117,14 @@ namespace freee {
         }
 
     protected:
-        virtual void SendEvent(MediaPacket pkt) {
+        virtual void SendEvent(SmartPkt pkt) {
             AutoLock lock(mCallbackLock);
             if (mCallback){
                 mCallback->onEvent(this, pkt);
             }
         }
 
-        virtual void OutputMediaPacket(MediaPacket pkt){
+        virtual void OutputMediaPacket(SmartPkt pkt){
             AutoLock lock(mOutputChainLock);
             for (int i = 0; i < mOutputChain.size(); ++i){
                 mOutputChain[i]->ProcessMedia(this, pkt);
@@ -133,14 +133,14 @@ namespace freee {
 
 
     protected:
-        virtual void MessageOpen(MediaPacket pkt){};
-        virtual void MessageClose(MediaPacket pkt){};
-        virtual void MessageStart(MediaPacket pkt){};
-        virtual void MessageStop(MediaPacket pkt){};
-        virtual void MessagePacket(MediaPacket pkt){};
-        virtual void MessageControl(MediaPacket pkt){};
+        virtual void MessageOpen(SmartPkt pkt){};
+        virtual void MessageClose(SmartPkt pkt){};
+        virtual void MessageStart(SmartPkt pkt){};
+        virtual void MessageStop(SmartPkt pkt){};
+        virtual void MessagePacket(SmartPkt pkt){};
+        virtual void MessageControl(SmartPkt pkt){};
 
-        void MessageProcess(MediaPacket pkt) override {
+        void MessageProcess(SmartPkt pkt) override {
             switch (pkt.msg.key){
                 case RecvMsg_Open:
                     MessageOpen(pkt);

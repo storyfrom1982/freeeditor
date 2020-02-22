@@ -21,7 +21,7 @@ namespace freee {
         ~X264Encoder();
 
     protected:
-        void OnEncodeVideo(MediaPacket buffer) override;
+        void OnEncodeVideo(SmartPkt buffer) override;
 
     protected:
         int OnOpenEncoder(json& cfg) override;

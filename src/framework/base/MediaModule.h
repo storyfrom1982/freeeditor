@@ -21,8 +21,8 @@ namespace freee {
     protected:
         virtual int ModuleImplOpen(json &cfg){ return 0;};
         virtual void ModuleImplClose(){};
-        virtual int ModuleImplProcessMedia(MediaPacket pkt){ return 0;};
-        virtual void onModuleImplProcessMedia(MediaPacket pkt){};
+        virtual int ModuleImplProcessMedia(SmartPkt pkt){ return 0;};
+        virtual void onModuleImplProcessMedia(SmartPkt pkt){};
     };
 
 }

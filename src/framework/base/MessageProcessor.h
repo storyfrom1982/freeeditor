@@ -6,7 +6,7 @@
 #define ANDROID_MEDIAPROCESSOR_H
 
 
-#include <MediaBufferPool.h>
+#include <BufferPool.h>
 #include "AutoLock.h"
 #include <string>
 #include <vector>
@@ -24,8 +24,8 @@ namespace freee {
         void StartProcessor(std::string name);
         void StopProcessor();
 
-        virtual void ProcessMessage(MediaPacket pkt);
-        virtual void MessageProcess(MediaPacket pkt){}
+        virtual void ProcessMessage(SmartPkt pkt);
+        virtual void MessageProcess(SmartPkt pkt){}
 
     private:
         void MediaProcessorLoop();
@@ -40,7 +40,7 @@ namespace freee {
         Lock mLock;
         pthread_t mThreadId;
 
-        std::vector<MediaPacket> mPktList;
+        std::vector<SmartPkt> mPktList;
     };
 
 }

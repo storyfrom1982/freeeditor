@@ -10,7 +10,7 @@
 #include <MessageContext.h>
 #include <SmartPtr.h>
 #include <MConfig.h>
-#include <MediaBufferPool.h>
+#include <BufferPool.h>
 #include "MediaProtocol.h"
 
 namespace freee{
@@ -25,7 +25,7 @@ namespace freee{
 
         void OpenEncoder(json& cfg);
         void CloseEncoder();
-        void EncodeVideo(MediaPacket buffer);
+        void EncodeVideo(SmartPkt buffer);
 
         void SetProtocol(MediaProtocol *aProtocol){
             mediaProtocol = aProtocol;
@@ -41,7 +41,7 @@ namespace freee{
 
         virtual int OnOpenEncoder(json& cfg) = 0;
         virtual void OnCloseEncoder() = 0;
-        virtual void OnEncodeVideo(MediaPacket buffer);
+        virtual void OnEncodeVideo(SmartPkt buffer);
     };
 
 }

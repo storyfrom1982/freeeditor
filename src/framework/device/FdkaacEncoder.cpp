@@ -85,7 +85,7 @@ void FdkaacEncoder::CloseAudioEncoder() {
     aacEncClose(&m_pHandle);
 }
 
-int FdkaacEncoder::EncodeAudioData(MediaPacket buffer) {
+int FdkaacEncoder::EncodeAudioData(SmartPkt buffer) {
 
     AACENC_BufDesc in_buf = { 0 }, out_buf = { 0 };
     AACENC_InArgs in_args = { 0 };

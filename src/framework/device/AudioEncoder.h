@@ -7,7 +7,7 @@
 
 
 #include <MConfig.h>
-#include <MediaBufferPool.h>
+#include <BufferPool.h>
 #include "MediaProtocol.h"
 
 namespace freee {
@@ -22,7 +22,7 @@ namespace freee {
 
         virtual int OpenAudioEncoder(json& cfg) = 0;
         virtual void CloseAudioEncoder() = 0;
-        virtual int EncodeAudioData(MediaPacket buffer) = 0;
+        virtual int EncodeAudioData(SmartPkt buffer) = 0;
 
         void SetProtocol(MediaProtocol *aProtocol){
             mediaProtocol = aProtocol;

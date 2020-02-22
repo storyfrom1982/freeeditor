@@ -29,10 +29,10 @@ VideoEncoder *VideoEncoder::Create(std::string name) {
     return new X264Encoder;
 }
 
-void VideoEncoder::EncodeVideo(MediaPacket buffer) {
+void VideoEncoder::EncodeVideo(SmartPkt buffer) {
 //    SrMessage *b = new SrMessage;
 //    *b = buffer;
 }
 
-void VideoEncoder::OnEncodeVideo(MediaPacket buffer) {
+void VideoEncoder::OnEncodeVideo(SmartPkt buffer) {
 }

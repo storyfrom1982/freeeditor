@@ -17,13 +17,13 @@ namespace freee {
 
         ~MediaContext() override ;
 
-        void SendMessage(MediaPacket msg) override;
-        MediaPacket GetMessage(int key) override;
+        void SendMessage(SmartPkt msg) override;
+        SmartPkt GetMessage(int key) override;
 
     public:
 
-        void onRecvMessage(MediaPacket msg) override;
-        MediaPacket onObtainMessage(int key) override;
+        void onRecvMessage(SmartPkt msg) override;
+        SmartPkt onObtainMessage(int key) override;
 
         MessageContext* ConnectCamera();
         MessageContext* ConnectMicrophone();

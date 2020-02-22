@@ -7,7 +7,7 @@
 
 
 #include <MConfig.h>
-#include <MediaBufferPool.h>
+#include <BufferPool.h>
 
 namespace freee {
 
@@ -46,8 +46,8 @@ namespace freee {
         virtual void Close(MediaChain *chain) = 0;
         virtual void Start(MediaChain *chain) = 0;
         virtual void Stop(MediaChain *chain) = 0;
-        virtual void Control(MediaChain *chain, MediaPacket pkt) = 0;
-        virtual void ProcessMedia(MediaChain *chain, MediaPacket pkt) = 0;
+        virtual void Control(MediaChain *chain, SmartPkt pkt) = 0;
+        virtual void ProcessMedia(MediaChain *chain, SmartPkt pkt) = 0;
 
         virtual int GetMediaType(MediaChain *chain) = 0;
         virtual int GetMediaNumber(MediaChain *chain) = 0;
@@ -59,7 +59,7 @@ namespace freee {
 
         class EventCallback {
         public:
-            virtual void onEvent(MediaChain *chain, MediaPacket pkt) = 0;
+            virtual void onEvent(MediaChain *chain, SmartPkt pkt) = 0;
         };
 
         virtual void SetEventCallback(EventCallback *callback) = 0;

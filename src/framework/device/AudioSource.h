@@ -30,9 +30,9 @@ namespace freee {
 
         void SetEncoder(AudioEncoder *encoder);
 
-        virtual void onRecvMessage(MediaPacket msg);
+        virtual void onRecvMessage(SmartPkt msg);
 
-        virtual MediaPacket onObtainMessage(int key);
+        virtual SmartPkt onObtainMessage(int key);
 
     private:
         AudioEncoder *mEncoder;

@@ -29,8 +29,8 @@ MediaContext& MediaContext::Instance() {
     return globalMediaContext;
 }
 
-MediaPacket MediaContext::onObtainMessage(int key) {
-    MediaPacket pkt(key);
+SmartPkt MediaContext::onObtainMessage(int key) {
+    SmartPkt pkt(key);
     if (key == OnGetMsg_CreateRecorder){
         pkt.msg.ptr = new MediaRecorder();
     }else if (key == OnGetMsg_GetRecorderConfig){
@@ -39,32 +39,32 @@ MediaPacket MediaContext::onObtainMessage(int key) {
         pkt.msg.size = str.length();
         pkt.msg.json = strndup(str.c_str(), pkt.msg.size);
     }else{
-        return MediaPacket();
+        return SmartPkt();
     }
     return pkt;
 }
 
-void MediaContext::onRecvMessage(MediaPacket msg) {
+void MediaContext::onRecvMessage(SmartPkt msg) {
 
 }
 
-void MediaContext::SendMessage(MediaPacket msg) {
+void MediaContext::SendMessage(SmartPkt msg) {
     MessageContext::SendMessage(msg);
 }
 
-MediaPacket MediaContext::GetMessage(int key) {
+SmartPkt MediaContext::GetMessage(int key) {
     return MessageContext::GetMessage(key);
 }
 
 MessageContext *MediaContext::ConnectCamera() {
-    MediaPacket pkt = MessageContext::GetMessage(GetMsg_ConnectCamera);
+    SmartPkt pkt = MessageContext::GetMessage(GetMsg_ConnectCamera);
     assert(pkt.msg.ptr);
     assert(pkt.msg.key == GetMsg_ConnectCamera);
     return static_cast<MessageContext *>(pkt.msg.ptr);
 }
 
 MessageContext *MediaContext::ConnectMicrophone() {
-    MediaPacket pkt = MessageContext::GetMessage(GetMsg_ConnectMicrophone);
+    SmartPkt pkt = MessageContext::GetMessage(GetMsg_ConnectMicrophone);
     assert(pkt.msg.ptr);
     assert(pkt.msg.key == GetMsg_ConnectMicrophone);
     return static_cast<MessageContext *>(pkt.msg.ptr);

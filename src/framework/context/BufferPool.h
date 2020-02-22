@@ -20,10 +20,10 @@ extern "C" {
 
 namespace freee {
 
-    class MediaPacket {
+    class SmartPkt {
 
     public:
-        MediaPacket (int key = 0)
+        SmartPkt (int key = 0)
         {
             this->buffer = nullptr;
             this->frame = (sr_buffer_frame_t){0};
@@ -31,14 +31,14 @@ namespace freee {
             this->msg.key = key;
             reference_count = new int(1);
         }
-        MediaPacket (sr_buffer_data_t *buffer)
+        SmartPkt (sr_buffer_data_t *buffer)
         {
             this->buffer = buffer;
             this->frame = (sr_buffer_frame_t){0};
             this->msg = (struct message){0};
             reference_count = new int(1);
         }
-        MediaPacket(const MediaPacket &pkt)
+        SmartPkt(const SmartPkt &pkt)
         {
             if (this != &pkt){
                 this->msg = pkt.msg;
@@ -48,7 +48,7 @@ namespace freee {
                 __sr_atom_add(*reference_count, 1);
             }
         }
-        ~MediaPacket()
+        ~SmartPkt()
         {
             __sr_atom_sub(*reference_count, 1);
             if ((*reference_count) == 0){
@@ -61,9 +61,9 @@ namespace freee {
                 delete reference_count;
             }
         }
-        const MediaPacket& operator =(const MediaPacket& pkt)
+        const SmartPkt& operator =(const SmartPkt& pkt)
         {
-            this->~MediaPacket();
+            this->~SmartPkt();
             this->msg = pkt.msg;
             this->frame = pkt.frame;
             this->buffer = pkt.buffer;
@@ -94,20 +94,20 @@ namespace freee {
 
 
 
-    class MediaBufferPool {
+    class BufferPool {
 
     public:
-        MediaBufferPool(size_t count, size_t size)
+        BufferPool(size_t count, size_t size)
         {
             pool = sr_buffer_pool_create(count, size);
         }
-        ~MediaBufferPool()
+        ~BufferPool()
         {
             sr_buffer_pool_release(&pool);
         }
-        MediaPacket GetBuffer()
+        SmartPkt GetPkt()
         {
-            return MediaPacket(sr_buffer_pool_get(pool));
+            return SmartPkt(sr_buffer_pool_get(pool));
         }
 
     private:

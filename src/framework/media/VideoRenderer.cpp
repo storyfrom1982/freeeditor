@@ -31,7 +31,7 @@ VideoRenderer::~VideoRenderer() {
     StopProcessor();
 }
 
-void VideoRenderer::MessageOpen(MediaPacket pkt) {
+void VideoRenderer::MessageOpen(SmartPkt pkt) {
     mMediaConfig = static_cast<MediaChain *>(pkt.msg.ptr)->GetMediaConfig(this);
     if (mStatus == Status_Closed){
         ModuleImplOpen(mMediaConfig);
@@ -39,7 +39,7 @@ void VideoRenderer::MessageOpen(MediaPacket pkt) {
     }
 }
 
-void VideoRenderer::MessageClose(MediaPacket pkt) {
+void VideoRenderer::MessageClose(SmartPkt pkt) {
     if (mStatus == Status_Started){
         MessageStop(pkt);
     }
@@ -49,7 +49,7 @@ void VideoRenderer::MessageClose(MediaPacket pkt) {
     }
 }
 
-void VideoRenderer::MessageStart(MediaPacket pkt) {
+void VideoRenderer::MessageStart(SmartPkt pkt) {
     if (mStatus != Status_Opened){
         MessageOpen(pkt);
     }
@@ -58,13 +58,13 @@ void VideoRenderer::MessageStart(MediaPacket pkt) {
     }
 }
 
-void VideoRenderer::MessageStop(MediaPacket pkt) {
+void VideoRenderer::MessageStop(SmartPkt pkt) {
     if (mStatus == Status_Started){
         mStatus = Status_Stopped;
     }
 }
 
-void VideoRenderer::MessagePacket(MediaPacket pkt) {
+void VideoRenderer::MessagePacket(SmartPkt pkt) {
     if (mStatus != Status_Started){
         MessageStart(pkt);
         if (mStatus != Status_Started){
@@ -74,7 +74,7 @@ void VideoRenderer::MessagePacket(MediaPacket pkt) {
     ModuleImplProcessMedia(pkt);
 }
 
-void VideoRenderer::MessageControl(MediaPacket pkt) {
+void VideoRenderer::MessageControl(SmartPkt pkt) {
     switch (pkt.msg.key){
         case RecvMsg_SetVideoWindow:
             MessageSetVideoWindow(pkt);
@@ -116,7 +116,7 @@ void VideoRenderer::ModuleImplClose() {
     }
 }
 
-int VideoRenderer::ModuleImplProcessMedia(MediaPacket pkt) {
+int VideoRenderer::ModuleImplProcessMedia(SmartPkt pkt) {
     AutoLock lock(mLock);
     if (!isWindowPausing){
         opengles_render(opengles, &pkt.frame);
@@ -125,21 +125,21 @@ int VideoRenderer::ModuleImplProcessMedia(MediaPacket pkt) {
     return 0;
 }
 
-void VideoRenderer::SetVideoWindow(MediaPacket pkt) {
+void VideoRenderer::SetVideoWindow(SmartPkt pkt) {
     LOGD("VideoRenderer::SetVideoWindow enter\n");
     pkt.msg.key = RecvMsg_SetVideoWindow;
     ProcessMessage(pkt);
     LOGD("VideoRenderer::SetVideoWindow exit\n");
 }
 
-void VideoRenderer::MessageSetVideoWindow(MediaPacket pkt) {
+void VideoRenderer::MessageSetVideoWindow(SmartPkt pkt) {
     LOGD("VideoRenderer::MessageSetVideoWindow enter\n");
     mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.msg.ptr));
     mVideoWindow->SetCallback(this);
     LOGD("VideoRenderer::MessageSetVideoWindow exit\n");
 }
 
-void VideoRenderer::onSurfaceCreated(MediaPacket msg) {
+void VideoRenderer::onSurfaceCreated(SmartPkt msg) {
     LOGD("VideoRenderer::onSurfaceCreated enter\n");
     AutoLock lock(mLock);
     isWindowPausing = false;
@@ -148,26 +148,26 @@ void VideoRenderer::onSurfaceCreated(MediaPacket msg) {
     LOGD("VideoRenderer::onSurfaceCreated exit\n");
 }
 
-void VideoRenderer::onSurfaceChanged(MediaPacket msg) {
+void VideoRenderer::onSurfaceChanged(SmartPkt msg) {
     msg.msg.key = RecvMsg_SurfaceChanged;
     ProcessMessage(msg);
 }
 
-void VideoRenderer::onSurfaceDestroyed(MediaPacket msg) {
+void VideoRenderer::onSurfaceDestroyed(SmartPkt msg) {
     AutoLock lock(mLock);
     isWindowPausing = true;
     msg.msg.key = RecvMsg_SurfaceDestroyed;
     ProcessMessage(msg);
 }
 
-void VideoRenderer::MessageWindowCreated(MediaPacket pkt) {
+void VideoRenderer::MessageWindowCreated(SmartPkt pkt) {
     isWindowReady = true;
     if (mStatus == Status_Opened){
         gl_renderer_set_window(renderer, pkt.msg.ptr);
     }
 }
 
-void VideoRenderer::MessageWindowDestroyed(MediaPacket pkt) {
+void VideoRenderer::MessageWindowDestroyed(SmartPkt pkt) {
     if (isWindowReady){
         isWindowReady = false;
         if (mStatus == Status_Opened){
@@ -176,7 +176,7 @@ void VideoRenderer::MessageWindowDestroyed(MediaPacket pkt) {
     }
 }
 
-void VideoRenderer::MessageWindowChanged(MediaPacket pkt) {
+void VideoRenderer::MessageWindowChanged(SmartPkt pkt) {
     if (mVideoWindow){
         UpdateViewport(mVideoWindow->width(), mVideoWindow->height());
     }
