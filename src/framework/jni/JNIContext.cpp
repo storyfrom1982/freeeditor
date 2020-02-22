@@ -118,7 +118,7 @@ public:
         return jmsg;
     }
 
-    void onReceiveMessage(MediaPacket pkt) override {
+    void onRecvMessage(MediaPacket pkt) override {
         JniEnv env;
         jobject obj = nullptr;
         jstring str = nullptr;

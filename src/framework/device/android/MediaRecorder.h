@@ -8,24 +8,26 @@
 
 #include <MessageContext.h>
 #include <MyVideoSource.h>
-#include <VideoWindow.h>
-#include <VideoRenderer.h>
+#include <MyVideoWindow.h>
+#include <MyVideoRenderer.h>
 #include <AudioSource.h>
 #include <AudioEncoder.h>
 #include <MediaProtocol.h>
-#include <MediaProcessor.h>
+#include <MessageProcessor.h>
 #include <MediaModule.h>
+#include "../../media/VideoSource.h"
+#include "../../media/VideoRenderer.h"
 
 namespace freee{
 
-    class MediaRecorder : public MessageContext, MediaChainImpl, MediaProcessor {
+    class MediaRecorder : public MessageContext, MediaChainImpl {
 
     public:
         MediaRecorder();
         ~MediaRecorder();
 
     private:
-        void onReceiveMessage(MediaPacket pkt) override;
+        void onRecvMessage(MediaPacket pkt) override;
 
     protected:
         void ProcessMessage(MediaPacket pkt) override;
@@ -40,13 +42,18 @@ namespace freee{
         void StopRecord();
         void StopPreview();
 
+        json &GetMediaConfig(MediaChain *chain) override;
+
     private:
         int mStatus;
 
         bool isRecording;
         bool isPreviewing;
 
-        MyVideoSource *videoSource;
+//        MyVideoSource *videoSource;
+
+        VideoSource *mVideoSource;
+        VideoRenderer *mVideoRenderer;
     };
 }
 

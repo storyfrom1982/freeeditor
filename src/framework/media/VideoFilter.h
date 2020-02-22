@@ -7,12 +7,12 @@
 
 
 #include <MediaChainImpl.h>
-#include <MediaProcessor.h>
+#include <MessageProcessor.h>
 #include <MediaModule.h>
 
 namespace freee {
 
-    class VideoFilter : public MediaModule, MediaProcessor {
+    class VideoFilter : public MediaModule {
 
     public:
         VideoFilter(int mediaType = MediaType_Video,
@@ -21,35 +21,22 @@ namespace freee {
 
         ~VideoFilter();
 
-        void Open(MediaChain *chain) override;
-
-        void Close(MediaChain *chain) override;
-
-        void Start(MediaChain *chain) override;
-
-        void Stop(MediaChain *chain) override;
-
-        void ProcessMedia(MediaChain *chain, MediaPacket pkt) override;
-
     protected:
-        void ProcessOpen() override;
+        void MessageOpen(MediaPacket pkt) override;
 
-        void ProcessClose() override;
+        void MessageClose(MediaPacket pkt) override;
 
-        void ProcessStart() override;
+        void MessageStart(MediaPacket pkt) override;
 
-        void ProcessStop() override;
+        void MessageStop(MediaPacket pkt) override;
 
-        void ProcessPacket(MediaPacket pkt) override;
+        void MessagePacket(MediaPacket pkt) override;
 
-        int ModuleOpen(json &cfg) override;
+        int ModuleImplOpen(json &cfg) override;
 
-        void ModuleClose() override;
+        void ModuleImplClose() override;
 
-        int ModuleProcessPacket(MediaPacket pkt) override;
-
-    private:
-        void MessageProcess(MediaPacket pkt) override;
+        int ModuleImplProcessMedia(MediaPacket pkt) override;
 
     private:
         int mStatus;

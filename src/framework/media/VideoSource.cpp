@@ -17,16 +17,18 @@ enum {
 };
 
 enum {
-    RecvMsg_Opened = 1,
-    RecvMsg_Started,
-    RecvMsg_Stopped,
-    RecvMsg_Closed,
-    RecvMsg_ProcessPicture,
+    OnRecvMsg_Opened = 1,
+    OnRecvMsg_Started,
+    OnRecvMsg_Stopped,
+    OnRecvMsg_Closed,
+    OnRecvMsg_ProcessPicture,
 };
 
 
 VideoSource::VideoSource(MessageContext *context)
     : MediaChainImpl(MediaType_Video, MediaNumber_VideoSource, "VideoSource") {
+    mPool = nullptr;
+    mStatus = Status_Closed;
     if (context == nullptr){
         context = MediaContext::Instance().ConnectCamera();
     }
@@ -37,6 +39,10 @@ VideoSource::~VideoSource() {
     LOGD("VideoSource::~VideoSource enter\n");
     SendMessage(MediaPacket(SendMsg_Close));
     DisconnectContext();
+    if (mPool){
+        delete mPool;
+        mPool = nullptr;
+    }
     LOGD("VideoSource::~VideoSource exit\n");
 }
 
@@ -58,42 +64,55 @@ void VideoSource::Close(MediaChain *chain) {
 }
 
 void VideoSource::Start(MediaChain *chain) {
-    LOGD("VideoSource::Close Start\n");
+    LOGD("VideoSource::Start enter\n");
     SendMessage(MediaPacket(SendMsg_Start));
-    LOGD("VideoSource::Close Start\n");
+    LOGD("VideoSource::Start exit\n");
 }
 
 void VideoSource::Stop(MediaChain *chain) {
-    LOGD("VideoSource::Stop Start\n");
+    LOGD("VideoSource::Stop enter\n");
     SendMessage(MediaPacket(SendMsg_Stop));
-    LOGD("VideoSource::Stop Start\n");
+    LOGD("VideoSource::Stop exit\n");
+}
+
+void VideoSource::Control(MediaChain *chain, MediaPacket pkt) {
+
 }
 
 void VideoSource::ProcessMedia(MediaChain *chain, MediaPacket pkt) {
     sr_buffer_frame_fill_picture(&pkt.frame, (uint8_t*)pkt.msg.ptr, mSrcWidth, mSrcHeight, libyuv::FOURCC_NV21);
-    MediaPacket y420 = mPool->GetBuffer();
-    sr_buffer_frame_fill_picture(&y420.frame, y420.buffer->data, mCodecWidth, mCodecHeight, libyuv::FOURCC_I420);
-    sr_buffer_frame_to_yuv420p(&pkt.frame, &y420.frame, mSrcRotation);
-    OutputMediaPacket(pkt);
+    MediaPacket y420;
+    if (mPool){
+        y420 = mPool->GetBuffer();
+    }
+    if (y420.buffer){
+        sr_buffer_frame_fill_picture(&y420.frame, y420.buffer->data, mCodecWidth, mCodecHeight, libyuv::FOURCC_I420);
+        sr_buffer_frame_to_yuv420p(&pkt.frame, &y420.frame, mSrcRotation);
+        OutputMediaPacket(y420);
+    }
 }
 
-void VideoSource::onReceiveMessage(MediaPacket pkt) {
+void VideoSource::onRecvMessage(MediaPacket pkt) {
     switch (pkt.msg.key){
-        case RecvMsg_ProcessPicture:
+        case OnRecvMsg_ProcessPicture:
             ProcessMedia(this, pkt);
             break;
-        case RecvMsg_Opened:
+        case OnRecvMsg_Opened:
+            mStatus = Status_Opened;
             LOGD("VideoSource Opened\n");
             UpdateMediaConfig(pkt);
             break;
-        case RecvMsg_Started:
+        case OnRecvMsg_Closed:
+            mStatus = Status_Closed;
+            LOGD("VideoSource Closed\n");
+            break;
+        case OnRecvMsg_Started:
+            mStatus = Status_Started;
             LOGD("VideoSource Started\n");
             break;
-        case RecvMsg_Stopped:
+        case OnRecvMsg_Stopped:
+            mStatus = Status_Stopped;
             LOGD("VideoSource Stopped\n");
-            break;
-        case RecvMsg_Closed:
-            LOGD("VideoSource Closed\n");
             break;
         default:
             break;

@@ -14,10 +14,11 @@
 namespace freee {
 
 
-    class MediaProcessor {
+    class MessageProcessor {
 
     public:
-        virtual ~MediaProcessor(){}
+        MessageProcessor();
+        virtual ~MessageProcessor(){}
 
     protected:
         void StartProcessor(std::string name);

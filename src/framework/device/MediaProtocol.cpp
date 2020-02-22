@@ -31,7 +31,7 @@ MediaProtocol::~MediaProtocol() {
     StopProcessor();
 }
 
-void MediaProtocol::onReceiveMessage(MediaPacket msg) {
+void MediaProtocol::onRecvMessage(MediaPacket msg) {
     MessageProcessor(msg);
 }
 

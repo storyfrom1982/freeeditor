@@ -16,23 +16,13 @@ namespace freee {
     public:
         MediaModule(int mediaType, int mediaNumber, const std::string &mediaName)
                 : MediaChainImpl(mediaType, mediaNumber, mediaName){};
-
         virtual ~MediaModule(){};
 
     protected:
-        virtual void ProcessOpen(){};
-        virtual void ProcessClose(){};
-        virtual void ProcessStart(){};
-        virtual void ProcessStop(){};
-        virtual void ProcessPacket(MediaPacket pkt){};
-
-        virtual int ModuleOpen(json &cfg){ return 0;};
-        virtual void ModuleClose(){};
-        virtual int ModuleProcessPacket(MediaPacket pkt){ return 0;};
-
-        void OutputMediaPacket(MediaPacket pkt) override {
-            MediaChainImpl::OutputMediaPacket(pkt);
-        }
+        virtual int ModuleImplOpen(json &cfg){ return 0;};
+        virtual void ModuleImplClose(){};
+        virtual int ModuleImplProcessMedia(MediaPacket pkt){ return 0;};
+        virtual void onModuleImplProcessMedia(MediaPacket pkt){};
     };
 
 }

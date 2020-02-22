@@ -21,11 +21,11 @@ enum {
 };
 
 enum {
-    RecvMsg_Opened = 1,
-    RecvMsg_Started,
-    RecvMsg_Stopped,
-    RecvMsg_Closed,
-    RecvMsg_ProcessPicture,
+    OnRecvMsg_Opened = 1,
+    OnRecvMsg_Started,
+    OnRecvMsg_Stopped,
+    OnRecvMsg_Closed,
+    OnRecvMsg_ProcessPicture,
 };
 
 //freee::MyVideoSource *freee::MyVideoSource::CreateVideoSource() {
@@ -41,8 +41,8 @@ MyVideoSource::MyVideoSource() {
     ConnectContext(sourceContext);
     isPreview = false;
     isClosed = false;
-    window = new VideoWindow();
-    render = new VideoRenderer();
+    window = new MyVideoWindow();
+    render = new MyVideoRenderer();
     sr_message_t msg = __sr_null_msg;
     msg.key = OpenGLESRender_Init;
     MediaPacket b;
@@ -104,22 +104,22 @@ void MyVideoSource::SetEncoder(VideoEncoder *videoEncoder) {
     encoder = videoEncoder;
 }
 
-void MyVideoSource::onReceiveMessage(MediaPacket msg) {
+void MyVideoSource::onRecvMessage(MediaPacket msg) {
     switch (msg.msg.key){
-        case RecvMsg_ProcessPicture:
+        case OnRecvMsg_ProcessPicture:
             processData(msg.msg.ptr, msg.msg.size);
             break;
-        case RecvMsg_Opened:
-            LOGD("MyVideoSource::onRecvFrom RecvMsg_Opened\n");
+        case OnRecvMsg_Opened:
+            LOGD("MyVideoSource::onRecvFrom OnRecvMsg_Opened\n");
             updateConfig(msg);
             break;
-        case RecvMsg_Started:
-            LOGD("MyVideoSource::onRecvFrom RecvMsg_Started\n");
+        case OnRecvMsg_Started:
+            LOGD("MyVideoSource::onRecvFrom OnRecvMsg_Started\n");
             break;
-        case RecvMsg_Stopped:
+        case OnRecvMsg_Stopped:
             LOGD("MyVideoSource::onRecvFrom OnVideoSource_Stopped\n");
             break;
-        case RecvMsg_Closed:
+        case OnRecvMsg_Closed:
             isClosed = true;
             LOGD("MyVideoSource::onRecvFrom OnVideoSource_Closed\n");
             break;

@@ -27,7 +27,9 @@ enum {
 
 MediaRecorder::MediaRecorder()
         : MediaChainImpl(MediaType_All, MediaNumber_Recorder, "MediaRecorder") {
-    videoSource = nullptr;
+    mVideoSource = nullptr;
+    mVideoRenderer = nullptr;
+    isPreviewing = false;
 //    audioSource = nullptr;
     mStatus = Status_Closed;
     SetContextName("MediaRecorder");
@@ -72,7 +74,7 @@ void MediaRecorder::ProcessMessage(MediaPacket pkt) {
     }
 }
 
-void MediaRecorder::onReceiveMessage(MediaPacket pkt) {
+void MediaRecorder::onRecvMessage(MediaPacket pkt) {
     ProcessMessage(pkt);
 }
 
@@ -80,8 +82,15 @@ void MediaRecorder::Open(MediaPacket pkt) {
     if (mStatus == Status_Closed){
 
         mMediaConfig = json::parse(pkt.msg.json);
-        videoSource = new MyVideoSource();
-        videoSource->Open(mMediaConfig["video"]);
+
+        mVideoSource = new VideoSource();
+        mVideoSource->Open(this);
+
+        mVideoRenderer = new VideoRenderer();
+        mVideoSource->AddOutputChain(mVideoRenderer);
+
+//        videoSource = new MyVideoSource();
+//        videoSource->Open(mMediaConfig["video"]);
 
         mStatus = Status_Opened;
     }
@@ -89,13 +98,16 @@ void MediaRecorder::Open(MediaPacket pkt) {
 
 void MediaRecorder::Close() {
     if (mStatus == Status_Started){
-        videoSource->Stop();
+        Stop();
     }
     if (mStatus == Status_Opened
         || mStatus == Status_Stopped){
 
-        videoSource->Close();
-        delete videoSource;
+        mVideoSource->Close(this);
+        delete mVideoSource;
+
+        mVideoRenderer->Close(this);
+        delete mVideoRenderer;
 
         mStatus = Status_Closed;
     }
@@ -107,7 +119,6 @@ void MediaRecorder::StartRecord() {
             Start();
         }
         if (mStatus == Status_Started){
-//            videoSource->SetEncoder(videoEncoder);
             isRecording = true;
         }
     }
@@ -116,7 +127,6 @@ void MediaRecorder::StartRecord() {
 void MediaRecorder::StopRecord() {
     if (isRecording){
         isRecording = false;
-//        videoSource->SetEncoder(nullptr);
         if (!isPreviewing){
             Stop();
         }
@@ -124,22 +134,25 @@ void MediaRecorder::StopRecord() {
 }
 
 void MediaRecorder::StartPreview(MediaPacket pkt) {
+    LOGD("MediaRecorder::StartPreview enter\n");
     if (!isPreviewing){
+        LOGD("MediaRecorder::StartPreview 1\n");
         if (mStatus != Status_Started){
             Start();
         }
         if (mStatus == Status_Started){
-            videoSource->SetWindow((MessageContext*)pkt.msg.ptr);
-            videoSource->StartPreview();
+            LOGD("MediaRecorder::StartPreview 2\n");
+            mVideoRenderer->SetVideoWindow(pkt);
             isPreviewing = true;
         }
     }
+    LOGD("MediaRecorder::StartPreview exit\n");
 }
 
 void MediaRecorder::StopPreview() {
     if (isPreviewing){
         isPreviewing = false;
-        videoSource->StopPreview();
+
         if (!isRecording){
             Stop();
         }
@@ -150,7 +163,7 @@ void MediaRecorder::Start() {
     if (mStatus != Status_Started){
         if (mStatus == Status_Opened || mStatus == Status_Stopped){
 
-            videoSource->Start();
+            mVideoSource->Start(this);
 
             mStatus = Status_Started;
         }
@@ -160,9 +173,16 @@ void MediaRecorder::Start() {
 void MediaRecorder::Stop() {
     if (mStatus == Status_Started){
 
-        videoSource->Stop();
+        mVideoSource->Stop(this);
 
         mStatus = Status_Stopped;
     }
+}
+
+json &MediaRecorder::GetMediaConfig(MediaChain *chain) {
+    if (chain->GetMediaType(this) == MediaType_Video){
+        return mMediaConfig["video"];
+    }
+    return MediaChainImpl::GetMediaConfig(chain);
 }
 

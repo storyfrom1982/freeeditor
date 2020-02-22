@@ -57,12 +57,12 @@ namespace freee {
         virtual void AddOutputChain(MediaChain *chain) = 0;
         virtual void RemoveOutputChain(MediaChain *chain) = 0;
 
-        class Callback {
+        class EventCallback {
         public:
             virtual void onEvent(MediaChain *chain, MediaPacket pkt) = 0;
         };
 
-        virtual void SetCallback(Callback *callback) = 0;
+        virtual void SetEventCallback(EventCallback *callback) = 0;
     };
 
 }

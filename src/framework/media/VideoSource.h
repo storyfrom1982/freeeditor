@@ -12,7 +12,7 @@
 namespace freee {
 
 
-    class VideoSource : public MediaChainImpl, MessageContext {
+    class VideoSource : public MessageContext, public MediaChainImpl {
 
     public:
         VideoSource(MessageContext *context = nullptr);
@@ -28,17 +28,21 @@ namespace freee {
 
         void ProcessMedia(MediaChain *chain, MediaPacket pkt) override;
 
+        void Control(MediaChain *chain, MediaPacket pkt) override;
+
     private:
-        void onReceiveMessage(MediaPacket pkt) override;
+        void onRecvMessage(MediaPacket pkt) override;
 
         void UpdateMediaConfig(MediaPacket pkt);
 
     private:
+        int mStatus;
 
         int mSrcRotation;
         int mSrcWidth, mSrcHeight;
         int mCodecWidth, mCodecHeight;
 
+        Lock mLock;
         size_t mBufferSize;
         MediaBufferPool *mPool;
     };

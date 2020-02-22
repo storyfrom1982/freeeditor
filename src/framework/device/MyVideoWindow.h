@@ -7,7 +7,7 @@
 
 
 #include <MessageContext.h>
-#include "VideoRenderer.h"
+#include "MyVideoRenderer.h"
 
 #ifdef __ANDROID__
 
@@ -16,17 +16,17 @@
 
 namespace freee {
 
-    class VideoWindow : public MessageContext {
+    class MyVideoWindow : public MessageContext {
 
     public:
 
-        VideoWindow();
+        MyVideoWindow();
 
-        virtual ~VideoWindow();
+        virtual ~MyVideoWindow();
 
         bool IsReady();
 
-        void RegisterCallback(VideoRenderer *callback);
+        void RegisterCallback(MyVideoRenderer *callback);
 
         void* GetNativeWindow();
 
@@ -36,7 +36,7 @@ namespace freee {
 
         void GetWindowSize(int *w, int *h);
 
-        void onReceiveMessage(MediaPacket pkt) override;
+        void onRecvMessage(MediaPacket pkt) override;
 
         MediaPacket onObtainMessage(int key) override;
 
@@ -47,7 +47,7 @@ namespace freee {
         void *mWindowHolder;
         void *mNativeWindow;
 
-        VideoRenderer *mCallback;
+        MyVideoRenderer *mCallback;
 
     };
 

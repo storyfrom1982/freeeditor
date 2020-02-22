@@ -5,7 +5,7 @@
 #ifndef ANDROID_ANDROIDWINDOW_H
 #define ANDROID_ANDROIDWINDOW_H
 
-#include "VideoWindow.h"
+#include "MyVideoWindow.h"
 
 
 #ifdef __cplusplus

@@ -31,11 +31,11 @@ namespace freee {
         OpenGLESRender_SurfaceDestroyed,
     };
 
-    class VideoRenderer : public SrMessageQueue {
+    class MyVideoRenderer : public SrMessageQueue {
 
     public:
-        VideoRenderer();
-        ~VideoRenderer() override;
+        MyVideoRenderer();
+        ~MyVideoRenderer() override;
 
     public:
         void OnPutMessage(MediaPacket pkt);

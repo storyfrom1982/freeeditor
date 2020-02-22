@@ -29,6 +29,7 @@ namespace freee{
             AutoLock lock(mLock);
             if (context){
                 messageContext = context;
+                AutoLock lockContext(messageContext->mLock);
                 messageContext->messageContext = this;
             }
         }
@@ -36,6 +37,7 @@ namespace freee{
         void DisconnectContext(){
             AutoLock lock(mLock);
             if (messageContext){
+                AutoLock lockContext(messageContext->mLock);
                 messageContext->messageContext = NULL;
                 messageContext = NULL;
             }
@@ -46,9 +48,7 @@ namespace freee{
         }
 
     public:
-        virtual void onReceiveMessage(MediaPacket pkt) {
-
-        };
+        virtual void onRecvMessage(MediaPacket pkt) {};
 
         virtual MediaPacket onObtainMessage(int key){
             return MediaPacket();
@@ -58,7 +58,7 @@ namespace freee{
         virtual void SendMessage(MediaPacket pkt){
             AutoLock lock(mLock);
             if (messageContext){
-                messageContext->onReceiveMessage(pkt);
+                messageContext->onRecvMessage(pkt);
             }
         }
 

@@ -8,16 +8,6 @@
 using namespace freee;
 
 
-enum {
-    RecvMsg_None = 0,
-    RecvMsg_Open = 1,
-    RecvMsg_Start = 2,
-    RecvMsg_Stop = 3,
-    RecvMsg_Close = 4,
-    RecvMsg_ProcessMedia = 5,
-};
-
-
 VideoFilter::VideoFilter(int mediaType, int mediaNumber, const std::string &mediaName)
         : MediaModule(mediaType, mediaNumber, mediaName) {
     mStatus = Status_Closed;
@@ -28,110 +18,64 @@ VideoFilter::~VideoFilter() {
     StopProcessor();
 }
 
-void VideoFilter::Open(MediaChain *chain) {
-    mMediaConfig = chain->GetMediaConfig(this);
-    ProcessMessage(MediaPacket(RecvMsg_Open));
-}
-
-void VideoFilter::Close(MediaChain *chain) {
-    ProcessMessage(MediaPacket(RecvMsg_Close));
-}
-
-void VideoFilter::Start(MediaChain *chain) {
-    mMediaConfig = chain->GetMediaConfig(this);
-    ProcessMessage(MediaPacket(RecvMsg_Start));
-}
-
-void VideoFilter::Stop(MediaChain *chain) {
-    ProcessMessage(MediaPacket(RecvMsg_Stop));
-}
-
-void VideoFilter::ProcessMedia(MediaChain *chain, MediaPacket pkt) {
-    pkt.msg.ptr = chain;
-    ProcessMessage(pkt);
-}
-
-void VideoFilter::MessageProcess(MediaPacket pkt) {
-    switch (pkt.msg.key){
-        case RecvMsg_Open:
-            ProcessOpen();
-            break;
-        case RecvMsg_Close:
-            ProcessClose();
-            break;
-        case RecvMsg_Start:
-            ProcessStart();
-            break;
-        case RecvMsg_Stop:
-            ProcessStop();
-            break;
-        case RecvMsg_ProcessMedia:
-            ProcessPacket(pkt);
-            break;
-        default:
-            break;
-    }
-}
-
-void VideoFilter::ProcessOpen() {
+void VideoFilter::MessageOpen(MediaPacket pkt) {
+    mMediaConfig = static_cast<MediaChain *>(pkt.msg.ptr)->GetMediaConfig(this);
     if (mStatus == Status_Closed){
-        ModuleOpen(mMediaConfig);
+        ModuleImplOpen(mMediaConfig);
         mStatus = Status_Opened;
     }
 }
 
-void VideoFilter::ProcessClose() {
+void VideoFilter::MessageClose(MediaPacket pkt) {
     if (mStatus == Status_Started){
-        ProcessStop();
+        MessageStop(pkt);
     }
     if (mStatus == Status_Opened || mStatus == Status_Stopped){
-        ModuleClose();
+        ModuleImplClose();
         mStatus = Status_Closed;
     }
 }
 
-void VideoFilter::ProcessStart() {
+void VideoFilter::MessageStart(MediaPacket pkt) {
     if (mStatus != Status_Opened){
-        ProcessOpen();
+        MessageOpen(pkt);
     }
     if (mStatus == Status_Opened || mStatus == Status_Stopped){
         mStatus = Status_Started;
     }
 }
 
-void VideoFilter::ProcessStop() {
+void VideoFilter::MessageStop(MediaPacket pkt) {
     if (mStatus == Status_Started){
         mStatus = Status_Stopped;
     }
 }
 
-void VideoFilter::ProcessPacket(MediaPacket pkt) {
+void VideoFilter::MessagePacket(MediaPacket pkt) {
     if (mStatus != Status_Started){
-        auto *chain = static_cast<MediaChain *>(pkt.msg.ptr);
-        mMediaConfig = chain->GetMediaConfig(this);
-        ProcessStart();
+        MessageStart(pkt);
         if (mStatus != Status_Started){
             return;
         }
     }
-    ModuleProcessPacket(pkt);
+    ModuleImplProcessMedia(pkt);
 }
 
-int VideoFilter::ModuleOpen(json &cfg) {
+int VideoFilter::ModuleImplOpen(json &cfg) {
     int width = cfg["codecWidth"];
     int height = cfg["codecHeight"];
     pool = new MediaBufferPool(1,  width * height / 2 * 3);
     return 0;
 }
 
-void VideoFilter::ModuleClose() {
+void VideoFilter::ModuleImplClose() {
     if (pool){
         delete pool;
         pool = nullptr;
     }
 }
 
-int VideoFilter::ModuleProcessPacket(MediaPacket pkt) {
+int VideoFilter::ModuleImplProcessMedia(MediaPacket pkt) {
     int srcWidth = mMediaConfig["srcWidth"];
     int srcHeight = mMediaConfig["srcHeight"];
     int codecWidth = mMediaConfig["codecWidth"];

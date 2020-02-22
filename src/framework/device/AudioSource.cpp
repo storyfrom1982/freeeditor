@@ -35,7 +35,7 @@ AudioSource::~AudioSource() {
     Close();
 }
 
-void AudioSource::onReceiveMessage(MediaPacket msg) {
+void AudioSource::onRecvMessage(MediaPacket msg) {
 //    LOGD("AudioSource::onRecvFrom data size=%d\n", msg.type);
 //    SrMessage buffer;
 //    buffer.buffer->data = static_cast<unsigned char *>(msg.ptr);

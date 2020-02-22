@@ -44,7 +44,7 @@ MediaPacket MediaContext::onObtainMessage(int key) {
     return pkt;
 }
 
-void MediaContext::onReceiveMessage(MediaPacket msg) {
+void MediaContext::onRecvMessage(MediaPacket msg) {
 
 }
 

@@ -9,8 +9,8 @@
 #include <StreamProcessor.h>
 #include <MConfig.h>
 #include <MyVideoSource.h>
-#include <VideoWindow.h>
-#include <VideoRenderer.h>
+#include <MyVideoWindow.h>
+#include <MyVideoRenderer.h>
 #include "StreamCapture.h"
 
 
@@ -63,8 +63,8 @@ namespace freee {
 //
 //        MyVideoSource *m_videoSource;
 //
-//        VideoWindow *mNativeWindow;
-//        VideoRenderer *videoRenderer;
+//        MyVideoWindow *mNativeWindow;
+//        MyVideoRenderer *videoRenderer;
 //        GLObject *glObject;
     };
 

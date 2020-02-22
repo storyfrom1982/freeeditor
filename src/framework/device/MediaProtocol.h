@@ -22,7 +22,7 @@ namespace freee {
         MediaProtocol(std::string url);
         ~MediaProtocol();
 
-        void onReceiveMessage(MediaPacket msg) override;
+        void onRecvMessage(MediaPacket msg) override;
 
     protected:
     private:

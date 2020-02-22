@@ -2,13 +2,14 @@
 // Created by yongge on 20-2-20.
 //
 
-#include "MediaProcessor.h"
+#include "MessageProcessor.h"
 
 
 using namespace freee;
 
+MessageProcessor::MessageProcessor() : mThreadId(0), isRunning(false), isStopped(false) {}
 
-void MediaProcessor::StartProcessor(std::string name) {
+void MessageProcessor::StartProcessor(std::string name) {
     LOGD("MediaProcessor::StartProcessor [%s] enter\n", name.c_str());
     isRunning = true;
     isStopped = false;
@@ -19,7 +20,7 @@ void MediaProcessor::StartProcessor(std::string name) {
     LOGD("MediaProcessor::StartProcessor [%s] exit\n", name.c_str());
 }
 
-void MediaProcessor::StopProcessor() {
+void MessageProcessor::StopProcessor() {
     LOGD("MediaProcessor::StopProcessor [%s] enter\n", name.c_str());
     __set_false(isRunning);
     mLock.lock();
@@ -38,7 +39,7 @@ void MediaProcessor::StopProcessor() {
     LOGD("MediaProcessor::StopProcessor [%s] exit\n", name.c_str());
 }
 
-void MediaProcessor::ProcessMessage(MediaPacket pkt) {
+void MessageProcessor::ProcessMessage(MediaPacket pkt) {
     if (__is_true(isRunning)){
         mLock.lock();
         mPktList.push_back(pkt);
@@ -47,7 +48,7 @@ void MediaProcessor::ProcessMessage(MediaPacket pkt) {
     }
 }
 
-void MediaProcessor::MediaProcessorLoop() {
+void MessageProcessor::MediaProcessorLoop() {
 
     LOGD("MediaProcessor::MediaProcessorLoop [%s] enter\n", name.c_str());
 
@@ -61,12 +62,13 @@ void MediaProcessor::MediaProcessorLoop() {
             }else {
                 __set_true(isStopped);
                 LOGD("MediaProcessor::MediaProcessorLoop [%s] exit\n", name.c_str());
+                mLock.unlock();
                 return;
             }
         }
 
         auto it = mPktList.begin();
-        MediaPacket &pkt = *it;
+        MediaPacket pkt = *it;
         mPktList.erase(it);
 
         mLock.signal();
@@ -76,7 +78,7 @@ void MediaProcessor::MediaProcessorLoop() {
     }
 }
 
-void *MediaProcessor::MediaProcessorThread(void *p) {
-    ((MediaProcessor *) p)->MediaProcessorLoop();
+void *MessageProcessor::MediaProcessorThread(void *p) {
+    ((MessageProcessor *) p)->MediaProcessorLoop();
     return nullptr;
 }

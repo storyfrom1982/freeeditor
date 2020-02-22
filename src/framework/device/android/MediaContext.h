@@ -22,7 +22,7 @@ namespace freee {
 
     public:
 
-        void onReceiveMessage(MediaPacket msg) override;
+        void onRecvMessage(MediaPacket msg) override;
         MediaPacket onObtainMessage(int key) override;
 
         MessageContext* ConnectCamera();

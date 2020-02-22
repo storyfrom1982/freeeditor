@@ -30,7 +30,7 @@ namespace freee {
 
         void SetEncoder(AudioEncoder *encoder);
 
-        virtual void onReceiveMessage(MediaPacket msg);
+        virtual void onRecvMessage(MediaPacket msg);
 
         virtual MediaPacket onObtainMessage(int key);
 

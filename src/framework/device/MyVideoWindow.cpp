@@ -2,7 +2,7 @@
 // Created by yongge on 19-7-4.
 //
 
-#include "VideoWindow.h"
+#include "MyVideoWindow.h"
 
 #ifdef __ANDROID__
 #include <JNIContext.h>
@@ -16,25 +16,25 @@ using namespace freee;
 
 
 enum {
-    OnPutMsg_WindowError = 0,
-    OnPutMsg_WindowCreated = 1,
-    OnPutMsg_WindowChanged = 2,
-    OnPutMsg_WindowDestroyed = 3
+    RecvMsg_Error = 0,
+    RecvMsg_SurfaceCreated = 1,
+    RecvMsg_SurfaceChanged = 2,
+    RecvMsg_SurfaceDestroyed = 3
 };
 
 enum {
-    PutMsg_WindowError = 0,
-    PutMsg_RegisterCallback = 1
+    SendMsg_Error = 0,
+    SendMsg_RegisterCallback = 1
 };
 
-VideoWindow::VideoWindow() {
+MyVideoWindow::MyVideoWindow() {
     isReady = false;
     mWindowHolder = nullptr;
     mNativeWindow = nullptr;
-    SetContextName("VideoWindow");
+    SetContextName("MyVideoWindow");
 }
 
-VideoWindow::~VideoWindow() {
+MyVideoWindow::~MyVideoWindow() {
 #ifdef __ANDROID__
     if (mNativeWindow){
         ANativeWindow_release((ANativeWindow*)mNativeWindow);
@@ -46,31 +46,31 @@ VideoWindow::~VideoWindow() {
 #endif
 }
 
-void *VideoWindow::GetNativeWindow() {
+void *MyVideoWindow::GetNativeWindow() {
     return mNativeWindow;
 }
 
-void VideoWindow::GetWindowSize(int *w, int *h) {
+void MyVideoWindow::GetWindowSize(int *w, int *h) {
 #ifdef __ANDROID__
     *w = ANativeWindow_getWidth((ANativeWindow*)mNativeWindow);
     *h = ANativeWindow_getHeight((ANativeWindow*)mNativeWindow);
 #endif
 }
 
-int VideoWindow::GetWindowWidth() {
+int MyVideoWindow::GetWindowWidth() {
 #ifdef __ANDROID__
     return ANativeWindow_getWidth((ANativeWindow*)mNativeWindow);
 #endif
 }
 
-int VideoWindow::GetWindowHeight() {
+int MyVideoWindow::GetWindowHeight() {
 #ifdef __ANDROID__
     return ANativeWindow_getHeight((ANativeWindow*)mNativeWindow);
 #endif
 }
 
-void VideoWindow::onReceiveMessage(MediaPacket pkt) {
-    if (pkt.msg.key == OnPutMsg_WindowCreated){
+void MyVideoWindow::onRecvMessage(MediaPacket pkt) {
+    if (pkt.msg.key == RecvMsg_SurfaceCreated){
         mWindowHolder = pkt.msg.obj;
 #ifdef __ANDROID__
         JniEnv env;
@@ -82,30 +82,30 @@ void VideoWindow::onReceiveMessage(MediaPacket pkt) {
             mCallback->OnPutMessage(pkt);
         }
 #endif
-    }else if (pkt.msg.key == OnPutMsg_WindowChanged){
+    }else if (pkt.msg.key == RecvMsg_SurfaceChanged){
         pkt.msg.key = OpenGLESRender_SurfaceCreated;
         pkt.msg.ptr = this;
         mCallback->OnPutMessage(pkt);
-    }else if (pkt.msg.key == OnPutMsg_WindowDestroyed){
+    }else if (pkt.msg.key == RecvMsg_SurfaceDestroyed){
         pkt.msg.key = OpenGLESRender_SurfaceDestroyed;
         pkt.msg.ptr = this;
         mCallback->OnPutMessage(pkt);
     }
 }
 
-MediaPacket VideoWindow::onObtainMessage(int key) {
+MediaPacket MyVideoWindow::onObtainMessage(int key) {
     return MessageContext::onObtainMessage(key);
 }
 
-void VideoWindow::RegisterCallback(VideoRenderer *callback) {
+void MyVideoWindow::RegisterCallback(MyVideoRenderer *callback) {
     mCallback = callback;
     MediaPacket pkt;
-    pkt.msg.key = PutMsg_RegisterCallback;
+    pkt.msg.key = SendMsg_RegisterCallback;
     SendMessage(pkt);
     isReady = true;
-    LOGD("VideoWindow::RegisterCallback: %d\n", __is_true(isReady));
+    LOGD("MyVideoWindow::RegisterCallback: %d\n", __is_true(isReady));
 }
 
-bool VideoWindow::IsReady() {
+bool MyVideoWindow::IsReady() {
     return isReady;
 }

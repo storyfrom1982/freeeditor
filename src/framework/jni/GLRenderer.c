@@ -203,7 +203,7 @@ int gl_renderer_set_window(gl_renderer_t *renderer, void *window)
 {
     LOGD("gl_renderer_set_view enter\n");
 
-    if (window == NULL){
+    if (renderer == NULL || window == NULL){
         LOGE("Invalid native mWindowHolder\n");
         return -1;
     }
@@ -232,6 +232,11 @@ int gl_renderer_set_window(gl_renderer_t *renderer, void *window)
 int gl_renderer_remove_window(gl_renderer_t *renderer)
 {
     LOGD("gl_renderer_remove_window enter\n");
+
+    if (renderer == NULL){
+        LOGE("Invalid renderer\n");
+        return -1;
+    }
 
     renderer->window = NULL;
 

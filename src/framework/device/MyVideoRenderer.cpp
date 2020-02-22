@@ -2,8 +2,8 @@
 // Created by yongge on 20-2-4.
 //
 #include <MediaBufferPool.h>
-#include "VideoRenderer.h"
-#include "VideoWindow.h"
+#include "MyVideoRenderer.h"
+#include "MyVideoWindow.h"
 
 
 #ifdef __cplusplus
@@ -20,13 +20,13 @@ extern "C" {
 using namespace freee;
 
 
-VideoRenderer::VideoRenderer() {
-    std::string name("VideoRenderer");
+MyVideoRenderer::MyVideoRenderer() {
+    std::string name("MyVideoRenderer");
     StartProcessor(name);
 }
 
-VideoRenderer::~VideoRenderer() {
-    LOGD("VideoRenderer)\n");
+MyVideoRenderer::~MyVideoRenderer() {
+    LOGD("MyVideoRenderer)\n");
     StopProcessor();
     if (renderer){
         gl_renderer_release(&renderer);
@@ -36,40 +36,40 @@ VideoRenderer::~VideoRenderer() {
     }
 }
 
-void VideoRenderer::init(MediaPacket pkt) {
+void MyVideoRenderer::init(MediaPacket pkt) {
     renderer = gl_renderer_create(16, 16);
     opengles_open(&opengles);
 }
 
-void VideoRenderer::setSurfaceView(MediaPacket pkt) {
-    VideoWindow *window = (VideoWindow*)pkt.msg.ptr;
+void MyVideoRenderer::setSurfaceView(MediaPacket pkt) {
+    MyVideoWindow *window = (MyVideoWindow*)pkt.msg.ptr;
     window->RegisterCallback(this);
 }
 
-void VideoRenderer::drawPicture(MediaPacket pkt) {
+void MyVideoRenderer::drawPicture(MediaPacket pkt) {
     opengles_render(opengles, &pkt.frame);
     gl_renderer_swap_buffers(renderer);
 }
 
-void VideoRenderer::surfaceCreated(MediaPacket pkt) {
-    VideoWindow *window = (VideoWindow*)pkt.msg.ptr;
+void MyVideoRenderer::surfaceCreated(MediaPacket pkt) {
+    MyVideoWindow *window = (MyVideoWindow*)pkt.msg.ptr;
     gl_renderer_set_window(renderer, window->GetNativeWindow());
     int w, h;
     window->GetWindowSize(&w, &h);
     glViewport(0, 0, w, h);
 }
 
-void VideoRenderer::surfaceChanged(MediaPacket msg) {
+void MyVideoRenderer::surfaceChanged(MediaPacket msg) {
 
 }
 
-void VideoRenderer::surfaceDestroyed(MediaPacket msg) {
+void MyVideoRenderer::surfaceDestroyed(MediaPacket msg) {
     AutoLock lock(m_lock);
     gl_renderer_remove_window(renderer);
     lock.signal();
 }
 
-void VideoRenderer::MessageProcessor(MediaPacket pkt) {
+void MyVideoRenderer::MessageProcessor(MediaPacket pkt) {
     switch (pkt.msg.key){
         case OpenGLESRender_Init:
             init(pkt);
@@ -91,7 +91,7 @@ void VideoRenderer::MessageProcessor(MediaPacket pkt) {
     }
 }
 
-void VideoRenderer::OnPutMessage(MediaPacket pkt) {
+void MyVideoRenderer::OnPutMessage(MediaPacket pkt) {
     if (pkt.msg.key == OpenGLESRender_SurfaceDestroyed){
         AutoLock lock(m_lock);
         PutMessage(pkt);

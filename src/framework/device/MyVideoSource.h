@@ -9,8 +9,8 @@
 #include <MConfig.h>
 #include <MessageContext.h>
 #include <MediaBufferPool.h>
-#include "VideoRenderer.h"
-#include "VideoWindow.h"
+#include "MyVideoRenderer.h"
+#include "MyVideoWindow.h"
 #include "VideoEncoder.h"
 
 
@@ -26,7 +26,7 @@ namespace freee {
         MyVideoSource();
         virtual ~MyVideoSource() override ;
 
-        void onReceiveMessage(MediaPacket msg) override;
+        void onRecvMessage(MediaPacket msg) override;
 
         MediaPacket onObtainMessage(int key) override;
 
@@ -65,8 +65,8 @@ namespace freee {
         Lock mLock;
         VideoEncoder *encoder;
 
-        VideoWindow *window;
-        VideoRenderer *render;
+        MyVideoWindow *window;
+        MyVideoRenderer *render;
 
         MediaBufferPool *bp;
         sr_buffer_pool_t *pool;

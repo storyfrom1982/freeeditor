@@ -190,6 +190,7 @@ public class VideoSource extends JNIContext implements Runnable,
                 mCamera.setErrorCallback(null);
                 mCamera.release();
                 mCamera = null;
+                mBufferList.clear();
                 sendMessage(SendMsg_Closed);
                 mStatus = Status_Closed;
             }
