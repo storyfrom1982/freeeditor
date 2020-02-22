@@ -34,7 +34,7 @@ public class MediaRecorder extends JNIContext {
         String config = MediaContext.Instance().getRecorderConfig();
         mConfig = JSON.parseObject(config);
         Log.d(TAG, "encoder config: " + JSON.toJSONString(mConfig, true));
-        sendMessage(new JNIMessage(SendMsg_Open, mConfig.toJSONString()));
+        sendMessage(SendMsg_Open, mConfig.toJSONString());
     }
 
     public void setVideoSize(int width, int height){
@@ -43,7 +43,7 @@ public class MediaRecorder extends JNIContext {
     }
 
     public void updateConfig(){
-        sendMessage(new JNIMessage(SendMsg_UpdateConfig, mConfig.toJSONString()));
+        sendMessage(SendMsg_UpdateConfig, mConfig.toJSONString());
     }
 
     public void startCapture(){
@@ -56,7 +56,7 @@ public class MediaRecorder extends JNIContext {
 
     public void startRecord(String url){
         mUrl = url;
-        sendMessage(new JNIMessage(SendMsg_StartRecord, mUrl));
+        sendMessage(SendMsg_StartRecord, mUrl);
     }
 
     public void stopRecord(){
@@ -65,7 +65,7 @@ public class MediaRecorder extends JNIContext {
 
     public void startPreview(SurfaceView view){
         videoView.setSurfaceView(view);
-        sendMessage(new JNIMessage(SendMsg_StartPreview, videoView.getContextPointer()));
+        sendMessage(SendMsg_StartPreview, videoView.getContextPointer());
     }
 
     public void stopPreview(){

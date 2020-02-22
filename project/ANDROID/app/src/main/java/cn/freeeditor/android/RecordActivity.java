@@ -100,6 +100,7 @@ public class RecordActivity extends Activity {
         recorder.startCapture();
         recorder.startRecord(url);
         recorder.startPreview(surfaceView);
+        publishHandler.sendMessageDelayed(publishHandler.obtainMessage(HANDLER_ORENTATION), 1000);
     }
 
 
@@ -109,6 +110,14 @@ public class RecordActivity extends Activity {
         recorder.release();
     }
 
+    private void changeOrientation(){
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        publishHandler.sendEmptyMessageDelayed(HANDLER_ORENTATION, 1000);
+    }
 
     View.OnClickListener publishClickListener = new View.OnClickListener() {
         @Override
@@ -192,6 +201,7 @@ public class RecordActivity extends Activity {
 
     private static final int OVERLAY_FADE_OUT = 0;
     private static final int HANDLER_PERMISSION_GAN = 3721;
+    private static final int HANDLER_ORENTATION = 3722;
 
 
     private final Handler publishHandler = new PublishHandler(this);
@@ -216,6 +226,9 @@ public class RecordActivity extends Activity {
                     break;
                 case HANDLER_PERMISSION_GAN:
                     activity.requirePermission();
+                    break;
+                case HANDLER_ORENTATION:
+                    activity.changeOrientation();
                     break;
                 default:
                     break;

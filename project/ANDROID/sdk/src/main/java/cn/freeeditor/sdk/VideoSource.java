@@ -175,7 +175,7 @@ public class VideoSource extends JNIContext implements Runnable,
         }
         mConfig.put("srcFormat", "YV21");
         mConfig.put("srcRotation", mRotation);
-        sendMessage(new JNIMessage(SendMsg_Opened, mConfig.toString()));
+        sendMessage(SendMsg_Opened, mConfig.toString());
 
         mStatus = Status_Opened;
     }

@@ -72,7 +72,7 @@ public class VideoSurfaceView extends JNIContext implements Runnable, SurfaceHol
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        sendMessage(new JNIMessage(PutMsg_SurfaceCreated, holder.getSurface()));
+        sendMessage(PutMsg_SurfaceCreated, holder.getSurface());
     }
 
     @Override

@@ -29,11 +29,27 @@ abstract public class JNIContext {
     protected abstract void onReceiveMessage(JNIMessage msg);
 
     protected void sendMessage(int key){
-        sendMessage(key, contextPointer);
+        sendMessage(key, 0, 0, contextPointer);
     }
 
-    protected void sendMessage(JNIMessage msg){
-        sendMessage(msg, contextPointer);
+//    protected void sendMessage(JNIMessage msg){
+//        sendMessage(msg, contextPointer);
+//    }
+
+    protected void sendMessage(int key, long number){
+        sendMessage(key, number, 0, contextPointer);
+    }
+
+    protected void sendMessage(int key, double decimal){
+        sendMessage(key, 0, decimal, contextPointer);
+    }
+
+    protected void sendMessage(int key, Object obj){
+        sendMessage(key, obj, contextPointer);
+    }
+
+    protected void sendMessage(int key, String json){
+        sendMessage(key, json, contextPointer);
     }
 
     protected void sendMessage(int key, byte[] buffer, int size){
@@ -61,7 +77,10 @@ abstract public class JNIContext {
     private native void disconnectContext(long messageContext, long contextPointer);
 
     private native JNIMessage getMessage(int key, long contextPointer);
-    private native void sendMessage(int key, long contextPointer);
+//    private native void sendMessage(int key, long contextPointer);
+    private native void sendMessage(int key, Object obj, long contextPointer);
+    private native void sendMessage(int key, String json, long contextPointer);
+    private native void sendMessage(int key, long number, double decimal, long contextPointer);
     private native void sendMessage(int key, byte[] buffer, int size, long contextPointer);
-    private native void sendMessage(JNIMessage msg, long contextPointer);
+//    private native void sendMessage(JNIMessage msg, long contextPointer);
 }

@@ -67,35 +67,50 @@ public:
         }
     }
 
-    void SendKeyMessage(int key){
-        SmartPkt msg;
-        msg.msg.key = key;
-        MessageContext::SendMessage(msg);
+    void SendMessage(int key, jlong number, jdouble decimal){
+        SmartPkt pkt(key);
+        pkt.msg.number = number;
+        pkt.msg.decimal = decimal;
+        MessageContext::SendMessage(pkt);
     }
 
-    void SendBufferMessage(int key, jbyte *buffer, int size){
-        SmartPkt pkt;
-        pkt.msg.key = key;
+    void SendMessage(int key, jobject obj){
+        SmartPkt pkt(key);
+        pkt.msg.obj = obj;
+        MessageContext::SendMessage(pkt);
+    }
+
+    void SendMessage(int key, jstring json, JNIEnv *env){
+        SmartPkt pkt(key);
+        const char *js = env->GetStringUTFChars(json, 0);
+        pkt.msg.size = env->GetStringUTFLength(json);
+        pkt.msg.json = strndup(js, pkt.msg.size);
+        MessageContext::SendMessage(pkt);
+        env->ReleaseStringUTFChars(json, js);
+    }
+
+    void SendMessage(int key, jbyte *buffer, int size){
+        SmartPkt pkt(key);
         pkt.msg.ptr = buffer;
         pkt.msg.size = size;
         MessageContext::SendMessage(pkt);
     }
 
-    void SendJNIMessage(jobject jmsg) {
-        JniEnv env;
-        SmartPkt pkt;
-        pkt.msg.key = env->GetIntField(jmsg, m_keyField);
-        pkt.msg.number = env->GetLongField(jmsg, m_numberField);
-        pkt.msg.decimal = env->GetDoubleField(jmsg, m_decimalField);
-        pkt.msg.obj = env->GetObjectField(jmsg, m_objField);
-        jstring str = static_cast<jstring>(env->GetObjectField(jmsg, m_stringField));
-        if (str != nullptr){
-            const char *js = env->GetStringUTFChars(str, 0);
-            pkt.msg.json = strdup(js);
-            env->ReleaseStringUTFChars(str, js);
-        }
-        MessageContext::SendMessage(pkt);
-    }
+//    void SendJNIMessage(jobject jmsg) {
+//        JniEnv env;
+//        SmartPkt pkt;
+//        pkt.msg.key = env->GetIntField(jmsg, m_keyField);
+//        pkt.msg.number = env->GetLongField(jmsg, m_numberField);
+//        pkt.msg.decimal = env->GetDoubleField(jmsg, m_decimalField);
+//        pkt.msg.obj = env->GetObjectField(jmsg, m_objField);
+//        jstring str = static_cast<jstring>(env->GetObjectField(jmsg, m_stringField));
+//        if (str != nullptr){
+//            const char *js = env->GetStringUTFChars(str, 0);
+//            pkt.msg.json = strdup(js);
+//            env->ReleaseStringUTFChars(str, js);
+//        }
+//        MessageContext::SendMessage(pkt);
+//    }
 
     jobject GetJNIMessage(JNIEnv *env, int key) {
         jobject obj = nullptr;
@@ -107,8 +122,8 @@ public:
         if (pkt.msg.obj != nullptr){
             obj = static_cast<jobject>(pkt.msg.obj);
         }
-//        jobject jmsg = env->NewObject(m_msgCls, m_newObject, pkt.msg.key, pkt.msg.number, pkt.msg.decimal, obj, str);
-        jobject jmsg = env->CallObjectMethod(m_obj, m_createJniMessage, pkt.msg.key, pkt.msg.number, pkt.msg.decimal, obj, str);
+        jobject jmsg = env->NewObject(m_msgCls, m_newObject, pkt.msg.key, pkt.msg.number, pkt.msg.decimal, obj, str);
+//        jobject jmsg = env->CallObjectMethod(m_obj, m_createJniMessage, pkt.msg.key, pkt.msg.number, pkt.msg.decimal, obj, str);
         if (str != nullptr){
             env->DeleteLocalRef(str);
         }
@@ -128,8 +143,8 @@ public:
         if (pkt.msg.obj != nullptr){
             obj = static_cast<jobject>(pkt.msg.obj);
         }
-//        jobject jmsg = env->NewObject(m_msgCls, m_newObject, pkt.msg.key, pkt.msg.number, pkt.msg.decimal, obj, str);
-        jobject jmsg = env->CallObjectMethod(m_obj, m_createJniMessage, pkt.msg.key, pkt.msg.number, pkt.msg.decimal, obj, str);
+        jobject jmsg = env->NewObject(m_msgCls, m_newObject, pkt.msg.key, pkt.msg.number, pkt.msg.decimal, obj, str);
+//        jobject jmsg = env->CallObjectMethod(m_obj, m_createJniMessage, pkt.msg.key, pkt.msg.number, pkt.msg.decimal, obj, str);
         env->CallVoidMethod(m_obj, m_onReceiveMessage, jmsg);
         env->DeleteLocalRef(jmsg);
         if (str != nullptr){
@@ -225,25 +240,58 @@ Java_cn_freeeditor_sdk_JNIContext_disconnectContext__JJ(JNIEnv *env, jobject ins
     }
 }
 
+//extern "C"
+//JNIEXPORT void JNICALL
+//Java_cn_freeeditor_sdk_JNIContext_sendMessage__IJ(JNIEnv *env, jobject instance, jint key,
+//                                                 jlong contextPointer) {
+//    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(contextPointer);
+//    if (pJNIContext){
+//        pJNIContext->SendMessage(key);
+//    }
+//}
+//
+//extern "C"
+//JNIEXPORT void JNICALL
+//Java_cn_freeeditor_sdk_JNIContext_sendMessage__Lcn_freeeditor_sdk_JNIMessage_2J(JNIEnv *env,
+//                                                                                jobject instance,
+//                                                                                jobject msg,
+//                                                                                jlong contextPointer) {
+//    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(contextPointer);
+//    if (pJNIContext){
+//        pJNIContext->SendJNIMessage(msg);
+//    }
+//}
+
 extern "C"
 JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_JNIContext_sendMessage__IJ(JNIEnv *env, jobject instance, jint key,
-                                                 jlong contextPointer) {
+Java_cn_freeeditor_sdk_JNIContext_sendMessage__ILjava_lang_Object_2J(JNIEnv *env, jobject instance,
+                                                                     jint key, jobject obj,
+                                                                     jlong contextPointer) {
     JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(contextPointer);
     if (pJNIContext){
-        pJNIContext->SendKeyMessage(key);
+        pJNIContext->SendMessage(key, obj);
     }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_JNIContext_sendMessage__Lcn_freeeditor_sdk_JNIMessage_2J(JNIEnv *env,
-                                                                                jobject instance,
-                                                                                jobject msg,
-                                                                                jlong contextPointer) {
+Java_cn_freeeditor_sdk_JNIContext_sendMessage__ILjava_lang_String_2J(JNIEnv *env, jobject instance,
+                                                                     jint key, jstring json_,
+                                                                     jlong contextPointer) {
     JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(contextPointer);
     if (pJNIContext){
-        pJNIContext->SendJNIMessage(msg);
+        pJNIContext->SendMessage(key, json_, env);
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_cn_freeeditor_sdk_JNIContext_sendMessage__IJDJ(JNIEnv *env, jobject instance, jint key,
+                                                    jlong number, jdouble decimal,
+                                                    jlong contextPointer) {
+    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(contextPointer);
+    if (pJNIContext){
+        pJNIContext->SendMessage(key, number, decimal);
     }
 }
 
@@ -255,7 +303,7 @@ Java_cn_freeeditor_sdk_JNIContext_sendMessage__I_3BIJ(JNIEnv *env, jobject insta
     JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(contextPointer);
     if (pJNIContext){
         jbyte *buffer = env->GetByteArrayElements(buffer_, NULL);
-        pJNIContext->SendBufferMessage(key, buffer, size);
+        pJNIContext->SendMessage(key, buffer, size);
         env->ReleaseByteArrayElements(buffer_, buffer, 0);
     }
 }

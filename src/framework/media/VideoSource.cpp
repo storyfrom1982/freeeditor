@@ -128,5 +128,5 @@ void VideoSource::UpdateMediaConfig(SmartPkt pkt) {
     mCodecWidth = mMediaConfig["codecWidth"];
     mCodecHeight = mMediaConfig["codecHeight"];
     mBufferSize = mCodecWidth * mCodecHeight / 2 * 3;
-    mPool = new BufferPool(1, mBufferSize);
+    mPool = new BufferPool(10, mBufferSize);
 }
