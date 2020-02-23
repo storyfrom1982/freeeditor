@@ -8,9 +8,6 @@
 
 #include <StreamProcessor.h>
 #include <MConfig.h>
-#include <MyVideoSource.h>
-#include <MyVideoWindow.h>
-#include <MyVideoRenderer.h>
 #include "StreamCapture.h"
 
 

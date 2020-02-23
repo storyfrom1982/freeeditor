@@ -20,6 +20,7 @@ import android.widget.EditText;
 
 import java.lang.ref.WeakReference;
 
+import cn.freeeditor.sdk.MediaContext;
 import cn.freeeditor.sdk.MediaRecorder;
 import cn.freeeditor.sdk.permission.PermissionEverywhere;
 import cn.freeeditor.sdk.permission.PermissionResponse;
@@ -100,7 +101,6 @@ public class RecordActivity extends Activity {
         recorder.startCapture();
         recorder.startRecord(url);
         recorder.startPreview(surfaceView);
-        publishHandler.sendMessageDelayed(publishHandler.obtainMessage(HANDLER_ORENTATION), 1000);
     }
 
 
@@ -108,6 +108,7 @@ public class RecordActivity extends Activity {
         recorder.stopRecord();
         recorder.stopCapture();
         recorder.release();
+//        MediaContext.Instance().release();
     }
 
     private void changeOrientation(){
@@ -118,6 +119,11 @@ public class RecordActivity extends Activity {
         }
         publishHandler.sendEmptyMessageDelayed(HANDLER_ORENTATION, 500);
     }
+
+//    @Override
+//    public void onConfigurationChanged(Configuration newConfig) {
+//
+//    }
 
     View.OnClickListener publishClickListener = new View.OnClickListener() {
         @Override
@@ -163,11 +169,12 @@ public class RecordActivity extends Activity {
     View.OnClickListener aspectRatioClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            }else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            }
+            publishHandler.sendMessageDelayed(publishHandler.obtainMessage(HANDLER_ORENTATION), 1000);
+//            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//            }else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+//            }
         }
     };
 

@@ -310,7 +310,7 @@ public class VideoSource extends JNIContext implements Runnable,
     }
 
     @Override
-    protected void onReceiveMessage(JNIMessage msg) {
+    protected void onRecvMessage(JNIMessage msg) {
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(msg.key, msg));
     }
 

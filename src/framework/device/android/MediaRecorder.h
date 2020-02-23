@@ -7,9 +7,6 @@
 
 
 #include <MessageContext.h>
-#include <MyVideoSource.h>
-#include <MyVideoWindow.h>
-#include <MyVideoRenderer.h>
 #include <AudioSource.h>
 #include <AudioEncoder.h>
 #include <MediaProtocol.h>
@@ -27,7 +24,7 @@ namespace freee{
         ~MediaRecorder();
 
     private:
-        void onRecvMessage(SmartPkt pkt) override;
+        void onRecvMessage(SmartMsg msg) override;
 
     protected:
         void ProcessMessage(SmartPkt pkt) override;

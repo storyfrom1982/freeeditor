@@ -21,12 +21,12 @@ abstract public class JNIContext {
         connectContext(messageContext, contextPointer);
     }
 
-    public void disconnectContext(long messageContext){
-
+    public void disconnectContext(){
+        disconnectContext(contextPointer);
     }
 
     protected abstract JNIMessage onObtainMessage(int key);
-    protected abstract void onReceiveMessage(JNIMessage msg);
+    protected abstract void onRecvMessage(JNIMessage msg);
 
     protected void sendMessage(int key){
         sendMessage(key, 0, 0, contextPointer);
@@ -74,7 +74,7 @@ abstract public class JNIContext {
     private native void deleteContext(long contextPointer);
     private native void setContextName(String name, long contextPointer);
     private native void connectContext(long messageContext, long contextPointer);
-    private native void disconnectContext(long messageContext, long contextPointer);
+    private native void disconnectContext(long contextPointer);
 
     private native JNIMessage getMessage(int key, long contextPointer);
 //    private native void sendMessage(int key, long contextPointer);

@@ -43,38 +43,23 @@ namespace freee {
         }
 
         void Open(MediaChain *chain) override {
-            SmartPkt pkt(RecvMsg_Open);
-            pkt.msg.ptr = chain;
-            ProcessMessage(pkt);
+            ProcessMessage(SmartPkt(SmartMsg(RecvMsg_Open, chain)));
         }
 
         void Close(MediaChain *chain) override {
-            SmartPkt pkt(RecvMsg_Close);
-            pkt.msg.ptr = chain;
-            ProcessMessage(pkt);
+            ProcessMessage(SmartPkt(SmartMsg(RecvMsg_Close, chain)));
         }
 
         void Start(MediaChain *chain) override {
-            SmartPkt pkt(RecvMsg_Start);
-            pkt.msg.ptr = chain;
-            ProcessMessage(pkt);
+            ProcessMessage(SmartPkt(SmartMsg(RecvMsg_Start, chain)));
         }
 
         void Stop(MediaChain *chain) override {
-            SmartPkt pkt(RecvMsg_Stop);
-            pkt.msg.ptr = chain;
-            ProcessMessage(pkt);
+            ProcessMessage(SmartPkt(SmartMsg(RecvMsg_Stop, chain)));
         }
 
         void ProcessMedia(MediaChain *chain, SmartPkt pkt) override {
-            pkt.msg.key = RecvMsg_ProcessMedia;
-            pkt.msg.ptr = chain;
-            ProcessMessage(pkt);
-        }
-
-        void Control(MediaChain *chain, SmartPkt pkt) override {
-            pkt.msg.key = RecvMsg_Control;
-            pkt.msg.ptr = chain;
+            pkt.msg = SmartMsg(RecvMsg_ProcessMedia, chain);
             ProcessMessage(pkt);
         }
 
@@ -141,7 +126,7 @@ namespace freee {
         virtual void MessageControl(SmartPkt pkt){};
 
         void MessageProcess(SmartPkt pkt) override {
-            switch (pkt.msg.key){
+            switch (pkt.msg.GetKey()){
                 case RecvMsg_Open:
                     MessageOpen(pkt);
                     break;

@@ -153,11 +153,11 @@ public class MContext implements Runnable, ComponentCallbacks {
     }
 
 //    public String loadConfig(){
-//        return sendRequest(new Msg(MSG_KEY_RequestLoadConfig)).obj;
+//        return sendRequest(new Msg(MSG_KEY_RequestLoadConfig)).troubledPtr;
 //    }
 //
 //    public String saveConfig(){
-//        return sendRequest(new Msg(MSG_KEY_RequestSaveConfig)).obj;
+//        return sendRequest(new Msg(MSG_KEY_RequestSaveConfig)).troubledPtr;
 //    }
 //
 //    public void updateConfig(String cfg){

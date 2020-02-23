@@ -66,7 +66,7 @@ public class VideoSurfaceView extends JNIContext implements Runnable, SurfaceHol
     }
 
     @Override
-    protected void onReceiveMessage(JNIMessage msg) {
+    protected void onRecvMessage(JNIMessage msg) {
         mMessageHandler.sendMessage(mMessageHandler.obtainMessage(msg.key, msg));
     }
 

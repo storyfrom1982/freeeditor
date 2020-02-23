@@ -29,10 +29,24 @@ VideoRenderer::VideoRenderer(int mediaType, int mediaNumber, const std::string &
 VideoRenderer::~VideoRenderer() {
     Stop(this);
     StopProcessor();
+    FinalClear();
+}
+
+void VideoRenderer::FinalClear() {
+    if (renderer){
+        gl_renderer_release(&renderer);
+    }
+    if (opengles){
+        opengles_close(&opengles);
+    }
+    if (mVideoWindow){
+        delete mVideoWindow;
+        mVideoWindow = nullptr;
+    }
 }
 
 void VideoRenderer::MessageOpen(SmartPkt pkt) {
-    mMediaConfig = static_cast<MediaChain *>(pkt.msg.ptr)->GetMediaConfig(this);
+    mMediaConfig = static_cast<MediaChain *>(pkt.msg.GetPtr())->GetMediaConfig(this);
     if (mStatus == Status_Closed){
         ModuleImplOpen(mMediaConfig);
         mStatus = Status_Opened;
@@ -75,7 +89,7 @@ void VideoRenderer::MessagePacket(SmartPkt pkt) {
 }
 
 void VideoRenderer::MessageControl(SmartPkt pkt) {
-    switch (pkt.msg.key){
+    switch (pkt.msg.GetKey()){
         case RecvMsg_SetVideoWindow:
             MessageSetVideoWindow(pkt);
             break;
@@ -94,7 +108,9 @@ void VideoRenderer::MessageControl(SmartPkt pkt) {
 }
 
 int VideoRenderer::ModuleImplOpen(json &cfg) {
-    renderer = gl_renderer_create(360, 640);
+    int width = cfg["codecWidth"];
+    int height = cfg["codecHeight"];
+    renderer = gl_renderer_create(width, height);
     opengles_open(&opengles);
     if (isWindowReady && mVideoWindow){
         gl_renderer_set_window(renderer, mVideoWindow->window());
@@ -125,45 +141,41 @@ int VideoRenderer::ModuleImplProcessMedia(SmartPkt pkt) {
     return 0;
 }
 
-void VideoRenderer::SetVideoWindow(SmartPkt pkt) {
+void VideoRenderer::SetVideoWindow(void *ptr) {
     LOGD("VideoRenderer::SetVideoWindow enter\n");
-    pkt.msg.key = RecvMsg_SetVideoWindow;
-    ProcessMessage(pkt);
+    ProcessMessage(SmartPkt(SmartMsg(RecvMsg_SetVideoWindow, ptr)));
     LOGD("VideoRenderer::SetVideoWindow exit\n");
 }
 
 void VideoRenderer::MessageSetVideoWindow(SmartPkt pkt) {
     LOGD("VideoRenderer::MessageSetVideoWindow enter\n");
-    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.msg.ptr));
+    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.msg.GetPtr()));
     mVideoWindow->SetCallback(this);
     LOGD("VideoRenderer::MessageSetVideoWindow exit\n");
 }
 
-void VideoRenderer::onSurfaceCreated(SmartPkt msg) {
+void VideoRenderer::onSurfaceCreated(void *ptr) {
     LOGD("VideoRenderer::onSurfaceCreated enter\n");
     AutoLock lock(mLock);
     isWindowPausing = false;
-    msg.msg.key = RecvMsg_SurfaceCreated;
-    ProcessMessage(msg);
+    ProcessMessage(SmartPkt(SmartMsg(RecvMsg_SurfaceCreated, ptr)));
     LOGD("VideoRenderer::onSurfaceCreated exit\n");
 }
 
-void VideoRenderer::onSurfaceChanged(SmartPkt msg) {
-    msg.msg.key = RecvMsg_SurfaceChanged;
-    ProcessMessage(msg);
+void VideoRenderer::onSurfaceChanged() {
+    ProcessMessage(SmartPkt(SmartMsg(RecvMsg_SurfaceChanged)));
 }
 
-void VideoRenderer::onSurfaceDestroyed(SmartPkt msg) {
+void VideoRenderer::onSurfaceDestroyed() {
     AutoLock lock(mLock);
     isWindowPausing = true;
-    msg.msg.key = RecvMsg_SurfaceDestroyed;
-    ProcessMessage(msg);
+    ProcessMessage(SmartPkt(SmartMsg(RecvMsg_SurfaceDestroyed)));
 }
 
 void VideoRenderer::MessageWindowCreated(SmartPkt pkt) {
     isWindowReady = true;
     if (mStatus == Status_Opened){
-        gl_renderer_set_window(renderer, pkt.msg.ptr);
+        gl_renderer_set_window(renderer, pkt.msg.GetPtr());
     }
 }
 

@@ -28,12 +28,11 @@ namespace freee {
 
         void ProcessMedia(MediaChain *chain, SmartPkt pkt) override;
 
-        void Control(MediaChain *chain, SmartPkt pkt) override;
 
     private:
-        void onRecvMessage(SmartPkt pkt) override;
+        void onRecvMessage(SmartMsg msg) override;
 
-        void UpdateMediaConfig(SmartPkt pkt);
+        void UpdateMediaConfig(SmartMsg msg);
 
     private:
         int mStatus;
@@ -44,7 +43,7 @@ namespace freee {
 
         Lock mLock;
         size_t mBufferSize;
-        BufferPool *mPool;
+        BufferPool *mBufferPool;
     };
 
 }

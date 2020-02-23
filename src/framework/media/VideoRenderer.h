@@ -37,9 +37,11 @@ namespace freee {
 
 
     public:
-        void SetVideoWindow(SmartPkt pkt);
+        void SetVideoWindow(void *ptr);
 
     private:
+        void FinalClear();
+
         void MessageSetVideoWindow(SmartPkt pkt);
 
         void MessageWindowCreated(SmartPkt pkt);
@@ -48,11 +50,11 @@ namespace freee {
 
         void MessageWindowChanged(SmartPkt pkt);
 
-        void onSurfaceCreated(SmartPkt msg) override;
+        void onSurfaceCreated(void *ptr) override;
 
-        void onSurfaceChanged(SmartPkt msg) override;
+        void onSurfaceChanged() override;
 
-        void onSurfaceDestroyed(SmartPkt msg) override;
+        void onSurfaceDestroyed() override;
 
         void UpdateViewport(int width, int height);
 

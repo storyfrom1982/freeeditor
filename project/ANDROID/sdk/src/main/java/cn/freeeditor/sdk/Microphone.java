@@ -257,7 +257,7 @@ public class Microphone extends JNIContext implements Runnable {
     }
 
     @Override
-    protected void onReceiveMessage(JNIMessage msg) {
+    protected void onRecvMessage(JNIMessage msg) {
         switch (msg.key){
 
             case OnPutMsg_OpenRecord:

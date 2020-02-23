@@ -19,7 +19,7 @@ VideoFilter::~VideoFilter() {
 }
 
 void VideoFilter::MessageOpen(SmartPkt pkt) {
-    mMediaConfig = static_cast<MediaChain *>(pkt.msg.ptr)->GetMediaConfig(this);
+    mMediaConfig = static_cast<MediaChain *>(pkt.msg.GetPtr())->GetMediaConfig(this);
     if (mStatus == Status_Closed){
         ModuleImplOpen(mMediaConfig);
         mStatus = Status_Opened;

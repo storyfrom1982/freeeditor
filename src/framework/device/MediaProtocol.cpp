@@ -31,14 +31,14 @@ MediaProtocol::~MediaProtocol() {
     StopProcessor();
 }
 
-void MediaProtocol::onRecvMessage(SmartPkt msg) {
+void MediaProtocol::onRecvMessage(SmartMsg msg) {
     MessageProcessor(msg);
 }
 
 void MediaProtocol::MessageProcessor(SmartPkt pkt) {
-    switch (pkt.msg.key){
+    switch (pkt.msg.GetKey()){
         case ProtocolOpen:
-            Connect(pkt.msg.json);
+            Connect(pkt.msg.GetJson());
             break;
         case ProtocolClose:
             DisconnectContext();

@@ -126,12 +126,12 @@ void MConfig::buildDefaultConfig(json &config) {
 //        std::string cfg = load(MContext::Instance()->getConfigDirPath());
 //        size_t size = cfg.length();
 //        msg = __sr_msg_build(0, size  +1);
-//        memcpy(msg.obj, cfg.c_str(), size);
+//        memcpy(msg.troubledPtr, cfg.c_str(), size);
 //        return msg;
 //    }else if (msg.key == MSG_KEY_RequestUpdateConfig){
 //        if (__sr_msg_is_need_remove(msg)){
-//            LOGD("update config: %s\n", (char *)msg.obj);
-//            update((char *)msg.obj);
+//            LOGD("update config: %s\n", (char *)msg.troubledPtr);
+//            update((char *)msg.troubledPtr);
 //            __sr_msg_remove(msg);
 //        }
 //        return __sr_ok_msg;

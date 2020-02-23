@@ -307,7 +307,7 @@ struct sr_queue_t {
     int size;
     int pushable;
     int popable;
-    void (*free_node_cb)(sr_node_t*);
+    void (*clear_cb)(sr_node_t*);
     sr_node_t head;
     sr_node_t end;
     //blocking
@@ -317,7 +317,7 @@ struct sr_queue_t {
 };
 
 
-sr_queue_t* sr_queue_create(int max_node_number, void (*free_node_cb)(sr_node_t*))
+sr_queue_t* sr_queue_create(int max_node_number, void (*clear_cb)(sr_node_t*))
 {
     sr_queue_t *queue = (sr_queue_t*)calloc(1, sizeof(sr_queue_t));
     if (queue == NULL){
@@ -343,7 +343,7 @@ sr_queue_t* sr_queue_create(int max_node_number, void (*free_node_cb)(sr_node_t*
     queue->head.next = &(queue->end);
     queue->end.next = NULL;
     queue->end.prev = &(queue->head);
-    queue->free_node_cb = free_node_cb;
+    queue->clear_cb = clear_cb;
 
     return queue;
 }
@@ -570,20 +570,18 @@ int sr_queue_popable(sr_queue_t *queue)
     return queue->popable;
 }
 
-void sr_queue_clean(sr_queue_t *q)
+void sr_queue_clear(sr_queue_t *q)
 {
-	while ((q)->head.next != &((q)->end)){
-		(q)->head.prev = (q)->head.next;
-		(q)->head.next = (q)->head.next->next;
-		(q)->popable--;
-		if ((q)->free_node_cb){
-            (q)->free_node_cb((q)->head.prev);
-        } else{
-            free((q)->head.prev);
+    if ((q)->clear_cb){
+        while ((q)->head.next != &((q)->end)){
+            (q)->head.prev = (q)->head.next;
+            (q)->head.next = (q)->head.next->next;
+            (q)->popable--;
+            (q)->clear_cb((q)->head.prev);
         }
-	}
+        assert((q)->popable == 0);
+    }
 
-	assert((q)->popable == 0);
 	(q)->head.prev = NULL;
 	(q)->head.next = &((q)->end);
 	(q)->end.next = NULL;
@@ -606,7 +604,7 @@ void sr_queue_stop(sr_queue_t *queue)
     if (queue){
     	if (__set_true(queue->stopped)){
         	sr_queue_lock(queue);
-        	sr_queue_clean(queue);
+            sr_queue_clear(queue);
             sr_mutex_broadcast(queue->mutex);
             sr_queue_unlock(queue);
             while (queue->pop_waiting > 0 || queue->push_waiting > 0){
@@ -788,7 +786,7 @@ void sr_queue_block_clean(sr_queue_t *queue)
 {
     if (queue){
     	sr_queue_lock(queue);
-    	sr_queue_clean(queue);
+        sr_queue_clear(queue);
         sr_queue_unlock(queue);
     }else{
         LOGE("null parameter\n");

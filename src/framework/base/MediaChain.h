@@ -46,7 +46,6 @@ namespace freee {
         virtual void Close(MediaChain *chain) = 0;
         virtual void Start(MediaChain *chain) = 0;
         virtual void Stop(MediaChain *chain) = 0;
-        virtual void Control(MediaChain *chain, SmartPkt pkt) = 0;
         virtual void ProcessMedia(MediaChain *chain, SmartPkt pkt) = 0;
 
         virtual int GetMediaType(MediaChain *chain) = 0;

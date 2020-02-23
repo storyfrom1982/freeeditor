@@ -50,7 +50,7 @@ public:
         JniEnv env;
         m_obj = env->NewGlobalRef(obj);
         m_class = env->GetObjectClass(m_obj);
-        m_onReceiveMessage = env->GetMethodID(m_class, "onReceiveMessage", "(Lcn/freeeditor/sdk/Msg;)V");
+        m_onReceiveMessage = env->GetMethodID(m_class, "onRecvMessage", "(Lcn/freeeditor/sdk/Msg;)V");
         m_onReceiveRequest = env->GetMethodID(m_class, "onReceiveRequest", "(Lcn/freeeditor/sdk/Msg;)Lcn/freeeditor/sdk/Msg;");
 
         m_msgClass = static_cast<jclass>(env->NewGlobalRef(env->FindClass("cn/freeeditor/sdk/Msg")));
@@ -63,7 +63,7 @@ public:
         m_typeField = env->GetFieldID(m_msgClass, "type", "I");
         m_int64Field = env->GetFieldID(m_msgClass, "i64", "J");
         m_float64Field = env->GetFieldID(m_msgClass, "f64", "D");
-        m_objField = env->GetFieldID(m_msgClass, "obj", "Ljava/lang/Object;");
+        m_objField = env->GetFieldID(m_msgClass, "troubledPtr", "Ljava/lang/Object;");
     };
 
     ~MsgHandler(){

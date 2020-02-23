@@ -28,12 +28,13 @@ enum {
 VideoWindow::VideoWindow(MessageContext *context) {
     mWindowHolder = nullptr;
     mNativeWindow = nullptr;
-    SetContextName("VideoSurface");
+    SetContextName("VideoWindow");
     ConnectContext(context);
 }
 
 
 VideoWindow::~VideoWindow() {
+    DisconnectContext();
 #ifdef __ANDROID__
     if (mNativeWindow){
         ANativeWindow_release((ANativeWindow*)mNativeWindow);
@@ -43,7 +44,6 @@ VideoWindow::~VideoWindow() {
         env->DeleteGlobalRef((jobject)mWindowHolder);
     }
 #endif
-    DisconnectContext();
 }
 
 void *VideoWindow::window() {
@@ -66,28 +66,27 @@ int VideoWindow::height() {
 #endif
 }
 
-void VideoWindow::onRecvMessage(SmartPkt pkt) {
-    if (pkt.msg.key == RecvMsg_SurfaceCreated){
-        mWindowHolder = pkt.msg.obj;
+void VideoWindow::onRecvMessage(SmartMsg msg) {
+    if (msg.GetKey() == RecvMsg_SurfaceCreated){
+        mWindowHolder = msg.GetTroubledPtr();
 #ifdef __ANDROID__
         JniEnv env;
-        mWindowHolder = env->NewGlobalRef(static_cast<jobject>(pkt.msg.obj));
+        mWindowHolder = env->NewGlobalRef(static_cast<jobject>(msg.GetTroubledPtr()));
         mNativeWindow = ANativeWindow_fromSurface(env.m_pEnv, (jobject)mWindowHolder);
         AutoLock lock(mLock);
         if (mCallback){
-            pkt.msg.ptr = mNativeWindow;
-            mCallback->onSurfaceCreated(pkt);
+            mCallback->onSurfaceCreated(mNativeWindow);
         }
 #endif
-    }else if (pkt.msg.key == RecvMsg_SurfaceChanged){
+    }else if (msg.GetKey() == RecvMsg_SurfaceChanged){
         AutoLock lock(mLock);
         if (mCallback){
-            mCallback->onSurfaceChanged(pkt);
+            mCallback->onSurfaceChanged();
         }
-    }else if (pkt.msg.key == RecvMsg_SurfaceDestroyed){
+    }else if (msg.GetKey() == RecvMsg_SurfaceDestroyed){
         AutoLock lock(mLock);
         if (mCallback){
-            mCallback->onSurfaceDestroyed(pkt);
+            mCallback->onSurfaceDestroyed();
         }
     }
 }
@@ -95,5 +94,5 @@ void VideoWindow::onRecvMessage(SmartPkt pkt) {
 void VideoWindow::SetCallback(VideoWindow::VideoSurfaceCallback *callback) {
     AutoLock lock(mLock);
     mCallback = callback;
-    SendMessage(SmartPkt(SendMsg_RegisterCallback));
+    SendMessage(SmartMsg(SendMsg_RegisterCallback));
 }

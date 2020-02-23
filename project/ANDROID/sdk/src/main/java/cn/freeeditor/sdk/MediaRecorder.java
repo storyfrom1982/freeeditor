@@ -29,7 +29,7 @@ public class MediaRecorder extends JNIContext {
 
     public MediaRecorder(){
         videoView = new VideoSurfaceView();
-        recorderContext = MediaContext.Instance().createRecorder();
+        recorderContext = MediaContext.Instance().connectRecorder();
         connectContext(recorderContext);
         String config = MediaContext.Instance().getRecorderConfig();
         mConfig = JSON.parseObject(config);
@@ -74,7 +74,8 @@ public class MediaRecorder extends JNIContext {
 
     public void release(){
         sendMessage(SendMsg_Close);
-        MediaContext.Instance().deleteContext(recorderContext);
+        disconnectContext();
+        MediaContext.Instance().disconnectRecorder(recorderContext);
         super.release();
         if (videoView != null){
             videoView.release();
@@ -87,7 +88,7 @@ public class MediaRecorder extends JNIContext {
     }
 
     @Override
-    protected void onReceiveMessage(JNIMessage msg) {
+    protected void onRecvMessage(JNIMessage msg) {
 
     }
 

@@ -37,12 +37,12 @@ MediaRecorder::MediaRecorder()
 }
 
 MediaRecorder::~MediaRecorder() {
-    SendMessage(SmartPkt(RecvMsg_Close));
+    ProcessMessage(SmartMsg(RecvMsg_Close));
     StopProcessor();
 }
 
 void MediaRecorder::ProcessMessage(SmartPkt pkt) {
-    switch (pkt.msg.key){
+    switch (pkt.msg.GetKey()){
         case RecvMsg_Open:
             Open(pkt);
             break;
@@ -74,14 +74,14 @@ void MediaRecorder::ProcessMessage(SmartPkt pkt) {
     }
 }
 
-void MediaRecorder::onRecvMessage(SmartPkt pkt) {
-    ProcessMessage(pkt);
+void MediaRecorder::onRecvMessage(SmartMsg msg) {
+    ProcessMessage(SmartPkt(msg));
 }
 
 void MediaRecorder::Open(SmartPkt pkt) {
     if (mStatus == Status_Closed){
 
-        mMediaConfig = json::parse(pkt.msg.json);
+        mMediaConfig = json::parse(pkt.msg.GetJson());
 
         LOGD("MediaRecorder config >> %s\n", mMediaConfig.dump(4).c_str());
 
@@ -146,7 +146,7 @@ void MediaRecorder::StartPreview(SmartPkt pkt) {
         }
         if (mStatus == Status_Started){
             LOGD("MediaRecorder::StartPreview 2\n");
-            mVideoRenderer->SetVideoWindow(pkt);
+            mVideoRenderer->SetVideoWindow(pkt.msg.GetPtr());
             isPreviewing = true;
         }
     }

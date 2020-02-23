@@ -14,12 +14,16 @@ public class MediaContext extends JNIContext {
 
     private static final String TAG = "MediaContext";
 
-    private static final int GetMsg_CrateRecorder = 1;
+    private static final int GetMsg_ConnectRecorder = 1;
     private static final int GetMsg_GetRecorderConfig = 2;
 
-    private static final int OnGetMsg_CreateCamera = 1;
-    private static final int OnGetMsg_CreateMicrophone = 2;
+    private static final int OnGetMsg_ConnectCamera = 1;
+    private static final int OnGetMsg_ConnectMicrophone = 2;
 
+    private static final int SendMsg_DisconnectRecorder = 1;
+
+    private static final int OnRecvMsg_DisconnectCamera = 1;
+    private static final int OnRecvMsg_DisconnectMicrophone = 2;
 
     private int currentOrientation;
 
@@ -148,6 +152,8 @@ public class MediaContext extends JNIContext {
     }
 
     public void release(){
+        disconnectContext();
+        super.release();
         if (camera != null){
             camera.release();
             camera = null;
@@ -156,12 +162,15 @@ public class MediaContext extends JNIContext {
             microphone.release();
             microphone = null;
         }
-//        super.release();
     }
 
-    public long createRecorder(){
-        JNIMessage msg = getMessage(GetMsg_CrateRecorder);
+    public long connectRecorder(){
+        JNIMessage msg = getMessage(GetMsg_ConnectRecorder);
         return msg.number;
+    }
+
+    public void disconnectRecorder(long context){
+        sendMessage(SendMsg_DisconnectRecorder, context);
     }
 
     public String getRecorderConfig(){
@@ -172,9 +181,9 @@ public class MediaContext extends JNIContext {
     @Override
     protected JNIMessage onObtainMessage(int key) {
         switch (key){
-            case OnGetMsg_CreateCamera:
+            case OnGetMsg_ConnectCamera:
                 return new JNIMessage(key, createCamera());
-            case OnGetMsg_CreateMicrophone:
+            case OnGetMsg_ConnectMicrophone:
                 return new JNIMessage(key, createMicrophone());
             default:
                 break;
@@ -183,12 +192,23 @@ public class MediaContext extends JNIContext {
     }
 
     @Override
-    protected void onReceiveMessage(JNIMessage msg) {
-
-    }
-
-    private MediaContext(){
-        connectMediaContext(getContextPointer());
+    protected void onRecvMessage(JNIMessage msg) {
+        switch (msg.key){
+            case OnRecvMsg_DisconnectCamera:
+                if (camera != null){
+                    camera.release();
+                    camera = null;
+                }
+                break;
+            case OnRecvMsg_DisconnectMicrophone:
+                if (microphone != null){
+                    microphone.release();
+                    microphone = null;
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     private long createCamera(){
@@ -205,9 +225,12 @@ public class MediaContext extends JNIContext {
         return microphone.getContextPointer();
     }
 
-    private native void connectMediaContext(long contextPointer);
-
-    public native void deleteContext(long contextPointer);
+    private MediaContext(){
+        connectMediaContext(getContextPointer());
+    }
 
     public native void debug();
+
+    private native void connectMediaContext(long contextPointer);
+
 }

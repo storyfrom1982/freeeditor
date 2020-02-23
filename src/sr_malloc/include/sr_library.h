@@ -223,7 +223,7 @@ typedef struct sr_node_t{
 
 typedef struct sr_queue_t sr_queue_t;
 
-extern sr_queue_t* sr_queue_create(int max_node_number, void (*free_node_cb)(sr_node_t*));
+extern sr_queue_t* sr_queue_create(int max_node_number, void (*clear_cb)(sr_node_t*));
 extern void sr_queue_release(sr_queue_t **pp_queue);
 
 extern int sr_queue_push_front(sr_queue_t *queue, sr_node_t *node);
@@ -234,7 +234,7 @@ extern int sr_queue_pop_back(sr_queue_t *queue, sr_node_t **pp_node);
 
 extern int sr_queue_remove_node(sr_queue_t *queue, sr_node_t *node);
 
-extern void sr_queue_clean(sr_queue_t *queue);
+extern void sr_queue_clear(sr_queue_t *q);
 extern void sr_queue_stop(sr_queue_t *queue);
 extern bool sr_queue_is_stopped(sr_queue_t *queue);
 extern void sr_queue_finish(sr_queue_t *queue);
