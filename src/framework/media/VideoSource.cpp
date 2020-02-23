@@ -120,7 +120,7 @@ void VideoSource::onRecvMessage(SmartPkt pkt) {
 }
 
 void VideoSource::UpdateMediaConfig(SmartPkt pkt) {
-    LOGD("VideoSource::UpdateMediaConfig >> %s\n", pkt.msg.json);
+    LOGD("VideoSource::UpdateMediaConfig >> %s\n", pkt.msg.json.c_str());
     mMediaConfig = json::parse(pkt.msg.json);
     mSrcWidth = mMediaConfig["srcWidth"];
     mSrcHeight = mMediaConfig["srcHeight"];

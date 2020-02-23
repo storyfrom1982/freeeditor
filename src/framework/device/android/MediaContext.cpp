@@ -35,9 +35,7 @@ SmartPkt MediaContext::onObtainMessage(int key) {
         pkt.msg.ptr = new MediaRecorder();
     }else if (key == OnGetMsg_GetRecorderConfig){
         json js = MConfig::load();
-        std::string str = js.dump();
-        pkt.msg.size = str.length();
-        pkt.msg.json = strndup(str.c_str(), pkt.msg.size);
+        pkt.msg.json = js.dump();
     }else{
         return SmartPkt();
     }

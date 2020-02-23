@@ -84,7 +84,7 @@ public:
         SmartPkt pkt(key);
         const char *js = env->GetStringUTFChars(json, 0);
         pkt.msg.size = env->GetStringUTFLength(json);
-        pkt.msg.json = strndup(js, pkt.msg.size);
+        pkt.msg.json = std::string(js, pkt.msg.size);
         MessageContext::SendMessage(pkt);
         env->ReleaseStringUTFChars(json, js);
     }
@@ -116,8 +116,8 @@ public:
         jobject obj = nullptr;
         jstring str = nullptr;
         SmartPkt pkt = MessageContext::GetMessage(key);
-        if (pkt.msg.json != nullptr){
-            str = env->NewStringUTF(pkt.msg.json);
+        if (!pkt.msg.json.empty()){
+            str = env->NewStringUTF(pkt.msg.json.c_str());
         }
         if (pkt.msg.obj != nullptr){
             obj = static_cast<jobject>(pkt.msg.obj);
@@ -137,8 +137,8 @@ public:
         JniEnv env;
         jobject obj = nullptr;
         jstring str = nullptr;
-        if (pkt.msg.json != nullptr){
-            str = env->NewStringUTF(pkt.msg.json);
+        if (!pkt.msg.json.empty()){
+            str = env->NewStringUTF(pkt.msg.json.c_str());
         }
         if (pkt.msg.obj != nullptr){
             obj = static_cast<jobject>(pkt.msg.obj);

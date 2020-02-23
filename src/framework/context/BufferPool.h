@@ -5,6 +5,8 @@
 #ifndef ANDROID_SRBUFFERPOOL_H
 #define ANDROID_SRBUFFERPOOL_H
 
+#include <string>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -20,22 +22,57 @@ extern "C" {
 
 namespace freee {
 
+    class SmartMsg {
+    public:
+        SmartMsg(int _key = 0) :
+        key(_key),
+        size(0),
+        number(0),
+        decimal(0),
+        json(""),
+        obj(nullptr){}
+
+        SmartMsg(int _key, int64_t _number) : SmartMsg(_key){
+            number = _number;
+        }
+        SmartMsg(int _key, double _decimal) : SmartMsg(_key){
+            decimal = _decimal;
+        }
+        SmartMsg(int _key, void *_ptr) : SmartMsg(_key){
+            ptr = _ptr;
+        }
+        SmartMsg(int _key, std::string _json) : SmartMsg(_key){
+            json = _json;
+        }
+        void SetTroubledPtr(void *ptr){
+            obj = ptr;
+        }
+
+    public:
+        int key;
+        size_t size;
+        union {
+            void *ptr;
+            int64_t number;
+        };
+        double decimal;
+        void *obj;
+        std::string json;
+    };
+
     class SmartPkt {
 
     public:
-        SmartPkt (int key = 0)
+        SmartPkt (int key = 0) : msg(key)
         {
             this->buffer = nullptr;
             this->frame = (sr_buffer_frame_t){0};
-            this->msg = (struct message){0};
-            this->msg.key = key;
             reference_count = new int(1);
         }
-        SmartPkt (sr_buffer_data_t *buffer)
+        SmartPkt (sr_buffer_data_t *buffer) : msg(0)
         {
             this->buffer = buffer;
             this->frame = (sr_buffer_frame_t){0};
-            this->msg = (struct message){0};
             reference_count = new int(1);
         }
         SmartPkt(const SmartPkt &pkt)
@@ -55,9 +92,9 @@ namespace freee {
                 if (buffer){
                     sr_buffer_pool_put(buffer);
                 }
-                if (msg.json){
-                    free(msg.json);
-                }
+//                if (msg.json){
+//                    free(msg.json);
+//                }
                 delete reference_count;
             }
         }
@@ -75,18 +112,18 @@ namespace freee {
     public:
         sr_buffer_data_t *buffer;
         sr_buffer_frame_t frame;
-
-        struct message {
-            int key;
-            int size;
-            char *json;
-            void *obj;
-            union {
-                void *ptr;
-                int64_t number;
-            };
-            double decimal;
-        }msg;
+        SmartMsg msg;
+//        struct message {
+//            int key;
+//            int size;
+//            char *json;
+//            void *obj;
+//            union {
+//                void *ptr;
+//                int64_t number;
+//            };
+//            double decimal;
+//        }msg;
 
     private:
         int *reference_count;
