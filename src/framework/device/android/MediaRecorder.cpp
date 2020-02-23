@@ -83,6 +83,8 @@ void MediaRecorder::Open(SmartPkt pkt) {
 
         mMediaConfig = json::parse(pkt.msg.json);
 
+        LOGD("MediaRecorder config >> %s\n", mMediaConfig.dump(4).c_str());
+
         mVideoSource = new VideoSource();
         mVideoSource->Open(this);
 
