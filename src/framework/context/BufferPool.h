@@ -13,7 +13,7 @@ extern "C" {
 
 # include <sr_malloc.h>
 # include <sr_library.h>
-# include <video_resample.h>
+# include <sr_buffer_frame.h>
 
 #ifdef __cplusplus
 }
@@ -21,6 +21,8 @@ extern "C" {
 
 
 namespace freee {
+
+
 
     class SmartMsg {
     public:
@@ -50,9 +52,6 @@ namespace freee {
         SmartMsg(int _key, std::string _json) : SmartMsg(_key){
             json = _json;
         }
-//        void SetKey(int _key){
-//            key = _key;
-//        }
         void SetTroubledPtr(void *ptr){
             troubledPtr = ptr;
         }
@@ -88,25 +87,19 @@ namespace freee {
         std::string json;
     };
 
+
+
     class SmartPkt {
 
     public:
-//        SmartPkt (int key = 0) : msg(key)
-//        {
-//            this->buffer = nullptr;
-//            this->frame = (sr_buffer_frame_t){0};
-//            reference_count = new int(1);
-//        }
-        SmartPkt (SmartMsg _msg) : msg(_msg)
+        SmartPkt (SmartMsg _msg) : msg(_msg), frame({0})
         {
             this->buffer = nullptr;
-            this->frame = (sr_buffer_frame_t){0};
             reference_count = new int(1);
         }
-        SmartPkt (sr_buffer_data_t *buffer) : msg(0)
+        SmartPkt (sr_buffer_data_t *buffer) : msg(0), frame({0})
         {
             this->buffer = buffer;
-            this->frame = (sr_buffer_frame_t){0};
             reference_count = new int(1);
         }
         SmartPkt(const SmartPkt &pkt)
@@ -126,9 +119,6 @@ namespace freee {
                 if (buffer){
                     sr_buffer_pool_put(buffer);
                 }
-//                if (msg.json){
-//                    free(msg.json);
-//                }
                 delete reference_count;
             }
         }
@@ -144,20 +134,9 @@ namespace freee {
         }
 
     public:
+        SmartMsg msg;
         sr_buffer_data_t *buffer;
         sr_buffer_frame_t frame;
-        SmartMsg msg;
-//        struct message {
-//            int key;
-//            int size;
-//            char *json;
-//            void *troubledPtr;
-//            union {
-//                void *ptr;
-//                int64_t number;
-//            };
-//            double decimal;
-//        }msg;
 
     private:
         int *reference_count;

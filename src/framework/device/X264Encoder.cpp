@@ -2,7 +2,7 @@
 // Created by yongge on 20-2-14.
 //
 
-#include <video_resample.h>
+#include <sr_buffer_frame.h>
 #include "X264Encoder.h"
 
 

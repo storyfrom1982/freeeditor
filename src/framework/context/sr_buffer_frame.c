@@ -2,7 +2,7 @@
 // Created by yongge on 20-2-5.
 //
 
-#include "video_resample.h"
+#include "sr_buffer_frame.h"
 
 
 #include <libyuv.h>
@@ -20,7 +20,7 @@
 //
 //    frame->is_pointer = 1;
 //
-//    frame->media_type = fourcc;
+//    frame->color_space = fourcc;
 //    frame->width = width;
 //    frame->height = height;
 //
@@ -31,7 +31,7 @@
 //    frame->data = (uint8_t *)malloc(frame->size);
 //    frame->plane[0].data = frame->data;
 //
-//    switch (frame->media_type){
+//    switch (frame->color_space){
 //        case FOURCC_I420:
 //            frame->max_plane = 3;
 //            frame->plane[1].stride = frame->plane[0].stride >> 1;
@@ -71,15 +71,13 @@
 //    }
 //}
 
-int sr_buffer_frame_fill_picture(sr_buffer_frame_t *frame, const uint8_t *data, uint32_t width,
-                                 uint32_t height,
-                                 uint32_t fourcc)
+int sr_buffer_frame_set_color_space(sr_buffer_frame_t *frame, const uint8_t *data, int width, int height, uint32_t fourcc)
 {
     if (frame == NULL || data == NULL){
         return -1;
     }
 
-    frame->media_type = fourcc;
+    frame->color_space = fourcc;
     frame->width = width;
     frame->height = height;
 
@@ -89,10 +87,10 @@ int sr_buffer_frame_fill_picture(sr_buffer_frame_t *frame, const uint8_t *data, 
     frame->data = (uint8_t*)data;
     frame->plane[0].data = frame->data;
 
-    switch (frame->media_type){
+    switch (frame->color_space){
         case FOURCC_I420:
             frame->max_plane = 3;
-            frame->plane[1].stride = frame->plane[0].stride >> 1;
+            frame->plane[1].stride = (frame->plane[0].stride + 1) >> 1;
             frame->plane[1].size = frame->plane[0].size >> 2;
             frame->plane[1].data = frame->plane[0].data + frame->plane[0].size;
             frame->plane[2].stride = frame->plane[1].stride;
@@ -119,11 +117,11 @@ int sr_buffer_frame_fill_picture(sr_buffer_frame_t *frame, const uint8_t *data, 
     return 0;
 }
 
-int sr_buffer_frame_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst, int rotate_degree)
+int sr_buffer_frame_convert_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst, int _rotation)
 {
     if (src == NULL || dst == NULL
-        || (src->media_type != FOURCC_NV12
-            && src->media_type != FOURCC_NV21)){
+        || (src->color_space != FOURCC_NV12
+            && src->color_space != FOURCC_NV21)){
         return -1;
     }
 
@@ -131,20 +129,20 @@ int sr_buffer_frame_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst, i
     int height = dst->height;
     enum RotationMode rotation = kRotate0;
 
-    if (rotate_degree == 90){
+    if (_rotation == 90){
         width = dst->height;
         height = dst->width;
         rotation = kRotate90;
-    }else if (rotate_degree == 270){
+    }else if (_rotation == 270){
         width = dst->height;
         height = dst->width;
         rotation = kRotate270;
-    }else if (rotate_degree == 180){
+    }else if (_rotation == 180){
         rotation = kRotate180;
     }
 
-    int crop_x = (src->width - width) >> 1;
-    int crop_y = (src->height - height) >> 1;
+    int crop_x = (src->width - width + 1) >> 1;
+    int crop_y = (src->height - height + 1) >> 1;
 
     return ConvertToI420(
             src->data, src->size,
@@ -154,16 +152,16 @@ int sr_buffer_frame_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst, i
             crop_x, crop_y,
             src->width, src->height,
             width, height,
-            rotation, src->media_type);
+            rotation, src->color_space);
 }
 
-int sr_buffer_frame_from_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst)
+int sr_buffer_frame_convert_from_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst)
 {
-    if (src->media_type != FOURCC_I420){
+    if (src->color_space != FOURCC_I420){
         return -1;
     }
 
-    if (dst->media_type == FOURCC_NV21){
+    if (dst->color_space == FOURCC_NV21){
         return I420ToNV21(
                 src->plane[0].data, src->plane[0].stride,
                 src->plane[1].data, src->plane[1].stride,
@@ -171,7 +169,7 @@ int sr_buffer_frame_from_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst)
                 dst->plane[0].data, dst->plane[0].stride,
                 dst->plane[1].data, dst->plane[1].stride,
                 dst->width, dst->height);
-    }else if (dst->media_type == FOURCC_NV12){
+    }else if (dst->color_space == FOURCC_NV12){
         return I420ToNV12(
                 src->plane[0].data, src->plane[0].stride,
                 src->plane[1].data, src->plane[1].stride,

@@ -8,7 +8,7 @@
 #ifndef OPENGLES_H_
 #define OPENGLES_H_
 
-#include <video_resample.h>
+#include <sr_buffer_frame.h>
 
 
 typedef struct opengles_t opengles_t;

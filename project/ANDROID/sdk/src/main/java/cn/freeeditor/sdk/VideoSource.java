@@ -1,5 +1,6 @@
 package cn.freeeditor.sdk;
 
+import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES11Ext;
@@ -145,6 +146,7 @@ public class VideoSource extends JNIContext implements Runnable,
             }
         }
 
+        parameters.setPreviewFormat(ImageFormat.NV21);
         parameters.setPreviewSize(mSrcWidth, mSrcHeight);
         mCamera.setParameters(parameters);
         try {

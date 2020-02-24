@@ -76,11 +76,13 @@ void VideoSource::Stop(MediaChain *chain) {
 
 void VideoSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
     if (mBufferPool){
-        sr_buffer_frame_fill_picture(&pkt.frame, (uint8_t*)pkt.msg.GetPtr(), mSrcWidth, mSrcHeight, libyuv::FOURCC_NV21);
+        sr_buffer_frame_set_color_space(&pkt.frame, (uint8_t *) pkt.msg.GetPtr(), mSrcWidth,
+                                        mSrcHeight, libyuv::FOURCC_NV21);
         SmartPkt y420 = mBufferPool->GetPkt();
         if (y420.buffer){
-            sr_buffer_frame_fill_picture(&y420.frame, y420.buffer->data, mCodecWidth, mCodecHeight, libyuv::FOURCC_I420);
-            sr_buffer_frame_to_yuv420p(&pkt.frame, &y420.frame, mSrcRotation);
+            sr_buffer_frame_set_color_space(&y420.frame, y420.buffer->data, mCodecWidth,
+                                            mCodecHeight, libyuv::FOURCC_I420);
+            sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, mSrcRotation);
             OutputMediaPacket(y420);
         }
     }

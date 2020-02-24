@@ -10,7 +10,7 @@
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <sr_library.h>
-#include <video_resample.h>
+#include <sr_buffer_frame.h>
 
 const char g_indices[] =
 { 0, 3, 2, 0, 2, 1 };

@@ -80,10 +80,12 @@ int VideoFilter::ModuleImplProcessMedia(SmartPkt pkt) {
     int srcHeight = mMediaConfig["srcHeight"];
     int codecWidth = mMediaConfig["codecWidth"];
     int codecHeight = mMediaConfig["codecHeight"];
-    sr_buffer_frame_fill_picture(&pkt.frame, pkt.buffer->data, srcWidth, srcHeight, libyuv::FOURCC_NV21);
+    sr_buffer_frame_set_color_space(&pkt.frame, pkt.buffer->data, srcWidth, srcHeight,
+                                    libyuv::FOURCC_NV21);
     SmartPkt y420 = pool->GetPkt();
-    sr_buffer_frame_fill_picture(&y420.frame, y420.buffer->data, codecWidth, codecHeight, libyuv::FOURCC_I420);
-    sr_buffer_frame_to_yuv420p(&pkt.frame, &y420.frame, mMediaConfig["srcRotation"]);
+    sr_buffer_frame_set_color_space(&y420.frame, y420.buffer->data, codecWidth, codecHeight,
+                                    libyuv::FOURCC_I420);
+    sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, mMediaConfig["srcRotation"]);
     OutputMediaPacket(pkt);
     return 0;
 }
