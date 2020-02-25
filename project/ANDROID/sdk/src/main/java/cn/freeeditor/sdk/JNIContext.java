@@ -1,7 +1,7 @@
 package cn.freeeditor.sdk;
 
 
-abstract public class JNIContext {
+abstract public class JNIContext extends MessageProcessor {
 
     public JNIContext(){
         contextPointer = createContext();

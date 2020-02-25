@@ -12,7 +12,7 @@ import android.view.View;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class VideoSurfaceView extends JNIContext implements Runnable, SurfaceHolder.Callback {
+public class VideoSurfaceView extends JNIContext implements SurfaceHolder.Callback {
 
     private SurfaceView surfaceView;
 
@@ -25,31 +25,33 @@ public class VideoSurfaceView extends JNIContext implements Runnable, SurfaceHol
     private static final int OnPutMsg_RegisterCallback = 1;
 
 
-    private final Thread mMessageThread;
-    private final AtomicBoolean isRunning = new AtomicBoolean(false);
+//    private final Thread mMessageThread;
+//    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
 
     public VideoSurfaceView() {
-        mMessageThread = new Thread(this);
-        mMessageThread.start();
-        synchronized (isRunning){
-            if (!isRunning.get()){
-                try {
-                    isRunning.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        startHandler();
+//        mMessageThread = new Thread(this);
+//        mMessageThread.start();
+//        synchronized (isRunning){
+//            if (!isRunning.get()){
+//                try {
+//                    isRunning.wait();
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
     }
 
     public void release(){
-        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(OnPutMsg_Destroy));
-        try {
-            mMessageThread.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        stopHandler();
+//        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(OnPutMsg_Destroy));
+//        try {
+//            mMessageThread.join();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public SurfaceView getSurfaceView(){
@@ -67,7 +69,7 @@ public class VideoSurfaceView extends JNIContext implements Runnable, SurfaceHol
 
     @Override
     protected void onRecvMessage(JNIMessage msg) {
-        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(msg.key, msg));
+        msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
     }
 
     @Override
@@ -85,16 +87,16 @@ public class VideoSurfaceView extends JNIContext implements Runnable, SurfaceHol
         sendMessage(PutMsg_SurfaceDestroyed);
     }
 
-    @Override
-    public void run() {
-        Looper.prepare();
-        mMessageHandler = new MessageHandler(this);
-        synchronized (isRunning){
-            isRunning.set(true);
-            isRunning.notifyAll();
-        }
-        Looper.loop();
-    }
+//    @Override
+//    public void run() {
+//        Looper.prepare();
+//        mMessageHandler = new MessageHandler(this);
+//        synchronized (isRunning){
+//            isRunning.set(true);
+//            isRunning.notifyAll();
+//        }
+//        Looper.loop();
+//    }
 
 
     private void addSurfaceHolderCallback(){
@@ -105,36 +107,52 @@ public class VideoSurfaceView extends JNIContext implements Runnable, SurfaceHol
         }
     }
 
-    private void destroy(){
-        Looper.myLooper().quit();
+//    private void destroy(){
+//        Looper.myLooper().quit();
+//        super.release();
+//    }
+
+    @Override
+    void onFinalRelease() {
         super.release();
     }
 
-    private MessageHandler mMessageHandler;
-
-    private static final class MessageHandler extends Handler {
-
-        final WeakReference<VideoSurfaceView> weakReference;
-
-        MessageHandler(VideoSurfaceView videoSurfaceView){
-            weakReference = new WeakReference<>(videoSurfaceView);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            VideoSurfaceView videoSurfaceView = weakReference.get();
-            if (videoSurfaceView != null){
-                switch (msg.what){
-                    case OnPutMsg_RegisterCallback:
-                        videoSurfaceView.addSurfaceHolderCallback();
-                        break;
-                    case OnPutMsg_Destroy:
-                        videoSurfaceView.destroy();
-                        break;
-                    default:
-                        break;
-                }
-            }
+    @Override
+    void onMessageProcessor(Message msg) {
+        switch (msg.what){
+            case OnPutMsg_RegisterCallback:
+                addSurfaceHolderCallback();
+                break;
+            default:
+                break;
         }
     }
+
+//    private MessageHandler mMessageHandler;
+//
+//    private static final class MessageHandler extends Handler {
+//
+//        final WeakReference<VideoSurfaceView> weakReference;
+//
+//        MessageHandler(VideoSurfaceView videoSurfaceView){
+//            weakReference = new WeakReference<>(videoSurfaceView);
+//        }
+//
+//        @Override
+//        public void handleMessage(Message msg) {
+//            VideoSurfaceView videoSurfaceView = weakReference.get();
+//            if (videoSurfaceView != null){
+//                switch (msg.what){
+//                    case OnPutMsg_RegisterCallback:
+//                        videoSurfaceView.addSurfaceHolderCallback();
+//                        break;
+//                    case OnPutMsg_Destroy:
+//                        videoSurfaceView.destroy();
+//                        break;
+//                    default:
+//                        break;
+//                }
+//            }
+//        }
+//    }
 }

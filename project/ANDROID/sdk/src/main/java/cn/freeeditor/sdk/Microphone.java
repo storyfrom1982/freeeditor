@@ -1,20 +1,15 @@
 package cn.freeeditor.sdk;
 
-import android.Manifest;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 import android.os.Process;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Microphone extends JNIContext implements Runnable {
+public class Microphone implements Runnable {
 
 
     protected static final String TAG = "Microphone";
@@ -22,110 +17,108 @@ public class Microphone extends JNIContext implements Runnable {
     private int mMode;
     private int mSampleRate;
     private int mChannelCount;
-    private int mBytePerSample;
-    private int mSamplePerFrame;
-    private int mSampleBufferSize;
+    private int mBytesPerSample;
+    private int mSamplesPerFrame;
+    private int mCodecBufferSize;
 
-    private int framesPerBufferInt;
-    private int AudioRecordBufferSize;
+    private int mFramesPerBuffer;
+    private int mRecordBufferSize;
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final AtomicBoolean isStopped = new AtomicBoolean(true);
-    private final AtomicBoolean isStopping = new AtomicBoolean(false);
+    private final AtomicBoolean isClosing = new AtomicBoolean(false);
 
     private Thread mRecordThread = null;
     private AudioRecord mAudioRecord = null;
 
+    public interface RecordCallback {
+        void onRecordFrame(byte[] data, int size);
+    }
 
-    public int open(String cfgStr){
+    public interface ErrorCallback {
+        void onError(int error);
+    }
 
-        android.util.Log.d(TAG,"open ========== enter");
+    private final Object callbackLock = new Object();
+    private cn.freeeditor.sdk.Microphone.ErrorCallback mErrorCallback;
+    private cn.freeeditor.sdk.Microphone.RecordCallback mRecordCallback;
 
-        JSONObject cfg = JSON.parseObject(cfgStr);
+    public Microphone(){
+        mMode = MediaRecorder.AudioSource.MIC;
+    }
 
-        mSampleRate = cfg.getIntValue("sampleRate");
-        mChannelCount = cfg.getIntValue("channelCount");
-        mBytePerSample = cfg.getIntValue("bitPerSample") / 8;
-        mSamplePerFrame = cfg.getIntValue("samplePerFrame");
-
-        try {
-            AudioManager am = (AudioManager) MediaContext.Instance().getAppContext().
-                    getSystemService(Context.AUDIO_SERVICE);
-            String framesPerBuffer = am.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
-            if (framesPerBuffer != null){
-                framesPerBufferInt = Integer.parseInt(framesPerBuffer);
-            }
-        }catch (Exception e){
-            framesPerBufferInt = 0;
-            e.printStackTrace();
+    public void setRecordCallback(cn.freeeditor.sdk.Microphone.RecordCallback callback){
+        synchronized (callbackLock){
+            mRecordCallback = callback;
         }
+    }
 
-        android.util.Log.d(TAG,"framesPerBuffer size ========== " + framesPerBufferInt);
-
-        if (framesPerBufferInt == 0){
-            framesPerBufferInt = 256; // Use default
+    public void setErrorCallback(cn.freeeditor.sdk.Microphone.ErrorCallback callback){
+        synchronized (callbackLock){
+            mErrorCallback = callback;
         }
+    }
 
-        int frameSize = mChannelCount * mBytePerSample;
+    public void setMode(int mode){
+        mMode = mode;
+    }
+
+    public int open(int sampleRate, int channelCount, int bytesPerSample, int samplesPerFrame){
+        mSampleRate = sampleRate;
+        mChannelCount = channelCount;
+        mBytesPerSample = bytesPerSample;
+        mSamplesPerFrame = samplesPerFrame;
+
+        int sampleSize = mChannelCount * mBytesPerSample;
         int channelConfig = mChannelCount == 2 ? AudioFormat.CHANNEL_IN_STEREO : AudioFormat.CHANNEL_IN_MONO;
-        int audioFormat = mBytePerSample == 2 ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
+        int audioFormat = mBytesPerSample == 2 ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
         int minBufferSize = AudioRecord.getMinBufferSize(mSampleRate, channelConfig, audioFormat);
 
-        android.util.Log.v(TAG, "Audio record: wanted " + (mChannelCount == 2 ? "stereo" : "mono")
-                + " " + (mBytePerSample == 2 ? "16-bit" : "8-bit") + " " + (mSampleRate / 1000f)
-                + "kHz, " + mSamplePerFrame + " frames buffer");
+        mFramesPerBuffer = getFramesPerBuffer();
+        mCodecBufferSize = mSamplesPerFrame * sampleSize;
+        mRecordBufferSize = mFramesPerBuffer * sampleSize;
 
-        mSampleBufferSize = mSamplePerFrame * frameSize;
-        AudioRecordBufferSize = framesPerBufferInt * frameSize;
-
-        if (minBufferSize < AudioRecordBufferSize << 1){
-            minBufferSize = AudioRecordBufferSize << 1;
+        if (minBufferSize < mRecordBufferSize << 1){
+            minBufferSize = mRecordBufferSize << 1;
         }
 
-        if (mMode != android.media.MediaRecorder.AudioSource.VOICE_COMMUNICATION && mMode != android.media.MediaRecorder.AudioSource.DEFAULT && mMode != android.media.MediaRecorder.AudioSource.CAMCORDER){
-            mMode = MediaRecorder.AudioSource.MIC;
-        }
-        //mMode = MediaRecorder.AudioSource.VOICE_COMMUNICATION; //tkp JAVA
-        android.util.Log.i(TAG, "[JAVAAudioCapture] DEVSET-AudioSourceType =  " + mMode);
-        mAudioRecord = new AudioRecord(mMode, mSampleRate,
-                channelConfig, audioFormat, minBufferSize);
+        mAudioRecord = new AudioRecord(mMode, mSampleRate, channelConfig, audioFormat, minBufferSize);
 
-        // see notes about AudioTrack state in audioOpen(), above. Probably also applies here.
         if (mAudioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
-            android.util.Log.e(TAG, "Failed during initialization of AudioRecord");
+            Log.e(TAG, "Failed during initialization of AudioRecord");
             mAudioRecord.release();
             mAudioRecord = null;
             return -1;
         }
 
-        android.util.Log.v(TAG, "Audio record: got " + ((mAudioRecord.getChannelCount() >= 2) ? "stereo" : "mono")
-                + " " + ((mAudioRecord.getAudioFormat() == AudioFormat.ENCODING_PCM_16BIT) ? "16-bit" : "8-bit")
-                + " " + (mAudioRecord.getSampleRate() / 1000f) + "kHz, " + mSamplePerFrame + " frames buffer");
-
-        android.util.Log.d(TAG,"open ========== exit");
-
         return 0;
     }
 
+    public void close(){
+        if (isClosing.compareAndSet(false, true)){
+            stop();
+            if (mAudioRecord != null) {
+                mAudioRecord.release();
+                mAudioRecord = null;
+            }
+            isClosing.set(false);
+        }
+    }
 
     public void start(){
-        android.util.Log.d(TAG,"start ========== enter");
         if (isRunning.compareAndSet(false, true)){
             isStopped.set(false);
             mRecordThread = new Thread(this);
             mRecordThread.start();
         }
-        android.util.Log.d(TAG,"start ========== exit");
     }
 
-
     public void stop(){
-        android.util.Log.d(TAG,"stop ========== enter");
         if (isRunning.compareAndSet(true, false)){
-            while (!isStopped.get()){
-                synchronized (isRunning){
+            synchronized (isStopped){
+                if (!isStopped.get()){
                     try {
-                        isRunning.wait(10);
+                        isStopped.wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -138,148 +131,107 @@ public class Microphone extends JNIContext implements Runnable {
                 e.printStackTrace();
             }
         }
-        android.util.Log.d(TAG,"stop ========== exit");
-    }
-
-
-    /** This method is called by CloudSDK using JNI. */
-    public void close() {
-        android.util.Log.d(TAG,"close ========== enter");
-        if (isStopping.compareAndSet(false, true)){
-            stop();
-            if (mAudioRecord != null) {
-                mAudioRecord.release();
-                mAudioRecord = null;
-            }
-            isStopping.set(false);
-        }
-        android.util.Log.d(TAG,"close ========== exit");
     }
 
     @Override
     public void run() {
 
         if (mAudioRecord == null){
-            android.util.Log.e(TAG, "Uninitialized audioRecord!!!!");
+            Log.e(TAG, "Uninitialized AudioRecord");
             isStopped.set(true);
             return;
         }
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
 
-        int result = 0;
-        byte[] buffer = new byte[mSampleBufferSize];
+        byte[] codecBuffer = new byte[mCodecBufferSize];
 
-        int framePerBuffer = (int)((float)mSampleBufferSize / AudioRecordBufferSize);
+        int framePerBuffer = (int)((float) mCodecBufferSize / mRecordBufferSize);
         ++framePerBuffer;
         framePerBuffer <<= 1;
-        int cacheBufferSize = AudioRecordBufferSize * framePerBuffer;
+        int cacheBufferSize = mRecordBufferSize * framePerBuffer;
         int cacheWritePos = 0;
         int cacheReadPos = 0;
         int cacheDataSize = 0;
         byte[] cacheBuffer = new byte[cacheBufferSize];
 
-        // log Escape.
-        int iForLog = mAudioRecord.getAudioSource();
-
-
-        android.util.Log.d(TAG, "cacheBufferSize: " + cacheBufferSize + "  " + cacheBufferSize / AudioRecordBufferSize);
-
         mAudioRecord.startRecording();
-
-        if (mAudioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
-//            onError(CAPTURE_AUDIO_DEVICE_ERROR.getValue(), mNativeInstance);
+        int result = mAudioRecord.getRecordingState();
+        if (result != AudioRecord.RECORDSTATE_RECORDING) {
+            synchronized (callbackLock){
+                if (mErrorCallback != null){
+                    mErrorCallback.onError(0);
+                }
+            }
             isRunning.set(false);
         }
 
         while (isRunning.get()){
 
-//            Log.e(TAG, "AudioRecord.read enter");
-            result = mAudioRecord.read(cacheBuffer, cacheWritePos, AudioRecordBufferSize);
-            if (result == AudioRecord.ERROR_INVALID_OPERATION || result != AudioRecordBufferSize){
-                android.util.Log.e(TAG, "AudioRecord.read failed " + result);
-//                onError(CAPTURE_AUDIO_DEVICE_ERROR.getValue(), mNativeInstance);
+            result = mAudioRecord.read(cacheBuffer, cacheWritePos, mRecordBufferSize);
+            if (result == AudioRecord.ERROR_INVALID_OPERATION || result != mRecordBufferSize){
+                synchronized (callbackLock){
+                    if (mErrorCallback != null){
+                        mErrorCallback.onError(0);
+                    }
+                }
                 break;
             }
-//            Log.e(TAG, "AudioRecord.read exit");
 
             cacheDataSize += result;
             if ((cacheWritePos += result) >= cacheBufferSize){
                 cacheWritePos -= cacheBufferSize;
             }
 
-            while (cacheDataSize >= mSampleBufferSize){
+            while (cacheDataSize >= mCodecBufferSize){
                 int remain = cacheBufferSize - cacheReadPos;
-                if (remain >= mSampleBufferSize){
-                    System.arraycopy(cacheBuffer, cacheReadPos, buffer, 0, mSampleBufferSize);
+                if (remain >= mCodecBufferSize){
+                    System.arraycopy(cacheBuffer, cacheReadPos, codecBuffer, 0, mCodecBufferSize);
                 }else{
-                    System.arraycopy(cacheBuffer, cacheReadPos, buffer, 0, remain);
-                    System.arraycopy(cacheBuffer, 0, buffer, remain, mSampleBufferSize - remain);
+                    System.arraycopy(cacheBuffer, cacheReadPos, codecBuffer, 0, remain);
+                    System.arraycopy(cacheBuffer, 0, codecBuffer, remain, mCodecBufferSize - remain);
                 }
-                cacheDataSize -= mSampleBufferSize;
-                if ((cacheReadPos += mSampleBufferSize) >= cacheBufferSize){
+                cacheDataSize -= mCodecBufferSize;
+                if ((cacheReadPos += mCodecBufferSize) >= cacheBufferSize){
                     cacheReadPos -= cacheBufferSize;
                 }
-//                Log.d(TAG, "CloudAudioCapture ============>>>>>>>>>>>>>> " + mSampleBufferSize);
-//                recordFrame(buffer, mSampleBufferSize, mNativeInstance);
-                sendMessage(PutMsg_ProcessSound, buffer, mSampleBufferSize);
+                synchronized (callbackLock){
+                    if (mRecordCallback != null){
+                        mRecordCallback.onRecordFrame(codecBuffer, mCodecBufferSize);
+                    }
+                }
             }
         }
 
-        Log.d(TAG, "CloudAudioCapture ============>>>>>>>>>>>>>> exit");
+        Log.d(TAG, "Microphone stopped");
 
-        isStopped.set(true);
-
+        synchronized (isStopped){
+            isStopped.set(true);
+            isStopped.notifyAll();
+        }
 
         if (mAudioRecord != null) {
             mAudioRecord.stop();
         }
-
     }
 
-
-    private static final int OnPutMsg_OpenRecord = 1;
-    private static final int OnPutMsg_CloseRecord = 2;
-    private static final int OnPutMsg_StartRecord = 3;
-    private static final int OnPutMsg_StopRecord = 4;
-
-
-    private static final int PutMsg_Opened = 1;
-    private static final int PutMsg_Closed = 2;
-    private static final int PutMsg_Started = 3;
-    private static final int PutMsg_Stopped = 4;
-    private static final int PutMsg_ProcessSound = 5;
-
-
-    @Override
-    protected JNIMessage onObtainMessage(int key) {
-        return null;
-    }
-
-    @Override
-    protected void onRecvMessage(JNIMessage msg) {
-        switch (msg.key){
-
-            case OnPutMsg_OpenRecord:
-                open(msg.string);
-                break;
-
-            case OnPutMsg_StartRecord:
-                start();
-                break;
-
-            case OnPutMsg_StopRecord:
-                stop();
-                break;
-
-            case OnPutMsg_CloseRecord:
-                close();
-                break;
-
-            default:
-                break;
-
+    private int getFramesPerBuffer(){
+        int framesPerBuffer = 0;
+        try {
+            AudioManager am = (AudioManager) MediaContext.Instance().getAppContext().
+                    getSystemService(Context.AUDIO_SERVICE);
+            String str = am.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
+            if (str != null){
+                framesPerBuffer = Integer.parseInt(str);
+                android.util.Log.d(TAG,"PROPERTY_OUTPUT_FRAMES_PER_BUFFER[" + framesPerBuffer + "]");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
+        if (framesPerBuffer <= 256){
+            framesPerBuffer = 256; // Use default
+        }
+        return framesPerBuffer;
     }
 
 }
