@@ -36,15 +36,7 @@ namespace freee {
 
     private:
         int mStatus;
-
-        int mSrcRotation;
-        int mSrcWidth, mSrcHeight;
-        int mCodecWidth, mCodecHeight;
-        int mSrcImageFormat, mCodecImageFormat;
-
-        Lock mLock;
-        size_t mBufferSize;
-        BufferPool *mBufferPool;
+        int mSrcWidth, mSrcHeight, mSrcImageFormat;
     };
 
 }

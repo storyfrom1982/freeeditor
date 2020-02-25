@@ -33,9 +33,9 @@ namespace freee {
 
     public:
         MediaChainImpl(int mediaType, int mediaNumber, std::string mediaName) :
-            mMediaType(mediaType),
-            mMediaNumber(mediaNumber),
-            mMediaName(mediaName){}
+            mType(mediaType),
+            mNumber(mediaNumber),
+            mName(mediaName){}
 
         virtual ~MediaChainImpl(){
             AutoLock lock(mOutputChainLock);
@@ -63,20 +63,55 @@ namespace freee {
             ProcessMessage(pkt);
         }
 
-        int GetMediaType(MediaChain *chain) override {
-            return mMediaType;
+        void onOpened() override {
+            AutoLock lock(mOutputChainLock);
+            for (int i = 0; i < mOutputChain.size(); ++i){
+                mOutputChain[i]->Open(this);
+            }
         }
 
-        json &GetMediaConfig(MediaChain *chain) override {
-            return mMediaConfig;
+        void onClosed() override {
+            AutoLock lock(mOutputChainLock);
+            for (int i = 0; i < mOutputChain.size(); ++i){
+                mOutputChain[i]->Close(this);
+            }
         }
 
-        int GetMediaNumber(MediaChain *chain) override {
-            return mMediaNumber;
+        void onStarted() override {
+            AutoLock lock(mOutputChainLock);
+            for (int i = 0; i < mOutputChain.size(); ++i){
+                mOutputChain[i]->Start(this);
+            }
         }
 
-        std::string GetMediaName(MediaChain *chain) override {
-            return mMediaName;
+        void onStopped() override {
+            AutoLock lock(mOutputChainLock);
+            for (int i = 0; i < mOutputChain.size(); ++i){
+                mOutputChain[i]->Stop(this);
+            }
+        }
+
+        void onProcessMedia(SmartPkt pkt) override {
+            AutoLock lock(mOutputChainLock);
+            for (int i = 0; i < mOutputChain.size(); ++i){
+                mOutputChain[i]->ProcessMedia(this, pkt);
+            }
+        }
+
+        int GetType(MediaChain *chain) override {
+            return mType;
+        }
+
+        json &GetConfig(MediaChain *chain) override {
+            return mConfig;
+        }
+
+        int GetNumber(MediaChain *chain) override {
+            return mNumber;
+        }
+
+        std::string GetName(MediaChain *chain) override {
+            return mName;
         }
 
         virtual void AddOutputChain(MediaChain *chain) override {
@@ -109,20 +144,13 @@ namespace freee {
             }
         }
 
-        virtual void OutputMediaPacket(SmartPkt pkt){
-            AutoLock lock(mOutputChainLock);
-            for (int i = 0; i < mOutputChain.size(); ++i){
-                mOutputChain[i]->ProcessMedia(this, pkt);
-            }
-        }
-
 
     protected:
         virtual void MessageOpen(SmartPkt pkt){};
         virtual void MessageClose(SmartPkt pkt){};
         virtual void MessageStart(SmartPkt pkt){};
         virtual void MessageStop(SmartPkt pkt){};
-        virtual void MessagePacket(SmartPkt pkt){};
+        virtual void MessageProcessMedia(SmartPkt pkt){};
         virtual void MessageControl(SmartPkt pkt){};
 
         void MessageProcess(SmartPkt pkt) override {
@@ -140,7 +168,7 @@ namespace freee {
                     MessageStop(pkt);
                     break;
                 case RecvMsg_ProcessMedia:
-                    MessagePacket(pkt);
+                    MessageProcessMedia(pkt);
                     break;
                 case RecvMsg_Control:
                 default:
@@ -150,12 +178,10 @@ namespace freee {
 
 
     protected:
-        int mMediaType;
-
-        int mMediaNumber;
-
-        json mMediaConfig;
-        std::string mMediaName;
+        int mType;
+        int mNumber;
+        json mConfig;
+        std::string mName;
 
         Lock mCallbackLock;
         MediaChain::EventCallback *mCallback;

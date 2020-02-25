@@ -14,6 +14,7 @@
 #include <MediaModule.h>
 #include "../../media/VideoSource.h"
 #include "../../media/VideoRenderer.h"
+#include "../../media/VideoFilter.h"
 
 namespace freee{
 
@@ -39,7 +40,7 @@ namespace freee{
         void StopRecord();
         void StopPreview();
 
-        json &GetMediaConfig(MediaChain *chain) override;
+        json &GetConfig(MediaChain *chain) override;
 
     private:
         int mStatus;
@@ -49,6 +50,7 @@ namespace freee{
 
 
         AudioSource *mAudioSource;
+        VideoFilter *mVideoFilter;
         VideoSource *mVideoSource;
         VideoRenderer *mVideoRenderer;
     };

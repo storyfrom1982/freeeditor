@@ -27,6 +27,8 @@ enum {
 
 MediaRecorder::MediaRecorder()
         : MediaChainImpl(MediaType_All, MediaNumber_Recorder, "MediaRecorder") {
+    mAudioSource = nullptr;
+    mVideoFilter = nullptr;
     mVideoSource = nullptr;
     mVideoRenderer = nullptr;
     isPreviewing = false;
@@ -81,15 +83,18 @@ void MediaRecorder::onRecvMessage(SmartMsg msg) {
 void MediaRecorder::Open(SmartPkt pkt) {
     if (mStatus == Status_Closed){
 
-        mMediaConfig = json::parse(pkt.msg.GetJson());
+        mConfig = json::parse(pkt.msg.GetJson());
 
-        LOGD("MediaRecorder config >> %s\n", mMediaConfig.dump(4).c_str());
+        LOGD("MediaRecorder config >> %s\n", mConfig.dump(4).c_str());
 
         mVideoSource = new VideoSource();
-        mVideoSource->Open(this);
-
+        mVideoFilter = new VideoFilter();
         mVideoRenderer = new VideoRenderer();
-        mVideoSource->AddOutputChain(mVideoRenderer);
+
+        mVideoSource->AddOutputChain(mVideoFilter);
+        mVideoFilter->AddOutputChain(mVideoRenderer);
+
+        mVideoSource->Open(this);
 
         mAudioSource = new AudioSource();
         mAudioSource->Open(this);
@@ -105,13 +110,17 @@ void MediaRecorder::Close() {
     if (mStatus == Status_Opened
         || mStatus == Status_Stopped){
 
-        mVideoSource->RemoveOutputChain(mVideoRenderer);
+        mVideoSource->RemoveOutputChain(mVideoFilter);
+        mVideoFilter->RemoveOutputChain(mVideoRenderer);
 
         mVideoRenderer->Close(this);
         delete mVideoRenderer;
 
         mVideoSource->Close(this);
         delete mVideoSource;
+
+        mVideoFilter->Close(this);
+        delete mVideoFilter;
 
         mAudioSource->Close(this);
         delete mAudioSource;
@@ -182,18 +191,18 @@ void MediaRecorder::Stop() {
     if (mStatus == Status_Started){
 
         mVideoSource->Stop(this);
-//        mAudioSource->Stop(this);
+        mAudioSource->Stop(this);
 
         mStatus = Status_Stopped;
     }
 }
 
-json &MediaRecorder::GetMediaConfig(MediaChain *chain) {
-    if (chain->GetMediaType(this) == MediaType_Video){
-        return mMediaConfig["video"];
-    }else if (chain->GetMediaType(this) == MediaType_Audio){
-        return mMediaConfig["audio"];
+json &MediaRecorder::GetConfig(MediaChain *chain) {
+    if (chain->GetType(this) == MediaType_Video){
+        return mConfig["video"];
+    }else if (chain->GetType(this) == MediaType_Audio){
+        return mConfig["audio"];
     }
-    return MediaChainImpl::GetMediaConfig(chain);
+    return MediaChainImpl::GetConfig(chain);
 }
 

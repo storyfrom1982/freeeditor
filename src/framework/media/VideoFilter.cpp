@@ -11,81 +11,91 @@ using namespace freee;
 VideoFilter::VideoFilter(int mediaType, int mediaNumber, const std::string &mediaName)
         : MediaModule(mediaType, mediaNumber, mediaName) {
     mStatus = Status_Closed;
+    mBufferPool = nullptr;
     StartProcessor(mediaName);
 }
 
 VideoFilter::~VideoFilter() {
     StopProcessor();
+    FinalClear();
+}
+
+void VideoFilter::FinalClear() {
+    if (mBufferPool){
+        delete mBufferPool;
+        mBufferPool = nullptr;
+    }
+}
+
+void VideoFilter::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
+    if (mSrcImageFormat != mCodecImageFormat || mSrcWidth != mCodecWidth || mSrcHeight != mCodecHeight){
+        if (mBufferPool){
+            sr_buffer_frame_set_color_space(&pkt.frame,
+                    (uint8_t *) pkt.msg.GetPtr(), mSrcWidth,mSrcHeight, mSrcImageFormat);
+            SmartPkt y420 = mBufferPool->GetPkt();
+            if (y420.buffer){
+                sr_buffer_frame_set_color_space(&y420.frame,
+                        y420.buffer->data, mCodecWidth, mCodecHeight, mCodecImageFormat);
+                sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, mSrcRotation);
+                MediaChainImpl::ProcessMedia(chain, y420);
+            }
+        }
+    }else {
+        MediaChainImpl::ProcessMedia(chain, pkt);
+    }
 }
 
 void VideoFilter::MessageOpen(SmartPkt pkt) {
-    mMediaConfig = static_cast<MediaChain *>(pkt.msg.GetPtr())->GetMediaConfig(this);
+    mConfig = static_cast<MediaChain *>(pkt.msg.GetPtr())->GetConfig(this);
     if (mStatus == Status_Closed){
-        ModuleImplOpen(mMediaConfig);
+        ModuleOpen(mConfig);
         mStatus = Status_Opened;
     }
 }
 
 void VideoFilter::MessageClose(SmartPkt pkt) {
-    if (mStatus == Status_Started){
-        MessageStop(pkt);
-    }
-    if (mStatus == Status_Opened || mStatus == Status_Stopped){
-        ModuleImplClose();
+    if (mStatus == Status_Opened){
+        ModuleClose();
         mStatus = Status_Closed;
     }
 }
 
-void VideoFilter::MessageStart(SmartPkt pkt) {
-    if (mStatus != Status_Opened){
-        MessageOpen(pkt);
-    }
-    if (mStatus == Status_Opened || mStatus == Status_Stopped){
-        mStatus = Status_Started;
-    }
+void VideoFilter::MessageProcessMedia(SmartPkt pkt) {
+    ModuleProcessMedia(pkt);
 }
 
-void VideoFilter::MessageStop(SmartPkt pkt) {
-    if (mStatus == Status_Started){
-        mStatus = Status_Stopped;
-    }
-}
-
-void VideoFilter::MessagePacket(SmartPkt pkt) {
-    if (mStatus != Status_Started){
-        MessageStart(pkt);
-        if (mStatus != Status_Started){
-            return;
-        }
-    }
-    ModuleImplProcessMedia(pkt);
-}
-
-int VideoFilter::ModuleImplOpen(json &cfg) {
-    int width = cfg["codecWidth"];
-    int height = cfg["codecHeight"];
-    pool = new BufferPool(1,  width * height / 2 * 3);
+int VideoFilter::ModuleOpen(json &cfg) {
+    LOGD("VideoFilter::UpdateConfig >> %s\n", mConfig.dump().c_str());
+    mSrcWidth = mConfig["srcWidth"];
+    mSrcHeight = mConfig["srcHeight"];
+    mSrcRotation = mConfig["srcRotation"];
+    mCodecWidth = mConfig["codecWidth"];
+    mCodecHeight = mConfig["codecHeight"];
+    std::string srcFormat = mConfig["srcImageFormat"];
+    std::string codecFormat = mConfig["codecImageFormat"];
+    union {
+        int format;
+        char fourcc[4];
+    }fourcctoint;
+    memcpy(&fourcctoint.fourcc[0], srcFormat.c_str(), 4);
+    mSrcImageFormat = fourcctoint.format;
+    memcpy(&fourcctoint.fourcc[0], codecFormat.c_str(), 4);
+    mCodecImageFormat = fourcctoint.format;
+//    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", mSrcImageFormat, mCodecImageFormat);
+    mBufferSize = mCodecWidth * mCodecHeight / 2 * 3;
+    mBufferPool = new BufferPool(10, mBufferSize);
+    onOpened();
     return 0;
 }
 
-void VideoFilter::ModuleImplClose() {
-    if (pool){
-        delete pool;
-        pool = nullptr;
+void VideoFilter::ModuleClose() {
+    if (mBufferPool){
+        delete mBufferPool;
+        mBufferPool = nullptr;
     }
 }
 
-int VideoFilter::ModuleImplProcessMedia(SmartPkt pkt) {
-    int srcWidth = mMediaConfig["srcWidth"];
-    int srcHeight = mMediaConfig["srcHeight"];
-    int codecWidth = mMediaConfig["codecWidth"];
-    int codecHeight = mMediaConfig["codecHeight"];
-    sr_buffer_frame_set_color_space(&pkt.frame, pkt.buffer->data, srcWidth, srcHeight,
-                                    libyuv::FOURCC_NV21);
-    SmartPkt y420 = pool->GetPkt();
-    sr_buffer_frame_set_color_space(&y420.frame, y420.buffer->data, codecWidth, codecHeight,
-                                    libyuv::FOURCC_I420);
-    sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, mMediaConfig["srcRotation"]);
-    OutputMediaPacket(pkt);
+int VideoFilter::ModuleProcessMedia(SmartPkt pkt) {
+    onProcessMedia(pkt);
     return 0;
 }

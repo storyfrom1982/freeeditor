@@ -27,7 +27,6 @@ enum {
 
 VideoSource::VideoSource(MessageContext *context)
     : MediaChainImpl(MediaType_Video, MediaNumber_VideoSource, "VideoSource") {
-    mBufferPool = nullptr;
     mStatus = Status_Closed;
     if (context == nullptr){
         context = MediaContext::Instance().ConnectCamera();
@@ -40,17 +39,13 @@ VideoSource::~VideoSource() {
     SendMessage(SmartMsg(SendMsg_Close));
     DisconnectContext();
     MediaContext::Instance().DisconnectCamera();
-    if (mBufferPool){
-        delete mBufferPool;
-        mBufferPool = nullptr;
-    }
     LOGD("VideoSource::~VideoSource exit\n");
 }
 
 void VideoSource::Open(MediaChain *chain) {
     LOGD("VideoSource::Open enter\n");
-    mMediaConfig = chain->GetMediaConfig(this);
-    SmartMsg msg(SendMsg_Open, mMediaConfig.dump());
+    mConfig = chain->GetConfig(this);
+    SmartMsg msg(SendMsg_Open, mConfig.dump());
     LOGD("VideoSource::Open: %s\n", msg.GetJson().c_str());
     SendMessage(msg);
     LOGD("VideoSource::Open exit\n");
@@ -75,17 +70,10 @@ void VideoSource::Stop(MediaChain *chain) {
 }
 
 void VideoSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
-    if (mBufferPool){
-        sr_buffer_frame_set_color_space(&pkt.frame, (uint8_t *) pkt.msg.GetPtr(), mSrcWidth,
-                                        mSrcHeight, mSrcImageFormat);
-        SmartPkt y420 = mBufferPool->GetPkt();
-        if (y420.buffer){
-            sr_buffer_frame_set_color_space(&y420.frame, y420.buffer->data, mCodecWidth,
-                                            mCodecHeight, mCodecImageFormat);
-            sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, mSrcRotation);
-            OutputMediaPacket(y420);
-        }
-    }
+    sr_buffer_frame_set_color_space(
+            &pkt.frame, (uint8_t *) pkt.msg.GetPtr(),
+            mSrcWidth, mSrcHeight, mSrcImageFormat);
+    onProcessMedia(pkt);
 }
 
 void VideoSource::onRecvMessage(SmartMsg msg) {
@@ -116,24 +104,16 @@ void VideoSource::onRecvMessage(SmartMsg msg) {
 }
 
 void VideoSource::UpdateMediaConfig(SmartMsg msg) {
-    LOGD("VideoSource::UpdateMediaConfig >> %s\n", msg.GetJson().c_str());
-    mMediaConfig = json::parse(msg.GetJson());
-    mSrcWidth = mMediaConfig["srcWidth"];
-    mSrcHeight = mMediaConfig["srcHeight"];
-    mSrcRotation = mMediaConfig["srcRotation"];
-    mCodecWidth = mMediaConfig["codecWidth"];
-    mCodecHeight = mMediaConfig["codecHeight"];
-    std::string srcFormat = mMediaConfig["srcImageFormat"];
-    std::string codecFormat = mMediaConfig["codecImageFormat"];
+//    LOGD("VideoSource::UpdateMediaConfig >> %s\n", msg.GetJson().c_str());
+    mConfig = json::parse(msg.GetJson());
+    mSrcWidth = mConfig["srcWidth"];
+    mSrcHeight = mConfig["srcHeight"];
+    std::string srcFormat = mConfig["srcImageFormat"];
     union {
         int format;
         char fourcc[4];
     }fourcctoint;
     memcpy(&fourcctoint.fourcc[0], srcFormat.c_str(), 4);
     mSrcImageFormat = fourcctoint.format;
-    memcpy(&fourcctoint.fourcc[0], codecFormat.c_str(), 4);
-    mCodecImageFormat = fourcctoint.format;
-//    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", mSrcImageFormat, mCodecImageFormat);
-    mBufferSize = mCodecWidth * mCodecHeight / 2 * 3;
-    mBufferPool = new BufferPool(10, mBufferSize);
+    onOpened();
 }

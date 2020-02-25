@@ -64,21 +64,17 @@ namespace freee {
 
         void MessageClose(SmartPkt pkt) override;
 
-        void MessageStart(SmartPkt pkt) override;
-
-        void MessageStop(SmartPkt pkt) override;
-
-        void MessagePacket(SmartPkt pkt) override;
+        void MessageProcessMedia(SmartPkt pkt) override;
 
         void MessageControl(SmartPkt pkt) override;
 
 
     private:
-        int ModuleImplOpen(json &cfg) override;
+        int ModuleOpen(json &cfg) override;
 
-        void ModuleImplClose() override;
+        void ModuleClose() override;
 
-        int ModuleImplProcessMedia(SmartPkt pkt) override;
+        int ModuleProcessMedia(SmartPkt pkt) override;
 
 
     private:

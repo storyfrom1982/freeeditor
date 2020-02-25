@@ -48,8 +48,8 @@ SmartMsg AudioSource::onObtainMessage(int key) {
 }
 
 void AudioSource::Open(MediaChain *chain) {
-    mMediaConfig = chain->GetMediaConfig(this);
-    SmartMsg msg(PutMsg_Open, mMediaConfig.dump());
+    mConfig = chain->GetConfig(this);
+    SmartMsg msg(PutMsg_Open, mConfig.dump());
     SendMessage(msg);
 }
 

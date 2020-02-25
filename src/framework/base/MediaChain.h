@@ -42,16 +42,23 @@ namespace freee {
 
     public:
         virtual ~MediaChain(){};
+
+        virtual void onOpened() = 0;
+        virtual void onClosed() = 0;
+        virtual void onStarted() = 0;
+        virtual void onStopped() = 0;
+        virtual void onProcessMedia(SmartPkt pkt) = 0;
+
         virtual void Open(MediaChain *chain) = 0;
         virtual void Close(MediaChain *chain) = 0;
         virtual void Start(MediaChain *chain) = 0;
         virtual void Stop(MediaChain *chain) = 0;
         virtual void ProcessMedia(MediaChain *chain, SmartPkt pkt) = 0;
 
-        virtual int GetMediaType(MediaChain *chain) = 0;
-        virtual int GetMediaNumber(MediaChain *chain) = 0;
-        virtual json& GetMediaConfig(MediaChain *chain) = 0;
-        virtual std::string GetMediaName(MediaChain *chain) = 0;
+        virtual int GetType(MediaChain *chain) = 0;
+        virtual int GetNumber(MediaChain *chain) = 0;
+        virtual json& GetConfig(MediaChain *chain) = 0;
+        virtual std::string GetName(MediaChain *chain) = 0;
 
         virtual void AddOutputChain(MediaChain *chain) = 0;
         virtual void RemoveOutputChain(MediaChain *chain) = 0;

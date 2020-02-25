@@ -27,7 +27,7 @@ VideoRenderer::VideoRenderer(int mediaType, int mediaNumber, const std::string &
 }
 
 VideoRenderer::~VideoRenderer() {
-    Stop(this);
+    Close(this);
     StopProcessor();
     FinalClear();
 }
@@ -46,46 +46,30 @@ void VideoRenderer::FinalClear() {
 }
 
 void VideoRenderer::MessageOpen(SmartPkt pkt) {
-    mMediaConfig = static_cast<MediaChain *>(pkt.msg.GetPtr())->GetMediaConfig(this);
+    mConfig = static_cast<MediaChain *>(pkt.msg.GetPtr())->GetConfig(this);
     if (mStatus == Status_Closed){
-        ModuleImplOpen(mMediaConfig);
+        ModuleOpen(mConfig);
         mStatus = Status_Opened;
+        onOpened();
     }
 }
 
 void VideoRenderer::MessageClose(SmartPkt pkt) {
-    if (mStatus == Status_Started){
-        MessageStop(pkt);
-    }
-    if (mStatus == Status_Opened || mStatus == Status_Stopped){
-        ModuleImplClose();
+    if (mStatus == Status_Opened){
+        ModuleClose();
         mStatus = Status_Closed;
+        onClosed();
     }
 }
 
-void VideoRenderer::MessageStart(SmartPkt pkt) {
-    if (mStatus != Status_Opened){
-        MessageOpen(pkt);
-    }
-    if (mStatus == Status_Opened || mStatus == Status_Stopped){
-        mStatus = Status_Started;
-    }
-}
-
-void VideoRenderer::MessageStop(SmartPkt pkt) {
-    if (mStatus == Status_Started){
-        mStatus = Status_Stopped;
-    }
-}
-
-void VideoRenderer::MessagePacket(SmartPkt pkt) {
-    if (mStatus != Status_Started){
-        MessageStart(pkt);
-        if (mStatus != Status_Started){
-            return;
-        }
-    }
-    ModuleImplProcessMedia(pkt);
+void VideoRenderer::MessageProcessMedia(SmartPkt pkt) {
+//    if (mStatus != Status_Opened){
+//        MessageOpen(pkt);
+//        if (mStatus != Status_Opened){
+//            return;
+//        }
+//    }
+    ModuleProcessMedia(pkt);
 }
 
 void VideoRenderer::MessageControl(SmartPkt pkt) {
@@ -107,7 +91,7 @@ void VideoRenderer::MessageControl(SmartPkt pkt) {
     }
 }
 
-int VideoRenderer::ModuleImplOpen(json &cfg) {
+int VideoRenderer::ModuleOpen(json &cfg) {
     int width = cfg["codecWidth"];
     int height = cfg["codecHeight"];
     renderer = gl_renderer_create(width, height);
@@ -119,7 +103,7 @@ int VideoRenderer::ModuleImplOpen(json &cfg) {
     return 0;
 }
 
-void VideoRenderer::ModuleImplClose() {
+void VideoRenderer::ModuleClose() {
     if (renderer){
         gl_renderer_release(&renderer);
     }
@@ -132,7 +116,7 @@ void VideoRenderer::ModuleImplClose() {
     }
 }
 
-int VideoRenderer::ModuleImplProcessMedia(SmartPkt pkt) {
+int VideoRenderer::ModuleProcessMedia(SmartPkt pkt) {
     AutoLock lock(mLock);
     if (!isWindowPausing){
         opengles_render(opengles, &pkt.frame);

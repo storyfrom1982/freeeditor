@@ -21,27 +21,34 @@ namespace freee {
 
         ~VideoFilter();
 
+    public:
+        void ProcessMedia(MediaChain *chain, SmartPkt pkt) override;
+
     protected:
         void MessageOpen(SmartPkt pkt) override;
 
         void MessageClose(SmartPkt pkt) override;
 
-        void MessageStart(SmartPkt pkt) override;
+        void MessageProcessMedia(SmartPkt pkt) override;
 
-        void MessageStop(SmartPkt pkt) override;
+        int ModuleOpen(json &cfg) override;
 
-        void MessagePacket(SmartPkt pkt) override;
+        void ModuleClose() override;
 
-        int ModuleImplOpen(json &cfg) override;
+        int ModuleProcessMedia(SmartPkt pkt) override;
 
-        void ModuleImplClose() override;
-
-        int ModuleImplProcessMedia(SmartPkt pkt) override;
+    private:
+        void FinalClear();
 
     private:
         int mStatus;
+        int mSrcRotation;
+        int mSrcWidth, mSrcHeight;
+        int mCodecWidth, mCodecHeight;
+        int mSrcImageFormat, mCodecImageFormat;
 
-        BufferPool *pool;
+        size_t mBufferSize;
+        BufferPool *mBufferPool = nullptr;
 
     };
 
