@@ -16,15 +16,6 @@ public class MessageProcessor implements Runnable {
 
     void onMessageProcessor(Message msg){}
 
-    private void processMessage(Message msg){
-        if (isRunning.get()){
-            onMessageProcessor(msg);
-        }else {
-            Looper.myLooper().quit();
-            onFinalRelease();
-        }
-    }
-
     void startHandler(){
         if (!isRunning.get()){
             mThread = new Thread(this);
@@ -43,7 +34,7 @@ public class MessageProcessor implements Runnable {
 
     void stopHandler(){
         if (isRunning.compareAndSet(true, false)){
-            msgHandler.sendEmptyMessage(0);
+            msgHandler.sendEmptyMessage(-10000);
             try {
                 mThread.join();
             } catch (InterruptedException e) {
@@ -74,7 +65,11 @@ public class MessageProcessor implements Runnable {
         public void handleMessage(Message msg) {
             MessageProcessor processor = weakReference.get();
             if (processor != null){
-                processor.processMessage(msg);
+                if (msg.what == -10000){
+                    Looper.myLooper().quit();
+                    processor.onFinalRelease();
+                }
+                processor.onMessageProcessor(msg);
             }
         }
     }

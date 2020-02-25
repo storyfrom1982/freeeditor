@@ -5,24 +5,18 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-//import org.json.JSONException;
-//import org.json.JSONObject;
-
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
+
 
 public class VideoSource extends JNIContext
         implements Camera.PreviewCallback, Camera.ErrorCallback {
@@ -53,37 +47,18 @@ public class VideoSource extends JNIContext
 
     private int mBufferCount = 4;
     private ArrayList<byte[]> mBufferList = new ArrayList<>();
-
-//    private final Thread mMessageThread;
-    private final AtomicBoolean isRunning = new AtomicBoolean(false);
     private final SurfaceTexture mSurfaceTexture = new SurfaceTexture(buildTexture());
 
 
     public VideoSource(){
-//        mMessageThread = new Thread(this);
-//        mMessageThread.start();
-//        synchronized (isRunning){
-//            if (!isRunning.get()){
-//                try {
-//                    isRunning.wait();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }
         startHandler();
         mStatus = Status_Closed;
     }
 
     public void release(){
+        Log.d(TAG, "VideoSource ########################### release()");
         msgHandler.sendMessage(msgHandler.obtainMessage(RecvMsg_Close));
         stopHandler();
-//        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(RecvMsg_Destroy));
-//        try {
-//            mMessageThread.join();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
     }
 
     private void openCamera(JNIMessage msg){
@@ -177,8 +152,8 @@ public class VideoSource extends JNIContext
         }else {
             mConfig.put("srcPosition", "back");
         }
-        mConfig.put("srcFormat", "YV21");
         mConfig.put("srcRotation", mRotation);
+        mConfig.put("srcImageFormat", "NV21");
         sendMessage(SendMsg_Opened, mConfig.toString());
 
         mStatus = Status_Opened;
@@ -228,23 +203,6 @@ public class VideoSource extends JNIContext
         }
     }
 
-
-//    private void destroy(){
-//        Looper.myLooper().quit();
-//        super.release();
-//    }
-//
-//    @Override
-//    public void run() {
-//        Looper.prepare();
-//        mMessageHandler = new MessageHandler(this);
-//        synchronized (isRunning){
-//            isRunning.set(true);
-//            isRunning.notifyAll();
-//        }
-//        Looper.loop();
-//    }
-
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
         sendMessage(SendMsg_ProcessPicture, data, data.length);
@@ -272,7 +230,6 @@ public class VideoSource extends JNIContext
     private static final int RecvMsg_Start = 2;
     private static final int RecvMsg_Stop = 3;
     private static final int RecvMsg_Close = 4;
-    private static final int RecvMsg_Destroy = 5;
 
     @Override
     void onMessageProcessor(Message msg) {
@@ -294,43 +251,6 @@ public class VideoSource extends JNIContext
         }
     }
 
-//    private MessageHandler mMessageHandler;
-//
-//    private static final class MessageHandler extends Handler {
-//
-//        final WeakReference<VideoSource> weakReference;
-//
-//        MessageHandler(VideoSource deviceCamera){
-//            weakReference = new WeakReference<>(deviceCamera);
-//        }
-//
-//        @Override
-//        public void handleMessage(Message msg) {
-//            VideoSource videoCamera = weakReference.get();
-//            if (videoCamera != null){
-//                switch (msg.what){
-//                    case RecvMsg_Open:
-//                        videoCamera.openCamera((JNIMessage) msg.obj);
-//                        break;
-//                    case RecvMsg_Start:
-//                        videoCamera.startCapture();
-//                        break;
-//                    case RecvMsg_Stop:
-//                        videoCamera.stopCapture();
-//                        break;
-//                    case RecvMsg_Close:
-//                        videoCamera.closeCamera();
-//                        break;
-//                    case RecvMsg_Destroy:
-//                        videoCamera.destroy();
-//                        break;
-//                    default:
-//                        break;
-//                }
-//            }
-//        }
-//    }
-
     @Override
     protected JNIMessage onObtainMessage(int key) {
         return new JNIMessage();
@@ -338,15 +258,12 @@ public class VideoSource extends JNIContext
 
     @Override
     protected void onRecvMessage(JNIMessage msg) {
-//        mMessageHandler.sendMessage(mMessageHandler.obtainMessage(msg.key, msg));
         msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
     }
 
     private void fixedOutputSize(Camera.Parameters parameters, final int width, final int height){
-
         int difference = Integer.MAX_VALUE;
         List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
-
         for (Camera.Size size : sizes) {
             if (size.width >= width && size.height >= height) {
                 int d = size.width * size.height - width * height;
@@ -359,7 +276,6 @@ public class VideoSource extends JNIContext
                 }
             }
         }
-
         if (difference == Integer.MAX_VALUE){
             for (Camera.Size size : sizes) {
                 float ar = (float) (Math.round(((float) width / height) * 1000.0f)) / 1000.0f;

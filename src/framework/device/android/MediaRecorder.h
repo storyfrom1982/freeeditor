@@ -47,8 +47,8 @@ namespace freee{
         bool isRecording;
         bool isPreviewing;
 
-//        MyVideoSource *videoSource;
 
+        AudioSource *mAudioSource;
         VideoSource *mVideoSource;
         VideoRenderer *mVideoRenderer;
     };

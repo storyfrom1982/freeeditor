@@ -77,11 +77,11 @@ void VideoSource::Stop(MediaChain *chain) {
 void VideoSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
     if (mBufferPool){
         sr_buffer_frame_set_color_space(&pkt.frame, (uint8_t *) pkt.msg.GetPtr(), mSrcWidth,
-                                        mSrcHeight, libyuv::FOURCC_NV21);
+                                        mSrcHeight, mSrcImageFormat);
         SmartPkt y420 = mBufferPool->GetPkt();
         if (y420.buffer){
             sr_buffer_frame_set_color_space(&y420.frame, y420.buffer->data, mCodecWidth,
-                                            mCodecHeight, libyuv::FOURCC_I420);
+                                            mCodecHeight, mCodecImageFormat);
             sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, mSrcRotation);
             OutputMediaPacket(y420);
         }
@@ -123,6 +123,17 @@ void VideoSource::UpdateMediaConfig(SmartMsg msg) {
     mSrcRotation = mMediaConfig["srcRotation"];
     mCodecWidth = mMediaConfig["codecWidth"];
     mCodecHeight = mMediaConfig["codecHeight"];
+    std::string srcFormat = mMediaConfig["srcImageFormat"];
+    std::string codecFormat = mMediaConfig["codecImageFormat"];
+    union {
+        int format;
+        char fourcc[4];
+    }fourcctoint;
+    memcpy(&fourcctoint.fourcc[0], srcFormat.c_str(), 4);
+    mSrcImageFormat = fourcctoint.format;
+    memcpy(&fourcctoint.fourcc[0], codecFormat.c_str(), 4);
+    mCodecImageFormat = fourcctoint.format;
+//    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", mSrcImageFormat, mCodecImageFormat);
     mBufferSize = mCodecWidth * mCodecHeight / 2 * 3;
     mBufferPool = new BufferPool(10, mBufferSize);
 }

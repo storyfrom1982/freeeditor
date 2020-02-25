@@ -142,6 +142,8 @@ public class Microphone implements Runnable {
             return;
         }
 
+        Log.d(TAG, "Microphone start ==================== " + Thread.currentThread().getId());
+
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
 
         byte[] codecBuffer = new byte[mCodecBufferSize];
@@ -197,21 +199,18 @@ public class Microphone implements Runnable {
                 }
                 synchronized (callbackLock){
                     if (mRecordCallback != null){
+//                        Log.d(TAG, "Microphone thread id " + Thread.currentThread().getId());
                         mRecordCallback.onRecordFrame(codecBuffer, mCodecBufferSize);
                     }
                 }
             }
         }
 
-        Log.d(TAG, "Microphone stopped");
+        Log.d(TAG, "Microphone stopped ==================== " + Thread.currentThread().getId());
 
         synchronized (isStopped){
             isStopped.set(true);
             isStopped.notifyAll();
-        }
-
-        if (mAudioRecord != null) {
-            mAudioRecord.stop();
         }
     }
 

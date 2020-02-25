@@ -1,15 +1,13 @@
 package cn.freeeditor.sdk;
 
-import android.media.AudioRecord;
 import android.os.Message;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 
-public class AudioSource extends JNIContext {
-
+public class AudioSource extends JNIContext
+        implements Microphone.RecordCallback, Microphone.ErrorCallback {
 
     protected static final String TAG = "AudioSource";
 
@@ -18,37 +16,34 @@ public class AudioSource extends JNIContext {
     private int mBytesPerSample;
     private int mSamplesPerFrame;
 
-    private final AtomicBoolean isRunning = new AtomicBoolean(false);
-    private final AtomicBoolean isStopped = new AtomicBoolean(true);
-    private final AtomicBoolean isStopping = new AtomicBoolean(false);
-
-    private Thread mRecordThread = null;
-    private AudioRecord mAudioRecord = null;
-
     private Microphone microphone;
 
     public AudioSource(){
         microphone = new Microphone();
+        microphone.setErrorCallback(this);
         startHandler();
     }
 
-    public void relase(){
+    public void release(){
+        Log.d(TAG, "AudioSource ########################### release()");
+        msgHandler.sendEmptyMessage(OnPutMsg_CloseRecord);
         stopHandler();
-        super.release();
     }
 
     public int open(String cfgStr){
         JSONObject cfg = JSON.parseObject(cfgStr);
-        mSampleRate = cfg.getIntValue("sampleRate");
-        mChannelCount = cfg.getIntValue("channelCount");
-        mBytesPerSample = cfg.getIntValue("bitPerSample") / 8;
-        mSamplesPerFrame = cfg.getIntValue("samplePerFrame");
+        Log.d(TAG, "AudioSource config: " + cfg.toJSONString());
+        mSampleRate = cfg.getIntValue("srcSampleRate");
+        mChannelCount = cfg.getIntValue("srcChannelCount");
+        mBytesPerSample = cfg.getIntValue("srcBytesPerSample");
+        mSamplesPerFrame = cfg.getIntValue("codecSamplesPerFrame");
         return microphone.open(mSampleRate, mChannelCount, mBytesPerSample, mSamplesPerFrame);
     }
 
 
     public void start(){
         microphone.start();
+        microphone.setRecordCallback(this);
     }
 
 
@@ -81,7 +76,6 @@ public class AudioSource extends JNIContext {
     @Override
     void onMessageProcessor(Message msg) {
         JNIMessage jmsg = (JNIMessage) msg.obj;
-
         switch (msg.what){
 
             case OnPutMsg_OpenRecord:
@@ -116,4 +110,13 @@ public class AudioSource extends JNIContext {
         msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
     }
 
+    @Override
+    public void onRecordFrame(byte[] data, int size) {
+        sendMessage(PutMsg_ProcessSound, size);
+    }
+
+    @Override
+    public void onError(int error) {
+
+    }
 }

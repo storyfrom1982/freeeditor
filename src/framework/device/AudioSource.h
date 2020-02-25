@@ -7,32 +7,35 @@
 
 
 #include <MessageContext.h>
+#include <MediaChainImpl.h>
 #include "AudioEncoder.h"
 
 namespace freee {
 
 
-    class AudioSource : public MessageContext {
+    class AudioSource : public MessageContext, public MediaChainImpl {
 
     public:
 
-        AudioSource();
+        AudioSource(int mediaType = MediaType_Audio,
+                int mediaNumber = MediaNumber_AudioSource,
+                std::string mediaName = "AudioSource");
 
         ~AudioSource();
 
-        void Open(json& cfg);
+        void Open(MediaChain *chain) override;
 
-        void Close();
+        void Close(MediaChain *chain) override;
 
-        void Start();
+        void Start(MediaChain *chain) override;
 
-        void Stop();
+        void Stop(MediaChain *chain) override;
 
-        void SetEncoder(AudioEncoder *encoder);
+        void ProcessMedia(MediaChain *chain, SmartPkt pkt) override;
 
-        virtual void onRecvMessage(SmartMsg msg);
+        virtual void onRecvMessage(SmartMsg msg) override;
 
-        virtual SmartMsg onObtainMessage(int key);
+        virtual SmartMsg onObtainMessage(int key) override;
 
     private:
         AudioEncoder *mEncoder;

@@ -91,8 +91,8 @@ void MediaRecorder::Open(SmartPkt pkt) {
         mVideoRenderer = new VideoRenderer();
         mVideoSource->AddOutputChain(mVideoRenderer);
 
-//        videoSource = new MyVideoSource();
-//        videoSource->Open(mMediaConfig["video"]);
+        mAudioSource = new AudioSource();
+        mAudioSource->Open(this);
 
         mStatus = Status_Opened;
     }
@@ -112,6 +112,9 @@ void MediaRecorder::Close() {
 
         mVideoSource->Close(this);
         delete mVideoSource;
+
+        mAudioSource->Close(this);
+        delete mAudioSource;
 
         mStatus = Status_Closed;
     }
@@ -168,6 +171,7 @@ void MediaRecorder::Start() {
         if (mStatus == Status_Opened || mStatus == Status_Stopped){
 
             mVideoSource->Start(this);
+            mAudioSource->Start(this);
 
             mStatus = Status_Started;
         }
@@ -178,6 +182,7 @@ void MediaRecorder::Stop() {
     if (mStatus == Status_Started){
 
         mVideoSource->Stop(this);
+//        mAudioSource->Stop(this);
 
         mStatus = Status_Stopped;
     }
@@ -186,6 +191,8 @@ void MediaRecorder::Stop() {
 json &MediaRecorder::GetMediaConfig(MediaChain *chain) {
     if (chain->GetMediaType(this) == MediaType_Video){
         return mMediaConfig["video"];
+    }else if (chain->GetMediaType(this) == MediaType_Audio){
+        return mMediaConfig["audio"];
     }
     return MediaChainImpl::GetMediaConfig(chain);
 }

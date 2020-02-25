@@ -27,8 +27,8 @@ public class MediaContext extends JNIContext {
 
     private int currentOrientation;
 
-    private VideoSource camera;
-    private Microphone microphone;
+    private VideoSource videoSource;
+    private AudioSource audioSource;
 
     private static MediaContext sMediaContext = null;
 
@@ -154,13 +154,13 @@ public class MediaContext extends JNIContext {
     public void release(){
         disconnectContext();
         super.release();
-        if (camera != null){
-            camera.release();
-            camera = null;
+        if (videoSource != null){
+            videoSource.release();
+            videoSource = null;
         }
-        if (microphone != null){
-            microphone.release();
-            microphone = null;
+        if (audioSource != null){
+            audioSource.release();
+            audioSource = null;
         }
     }
 
@@ -195,15 +195,15 @@ public class MediaContext extends JNIContext {
     protected void onRecvMessage(JNIMessage msg) {
         switch (msg.key){
             case OnRecvMsg_DisconnectCamera:
-                if (camera != null){
-                    camera.release();
-                    camera = null;
+                if (videoSource != null){
+                    videoSource.release();
+                    videoSource = null;
                 }
                 break;
             case OnRecvMsg_DisconnectMicrophone:
-                if (microphone != null){
-                    microphone.release();
-                    microphone = null;
+                if (audioSource != null){
+                    audioSource.release();
+                    audioSource = null;
                 }
                 break;
             default:
@@ -212,17 +212,17 @@ public class MediaContext extends JNIContext {
     }
 
     private long createCamera(){
-        if (camera == null){
-            camera = new VideoSource();
+        if (videoSource == null){
+            videoSource = new VideoSource();
         }
-        return camera.getContextPointer();
+        return videoSource.getContextPointer();
     }
 
     private long createMicrophone(){
-        if (microphone == null){
-            microphone = new Microphone();
+        if (audioSource == null){
+            audioSource = new AudioSource();
         }
-        return microphone.getContextPointer();
+        return audioSource.getContextPointer();
     }
 
     private MediaContext(){

@@ -26,49 +26,49 @@ enum {
 };
 
 
-AudioSource::AudioSource() {
+AudioSource::AudioSource(int mediaType, int mediaNumber, std::string mediaName)
+        : MediaChainImpl(mediaType, mediaNumber, mediaName) {
     MessageContext *context = MediaContext::Instance().ConnectMicrophone();
     ConnectContext(context);
 }
 
 AudioSource::~AudioSource() {
-    Close();
+    LOGD("AudioSource::~AudioSource\n");
+    Close(this);
+    DisconnectContext();
+    MediaContext::Instance().DisconnectMicrophone();
 }
 
 void AudioSource::onRecvMessage(SmartMsg msg) {
-//    LOGD("AudioSource::onRecvFrom data size=%d\n", msg.type);
-//    SrMessage buffer;
-//    buffer.buffer->data = static_cast<unsigned char *>(msg.ptr);
-//    mEncoder->EncodeAudioData(buffer);
+//    LOGD("AudioSource::onRecvMessage data %d\n", msg.GetKey());
 }
 
 SmartMsg AudioSource::onObtainMessage(int key) {
     return MessageContext::onObtainMessage(key);
 }
 
-void AudioSource::Open(json& cfg) {
-    SmartMsg msg(PutMsg_Open, cfg.dump());
+void AudioSource::Open(MediaChain *chain) {
+    mMediaConfig = chain->GetMediaConfig(this);
+    SmartMsg msg(PutMsg_Open, mMediaConfig.dump());
     SendMessage(msg);
-    mEncoder->OpenAudioEncoder(cfg);
 }
 
-void AudioSource::Close() {
+void AudioSource::Close(MediaChain *chain) {
     SmartMsg msg(PutMsg_Close);
     SendMessage(msg);
-    mEncoder->CloseAudioEncoder();
 }
 
-void AudioSource::Start() {
+void AudioSource::Start(MediaChain *chain) {
     SmartMsg msg(PutMsg_Start);
     SendMessage(msg);
 }
 
-void AudioSource::Stop() {
+void AudioSource::Stop(MediaChain *chain) {
     SmartMsg msg(PutMsg_Stop);
     SendMessage(msg);
 }
 
-void AudioSource::SetEncoder(AudioEncoder *encoder) {
-    mEncoder = encoder;
+void AudioSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
+    MediaChainImpl::ProcessMedia(chain, pkt);
 }
 

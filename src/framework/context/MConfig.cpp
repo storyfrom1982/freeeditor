@@ -77,7 +77,7 @@ void MConfig::buildDefaultConfig(json &config) {
 
                 {"srcWidth", 640},
                 {"srcHeight", 360},
-                {"srcFormat", "YV21"},
+                {"srcImageFormat", "NV21"},
                 {"srcPosition", "front"},
                 {"srcRotation", 0},
                 {"srcMirror", false},
@@ -89,6 +89,7 @@ void MConfig::buildDefaultConfig(json &config) {
                 {"codecFPS", 25},
                 {"codecWidth", 640},
                 {"codecHeight", 360},
+                {"codecImageFormat", "I420"},
                 {"codecType", "h264"},
                 {"codecName", "x264"},
                 {"codecBitRate", 1024},
@@ -102,16 +103,19 @@ void MConfig::buildDefaultConfig(json &config) {
 
 
             {"audio", {
-                {"sampleRate", 48000},
-                {"channelCount", 1},
-                {"bitPerSample", 16},
-                {"samplePerFrame", 1024},
-                {"position", "center"},
-                {"aec", false},
+                {"srcSampleRate", 48000},
+                {"srcChannelCount", 1},
+                {"srcBytesPerSample", 2},
+                {"srcPosition", "center"},
+                {"srcAEC", false},
 
-                {"codeType", "aac"},
-                {"codeName", "faac"},
-                {"bitRate", 128},
+                {"codecType", "aac"},
+                {"codecName", "faac"},
+                {"codecBitRate", 128},
+                {"codecSampleRate", 48000},
+                {"codecChannelCount", 1},
+                {"codecBytesPerSample", 2},
+                {"codecSamplesPerFrame", 1024},
             }},
 
             {"audioEffect", {
