@@ -1,5 +1,6 @@
 package cn.freeeditor.sdk;
 
+import android.os.Message;
 import android.view.SurfaceView;
 
 import com.alibaba.fastjson.JSON;
@@ -28,6 +29,7 @@ public class MediaRecorder extends JNIContext {
     private JSONObject mConfig;
 
     public MediaRecorder(){
+        startHandler();
         videoView = new VideoSurfaceView();
         recorderContext = MediaContext.Instance().connectRecorder();
         connectContext(recorderContext);
@@ -35,6 +37,17 @@ public class MediaRecorder extends JNIContext {
         mConfig = JSON.parseObject(config);
         Log.d(TAG, "encoder config: " + JSON.toJSONString(mConfig));
         sendMessage(SendMsg_Open, mConfig.toJSONString());
+    }
+
+    public void release(){
+        sendMessage(SendMsg_Close);
+        disconnectContext();
+        super.release();
+        MediaContext.Instance().disconnectRecorder(recorderContext);
+        if (videoView != null){
+            videoView.release();
+        }
+        stopHandler();
     }
 
     public void setVideoSize(int width, int height){
@@ -72,14 +85,8 @@ public class MediaRecorder extends JNIContext {
         sendMessage(SendMsg_StopPreview);
     }
 
-    public void release(){
-        sendMessage(SendMsg_Close);
-        disconnectContext();
-        MediaContext.Instance().disconnectRecorder(recorderContext);
-        super.release();
-        if (videoView != null){
-            videoView.release();
-        }
+    @Override
+    void onFinalRelease() {
     }
 
     @Override
@@ -92,4 +99,8 @@ public class MediaRecorder extends JNIContext {
 
     }
 
+    @Override
+    void onMessageProcessor(Message msg) {
+
+    }
 }

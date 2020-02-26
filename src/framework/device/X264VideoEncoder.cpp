@@ -3,13 +3,23 @@
 //
 
 #include <sr_buffer_frame.h>
-#include "X264Encoder.h"
+#include "X264VideoEncoder.h"
 
 
 using namespace freee;
 
-int X264Encoder::OnOpenEncoder(json& cfg) {
-    LOGD("X264Encoder::OnOpenEncoder: %s\n", cfg.dump().c_str());
+
+X264VideoEncoder::X264VideoEncoder() {
+    m_handle = nullptr;
+}
+
+X264VideoEncoder::~X264VideoEncoder() {
+
+}
+
+
+int X264VideoEncoder::ModuleOpen(json &cfg) {
+    LOGD("X264VideoEncoder::OnOpenEncoder: %s\n", cfg.dump().c_str());
     param = (x264_param_t){0};
 
     x264_param_default(&param);
@@ -18,12 +28,12 @@ int X264Encoder::OnOpenEncoder(json& cfg) {
 
     param.i_csp = X264_CSP_I420;
     param.i_log_level = X264_LOG_NONE;
-    param.i_width = cfg["width"];
-    param.i_height = cfg["height"];
+    param.i_width = cfg["codecWidth"];
+    param.i_height = cfg["codecHeight"];
 
-    bool vbr = cfg["vbr"];
-    uint32_t fr = cfg["fps"];
-    uint32_t bitrate = cfg["bitRate"];
+    bool vbr = cfg["codecVBR"];
+    uint32_t fr = cfg["codecFPS"];
+    uint32_t bitrate = cfg["codecBitRate"];
 
     // if input buffer rate is reliable, use the buffer rate for calc bitrate
     if ( fr > 0){
@@ -89,21 +99,21 @@ int X264Encoder::OnOpenEncoder(json& cfg) {
     short pps_size = encoded[1].i_payload - 4;
 
     m_frameId = 0;
-    LOGD("X264Encoder::OnOpenEncoder: %p\n", m_handle);
+    LOGD("X264VideoEncoder::OnOpenEncoder: %p\n", m_handle);
     return 0;
 }
 
-void X264Encoder::OnCloseEncoder() {
+void X264VideoEncoder::ModuleClose() {
     if (m_handle){
         x264_encoder_close(m_handle);
+        m_handle = nullptr;
     }
 }
 
-void X264Encoder::OnEncodeVideo(SmartPkt buffer) {
+int X264VideoEncoder::ModuleProcessMedia(SmartPkt pkt) {
+    //    LOGD("X264VideoEncoder::OnOpenEncoder: enter\n");
 
-//    LOGD("X264Encoder::OnOpenEncoder: enter\n");
-
-    sr_buffer_frame_t *pkt = &buffer.frame;
+    sr_buffer_frame_t *frame = &(pkt.frame);
 
     x264_picture_t pic_out;
     x264_picture_t  pic;
@@ -112,12 +122,12 @@ void X264Encoder::OnEncodeVideo(SmartPkt buffer) {
 
     pic.img.i_csp = X264_CSP_I420;
     for (int i=0; i<3; i++){
-        pic.img.plane[i] = pkt->plane[i].data;
+        pic.img.plane[i] = frame->plane[i].data;
     }
     pic.img.i_plane = 3;
-    pic.img.i_stride[0] = pkt->plane[0].stride;
-    pic.img.i_stride[1] = pkt->plane[1].stride;
-    pic.img.i_stride[2] = pkt->plane[2].stride;
+    pic.img.i_stride[0] = frame->plane[0].stride;
+    pic.img.i_stride[1] = frame->plane[1].stride;
+    pic.img.i_stride[2] = frame->plane[2].stride;
 
     m_frameId ++;
     long long timeStamp = m_frameId;
@@ -144,10 +154,8 @@ void X264Encoder::OnEncodeVideo(SmartPkt buffer) {
     long long tmStamp = param.b_vfr_input ? pic_out.i_dts :
                         pic_out.i_dts*1000000*param.i_fps_den/param.i_fps_num;
 
-//    LOGD("X264Encoder::OnOpenEncoder: size=%d  i64=%ld\n", frameLen, tmStamp);
+    LOGD("X264VideoEncoder::OnOpenEncoder: size=%d  i64=%ld\n", frameLen, tmStamp);
+    return  0;
 }
 
-X264Encoder::~X264Encoder() {
-    OnCloseEncoder();
-}
 

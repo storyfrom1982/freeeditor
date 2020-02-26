@@ -3,6 +3,7 @@
 //
 
 #include <GLES3/gl3.h>
+#include <BufferPool.h>
 #include "VideoRenderer.h"
 
 
@@ -46,7 +47,7 @@ void VideoRenderer::FinalClear() {
 }
 
 void VideoRenderer::MessageOpen(SmartPkt pkt) {
-    mConfig = static_cast<MediaChain *>(pkt.msg.GetPtr())->GetConfig(this);
+    mConfig = static_cast<MediaChain *>(pkt.msg.ptr)->GetConfig(this);
     if (mStatus == Status_Closed){
         ModuleOpen(mConfig);
         mStatus = Status_Opened;
@@ -73,7 +74,7 @@ void VideoRenderer::MessageProcessMedia(SmartPkt pkt) {
 }
 
 void VideoRenderer::MessageControl(SmartPkt pkt) {
-    switch (pkt.msg.GetKey()){
+    switch (pkt.msg.key){
         case RecvMsg_SetVideoWindow:
             MessageSetVideoWindow(pkt);
             break;
@@ -127,13 +128,13 @@ int VideoRenderer::ModuleProcessMedia(SmartPkt pkt) {
 
 void VideoRenderer::SetVideoWindow(void *ptr) {
     LOGD("VideoRenderer::SetVideoWindow enter\n");
-    ProcessMessage(SmartPkt(SmartMsg(RecvMsg_SetVideoWindow, ptr)));
+    ProcessMessage(SmartPkt(SmartPkt(RecvMsg_SetVideoWindow, ptr)));
     LOGD("VideoRenderer::SetVideoWindow exit\n");
 }
 
 void VideoRenderer::MessageSetVideoWindow(SmartPkt pkt) {
     LOGD("VideoRenderer::MessageSetVideoWindow enter\n");
-    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.msg.GetPtr()));
+    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.msg.ptr));
     mVideoWindow->SetCallback(this);
     LOGD("VideoRenderer::MessageSetVideoWindow exit\n");
 }
@@ -142,24 +143,24 @@ void VideoRenderer::onSurfaceCreated(void *ptr) {
     LOGD("VideoRenderer::onSurfaceCreated enter\n");
     AutoLock lock(mLock);
     isWindowPausing = false;
-    ProcessMessage(SmartPkt(SmartMsg(RecvMsg_SurfaceCreated, ptr)));
+    ProcessMessage(SmartPkt(RecvMsg_SurfaceCreated, ptr));
     LOGD("VideoRenderer::onSurfaceCreated exit\n");
 }
 
 void VideoRenderer::onSurfaceChanged() {
-    ProcessMessage(SmartPkt(SmartMsg(RecvMsg_SurfaceChanged)));
+    ProcessMessage(SmartPkt(RecvMsg_SurfaceChanged));
 }
 
 void VideoRenderer::onSurfaceDestroyed() {
     AutoLock lock(mLock);
     isWindowPausing = true;
-    ProcessMessage(SmartPkt(SmartMsg(RecvMsg_SurfaceDestroyed)));
+    ProcessMessage(SmartPkt(RecvMsg_SurfaceDestroyed));
 }
 
 void VideoRenderer::MessageWindowCreated(SmartPkt pkt) {
     isWindowReady = true;
     if (mStatus == Status_Opened){
-        gl_renderer_set_window(renderer, pkt.msg.GetPtr());
+        gl_renderer_set_window(renderer, pkt.msg.ptr);
     }
 }
 

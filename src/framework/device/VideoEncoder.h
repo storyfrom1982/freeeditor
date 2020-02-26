@@ -11,37 +11,38 @@
 #include <SmartPtr.h>
 #include <MConfig.h>
 #include <BufferPool.h>
-#include "MediaProtocol.h"
+#include <MediaChainImpl.h>
+#include <MediaModule.h>
 
 namespace freee{
 
-    class VideoEncoder : public MessageContext {
+    class VideoEncoder : public MediaModule {
 
     public:
-
         static VideoEncoder* Create(std::string name);
-
         virtual ~VideoEncoder();
 
-        void OpenEncoder(json& cfg);
-        void CloseEncoder();
-        void EncodeVideo(SmartPkt buffer);
+    protected:
+        void MessageOpen(SmartPkt pkt) override;
 
-        void SetProtocol(MediaProtocol *aProtocol){
-            mediaProtocol = aProtocol;
-        }
+        void MessageClose(SmartPkt pkt) override;
+
+        void MessageProcessMedia(SmartPkt pkt) override;
+
+        void MessageControl(SmartPkt pkt) override;
 
     protected:
+        VideoEncoder(int mediaType = MediaType_Video,
+                int mediaNumber = MediaNumber_VideoEncoder,
+                const std::string &mediaName = "VideoEncoder");
 
-        MediaProtocol *mediaProtocol;
+    private:
+        void FinalClear();
 
     protected:
+        size_t bufferSize;
+        BufferPool *bufferPool;
 
-        VideoEncoder();
-
-        virtual int OnOpenEncoder(json& cfg) = 0;
-        virtual void OnCloseEncoder() = 0;
-        virtual void OnEncodeVideo(SmartPkt buffer);
     };
 
 }

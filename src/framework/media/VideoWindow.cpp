@@ -5,6 +5,7 @@
 #include <android/native_window.h>
 #include <JNIContext.h>
 #include <android/native_window_jni.h>
+#include <BufferPool.h>
 #include "VideoWindow.h"
 
 
@@ -38,53 +39,71 @@ VideoWindow::~VideoWindow() {
 #ifdef __ANDROID__
     if (mNativeWindow){
         ANativeWindow_release((ANativeWindow*)mNativeWindow);
+        mNativeWindow = nullptr;
     }
     if (mWindowHolder){
         JniEnv env;
         env->DeleteGlobalRef((jobject)mWindowHolder);
+        mWindowHolder = nullptr;
     }
 #endif
 }
 
 void *VideoWindow::window() {
+    AutoLock lock(mLock);
     return mNativeWindow;
 }
 
 int VideoWindow::width() {
+    AutoLock lock(mLock);
 #ifdef __ANDROID__
-    return ANativeWindow_getWidth((ANativeWindow*)mNativeWindow);
-#else
-    return 0;
+    if (mNativeWindow){
+        return ANativeWindow_getWidth((ANativeWindow*)mNativeWindow);
+    }
 #endif
+    return 0;
 }
 
 int VideoWindow::height() {
+    AutoLock lock(mLock);
 #ifdef __ANDROID__
-    return ANativeWindow_getHeight((ANativeWindow*)mNativeWindow);
-#else
-    return 0;
+    if (mNativeWindow){
+        return ANativeWindow_getHeight((ANativeWindow*)mNativeWindow);
+    }
 #endif
+    return 0;
 }
 
-void VideoWindow::onRecvMessage(SmartMsg msg) {
-    if (msg.GetKey() == RecvMsg_SurfaceCreated){
-        mWindowHolder = msg.GetTroubledPtr();
+void VideoWindow::onRecvMessage(SmartPkt pkt) {
+    if (pkt.msg.key == RecvMsg_SurfaceCreated){
 #ifdef __ANDROID__
         JniEnv env;
-        mWindowHolder = env->NewGlobalRef(static_cast<jobject>(msg.GetTroubledPtr()));
-        mNativeWindow = ANativeWindow_fromSurface(env.m_pEnv, (jobject)mWindowHolder);
         AutoLock lock(mLock);
+        mWindowHolder = pkt.msg.troubledPtr;
+        mWindowHolder = env->NewGlobalRef(static_cast<jobject>(pkt.msg.troubledPtr));
+        mNativeWindow = ANativeWindow_fromSurface(env.m_pEnv, (jobject)mWindowHolder);
         if (mCallback){
             mCallback->onSurfaceCreated(mNativeWindow);
         }
 #endif
-    }else if (msg.GetKey() == RecvMsg_SurfaceChanged){
+    }else if (pkt.msg.key == RecvMsg_SurfaceChanged){
         AutoLock lock(mLock);
         if (mCallback){
             mCallback->onSurfaceChanged();
         }
-    }else if (msg.GetKey() == RecvMsg_SurfaceDestroyed){
+    }else if (pkt.msg.key == RecvMsg_SurfaceDestroyed){
         AutoLock lock(mLock);
+#ifdef __ANDROID__
+        if (mNativeWindow){
+            ANativeWindow_release((ANativeWindow*)mNativeWindow);
+            mNativeWindow = nullptr;
+        }
+        if (mWindowHolder){
+            JniEnv env;
+            env->DeleteGlobalRef((jobject)mWindowHolder);
+            mWindowHolder = nullptr;
+        }
+#endif
         if (mCallback){
             mCallback->onSurfaceDestroyed();
         }
@@ -94,5 +113,5 @@ void VideoWindow::onRecvMessage(SmartMsg msg) {
 void VideoWindow::SetCallback(VideoWindow::VideoSurfaceCallback *callback) {
     AutoLock lock(mLock);
     mCallback = callback;
-    SendMessage(SmartMsg(SendMsg_RegisterCallback));
+    SendMessage(SmartPkt(SendMsg_RegisterCallback));
 }

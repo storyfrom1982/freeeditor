@@ -14,22 +14,20 @@
 
 namespace freee {
 
-    class X264Encoder : public VideoEncoder {
+    class X264VideoEncoder : public VideoEncoder {
 
     public:
-        X264Encoder(){}
-        ~X264Encoder();
+        X264VideoEncoder();
+        ~X264VideoEncoder();
 
     protected:
-        void OnEncodeVideo(SmartPkt buffer) override;
+        int ModuleOpen(json &cfg) override;
 
-    protected:
-        int OnOpenEncoder(json& cfg) override;
+        void ModuleClose() override;
 
-        void OnCloseEncoder() override;
+        int ModuleProcessMedia(SmartPkt pkt) override;
 
     private:
-
         ino64_t m_frameId;
         x264_t   *m_handle;
         x264_param_t param;

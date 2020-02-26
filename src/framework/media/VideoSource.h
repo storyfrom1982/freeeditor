@@ -30,9 +30,9 @@ namespace freee {
 
 
     private:
-        void onRecvMessage(SmartMsg msg) override;
+        void onRecvMessage(SmartPkt pkt) override;
 
-        void UpdateMediaConfig(SmartMsg msg);
+        void UpdateMediaConfig(SmartPkt pkt);
 
     private:
         int mStatus;

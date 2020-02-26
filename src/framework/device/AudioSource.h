@@ -8,7 +8,7 @@
 
 #include <MessageContext.h>
 #include <MediaChainImpl.h>
-#include "AudioEncoder.h"
+
 
 namespace freee {
 
@@ -33,12 +33,12 @@ namespace freee {
 
         void ProcessMedia(MediaChain *chain, SmartPkt pkt) override;
 
-        virtual void onRecvMessage(SmartMsg msg) override;
+        virtual void onRecvMessage(SmartPkt msg) override;
 
-        virtual SmartMsg onObtainMessage(int key) override;
+        virtual SmartPkt onObtainMessage(int key) override;
 
     private:
-        AudioEncoder *mEncoder;
+
     };
 
 

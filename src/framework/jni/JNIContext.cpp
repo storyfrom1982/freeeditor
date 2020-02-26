@@ -7,6 +7,7 @@
 #include "MediaContext.h"
 
 #include <android/log.h>
+#include <BufferPool.h>
 
 static void log_debug(int level, const char *debug_log, const char *pure_log)
 {
@@ -68,23 +69,29 @@ public:
     }
 
     void SendMessage(int key, jlong number, jdouble decimal){
-        MessageContext::SendMessage(SmartMsg(key, number, decimal, ""));
+        SmartPkt pkt(key);
+        pkt.msg.number = number;
+        pkt.msg.decimal = decimal;
+        MessageContext::SendMessage(pkt);
     }
 
     void SendMessage(int key, jobject obj){
-        SmartMsg msg(key);
-        msg.SetTroubledPtr(obj);
+        SmartPkt msg(key);
+        msg.msg.troubledPtr = obj;
         MessageContext::SendMessage(msg);
     }
 
     void SendMessage(int key, jstring json, JNIEnv *env){
         const char *js = env->GetStringUTFChars(json, 0);
-        MessageContext::SendMessage(SmartMsg(key, js));
+        MessageContext::SendMessage(SmartPkt(key, js, env->GetStringUTFLength(json)));
         env->ReleaseStringUTFChars(json, js);
     }
 
     void SendMessage(int key, jbyte *buffer, int size){
-        MessageContext::SendMessage(SmartMsg(key, buffer));
+        SmartPkt pkt(key);
+        pkt.msg.ptr = buffer;
+        pkt.msg.size = size;
+        MessageContext::SendMessage(pkt);
     }
 
 //    void SendJNIMessage(jobject jmsg) {
@@ -106,15 +113,15 @@ public:
     jobject GetJNIMessage(JNIEnv *env, int key) {
         jobject obj = nullptr;
         jstring str = nullptr;
-        SmartMsg msg = MessageContext::GetMessage(key);
-        if (!msg.GetJson().empty()){
-            str = env->NewStringUTF(msg.GetJson().c_str());
+        SmartPkt pkt = MessageContext::GetMessage(key);
+        if (pkt.msg.json){
+            str = env->NewStringUTF(pkt.msg.json);
         }
-        if (msg.GetTroubledPtr() != nullptr){
-            obj = static_cast<jobject>(msg.GetTroubledPtr());
+        if (pkt.msg.troubledPtr != nullptr){
+            obj = static_cast<jobject>(pkt.msg.troubledPtr);
         }
-        jobject jmsg = env->NewObject(m_msgCls, m_newObject, msg.GetKey(),
-                msg.GetNumber(), msg.GetDecimal(), obj, str);
+        jobject jmsg = env->NewObject(m_msgCls, m_newObject, pkt.msg.key,
+                pkt.msg.number, pkt.msg.decimal, obj, str);
         if (str != nullptr){
             env->DeleteLocalRef(str);
         }
@@ -124,18 +131,18 @@ public:
         return jmsg;
     }
 
-    void onRecvMessage(SmartMsg msg) override {
+    void onRecvMessage(SmartPkt pkt) override {
         JniEnv env;
         jobject obj = nullptr;
         jstring str = nullptr;
-        if (!msg.GetJson().empty()){
-            str = env->NewStringUTF(msg.GetJson().c_str());
+        if (pkt.msg.json){
+            str = env->NewStringUTF(pkt.msg.json);
         }
-        if (msg.GetTroubledPtr() != nullptr){
-            obj = static_cast<jobject>(msg.GetTroubledPtr());
+        if (pkt.msg.troubledPtr != nullptr){
+            obj = static_cast<jobject>(pkt.msg.troubledPtr);
         }
         jobject jmsg = env->NewObject(m_msgCls, m_newObject,
-                msg.GetKey(), msg.GetNumber(), msg.GetDecimal(), obj, str);
+                pkt.msg.key, pkt.msg.number, pkt.msg.decimal, obj, str);
         env->CallVoidMethod(m_obj, m_onReceiveMessage, jmsg);
         env->DeleteLocalRef(jmsg);
         if (str != nullptr){
@@ -146,22 +153,20 @@ public:
         }
     }
 
-    SmartMsg onObtainMessage(int key) override {
+    SmartPkt onObtainMessage(int key) override {
         JniEnv env;
-        jobject jmsg = env->CallObjectMethod(m_obj, m_onObtainMessage, key);
-        jstring str = static_cast<jstring>(env->GetObjectField(jmsg, m_stringField));
-        std::string json;
+        jobject msg = env->CallObjectMethod(m_obj, m_onObtainMessage, key);
+        jstring str = static_cast<jstring>(env->GetObjectField(msg, m_stringField));
+        SmartPkt pkt(env->GetIntField(msg, m_keyField));
+        pkt.msg.number = env->GetLongField(msg, m_numberField);
+        pkt.msg.decimal = env->GetDoubleField(msg, m_decimalField);
         if (str != nullptr){
             const char *js = env->GetStringUTFChars(str, 0);
-            json = std::string(js);
+            pkt.msg.json = strndup(js, env->GetStringUTFLength(str));
             env->ReleaseStringUTFChars(str, js);
         }
-        SmartMsg msg(env->GetIntField(jmsg, m_keyField),
-                     env->GetLongField(jmsg, m_numberField),
-                     env->GetDoubleField(jmsg, m_decimalField),
-                     json);
-        msg.SetTroubledPtr(env->GetObjectField(jmsg, m_objField));
-        return msg;
+        pkt.msg.troubledPtr = env->GetObjectField(msg, m_objField);
+        return pkt;
     }
 
 private:

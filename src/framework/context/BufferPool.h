@@ -23,84 +23,31 @@ extern "C" {
 namespace freee {
 
 
-
-    class SmartMsg {
-    public:
-        SmartMsg(int _key = 0) :
-                key(_key),
-                number(0),
-                decimal(0),
-                json(""),
-                troubledPtr(nullptr){}
-
-        SmartMsg(int _key, int64_t _number, double _decimal, std::string _json) :
-                key(_key),
-                number(_number),
-                decimal(_decimal),
-                json(_json),
-                troubledPtr(nullptr){}
-
-        SmartMsg(int _key, void *_ptr) : SmartMsg(_key){
-            ptr = _ptr;
-        }
-        SmartMsg(int _key, int64_t _number) : SmartMsg(_key){
-            number = _number;
-        }
-        SmartMsg(int _key, double _decimal) : SmartMsg(_key){
-            decimal = _decimal;
-        }
-        SmartMsg(int _key, std::string _json) : SmartMsg(_key){
-            json = _json;
-        }
-        void SetTroubledPtr(void *ptr){
-            troubledPtr = ptr;
-        }
-
-    public:
-        int GetKey(){
-            return key;
-        }
-        void* GetPtr(){
-            return ptr;
-        }
-        int64_t GetNumber(){
-            return number;
-        }
-        double GetDecimal(){
-            return decimal;
-        }
-        std::string& GetJson(){
-            return json;
-        }
-        void* GetTroubledPtr(){
-            return troubledPtr;
-        }
-
-    private:
-        int key;
-        union {
-            void *ptr;
-            int64_t number;
-        };
-        double decimal;
-        void *troubledPtr;
-        std::string json;
-    };
-
-
-
     class SmartPkt {
 
     public:
-        SmartPkt (SmartMsg _msg) : msg(_msg), frame({0})
+        SmartPkt() : msg({0}), frame({0}), buffer(nullptr)
         {
-            this->buffer = nullptr;
             reference_count = new int(1);
         }
-        SmartPkt (sr_buffer_data_t *buffer) : msg(0), frame({0})
+        SmartPkt(int _key) : SmartPkt()
         {
-            this->buffer = buffer;
-            reference_count = new int(1);
+            msg.key = _key;
+        }
+        SmartPkt(int _key, void *_ptr) : SmartPkt()
+        {
+            msg.key = _key;
+            msg.ptr = _ptr;
+        }
+        SmartPkt(int _key, const char *data, int size) : SmartPkt()
+        {
+            msg.key = _key;
+            msg.size = size;
+            msg.json = strndup(data, size);
+        }
+        SmartPkt (sr_buffer_data_t *_buffer) : SmartPkt()
+        {
+            buffer = _buffer;
         }
         SmartPkt(const SmartPkt &pkt)
         {
@@ -119,6 +66,10 @@ namespace freee {
                 if (buffer){
                     sr_buffer_pool_put(buffer);
                 }
+                if (msg.json){
+                    free(msg.json);
+                    msg.json = nullptr;
+                }
                 delete reference_count;
             }
         }
@@ -134,7 +85,18 @@ namespace freee {
         }
 
     public:
-        SmartMsg msg;
+        struct {
+            int key;
+            int size;
+            char *json;
+            union {
+                void *ptr;
+                int64_t number;
+            };
+            double decimal;
+            void *troubledPtr;
+        }msg;
+
         sr_buffer_data_t *buffer;
         sr_buffer_frame_t frame;
 

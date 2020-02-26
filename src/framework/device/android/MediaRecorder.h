@@ -8,8 +8,7 @@
 
 #include <MessageContext.h>
 #include <AudioSource.h>
-#include <AudioEncoder.h>
-#include <MediaProtocol.h>
+#include <VideoEncoder.h>
 #include <MessageProcessor.h>
 #include <MediaModule.h>
 #include "../../media/VideoSource.h"
@@ -18,17 +17,17 @@
 
 namespace freee{
 
-    class MediaRecorder : public MessageContext, MediaChainImpl {
+class MediaRecorder : public MessageContext, MediaChainImpl, MediaChain::EventCallback {
 
-    public:
+public:
         MediaRecorder();
         ~MediaRecorder();
 
     private:
-        void onRecvMessage(SmartMsg msg) override;
+        void onRecvMessage(SmartPkt pkt) override;
 
     protected:
-        void ProcessMessage(SmartPkt pkt) override;
+        void MessageProcess(SmartPkt pkt) override;
 
     private:
         void StartPreview(SmartPkt pkt);
@@ -39,6 +38,9 @@ namespace freee{
         void StartRecord();
         void StopRecord();
         void StopPreview();
+
+        void FinalClearVideoChain();
+        void onEvent(MediaChain *chain, SmartPkt pkt) override;
 
         json &GetConfig(MediaChain *chain) override;
 
@@ -53,6 +55,7 @@ namespace freee{
         VideoFilter *mVideoFilter;
         VideoSource *mVideoSource;
         VideoRenderer *mVideoRenderer;
+        VideoEncoder *mVideoEncoder;
     };
 }
 

@@ -39,33 +39,34 @@ AudioSource::~AudioSource() {
     MediaContext::Instance().DisconnectMicrophone();
 }
 
-void AudioSource::onRecvMessage(SmartMsg msg) {
+void AudioSource::onRecvMessage(SmartPkt msg) {
 //    LOGD("AudioSource::onRecvMessage data %d\n", msg.GetKey());
 }
 
-SmartMsg AudioSource::onObtainMessage(int key) {
+SmartPkt AudioSource::onObtainMessage(int key) {
     return MessageContext::onObtainMessage(key);
 }
 
 void AudioSource::Open(MediaChain *chain) {
     mConfig = chain->GetConfig(this);
-    SmartMsg msg(PutMsg_Open, mConfig.dump());
+    std::string str = mConfig.dump();
+    SmartPkt msg(PutMsg_Open, str.c_str(), str.length());
     SendMessage(msg);
 }
 
 void AudioSource::Close(MediaChain *chain) {
-    SmartMsg msg(PutMsg_Close);
-    SendMessage(msg);
+    SmartPkt pkt(PutMsg_Close);
+    SendMessage(pkt);
 }
 
 void AudioSource::Start(MediaChain *chain) {
-    SmartMsg msg(PutMsg_Start);
-    SendMessage(msg);
+    SmartPkt pkt(PutMsg_Start);
+    SendMessage(pkt);
 }
 
 void AudioSource::Stop(MediaChain *chain) {
-    SmartMsg msg(PutMsg_Stop);
-    SendMessage(msg);
+    SmartPkt pkt(PutMsg_Stop);
+    SendMessage(pkt);
 }
 
 void AudioSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {

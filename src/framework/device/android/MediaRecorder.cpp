@@ -4,6 +4,7 @@
 
 #include <MConfig.h>
 #include <VideoEncoder.h>
+#include <BufferPool.h>
 #include "MediaRecorder.h"
 #include "MediaContext.h"
 
@@ -31,6 +32,7 @@ MediaRecorder::MediaRecorder()
     mVideoFilter = nullptr;
     mVideoSource = nullptr;
     mVideoRenderer = nullptr;
+    mVideoEncoder = nullptr;
     isPreviewing = false;
 //    audioSource = nullptr;
     mStatus = Status_Closed;
@@ -39,12 +41,13 @@ MediaRecorder::MediaRecorder()
 }
 
 MediaRecorder::~MediaRecorder() {
-    ProcessMessage(SmartMsg(RecvMsg_Close));
+    ProcessMessage(SmartPkt(RecvMsg_Close));
     StopProcessor();
+    FinalClearVideoChain();
 }
 
-void MediaRecorder::ProcessMessage(SmartPkt pkt) {
-    switch (pkt.msg.GetKey()){
+void MediaRecorder::MessageProcess(SmartPkt pkt) {
+    switch (pkt.msg.key){
         case RecvMsg_Open:
             Open(pkt);
             break;
@@ -71,28 +74,35 @@ void MediaRecorder::ProcessMessage(SmartPkt pkt) {
             break;
         case RecvMsg_UpdateConfig:
             break;
+        case (MediaNumber_VideoSource + Status_Stopped):
+            FinalClearVideoChain();
+            break;
         default:
             break;
     }
 }
 
-void MediaRecorder::onRecvMessage(SmartMsg msg) {
-    ProcessMessage(SmartPkt(msg));
+void MediaRecorder::onRecvMessage(SmartPkt pkt) {
+    ProcessMessage(SmartPkt(pkt));
 }
 
 void MediaRecorder::Open(SmartPkt pkt) {
     if (mStatus == Status_Closed){
 
-        mConfig = json::parse(pkt.msg.GetJson());
+        mConfig = json::parse(pkt.msg.json);
 
         LOGD("MediaRecorder config >> %s\n", mConfig.dump(4).c_str());
 
         mVideoSource = new VideoSource();
         mVideoFilter = new VideoFilter();
         mVideoRenderer = new VideoRenderer();
+        mVideoEncoder = VideoEncoder::Create("x264");
+
+        mVideoSource->SetEventCallback(this);
 
         mVideoSource->AddOutputChain(mVideoFilter);
         mVideoFilter->AddOutputChain(mVideoRenderer);
+//        mVideoFilter->AddOutputChain(mVideoEncoder);
 
         mVideoSource->Open(this);
 
@@ -110,19 +120,18 @@ void MediaRecorder::Close() {
     if (mStatus == Status_Opened
         || mStatus == Status_Stopped){
 
+        mVideoSource->Close(this);
+//        mVideoFilter->Close(this);
         mVideoSource->RemoveOutputChain(mVideoFilter);
         mVideoFilter->RemoveOutputChain(mVideoRenderer);
-
-        mVideoRenderer->Close(this);
+        mVideoFilter->RemoveOutputChain(mVideoEncoder);
         delete mVideoRenderer;
-
-        mVideoSource->Close(this);
+        delete mVideoEncoder;
         delete mVideoSource;
-
-        mVideoFilter->Close(this);
         delete mVideoFilter;
 
         mAudioSource->Close(this);
+
         delete mAudioSource;
 
         mStatus = Status_Closed;
@@ -158,7 +167,7 @@ void MediaRecorder::StartPreview(SmartPkt pkt) {
         }
         if (mStatus == Status_Started){
             LOGD("MediaRecorder::StartPreview 2\n");
-            mVideoRenderer->SetVideoWindow(pkt.msg.GetPtr());
+            mVideoRenderer->SetVideoWindow(pkt.msg.ptr);
             isPreviewing = true;
         }
     }
@@ -204,5 +213,14 @@ json &MediaRecorder::GetConfig(MediaChain *chain) {
         return mConfig["audio"];
     }
     return MediaChainImpl::GetConfig(chain);
+}
+
+void MediaRecorder::onEvent(MediaChain *chain, SmartPkt pkt) {
+    LOGD("MediaRecorder::onEvent[%d]\n", pkt.msg.key);
+    ProcessMessage(pkt);
+}
+
+void MediaRecorder::FinalClearVideoChain() {
+
 }
 

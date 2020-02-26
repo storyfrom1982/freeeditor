@@ -48,26 +48,26 @@ namespace freee{
         }
 
     public:
-        virtual void onRecvMessage(SmartMsg msg) {};
+        virtual void onRecvMessage(SmartPkt pkt) {};
 
-        virtual SmartMsg onObtainMessage(int key){
-            return SmartMsg();
+        virtual SmartPkt onObtainMessage(int key){
+            return SmartPkt();
         }
 
     protected:
-        virtual void SendMessage(SmartMsg msg){
+        virtual void SendMessage(SmartPkt pkt){
             AutoLock lock(mLock);
             if (messageContext){
-                messageContext->onRecvMessage(msg);
+                messageContext->onRecvMessage(pkt);
             }
         }
 
-        virtual SmartMsg GetMessage(int key){
+        virtual SmartPkt GetMessage(int key){
             AutoLock lock(mLock);
             if (messageContext){
                 return messageContext->onObtainMessage(key);
             }
-            return SmartMsg();
+            return SmartPkt();
         }
 
     private:

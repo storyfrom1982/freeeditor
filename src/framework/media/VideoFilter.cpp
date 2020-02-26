@@ -2,6 +2,7 @@
 // Created by yongge on 20-2-21.
 //
 
+#include <BufferPool.h>
 #include "VideoFilter.h"
 
 
@@ -30,8 +31,8 @@ void VideoFilter::FinalClear() {
 void VideoFilter::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
     if (mSrcImageFormat != mCodecImageFormat || mSrcWidth != mCodecWidth || mSrcHeight != mCodecHeight){
         if (mBufferPool){
-            sr_buffer_frame_set_color_space(&pkt.frame,
-                    (uint8_t *) pkt.msg.GetPtr(), mSrcWidth,mSrcHeight, mSrcImageFormat);
+//            sr_buffer_frame_set_color_space(&pkt.frame,
+//                    (uint8_t *) pkt.msg.GetPtr(), mSrcWidth,mSrcHeight, mSrcImageFormat);
             SmartPkt y420 = mBufferPool->GetPkt();
             if (y420.buffer){
                 sr_buffer_frame_set_color_space(&y420.frame,
@@ -46,9 +47,10 @@ void VideoFilter::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
 }
 
 void VideoFilter::MessageOpen(SmartPkt pkt) {
-    mConfig = static_cast<MediaChain *>(pkt.msg.GetPtr())->GetConfig(this);
+    mConfig = static_cast<MediaChain *>(pkt.msg.ptr)->GetConfig(this);
     if (mStatus == Status_Closed){
         ModuleOpen(mConfig);
+        onOpened();
         mStatus = Status_Opened;
     }
 }
@@ -56,6 +58,7 @@ void VideoFilter::MessageOpen(SmartPkt pkt) {
 void VideoFilter::MessageClose(SmartPkt pkt) {
     if (mStatus == Status_Opened){
         ModuleClose();
+        onClosed();
         mStatus = Status_Closed;
     }
 }
@@ -84,7 +87,6 @@ int VideoFilter::ModuleOpen(json &cfg) {
 //    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", mSrcImageFormat, mCodecImageFormat);
     mBufferSize = mCodecWidth * mCodecHeight / 2 * 3;
     mBufferPool = new BufferPool(10, mBufferSize);
-    onOpened();
     return 0;
 }
 

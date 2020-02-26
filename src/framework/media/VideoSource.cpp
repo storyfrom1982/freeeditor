@@ -36,7 +36,6 @@ VideoSource::VideoSource(MessageContext *context)
 
 VideoSource::~VideoSource() {
     LOGD("VideoSource::~VideoSource enter\n");
-    SendMessage(SmartMsg(SendMsg_Close));
     DisconnectContext();
     MediaContext::Instance().DisconnectCamera();
     LOGD("VideoSource::~VideoSource exit\n");
@@ -45,56 +44,61 @@ VideoSource::~VideoSource() {
 void VideoSource::Open(MediaChain *chain) {
     LOGD("VideoSource::Open enter\n");
     mConfig = chain->GetConfig(this);
-    SmartMsg msg(SendMsg_Open, mConfig.dump());
-    LOGD("VideoSource::Open: %s\n", msg.GetJson().c_str());
-    SendMessage(msg);
+    std::string str = mConfig.dump();
+    SmartPkt pkt(SendMsg_Open, str.c_str(), str.length());
+    LOGD("VideoSource::Open: %s\n", pkt.msg.json);
+    SendMessage(pkt);
     LOGD("VideoSource::Open exit\n");
 }
 
 void VideoSource::Close(MediaChain *chain) {
     LOGD("VideoSource::Close enter\n");
-    SendMessage(SmartMsg(SendMsg_Close));
+    SendMessage(SmartPkt(SendMsg_Close));
     LOGD("VideoSource::Close exit\n");
 }
 
 void VideoSource::Start(MediaChain *chain) {
     LOGD("VideoSource::Start enter\n");
-    SendMessage(SmartMsg(SendMsg_Start));
+    SendMessage(SmartPkt(SendMsg_Start));
     LOGD("VideoSource::Start exit\n");
 }
 
 void VideoSource::Stop(MediaChain *chain) {
     LOGD("VideoSource::Stop enter\n");
-    SendMessage(SmartMsg(SendMsg_Stop));
+    SendMessage(SmartPkt(SendMsg_Stop));
     LOGD("VideoSource::Stop exit\n");
 }
 
 void VideoSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
     sr_buffer_frame_set_color_space(
-            &pkt.frame, (uint8_t *) pkt.msg.GetPtr(),
+            &pkt.frame, (uint8_t *) pkt.msg.ptr,
             mSrcWidth, mSrcHeight, mSrcImageFormat);
     onProcessMedia(pkt);
 }
 
-void VideoSource::onRecvMessage(SmartMsg msg) {
-    switch (msg.GetKey()){
+void VideoSource::onRecvMessage(SmartPkt pkt) {
+    switch (pkt.msg.key){
         case OnRecvMsg_ProcessPicture:
-            ProcessMedia(this, SmartPkt(msg));
+            ProcessMedia(this, pkt);
             break;
         case OnRecvMsg_Opened:
             mStatus = Status_Opened;
             LOGD("VideoSource Opened\n");
-            UpdateMediaConfig(msg);
+            UpdateMediaConfig(pkt);
+            ReportEvent(SmartPkt(Status_Opened + mNumber));
             break;
         case OnRecvMsg_Closed:
             mStatus = Status_Closed;
+            ReportEvent(SmartPkt(Status_Closed + mNumber));
             LOGD("VideoSource Closed\n");
             break;
         case OnRecvMsg_Started:
             mStatus = Status_Started;
+            ReportEvent(SmartPkt(Status_Started + mNumber));
             LOGD("VideoSource Started\n");
             break;
         case OnRecvMsg_Stopped:
+            ReportEvent(SmartPkt(Status_Stopped + mNumber));
             mStatus = Status_Stopped;
             LOGD("VideoSource Stopped\n");
             break;
@@ -103,9 +107,9 @@ void VideoSource::onRecvMessage(SmartMsg msg) {
     }
 }
 
-void VideoSource::UpdateMediaConfig(SmartMsg msg) {
-//    LOGD("VideoSource::UpdateMediaConfig >> %s\n", msg.GetJson().c_str());
-    mConfig = json::parse(msg.GetJson());
+void VideoSource::UpdateMediaConfig(SmartPkt pkt) {
+//    LOGD("VideoSource::UpdateMediaConfig >> %s\n", pkt.msg.json);
+    mConfig = json::parse(pkt.msg.json);
     mSrcWidth = mConfig["srcWidth"];
     mSrcHeight = mConfig["srcHeight"];
     std::string srcFormat = mConfig["srcImageFormat"];

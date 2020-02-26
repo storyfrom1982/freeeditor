@@ -5,6 +5,7 @@
 #ifndef ANDROID_MEDIACHAINIMPL_H
 #define ANDROID_MEDIACHAINIMPL_H
 
+#include <BufferPool.h>
 #include "MediaChain.h"
 #include "AutoLock.h"
 #include "MessageProcessor.h"
@@ -43,23 +44,24 @@ namespace freee {
         }
 
         void Open(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(SmartMsg(RecvMsg_Open, chain)));
+            ProcessMessage(SmartPkt(SmartPkt(RecvMsg_Open, chain)));
         }
 
         void Close(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(SmartMsg(RecvMsg_Close, chain)));
+            ProcessMessage(SmartPkt(SmartPkt(RecvMsg_Close, chain)));
         }
 
         void Start(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(SmartMsg(RecvMsg_Start, chain)));
+            ProcessMessage(SmartPkt(SmartPkt(RecvMsg_Start, chain)));
         }
 
         void Stop(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(SmartMsg(RecvMsg_Stop, chain)));
+            ProcessMessage(SmartPkt(SmartPkt(RecvMsg_Stop, chain)));
         }
 
         void ProcessMedia(MediaChain *chain, SmartPkt pkt) override {
-            pkt.msg = SmartMsg(RecvMsg_ProcessMedia, chain);
+            pkt.msg.key = RecvMsg_ProcessMedia;
+            pkt.msg.ptr = chain;
             ProcessMessage(pkt);
         }
 
@@ -137,7 +139,7 @@ namespace freee {
         }
 
     protected:
-        virtual void SendEvent(SmartPkt pkt) {
+        virtual void ReportEvent(SmartPkt pkt) {
             AutoLock lock(mCallbackLock);
             if (mCallback){
                 mCallback->onEvent(this, pkt);
@@ -154,7 +156,7 @@ namespace freee {
         virtual void MessageControl(SmartPkt pkt){};
 
         void MessageProcess(SmartPkt pkt) override {
-            switch (pkt.msg.GetKey()){
+            switch (pkt.msg.key){
                 case RecvMsg_Open:
                     MessageOpen(pkt);
                     break;
