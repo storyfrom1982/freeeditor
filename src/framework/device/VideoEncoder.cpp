@@ -21,8 +21,10 @@ VideoEncoder::VideoEncoder(int mediaType, int mediaNumber, const std::string &me
 }
 
 VideoEncoder::~VideoEncoder() {
+    LOGD("VideoEncoder::~VideoEncoder  enter\n");
     StopProcessor();
     FinalClear();
+    LOGD("VideoEncoder::~VideoEncoder  exit\n");
 }
 
 void VideoEncoder::FinalClear() {
@@ -30,6 +32,7 @@ void VideoEncoder::FinalClear() {
         delete bufferPool;
         bufferPool = nullptr;
     }
+    ModuleClose();
 }
 
 void VideoEncoder::MessageOpen(SmartPkt pkt) {

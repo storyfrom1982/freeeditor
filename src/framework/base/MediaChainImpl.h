@@ -44,19 +44,19 @@ namespace freee {
         }
 
         void Open(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(SmartPkt(RecvMsg_Open, chain)));
+            ProcessMessage(SmartPkt(RecvMsg_Open, chain));
         }
 
         void Close(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(SmartPkt(RecvMsg_Close, chain)));
+            ProcessMessage(SmartPkt(RecvMsg_Close, chain));
         }
 
         void Start(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(SmartPkt(RecvMsg_Start, chain)));
+            ProcessMessage(SmartPkt(RecvMsg_Start, chain));
         }
 
         void Stop(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(SmartPkt(RecvMsg_Stop, chain)));
+            ProcessMessage(SmartPkt(RecvMsg_Stop, chain));
         }
 
         void ProcessMedia(MediaChain *chain, SmartPkt pkt) override {

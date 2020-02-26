@@ -29,9 +29,13 @@ enum {
 };
 
 
-MediaContext::MediaContext() = default;
+MediaContext::MediaContext(){
+    SetContextName("MediaContext");
+};
 
-MediaContext::~MediaContext() = default;
+MediaContext::~MediaContext(){
+    LOGD("MediaContext::~MediaContext()\n");
+};
 
 
 MediaContext& MediaContext::Instance() {

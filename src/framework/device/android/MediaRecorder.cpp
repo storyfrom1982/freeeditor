@@ -102,7 +102,7 @@ void MediaRecorder::Open(SmartPkt pkt) {
 
         mVideoSource->AddOutputChain(mVideoFilter);
         mVideoFilter->AddOutputChain(mVideoRenderer);
-//        mVideoFilter->AddOutputChain(mVideoEncoder);
+        mVideoFilter->AddOutputChain(mVideoEncoder);
 
         mVideoSource->Open(this);
 
@@ -120,11 +120,11 @@ void MediaRecorder::Close() {
     if (mStatus == Status_Opened
         || mStatus == Status_Stopped){
 
-        mVideoSource->Close(this);
-//        mVideoFilter->Close(this);
         mVideoSource->RemoveOutputChain(mVideoFilter);
-        mVideoFilter->RemoveOutputChain(mVideoRenderer);
-        mVideoFilter->RemoveOutputChain(mVideoEncoder);
+        mVideoSource->Close(this);
+        mVideoFilter->Close(this);
+//        mVideoFilter->RemoveOutputChain(mVideoRenderer);
+//        mVideoFilter->RemoveOutputChain(mVideoEncoder);
         delete mVideoRenderer;
         delete mVideoEncoder;
         delete mVideoSource;
