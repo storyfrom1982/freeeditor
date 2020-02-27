@@ -85,7 +85,7 @@ gl_renderer_t* gl_renderer_create(int w, int h)
     renderer->width = w;
     renderer->height = h;
 
-    EGLint major = 1, minor = 4;
+    EGLint major = 2, minor = 0;
 
     EGLint num_config = 0;
 
@@ -94,6 +94,7 @@ gl_renderer_t* gl_renderer_create(int w, int h)
 
     if ( EGL_TRUE != eglInitialize(renderer->mEGLDisplay, &major, &minor)) {
         LOGE("eglInitialize failed\n");
+        free(renderer);
         return NULL;
     }
 
@@ -110,6 +111,7 @@ gl_renderer_t* gl_renderer_create(int w, int h)
     if (EGL_TRUE != eglChooseConfig(renderer->mEGLDisplay, config_attrib_list,
                                     &renderer->mEGLConfig, 1, &num_config)){
         LOGE("eglChooseConfig failed\n");
+        free(renderer);
         return NULL;
     }
 
@@ -124,14 +126,6 @@ gl_renderer_t* gl_renderer_create(int w, int h)
             EGL_NONE
     };
 
-    renderer->mEGLContext = eglCreateContext(renderer->mEGLDisplay,
-                                                 renderer->mEGLConfig, EGL_NO_CONTEXT, client_attrib_list);
-
-    if (renderer->mEGLContext == NULL){
-        LOGE("eglCreateContext failed\n");
-        return NULL;
-    }
-
     const EGLint attrib_list[] = {
             EGL_WIDTH, w,
             EGL_HEIGHT, h,
@@ -142,14 +136,25 @@ gl_renderer_t* gl_renderer_create(int w, int h)
             attrib_list);
     if (renderer->mEGLOffscreenSurface == NULL){
         LOGE("eglCreatePbufferSurface failed %d\n", eglGetError());
+        free(renderer);
         return NULL;
     }
 
     renderer->current_surface = renderer->mEGLOffscreenSurface;
 
+
+    renderer->mEGLContext = eglCreateContext(renderer->mEGLDisplay,
+            renderer->mEGLConfig, EGL_NO_CONTEXT, client_attrib_list);
+    if (renderer->mEGLContext == NULL){
+        LOGE("eglCreateContext failed\n");
+        free(renderer);
+        return NULL;
+    }
+
     if (!eglMakeCurrent(renderer->mEGLDisplay, renderer->current_surface,
                         renderer->current_surface, renderer->mEGLContext)) {
         LOGE("eglMakeCurrent failed\n");
+        free(renderer);
         return NULL;
     }
 

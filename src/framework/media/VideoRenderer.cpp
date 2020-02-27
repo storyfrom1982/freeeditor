@@ -51,7 +51,9 @@ void VideoRenderer::FinalClear() {
 void VideoRenderer::MessageOpen(SmartPkt pkt) {
     mConfig = static_cast<MediaChain *>(pkt.msg.ptr)->GetConfig(this);
     if (mStatus == Status_Closed){
-        ModuleOpen(mConfig);
+        if (ModuleOpen(mConfig) != 0){
+            return;
+        }
         mStatus = Status_Opened;
         onOpened();
     }
@@ -92,6 +94,9 @@ int VideoRenderer::ModuleOpen(json &cfg) {
     int width = cfg["codecWidth"];
     int height = cfg["codecHeight"];
     renderer = gl_renderer_create(width, height);
+    if (!renderer){
+        return -1;
+    }
     opengles_open(&opengles);
     if (mVideoWindow){
         mVideoWindow->SetCallback(this);
