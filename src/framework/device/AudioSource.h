@@ -14,6 +14,8 @@ namespace freee {
 
 
     class AudioSource : public MessageContext, public MediaChainImpl {
+    public:
+        void FinalClear() override;
 
     public:
 

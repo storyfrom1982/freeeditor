@@ -70,7 +70,7 @@ void VideoSource::Stop(MediaChain *chain) {
 }
 
 void VideoSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
-    sr_buffer_frame_set_color_space(
+    sr_buffer_frame_set_image_format(
             &pkt.frame, (uint8_t *) pkt.msg.ptr,
             mSrcWidth, mSrcHeight, mSrcImageFormat);
     onProcessMedia(pkt);
@@ -120,4 +120,8 @@ void VideoSource::UpdateMediaConfig(SmartPkt pkt) {
     memcpy(&fourcctoint.fourcc[0], srcFormat.c_str(), 4);
     mSrcImageFormat = fourcctoint.format;
     onOpened();
+}
+
+void VideoSource::FinalClear() {
+
 }

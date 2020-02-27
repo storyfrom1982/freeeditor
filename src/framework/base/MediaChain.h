@@ -42,6 +42,7 @@ namespace freee {
 
     public:
         virtual ~MediaChain(){};
+        virtual void FinalClear() = 0;
 
         virtual void onOpened() = 0;
         virtual void onClosed() = 0;

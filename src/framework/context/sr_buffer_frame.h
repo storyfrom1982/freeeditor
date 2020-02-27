@@ -17,7 +17,7 @@ typedef struct sr_buffer_frame_t {
         struct {
             int width;
             int height;
-            int color_space;
+            int image_format;
         };
         struct {
             int sample_rate;
@@ -42,7 +42,8 @@ typedef struct sr_buffer_frame_t {
 
 }sr_buffer_frame_t;
 
-int sr_buffer_frame_set_color_space(sr_buffer_frame_t *frame, const uint8_t *data, int width, int height, uint32_t fourcc);
+int sr_buffer_frame_set_image_format(sr_buffer_frame_t *frame, const uint8_t *data, int width,
+                                     int height, uint32_t fourcc);
 int sr_buffer_frame_convert_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst, int _rotation);
 int sr_buffer_frame_convert_from_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst);
 

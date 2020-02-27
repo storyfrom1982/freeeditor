@@ -27,15 +27,14 @@ enum {
 
 
 MediaRecorder::MediaRecorder()
-        : MediaChainImpl(MediaType_All, MediaNumber_Recorder, "MediaRecorder") {
-    mAudioSource = nullptr;
-    mVideoFilter = nullptr;
-    mVideoSource = nullptr;
-    mVideoRenderer = nullptr;
-    mVideoEncoder = nullptr;
-    isPreviewing = false;
-//    audioSource = nullptr;
-    mStatus = Status_Closed;
+        : MediaChainImpl(MediaType_All, MediaNumber_Recorder, "MediaRecorder"),
+        mAudioSource(nullptr),
+        mVideoSource(nullptr),
+        mVideoFilter(nullptr),
+        mVideoRenderer(nullptr),
+        mVideoEncoder(nullptr),
+        isPreviewing(false),
+        mStatus(Status_Closed){
     SetContextName("MediaRecorder");
     StartProcessor("MediaRecorder");
 }
@@ -43,7 +42,30 @@ MediaRecorder::MediaRecorder()
 MediaRecorder::~MediaRecorder() {
     ProcessMessage(SmartPkt(RecvMsg_Close));
     StopProcessor();
-    FinalClearVideoChain();
+//    FinalClear();
+}
+
+void MediaRecorder::FinalClear() {
+    if (mAudioSource){
+        delete mAudioSource;
+        mAudioSource = nullptr;
+    }
+    if (mVideoSource){
+        delete mVideoSource;
+        mVideoSource = nullptr;
+    }
+    if (mVideoEncoder){
+        delete mVideoEncoder;
+        mVideoEncoder = nullptr;
+    }
+    if (mVideoRenderer){
+        delete mVideoRenderer;
+        mVideoRenderer = nullptr;
+    }
+    if (mVideoFilter){
+        delete mVideoFilter;
+        mVideoFilter = nullptr;
+    }
 }
 
 void MediaRecorder::MessageProcess(SmartPkt pkt) {
@@ -89,20 +111,20 @@ void MediaRecorder::onRecvMessage(SmartPkt pkt) {
 void MediaRecorder::Open(SmartPkt pkt) {
     if (mStatus == Status_Closed){
 
-        mConfig = json::parse(pkt.msg.json);
+        mConfig = json::parse(std::string(pkt.msg.json, pkt.msg.size));
 
         LOGD("MediaRecorder config >> %s\n", mConfig.dump(4).c_str());
 
         mVideoSource = new VideoSource();
         mVideoFilter = new VideoFilter();
         mVideoRenderer = new VideoRenderer();
-        mVideoEncoder = VideoEncoder::Create("x264");
+        mVideoEncoder = VideoEncoder::Create(mConfig["video"]["codecName"]);
 
         mVideoSource->SetEventCallback(this);
 
         mVideoSource->AddOutputChain(mVideoFilter);
         mVideoFilter->AddOutputChain(mVideoRenderer);
-        mVideoFilter->AddOutputChain(mVideoEncoder);
+//        mVideoFilter->AddOutputChain(mVideoEncoder);
 
         mVideoSource->Open(this);
 
@@ -120,13 +142,11 @@ void MediaRecorder::Close() {
     if (mStatus == Status_Opened
         || mStatus == Status_Stopped){
 
-        mVideoSource->Close(this);
-
         mVideoSource->RemoveOutputChain(mVideoFilter);
         mVideoFilter->RemoveOutputChain(mVideoRenderer);
         mVideoFilter->RemoveOutputChain(mVideoEncoder);
 
-
+        mVideoSource->Close(this);
         mVideoEncoder->Close(this);
         mVideoRenderer->Close(this);
 
@@ -193,11 +213,10 @@ void MediaRecorder::StopPreview() {
 
 void MediaRecorder::Start() {
     if (mStatus != Status_Started){
-        if (mStatus == Status_Opened || mStatus == Status_Stopped){
-
+        if (mStatus == Status_Opened
+            || mStatus == Status_Stopped){
             mVideoSource->Start(this);
             mAudioSource->Start(this);
-
             mStatus = Status_Started;
         }
     }
@@ -205,10 +224,8 @@ void MediaRecorder::Start() {
 
 void MediaRecorder::Stop() {
     if (mStatus == Status_Started){
-
         mVideoSource->Stop(this);
         mAudioSource->Stop(this);
-
         mStatus = Status_Stopped;
     }
 }

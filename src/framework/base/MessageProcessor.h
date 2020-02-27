@@ -32,9 +32,6 @@ namespace freee {
         static void* MessageProcessorThread(void *p);
 
     private:
-        bool isRunning;
-        bool isStopped;
-
         unsigned int length;
         unsigned int put_index;
         unsigned int get_index;

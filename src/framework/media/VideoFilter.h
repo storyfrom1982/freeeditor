@@ -38,7 +38,7 @@ namespace freee {
         int ModuleProcessMedia(SmartPkt pkt) override;
 
     private:
-        void FinalClear();
+        void FinalClear() override ;
 
     private:
         int mStatus;

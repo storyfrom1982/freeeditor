@@ -21,7 +21,8 @@ namespace freee {
     };
 
     enum {
-        RecvMsg_Error = 0,
+        RecvMsg_Error = PktMsgError,
+        RecvMsg_Exit = PktMsgExit,
         RecvMsg_Open = 1,
         RecvMsg_Start = 2,
         RecvMsg_Stop = 3,

@@ -40,7 +40,7 @@ namespace freee {
         void SetVideoWindow(void *ptr);
 
     private:
-        void FinalClear();
+        void FinalClear() override ;
 
         void MessageSetVideoWindow(SmartPkt pkt);
 

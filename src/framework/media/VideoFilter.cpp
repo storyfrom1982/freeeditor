@@ -31,12 +31,13 @@ void VideoFilter::FinalClear() {
 void VideoFilter::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
     if (mSrcImageFormat != mCodecImageFormat || mSrcWidth != mCodecWidth || mSrcHeight != mCodecHeight){
         if (mBufferPool){
-//            sr_buffer_frame_set_color_space(&pkt.frame,
+//            sr_buffer_frame_set_image_format(&pkt.frame,
 //                    (uint8_t *) pkt.msg.GetPtr(), mSrcWidth,mSrcHeight, mSrcImageFormat);
             SmartPkt y420 = mBufferPool->GetPkt();
             if (y420.buffer){
-                sr_buffer_frame_set_color_space(&y420.frame,
-                        y420.buffer->data, mCodecWidth, mCodecHeight, mCodecImageFormat);
+                sr_buffer_frame_set_image_format(&y420.frame,
+                                                 y420.buffer->data, mCodecWidth, mCodecHeight,
+                                                 mCodecImageFormat);
                 sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, mSrcRotation);
                 MediaChainImpl::ProcessMedia(chain, y420);
             }

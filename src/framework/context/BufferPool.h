@@ -22,6 +22,10 @@ extern "C" {
 
 namespace freee {
 
+    enum {
+        PktMsgError = -1,
+        PktMsgExit = 0,
+    };
 
     class SmartPkt {
 
@@ -112,6 +116,7 @@ namespace freee {
         BufferPool(size_t count, size_t size)
         {
             pool = sr_buffer_pool_create(count, size);
+            assert(pool);
         }
         ~BufferPool()
         {

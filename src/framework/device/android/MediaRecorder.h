@@ -23,7 +23,10 @@ public:
         MediaRecorder();
         ~MediaRecorder();
 
-    private:
+private:
+    void FinalClear() override;
+
+private:
         void onRecvMessage(SmartPkt pkt) override;
 
     protected:

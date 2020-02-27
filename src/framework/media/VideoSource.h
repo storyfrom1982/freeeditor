@@ -18,6 +18,8 @@ namespace freee {
         VideoSource(MessageContext *context = nullptr);
         ~VideoSource();
 
+        void FinalClear() override;
+
         void Open(MediaChain *chain) override;
 
         void Close(MediaChain *chain) override;

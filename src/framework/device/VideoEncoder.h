@@ -37,7 +37,7 @@ namespace freee{
                 const std::string &mediaName = "VideoEncoder");
 
     private:
-        void FinalClear();
+        void FinalClear() override ;
 
     protected:
         size_t bufferSize;

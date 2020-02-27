@@ -73,3 +73,7 @@ void AudioSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
     MediaChainImpl::ProcessMedia(chain, pkt);
 }
 
+void AudioSource::FinalClear() {
+
+}
+
