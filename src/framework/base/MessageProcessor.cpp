@@ -10,18 +10,21 @@ using namespace freee;
 MessageProcessor::MessageProcessor() : mThreadId(0), isRunning(false), isStopped(false) {}
 
 void MessageProcessor::StartProcessor(std::string name) {
-    LOGD("MediaProcessor::StartProcessor [%s] enter\n", name.c_str());
+    LOGD("MessageProcessor::StartProcessor [%s] enter\n", name.c_str());
     isRunning = true;
     isStopped = false;
     this->name = name;
-    if (pthread_create(&mThreadId, nullptr, MediaProcessorThread, this) != 0) {
+    length = 256;
+    put_index = get_index = 0;
+    mPktList = std::vector<SmartPkt>(length);
+    if (pthread_create(&mThreadId, nullptr, MessageProcessorThread, this) != 0) {
         LOGF("pthread_create failed\n");
     }
-    LOGD("MediaProcessor::StartProcessor [%s] exit\n", name.c_str());
+    LOGD("MessageProcessor::StartProcessor [%s] exit\n", name.c_str());
 }
 
 void MessageProcessor::StopProcessor() {
-    LOGD("MediaProcessor::StopProcessor [%s] enter\n", name.c_str());
+    LOGD("MessageProcessor::StopProcessor [%s] enter\n", name.c_str());
     __set_false(isRunning);
     mLock.lock();
     pthread_t tid = mThreadId;
@@ -36,40 +39,52 @@ void MessageProcessor::StopProcessor() {
         }
         pthread_join(tid, nullptr);
     }
-    LOGD("MediaProcessor::StopProcessor [%s] exit\n", name.c_str());
+    mPktList.clear();
+    LOGD("MessageProcessor::StopProcessor [%s] exit\n", name.c_str());
 }
 
 void MessageProcessor::ProcessMessage(SmartPkt pkt) {
-    if (__is_true(isRunning)){
-        mLock.lock();
-        mPktList.push_back(pkt);
-        mLock.signal();
-        mLock.unlock();
+
+    mLock.lock();
+
+    while (0 == (length - put_index + get_index)){
+        if (__is_true(isRunning)){
+            mLock.wait();
+        }else {
+            mLock.unlock();
+            return ;
+        }
     }
+
+    mPktList[put_index & (length - 1)] = pkt;
+    put_index ++;
+
+    mLock.signal();
+    mLock.unlock();
 }
 
-void MessageProcessor::MediaProcessorLoop() {
+void MessageProcessor::MessageProcessorLoop() {
 
-    LOGD("MediaProcessor::MediaProcessorLoop [%s] enter\n", name.c_str());
+    LOGD("MessageProcessor::MessageProcessorLoop [%s] enter\n", name.c_str());
 
     while (true) {
 
         mLock.lock();
 
-        while (mPktList.empty()){
+        while (0 == (put_index - get_index)){
             if (__is_true(isRunning)){
                 mLock.wait();
             }else {
-                __set_true(isStopped);
-                LOGD("MediaProcessor::MediaProcessorLoop [%s] exit\n", name.c_str());
                 mLock.unlock();
-                return;
+                __set_true(isStopped);
+                LOGD("MessageProcessor::MessageProcessorLoop [%s] exit\n", name.c_str());
+                return ;
             }
         }
 
-        auto it = mPktList.begin();
-        SmartPkt pkt = *it;
-        mPktList.erase(it);
+        SmartPkt pkt = mPktList[get_index & (length - 1)];
+        mPktList[get_index & (length - 1)] = SmartPkt(0);
+        get_index ++;
 
         mLock.signal();
         mLock.unlock();
@@ -78,7 +93,7 @@ void MessageProcessor::MediaProcessorLoop() {
     }
 }
 
-void *MessageProcessor::MediaProcessorThread(void *p) {
-    ((MessageProcessor *) p)->MediaProcessorLoop();
+void *MessageProcessor::MessageProcessorThread(void *p) {
+    ((MessageProcessor *) p)->MessageProcessorLoop();
     return nullptr;
 }

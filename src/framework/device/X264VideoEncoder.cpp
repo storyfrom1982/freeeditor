@@ -154,7 +154,7 @@ int X264VideoEncoder::ModuleProcessMedia(SmartPkt pkt) {
     long long tmStamp = param.b_vfr_input ? pic_out.i_dts :
                         pic_out.i_dts*1000000*param.i_fps_den/param.i_fps_num;
 
-    LOGD("X264VideoEncoder::OnOpenEncoder: size=%d  i64=%ld\n", frameLen, tmStamp);
+//    LOGD("X264VideoEncoder::OnOpenEncoder: size=%d  i64=%ld\n", frameLen, tmStamp);
     return  0;
 }
 

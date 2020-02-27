@@ -120,14 +120,21 @@ void MediaRecorder::Close() {
     if (mStatus == Status_Opened
         || mStatus == Status_Stopped){
 
-        mVideoSource->RemoveOutputChain(mVideoFilter);
         mVideoSource->Close(this);
-        mVideoFilter->Close(this);
-//        mVideoFilter->RemoveOutputChain(mVideoRenderer);
-//        mVideoFilter->RemoveOutputChain(mVideoEncoder);
+
+        mVideoSource->RemoveOutputChain(mVideoFilter);
+        mVideoFilter->RemoveOutputChain(mVideoRenderer);
+        mVideoFilter->RemoveOutputChain(mVideoEncoder);
+
+
+        mVideoEncoder->Close(this);
+        mVideoRenderer->Close(this);
+
         delete mVideoRenderer;
         delete mVideoEncoder;
         delete mVideoSource;
+
+        mVideoFilter->Close(this);
         delete mVideoFilter;
 
         mAudioSource->Close(this);

@@ -28,12 +28,16 @@ namespace freee {
         virtual void MessageProcess(SmartPkt pkt){}
 
     private:
-        void MediaProcessorLoop();
-        static void* MediaProcessorThread(void *p);
+        void MessageProcessorLoop();
+        static void* MessageProcessorThread(void *p);
 
     private:
         bool isRunning;
         bool isStopped;
+
+        unsigned int length;
+        unsigned int put_index;
+        unsigned int get_index;
 
         std::string name;
 

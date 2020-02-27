@@ -22,23 +22,22 @@ namespace freee {
         int height();
         void *window();
 
-        class VideoSurfaceCallback {
+        class VideoWindowCallback {
         public:
             virtual void onSurfaceCreated(void *ptr) = 0;
-            virtual void onSurfaceChanged() = 0;
+            virtual void onSurfaceChanged(int width, int height) = 0;
             virtual void onSurfaceDestroyed() = 0;
         };
 
-        void SetCallback(VideoSurfaceCallback *callback);
+        void SetCallback(VideoWindowCallback *callback);
 
         void onRecvMessage(SmartPkt pkt) override;
 
     private:
         void *mWindowHolder;
         void *mNativeWindow;
-
         Lock mLock;
-        VideoSurfaceCallback *mCallback;
+        VideoWindowCallback *mCallback;
     };
 
 

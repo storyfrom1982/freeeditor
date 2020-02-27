@@ -6,6 +6,7 @@
 #include <JNIContext.h>
 #include <android/native_window_jni.h>
 #include <BufferPool.h>
+#include <MConfig.h>
 #include "VideoWindow.h"
 
 
@@ -15,7 +16,8 @@ using namespace freee;
 
 enum {
     SendMsg_Error = 0,
-    SendMsg_RegisterCallback = 1
+    SendMsg_WindowCreated = 1,
+    SendMsg_WindowDestroyed = 2
 };
 
 enum {
@@ -89,10 +91,15 @@ void VideoWindow::onRecvMessage(SmartPkt pkt) {
     }else if (pkt.msg.key == RecvMsg_SurfaceChanged){
         AutoLock lock(mLock);
         if (mCallback){
-            mCallback->onSurfaceChanged();
+            LOGD("RecvMsg_SurfaceChanged[%s]\n", pkt.msg.json);
+            json js = json::parse(pkt.msg.json);
+            mCallback->onSurfaceChanged(js["width"], js["height"]);
         }
     }else if (pkt.msg.key == RecvMsg_SurfaceDestroyed){
         AutoLock lock(mLock);
+        if (mCallback){
+            mCallback->onSurfaceDestroyed();
+        }
 #ifdef __ANDROID__
         if (mNativeWindow){
             ANativeWindow_release((ANativeWindow*)mNativeWindow);
@@ -104,14 +111,15 @@ void VideoWindow::onRecvMessage(SmartPkt pkt) {
             mWindowHolder = nullptr;
         }
 #endif
-        if (mCallback){
-            mCallback->onSurfaceDestroyed();
-        }
     }
 }
 
-void VideoWindow::SetCallback(VideoWindow::VideoSurfaceCallback *callback) {
+void VideoWindow::SetCallback(VideoWindow::VideoWindowCallback *callback) {
     AutoLock lock(mLock);
     mCallback = callback;
-    SendMessage(SmartPkt(SendMsg_RegisterCallback));
+    if (mCallback){
+        SendMessage(SmartPkt(SendMsg_WindowCreated));
+    }else {
+        SendMessage(SmartPkt(SendMsg_WindowDestroyed));
+    }
 }

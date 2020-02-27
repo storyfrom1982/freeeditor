@@ -19,11 +19,12 @@ enum {
 VideoRenderer::VideoRenderer(int mediaType, int mediaNumber, const std::string &mediaName)
         : MediaModule(mediaType, mediaNumber, mediaName) {
     mStatus = Status_Closed;
-    isWindowPausing = false;
-    isWindowReady = false;
+    isSurfaceCreated = false;
+    isSurfaceDestroyed = true;
     renderer = nullptr;
     opengles = nullptr;
     mVideoWindow = nullptr;
+    width = height = 0;
     StartProcessor(mediaName);
 }
 
@@ -41,6 +42,7 @@ void VideoRenderer::FinalClear() {
         opengles_close(&opengles);
     }
     if (mVideoWindow){
+        mVideoWindow->SetCallback(nullptr);
         delete mVideoWindow;
         mVideoWindow = nullptr;
     }
@@ -64,12 +66,6 @@ void VideoRenderer::MessageClose(SmartPkt pkt) {
 }
 
 void VideoRenderer::MessageProcessMedia(SmartPkt pkt) {
-//    if (mStatus != Status_Opened){
-//        MessageOpen(pkt);
-//        if (mStatus != Status_Opened){
-//            return;
-//        }
-//    }
     ModuleProcessMedia(pkt);
 }
 
@@ -97,9 +93,8 @@ int VideoRenderer::ModuleOpen(json &cfg) {
     int height = cfg["codecHeight"];
     renderer = gl_renderer_create(width, height);
     opengles_open(&opengles);
-    if (isWindowReady && mVideoWindow){
-        gl_renderer_set_window(renderer, mVideoWindow->window());
-        UpdateViewport(mVideoWindow->width(), mVideoWindow->height());
+    if (mVideoWindow){
+        mVideoWindow->SetCallback(this);
     }
     return 0;
 }
@@ -119,7 +114,7 @@ void VideoRenderer::ModuleClose() {
 
 int VideoRenderer::ModuleProcessMedia(SmartPkt pkt) {
     AutoLock lock(mLock);
-    if (!isWindowPausing){
+    if (!isSurfaceDestroyed){
         opengles_render(opengles, &pkt.frame);
         gl_renderer_swap_buffers(renderer);
     }
@@ -127,47 +122,47 @@ int VideoRenderer::ModuleProcessMedia(SmartPkt pkt) {
 }
 
 void VideoRenderer::SetVideoWindow(void *ptr) {
-    LOGD("VideoRenderer::SetVideoWindow enter\n");
-    ProcessMessage(SmartPkt(SmartPkt(RecvMsg_SetVideoWindow, ptr)));
-    LOGD("VideoRenderer::SetVideoWindow exit\n");
+    ProcessMessage(SmartPkt(RecvMsg_SetVideoWindow, ptr));
 }
 
 void VideoRenderer::MessageSetVideoWindow(SmartPkt pkt) {
-    LOGD("VideoRenderer::MessageSetVideoWindow enter\n");
     mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.msg.ptr));
-    mVideoWindow->SetCallback(this);
-    LOGD("VideoRenderer::MessageSetVideoWindow exit\n");
+    if (mStatus == Status_Opened){
+        mVideoWindow->SetCallback(this);
+    }
 }
 
 void VideoRenderer::onSurfaceCreated(void *ptr) {
-    LOGD("VideoRenderer::onSurfaceCreated enter\n");
     AutoLock lock(mLock);
-    isWindowPausing = false;
     ProcessMessage(SmartPkt(RecvMsg_SurfaceCreated, ptr));
-    LOGD("VideoRenderer::onSurfaceCreated exit\n");
 }
 
-void VideoRenderer::onSurfaceChanged() {
-    ProcessMessage(SmartPkt(RecvMsg_SurfaceChanged));
+void VideoRenderer::onSurfaceChanged(int width, int height) {
+    assert(width != 0 && height != 0);
+    SmartPkt pkt(RecvMsg_SurfaceChanged);
+    pkt.frame.width = width;
+    pkt.frame.height = height;
+    ProcessMessage(pkt);
 }
 
 void VideoRenderer::onSurfaceDestroyed() {
     AutoLock lock(mLock);
-    isWindowPausing = true;
+    isSurfaceDestroyed = true;
     ProcessMessage(SmartPkt(RecvMsg_SurfaceDestroyed));
 }
 
 void VideoRenderer::MessageWindowCreated(SmartPkt pkt) {
-    isWindowReady = true;
-    if (mStatus == Status_Opened){
+    isSurfaceCreated = true;
+    isSurfaceDestroyed = false;
+    if (renderer){
         gl_renderer_set_window(renderer, pkt.msg.ptr);
     }
 }
 
 void VideoRenderer::MessageWindowDestroyed(SmartPkt pkt) {
-    if (isWindowReady){
-        isWindowReady = false;
-        if (mStatus == Status_Opened){
+    if (isSurfaceCreated){
+        isSurfaceCreated = false;
+        if (renderer){
             gl_renderer_remove_window(renderer);
         }
     }
@@ -175,7 +170,7 @@ void VideoRenderer::MessageWindowDestroyed(SmartPkt pkt) {
 
 void VideoRenderer::MessageWindowChanged(SmartPkt pkt) {
     if (mVideoWindow){
-        UpdateViewport(mVideoWindow->width(), mVideoWindow->height());
+        UpdateViewport(pkt.frame.width, pkt.frame.height);
     }
 }
 

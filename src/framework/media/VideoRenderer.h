@@ -26,7 +26,7 @@ extern "C" {
 namespace freee {
 
 
-    class VideoRenderer : public MediaModule, VideoWindow::VideoSurfaceCallback {
+    class VideoRenderer : public MediaModule, VideoWindow::VideoWindowCallback {
 
     public:
         VideoRenderer(
@@ -52,7 +52,7 @@ namespace freee {
 
         void onSurfaceCreated(void *ptr) override;
 
-        void onSurfaceChanged() override;
+        void onSurfaceChanged(int width, int height) override;
 
         void onSurfaceDestroyed() override;
 
@@ -79,14 +79,15 @@ namespace freee {
 
     private:
         int mStatus;
+        int width, height;
 
         gl_window_t *window;
         gl_renderer_t *renderer;
         opengles_t *opengles;
 
         Lock mLock;
-        bool isWindowReady;
-        bool isWindowPausing;
+        bool isSurfaceCreated;
+        bool isSurfaceDestroyed;
         VideoWindow *mVideoWindow;
     };
 
