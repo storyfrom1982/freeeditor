@@ -301,23 +301,17 @@ inline void sr_mutex_broadcast(sr_mutex_t *mutex)
 
 
 struct sr_queue_t {
-	//non-blocking
-    bool lock;
-    bool stopped;
-    int size;
-    int pushable;
-    int popable;
+    int length;
     void (*clear_cb)(sr_node_t*);
     sr_node_t head;
     sr_node_t end;
-    //blocking
-    int push_waiting;
-    int pop_waiting;
+    int waiting;
+    bool stopped;
     sr_mutex_t *mutex;
 };
 
 
-sr_queue_t* sr_queue_create(int max_node_number, void (*clear_cb)(sr_node_t*))
+sr_queue_t* sr_queue_create(void (*clear_cb)(sr_node_t*))
 {
     sr_queue_t *queue = (sr_queue_t*)calloc(1, sizeof(sr_queue_t));
     if (queue == NULL){
@@ -331,14 +325,10 @@ sr_queue_t* sr_queue_create(int max_node_number, void (*clear_cb)(sr_node_t*))
         return NULL;
     }
 
-    queue->push_waiting = 0;
-    queue->pop_waiting = 0;
+    queue->waiting = 0;
 
-    queue->lock = false;
     queue->stopped = false;
-    queue->size = max_node_number;
-    queue->pushable = max_node_number;
-    queue->popable = 0;
+    queue->length = 0;
     queue->head.prev = NULL;
     queue->head.next = &(queue->end);
     queue->end.next = NULL;
@@ -353,12 +343,8 @@ void sr_queue_release(sr_queue_t **pp_queue)
     if (pp_queue && *pp_queue){
         sr_queue_t *queue = *pp_queue;
         *pp_queue = NULL;
-        if (__is_false(queue->stopped)
-        		|| queue->popable > 0
-        		|| queue->pop_waiting > 0
-        		|| queue->push_waiting > 0 ){
-        	sr_queue_stop(queue);
-        }
+        sr_queue_block_clear(queue);
+        sr_queue_stop(queue);
         sr_mutex_release(&queue->mutex);
         free(queue);
     }
@@ -366,342 +352,157 @@ void sr_queue_release(sr_queue_t **pp_queue)
 
 int sr_queue_push_front(sr_queue_t *queue, sr_node_t *node)
 {
-    if (NULL == queue || NULL == node){
-        LOGE("null parameter\n");
-        return QUEUE_RESULT_ERROR;
-    }
-
-    if (__is_true(queue->stopped)){
-        return QUEUE_RESULT_USER_INTERRUPT;
-    }
-
-    if (!__sr_atom_trylock(queue->lock)){
-        return QUEUE_RESULT_TRY_AGAIN;
-    }
-
-    if (queue->pushable == 0){
-        __sr_atom_unlock(queue->lock);
-        return QUEUE_RESULT_TRY_AGAIN;
-    }
-
-    node->prev = queue->end.prev;
-    node->prev->next = node;
-    queue->end.prev = node;
-    node->next = &(queue->end);
-
+    assert(queue != NULL && node != NULL);
     node->next = queue->head.next;
     node->next->prev = node;
     node->prev = &(queue->head);
     queue->head.next = node;
-
-    queue->popable++;
-    queue->pushable--;
-
-    __sr_atom_unlock(queue->lock);
-
-    return QUEUE_RESULT_OK;
+    queue->length++;
+    return queue->length;
 }
 
 int sr_queue_push_back(sr_queue_t *queue, sr_node_t *node)
 {
-    if (NULL == queue || NULL == node){
-        LOGE("null parameter\n");
-        return QUEUE_RESULT_ERROR;
-    }
-
-    if (__is_true(queue->stopped)){
-        return QUEUE_RESULT_USER_INTERRUPT;
-    }
-
-    if (!__sr_atom_trylock(queue->lock)){
-        return QUEUE_RESULT_TRY_AGAIN;
-    }
-
-    if (queue->pushable == 0){
-        __sr_atom_unlock(queue->lock);
-        return QUEUE_RESULT_TRY_AGAIN;
-    }
-
+    assert(queue != NULL && node != NULL);
     node->prev = queue->end.prev;
     node->prev->next = node;
     queue->end.prev = node;
     node->next = &(queue->end);
-
-    queue->popable++;
-    queue->pushable--;
-
-    __sr_atom_unlock(queue->lock);
-
-    return QUEUE_RESULT_OK;
+    queue->length++;
+    return queue->length;
 }
 
 int sr_queue_pop_front(sr_queue_t *queue, sr_node_t **pp_node)
 {
-    if (NULL == queue || NULL == pp_node){
-        LOGE("null parameter\n");
-        return QUEUE_RESULT_ERROR;
+    assert(queue != NULL && pp_node != NULL);
+    if (queue->length == 0){
+        return QUEUE_RESULT_ERROR_EMPTY;
     }
-
-    if (!__sr_atom_trylock(queue->lock)){
-        return QUEUE_RESULT_TRY_AGAIN;
-    }
-
-    if (queue->popable == 0){
-        __sr_atom_unlock(queue->lock);
-        if (__is_true(queue->stopped)){
-            return QUEUE_RESULT_USER_INTERRUPT;
-        }
-        return QUEUE_RESULT_TRY_AGAIN;
-    }
-
     (*pp_node) = queue->head.next;
     queue->head.next = (*pp_node)->next;
     (*pp_node)->next->prev = &(queue->head);
-
-    queue->pushable++;
-    queue->popable--;
-
-    __sr_atom_unlock(queue->lock);
-
-    return QUEUE_RESULT_OK;
+    queue->length--;
+    return queue->length;
 }
 
 int sr_queue_pop_back(sr_queue_t *queue, sr_node_t **pp_node)
 {
-    if (NULL == queue || NULL == pp_node){
-        LOGE("null parameter\n");
-        return QUEUE_RESULT_ERROR;
+    assert(queue != NULL && pp_node != NULL);
+    if (queue->length == 0){
+        return QUEUE_RESULT_ERROR_EMPTY;
     }
-
-    if (!__sr_atom_trylock(queue->lock)){
-        return QUEUE_RESULT_TRY_AGAIN;
-    }
-    if (queue->popable == 0){
-        __sr_atom_unlock(queue->lock);
-        if (__is_true(queue->stopped)){
-            return QUEUE_RESULT_USER_INTERRUPT;
-        }
-        return QUEUE_RESULT_TRY_AGAIN;
-    }
-
     (*pp_node) = queue->end.prev;
     queue->end.prev = (*pp_node)->prev;
     (*pp_node)->prev->next = &(queue->end);
-
-    queue->pushable++;
-    queue->popable--;
-
-    __sr_atom_unlock(queue->lock);
-
-    return QUEUE_RESULT_OK;
+    queue->length--;
+    return queue->length;
 }
 
 int sr_queue_remove_node(sr_queue_t *queue, sr_node_t *node)
 {
-    if (NULL == queue || NULL == node
-    		|| NULL == node->prev || NULL == node->next){
-        LOGE("null parameter\n");
-        return QUEUE_RESULT_ERROR;
+    assert(queue != NULL);
+    if (queue->length > 0){
+        assert(node != NULL && node->next != NULL && node->prev != NULL);
+        node->prev->next = node->next;
+        node->next->prev = node->prev;
+        node->prev = node->next = NULL;
+        queue->length--;
     }
-
-    node->prev->next = node->next;
-    node->next->prev = node->prev;
-    node->prev = node->next = NULL;
-
-    queue->pushable++;
-    queue->popable--;
-
-    return QUEUE_RESULT_OK;
+    return queue->length;
 }
 
 void sr_queue_lock(sr_queue_t *queue)
 {
-	if (queue != NULL){
-		sr_mutex_lock(queue->mutex);
-		__sr_atom_lock(queue->lock);
-	}else{
-        LOGE("null parameter\n");
-    }
+    assert(queue != NULL);
+    sr_mutex_lock(queue->mutex);
 }
 
 void sr_queue_unlock(sr_queue_t *queue)
 {
-	if (queue != NULL){
-		__sr_atom_unlock(queue->lock);
-		sr_mutex_unlock(queue->mutex);
-	}else{
-        LOGE("null parameter\n");
-    }
+    assert(queue != NULL);
+    sr_mutex_unlock(queue->mutex);
 }
 
 sr_node_t* sr_queue_get_first(sr_queue_t *queue)
 {
-	if (queue == NULL){
-		LOGE("null parameter\n");
-		return NULL;
-	}
+    assert(queue != NULL);
 	return queue->head.next;
 }
 
 sr_node_t* sr_queue_get_last(sr_queue_t *queue)
 {
-	if (queue == NULL){
-		LOGE("null parameter\n");
-		return NULL;
-	}
+    assert(queue != NULL);
 	return queue->end.prev;
 }
 
-int sr_queue_pushable(sr_queue_t *queue)
+int sr_queue_length(sr_queue_t *queue)
 {
-    if (NULL == queue){
-        LOGE("null parameter\n");
-        return QUEUE_RESULT_ERROR;
-    }
-    return queue->pushable;
+    assert(queue != NULL);
+    return queue->length;
 }
 
-int sr_queue_popable(sr_queue_t *queue)
+void sr_queue_clear(sr_queue_t *queue)
 {
-    if (NULL == queue){
-        LOGE("null parameter\n");
-        return QUEUE_RESULT_ERROR;
-    }
-    return queue->popable;
-}
-
-void sr_queue_clear(sr_queue_t *q)
-{
-    if ((q)->clear_cb){
-        while ((q)->head.next != &((q)->end)){
-            (q)->head.prev = (q)->head.next;
-            (q)->head.next = (q)->head.next->next;
-            (q)->popable--;
-            (q)->clear_cb((q)->head.prev);
+    assert(queue != NULL);
+    if ((queue)->clear_cb){
+        while ((queue)->head.next != &((queue)->end)){
+            (queue)->head.prev = (queue)->head.next;
+            (queue)->head.next = (queue)->head.next->next;
+            (queue)->length--;
+            (queue)->clear_cb((queue)->head.prev);
         }
-        assert((q)->popable == 0);
+        assert((queue)->length == 0);
     }
-
-	(q)->head.prev = NULL;
-	(q)->head.next = &((q)->end);
-	(q)->end.next = NULL;
-	(q)->end.prev = &((q)->head);
-	(q)->pushable = (q)->size;
+	(queue)->head.prev = NULL;
+	(queue)->head.next = &((queue)->end);
+	(queue)->end.next = NULL;
+	(queue)->end.prev = &((queue)->head);
 }
 
 
 bool sr_queue_is_stopped(sr_queue_t *queue)
 {
-	if (queue){
-		return __is_true(queue->stopped);
-	}
-	return true;
+    assert(queue != NULL);
+    return __is_true(queue->stopped);
 }
 
 
 void sr_queue_stop(sr_queue_t *queue)
 {
-    if (queue){
-    	if (__set_true(queue->stopped)){
-        	sr_queue_lock(queue);
-            sr_queue_clear(queue);
+    assert(queue != NULL);
+    if (__set_true(queue->stopped)){
+        while (queue->waiting > 0){
+            sr_mutex_lock(queue->mutex);
             sr_mutex_broadcast(queue->mutex);
-            sr_queue_unlock(queue);
-            while (queue->pop_waiting > 0 || queue->push_waiting > 0){
-                nanosleep((const struct timespec[]){{0, 10000L}}, NULL);
-                sr_mutex_lock(queue->mutex);
-                sr_mutex_broadcast(queue->mutex);
-                sr_mutex_unlock(queue->mutex);
-            }
-    	}
-    }else{
-        LOGE("null parameter\n");
-    }
-}
-
-
-void sr_queue_finish(sr_queue_t *queue)
-{
-    if (queue){
-    	__set_true(queue->stopped);
-    }else{
-        LOGE("null parameter\n");
+            sr_mutex_unlock(queue->mutex);
+            nanosleep((const struct timespec[]){{0, 100000L}}, NULL);
+        }
     }
 }
 
 
 int sr_queue_block_push_front(sr_queue_t *queue, sr_node_t *node)
 {
-    int result = 0;
-
-    if (queue == NULL || node == NULL){
-        LOGE("null parameter\n");
-        return QUEUE_RESULT_ERROR;
-    }
-
+    assert(queue != NULL && node != NULL);
     sr_mutex_lock(queue->mutex);
-
-    while ((result = sr_queue_push_front(queue, node)) == QUEUE_RESULT_TRY_AGAIN){
-
-        if (sr_queue_pushable(queue) == 0){
-            if (__is_false(queue->stopped)){
-                __sr_atom_add(queue->push_waiting, 1);
-                sr_mutex_wait(queue->mutex);
-                __sr_atom_sub(queue->push_waiting, 1);
-            }
-            if (__is_true(queue->stopped)){
-            	sr_mutex_unlock(queue->mutex);
-                return QUEUE_RESULT_USER_INTERRUPT;
-            }
-        }
+    int result = sr_queue_push_front(queue, node);
+    if (queue->waiting > 0){
+        sr_mutex_broadcast(queue->mutex);
     }
-
-    if (result == 0){
-        if (queue->pop_waiting > 0){
-            sr_mutex_broadcast(queue->mutex);
-        }
-    }
-
     sr_mutex_unlock(queue->mutex);
-
     return result;
 }
 
 
 int sr_queue_block_push_back(sr_queue_t *queue, sr_node_t *node)
 {
-    int result = 0;
-
-    if (queue == NULL || node == NULL){
-        LOGE("null parameter\n");
-        return QUEUE_RESULT_ERROR;
-    }
-
+    assert(queue != NULL && node != NULL);
     sr_mutex_lock(queue->mutex);
-
-    while ((result = sr_queue_push_back(queue, node)) == QUEUE_RESULT_TRY_AGAIN){
-
-        if (sr_queue_pushable(queue) == 0){
-            if (__is_false(queue->stopped)){
-                __sr_atom_add(queue->push_waiting, 1);
-                sr_mutex_wait(queue->mutex);
-                __sr_atom_sub(queue->push_waiting, 1);
-            }
-            if (__is_true(queue->stopped)){
-            	sr_mutex_unlock(queue->mutex);
-                return QUEUE_RESULT_USER_INTERRUPT;
-            }
-        }
+    int result = sr_queue_push_back(queue, node);
+    if (queue->waiting > 0){
+        sr_mutex_broadcast(queue->mutex);
     }
-
-    if (result == 0){
-        if (queue->pop_waiting > 0){
-            sr_mutex_broadcast(queue->mutex);
-        }
-    }
-
     sr_mutex_unlock(queue->mutex);
-
     return result;
 }
 
@@ -709,37 +510,21 @@ int sr_queue_block_push_back(sr_queue_t *queue, sr_node_t *node)
 int sr_queue_block_pop_front(sr_queue_t *queue, sr_node_t **pp_node)
 {
     int result = 0;
-
-    if (queue == NULL || pp_node == NULL){
-        LOGE("null parameter\n");
-        return QUEUE_RESULT_ERROR;
-    }
-
+    assert(queue != NULL && pp_node != NULL);
     sr_mutex_lock(queue->mutex);
-
-    while ((result = sr_queue_pop_front(queue, pp_node)) == QUEUE_RESULT_TRY_AGAIN){
-
-        if (sr_queue_popable(queue) == 0){
+    while ((result = sr_queue_pop_front(queue, pp_node)) == QUEUE_RESULT_ERROR_EMPTY){
+        if (sr_queue_length(queue) == 0){
             if (__is_false(queue->stopped)){
-                __sr_atom_add(queue->pop_waiting, 1);
+                __sr_atom_add(queue->waiting, 1);
                 sr_mutex_wait(queue->mutex);
-                __sr_atom_sub(queue->pop_waiting, 1);
-            }
-            if (__is_true(queue->stopped)){
-            	sr_mutex_unlock(queue->mutex);
-                return QUEUE_RESULT_USER_INTERRUPT;
+                __sr_atom_sub(queue->waiting, 1);
+            }else {
+                sr_mutex_unlock(queue->mutex);
+                return QUEUE_RESULT_ERROR_STOPPED;
             }
         }
     }
-
-    if (result == 0){
-        if (queue->push_waiting > 0){
-            sr_mutex_broadcast(queue->mutex);
-        }
-    }
-
     sr_mutex_unlock(queue->mutex);
-
     return result;
 }
 
@@ -747,50 +532,31 @@ int sr_queue_block_pop_front(sr_queue_t *queue, sr_node_t **pp_node)
 int sr_queue_block_pop_back(sr_queue_t *queue, sr_node_t **pp_node)
 {
     int result = 0;
-
-    if (queue == NULL || pp_node == NULL){
-        LOGE("null parameter\n");
-        return QUEUE_RESULT_ERROR;
-    }
-
+    assert(queue != NULL && pp_node != NULL);
     sr_mutex_lock(queue->mutex);
-
-    while ((result = sr_queue_pop_back(queue, pp_node)) == QUEUE_RESULT_TRY_AGAIN){
-
-        if (sr_queue_popable(queue) == 0){
+    while ((result = sr_queue_pop_back(queue, pp_node)) == QUEUE_RESULT_ERROR_EMPTY){
+        if (sr_queue_length(queue) == 0){
             if (__is_false(queue->stopped)){
-                __sr_atom_add(queue->pop_waiting, 1);
+                __sr_atom_add(queue->waiting, 1);
                 sr_mutex_wait(queue->mutex);
-                __sr_atom_sub(queue->pop_waiting, 1);
-            }
-            if (__is_true(queue->stopped)){
-            	sr_mutex_unlock(queue->mutex);
-                return QUEUE_RESULT_USER_INTERRUPT;
+                __sr_atom_sub(queue->waiting, 1);
+            }else {
+                sr_mutex_unlock(queue->mutex);
+                return QUEUE_RESULT_ERROR_STOPPED;
             }
         }
     }
-
-    if (result == 0){
-        if (queue->push_waiting > 0){
-            sr_mutex_broadcast(queue->mutex);
-        }
-    }
-
     sr_mutex_unlock(queue->mutex);
-
     return result;
 }
 
 
-void sr_queue_block_clean(sr_queue_t *queue)
+void sr_queue_block_clear(sr_queue_t *queue)
 {
-    if (queue){
-    	sr_queue_lock(queue);
-        sr_queue_clear(queue);
-        sr_queue_unlock(queue);
-    }else{
-        LOGE("null parameter\n");
-    }
+    assert(queue != NULL);
+    sr_mutex_lock(queue->mutex);
+    sr_queue_clear(queue);
+    sr_mutex_unlock(queue->mutex);
 }
 
 
@@ -1280,22 +1046,30 @@ typedef struct sr_buffer_node_t{
 }sr_buffer_node_t;
 
 struct sr_buffer_pool {
-    size_t size;
-    size_t count;
+    size_t head_size;
+    size_t data_size;
+    size_t buffer_count;
+    bool destroyed;
     sr_queue_t *queue;
-    sr_buffer_node_t *buffers;
 };
 
-sr_buffer_pool_t* sr_buffer_pool_create(size_t buffer_count, size_t buffer_size){
-    sr_buffer_pool_t *pool = (sr_buffer_pool_t*) malloc(sizeof(sr_buffer_pool_t));
-    pool->count = buffer_count;
-    pool->size = buffer_size;
-    pool->queue = sr_queue_create(pool->count, NULL);
-    pool->buffers = (sr_buffer_node_t*)calloc(pool->count, sizeof(sr_buffer_node_t));
-    for (int i = 0; i < pool->count; ++i){
-        sr_buffer_node_t *node = pool->buffers + i;
-        node->buffer.head = (uint8_t*)malloc(pool->size + 32);
-        node->buffer.data = node->buffer.head + 32;
+static void release_buffer_node(sr_node_t *node){
+    sr_buffer_node_t *buffer_node = (sr_buffer_node_t*)node;
+    free(buffer_node->buffer.head);
+    free(buffer_node);
+}
+
+sr_buffer_pool_t* sr_buffer_pool_create(size_t buffer_count, size_t data_size, size_t head_size){
+    sr_buffer_pool_t *pool = (sr_buffer_pool_t*) calloc(1, sizeof(sr_buffer_pool_t));
+    pool->buffer_count = buffer_count;
+    pool->data_size = data_size;
+    pool->head_size = head_size;
+    pool->queue = sr_queue_create(release_buffer_node);
+    for (int i = 0; i < pool->buffer_count; ++i){
+        sr_buffer_node_t *node = malloc(sizeof(sr_buffer_node_t));
+        node->buffer.data_size = data_size;
+        node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
+        node->buffer.data = node->buffer.head + pool->head_size;
         node->pool = pool;
         __sr_queue_push_back(pool->queue, node);
     }
@@ -1305,17 +1079,17 @@ sr_buffer_pool_t* sr_buffer_pool_create(size_t buffer_count, size_t buffer_size)
 void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool){
     if (pp_buffer_pool && *pp_buffer_pool){
         sr_buffer_pool_t *pool = *pp_buffer_pool;
-        for (int i = 0; i < pool->count; ++i){
-            free(pool->buffers[i].buffer.head);
+        __set_true(pool->destroyed);
+        if (sr_queue_length(pool->queue) == pool->buffer_count){
+            sr_queue_release(&pool->queue);
+            free(pool);
         }
-        sr_queue_release(&pool->queue);
-        free(pool->buffers);
-        free(pool);
     }
 }
 
 sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool){
-    if (sr_queue_popable(pool->queue) > 0){
+    assert(pool != NULL);
+    if (sr_queue_length(pool->queue) > 0){
         sr_buffer_node_t *node;
         __sr_queue_block_pop_front(pool->queue, node);
         return &node->buffer;
@@ -1323,11 +1097,29 @@ sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool){
     return NULL;
 }
 
+sr_buffer_data_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool){
+    assert(pool != NULL);
+    if (sr_queue_length(pool->queue) > 0){
+        sr_buffer_node_t *node = malloc(sizeof(sr_buffer_node_t));
+        node->buffer.data_size = pool->data_size;
+        node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
+        node->buffer.data = node->buffer.head + pool->head_size;
+        node->pool = pool;
+        __sr_atom_add(pool->buffer_count, 1);
+        return &node->buffer;
+    }
+    return NULL;
+}
+
 void sr_buffer_pool_put(sr_buffer_data_t *buffer){
-    if (buffer){
-        sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)buffer - sizeof(sr_node_t));
-        __sr_queue_block_push_back(node->pool->queue, node);
-    }else {
-        LOGD("null parameter\n");
+    assert(buffer != NULL);
+    sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)buffer - sizeof(sr_node_t));
+    __sr_queue_block_push_back(node->pool->queue, node);
+    if (__is_true(node->pool->destroyed)){
+        sr_buffer_pool_t *pool = node->pool;
+        if (sr_queue_length(pool->queue) == pool->buffer_count){
+            sr_queue_release(&pool->queue);
+            free(pool);
+        }
     }
 }

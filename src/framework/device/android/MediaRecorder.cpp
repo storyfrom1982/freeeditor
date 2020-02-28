@@ -147,14 +147,13 @@ void MediaRecorder::Close() {
         mVideoFilter->RemoveOutputChain(mVideoEncoder);
 
         mVideoSource->Close(this);
+        mVideoFilter->Close(this);
         mVideoEncoder->Close(this);
         mVideoRenderer->Close(this);
 
         delete mVideoRenderer;
         delete mVideoEncoder;
         delete mVideoSource;
-
-        mVideoFilter->Close(this);
         delete mVideoFilter;
 
         mAudioSource->Close(this);

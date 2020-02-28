@@ -210,10 +210,8 @@ extern void sr_mutex_broadcast(sr_mutex_t *mutex);
 ///////////////////////////////////////////////////////////////
 
 enum {
-    QUEUE_RESULT_USER_INTERRUPT = -3,
-    QUEUE_RESULT_TRY_AGAIN = -2,
-    QUEUE_RESULT_ERROR = -1,
-	QUEUE_RESULT_OK = 0
+    QUEUE_RESULT_ERROR_EMPTY = -2,
+    QUEUE_RESULT_ERROR_STOPPED = -1,
 };
 
 typedef struct sr_node_t{
@@ -223,7 +221,7 @@ typedef struct sr_node_t{
 
 typedef struct sr_queue_t sr_queue_t;
 
-extern sr_queue_t* sr_queue_create(int max_node_number, void (*clear_cb)(sr_node_t*));
+extern sr_queue_t* sr_queue_create(void (*clear_cb)(sr_node_t*));
 extern void sr_queue_release(sr_queue_t **pp_queue);
 
 extern int sr_queue_push_front(sr_queue_t *queue, sr_node_t *node);
@@ -234,10 +232,9 @@ extern int sr_queue_pop_back(sr_queue_t *queue, sr_node_t **pp_node);
 
 extern int sr_queue_remove_node(sr_queue_t *queue, sr_node_t *node);
 
-extern void sr_queue_clear(sr_queue_t *q);
+extern void sr_queue_clear(sr_queue_t *queue);
 extern void sr_queue_stop(sr_queue_t *queue);
 extern bool sr_queue_is_stopped(sr_queue_t *queue);
-extern void sr_queue_finish(sr_queue_t *queue);
 
 extern void sr_queue_lock(sr_queue_t *queue);
 extern void sr_queue_unlock(sr_queue_t *queue);
@@ -245,8 +242,7 @@ extern void sr_queue_unlock(sr_queue_t *queue);
 extern sr_node_t* sr_queue_get_first(sr_queue_t *queue);
 extern sr_node_t* sr_queue_get_last(sr_queue_t *queue);
 
-extern int sr_queue_pushable(sr_queue_t *queue);
-extern int sr_queue_popable(sr_queue_t *queue);
+extern int sr_queue_length(sr_queue_t *queue);
 
 extern int sr_queue_block_push_front(sr_queue_t *queue, sr_node_t *node);
 extern int sr_queue_block_push_back(sr_queue_t *queue, sr_node_t *node);
@@ -254,7 +250,7 @@ extern int sr_queue_block_push_back(sr_queue_t *queue, sr_node_t *node);
 extern int sr_queue_block_pop_front(sr_queue_t *queue, sr_node_t **pp_node);
 extern int sr_queue_block_pop_back(sr_queue_t *queue, sr_node_t **pp_node);
 
-extern void sr_queue_block_clean(sr_queue_t *queue);
+extern void sr_queue_block_clear(sr_queue_t *queue);
 
 
 #define __sr_queue_push_front(queue, node) \
@@ -361,15 +357,17 @@ extern int sr_message_queue_put(sr_message_queue_t *queue, sr_message_t msg);
 
 
 typedef struct sr_buffer_data_t {
+	size_t data_size;
 	unsigned char *head;
 	unsigned char *data;
 }sr_buffer_data_t;
 
 typedef struct sr_buffer_pool sr_buffer_pool_t;
 
-sr_buffer_pool_t* sr_buffer_pool_create(size_t buffer_count, size_t buffer_size);
+sr_buffer_pool_t* sr_buffer_pool_create(size_t buffer_count, size_t data_size, size_t head_size);
 void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool);
 
+sr_buffer_data_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool);
 sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool);
 void sr_buffer_pool_put(sr_buffer_data_t *buffer);
 

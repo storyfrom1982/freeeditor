@@ -143,7 +143,7 @@ void VideoRenderer::onSurfaceCreated(void *ptr) {
 }
 
 void VideoRenderer::onSurfaceChanged(int width, int height) {
-    assert(width != 0 && height != 0);
+//    assert(width != 0 && height != 0);
     SmartPkt pkt(RecvMsg_SurfaceChanged);
     pkt.frame.width = width;
     pkt.frame.height = height;

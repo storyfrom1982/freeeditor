@@ -113,9 +113,9 @@ namespace freee {
     class BufferPool {
 
     public:
-        BufferPool(size_t count, size_t size)
+        BufferPool(size_t buffer_count, size_t data_size, size_t head_size = 0)
         {
-            pool = sr_buffer_pool_create(count, size);
+            pool = sr_buffer_pool_create(buffer_count, data_size, head_size);
             assert(pool);
         }
         ~BufferPool()
@@ -123,6 +123,10 @@ namespace freee {
             sr_buffer_pool_release(&pool);
         }
         SmartPkt GetPkt()
+        {
+            return SmartPkt(sr_buffer_pool_get(pool));
+        }
+        SmartPkt AllocPkt()
         {
             return SmartPkt(sr_buffer_pool_get(pool));
         }

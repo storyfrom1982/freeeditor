@@ -79,6 +79,7 @@ struct gl_renderer_t{
 gl_renderer_t* gl_renderer_create(int w, int h)
 {
     LOGD("gl_renderer_create enter\n");
+    LOGD("gl_renderer_create ===== [%dx%d]\n", w, h);
 
     gl_renderer_t *renderer = (gl_renderer_t*)malloc(sizeof(struct gl_renderer_t));
 

@@ -83,7 +83,7 @@ int X264VideoEncoder::ModuleOpen(json &cfg) {
 
     m_handle = x264_encoder_open(&param);
 
-    x264_nal_t* encoded;
+    x264_nal_t* encoded = nullptr;
     int nal;
 
     if (x264_encoder_headers(m_handle, &encoded, &nal) < 0){
@@ -98,6 +98,7 @@ int X264VideoEncoder::ModuleOpen(json &cfg) {
     short sps_size = encoded[0].i_payload-4;
     short pps_size = encoded[1].i_payload - 4;
 
+//    free(encoded);
     m_frameId = 0;
     LOGD("X264VideoEncoder::OnOpenEncoder: %p\n", m_handle);
     return 0;

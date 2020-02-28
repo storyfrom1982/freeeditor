@@ -99,14 +99,14 @@ AVFramePool* av_frame_pool_create(AVFrame *config, int capacity)
         return NULL;
     }
 
-    pool->sourceQueue = sr_queue_create(capacity, free_node_frame);
+    pool->sourceQueue = sr_queue_create(free_node_frame);
     if (!pool->sourceQueue){
         LOGE("sr_queue_create failed\n");
         av_frame_pool_release(&pool);
         return NULL;
     }
 
-    pool->recycleQueue = sr_queue_create(capacity, free_node_frame);
+    pool->recycleQueue = sr_queue_create(free_node_frame);
     if (!pool->recycleQueue){
         LOGE("sr_queue_create failed\n");
         av_frame_pool_release(&pool);
