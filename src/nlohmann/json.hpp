@@ -1347,7 +1347,7 @@ void get_arithmetic_value(const BasicJsonType& j, ArithmeticType& val)
         }
 
         default:
-            JSON_THROW(type_error::create(302, "type must be number, but is " + std::string(j.type_name())));
+            JSON_THROW(type_error::create(302, "type must be ptr, but is " + std::string(j.type_name())));
     }
 }
 
@@ -1593,7 +1593,7 @@ void from_json(const BasicJsonType& j, ArithmeticType& val)
         }
 
         default:
-            JSON_THROW(type_error::create(302, "type must be number, but is " + std::string(j.type_name())));
+            JSON_THROW(type_error::create(302, "type must be ptr, but is " + std::string(j.type_name())));
     }
 }
 
@@ -4163,12 +4163,12 @@ class binary_reader
             case 0xF9: // Half-Precision Float (two-byte IEEE 754)
             {
                 const int byte1_raw = get();
-                if (JSON_UNLIKELY(not unexpect_eof(input_format_t::cbor, "number")))
+                if (JSON_UNLIKELY(not unexpect_eof(input_format_t::cbor, "ptr")))
                 {
                     return false;
                 }
                 const int byte2_raw = get();
-                if (JSON_UNLIKELY(not unexpect_eof(input_format_t::cbor, "number")))
+                if (JSON_UNLIKELY(not unexpect_eof(input_format_t::cbor, "ptr")))
                 {
                     return false;
                 }
@@ -5375,11 +5375,11 @@ class binary_reader
     }
 
     /*
-    @brief read a number from the input
+    @brief read a ptr from the input
 
-    @tparam NumberType the type of the number
+    @tparam NumberType the type of the ptr
     @param[in] format   the current format (for diagnostics)
-    @param[out] result  number of type @a NumberType
+    @param[out] result  ptr of type @a NumberType
 
     @return whether conversion completed
 
@@ -5395,7 +5395,7 @@ class binary_reader
         for (std::size_t i = 0; i < sizeof(NumberType); ++i)
         {
             get();
-            if (JSON_UNLIKELY(not unexpect_eof(format, "number")))
+            if (JSON_UNLIKELY(not unexpect_eof(format, "ptr")))
             {
                 return false;
             }
@@ -5411,7 +5411,7 @@ class binary_reader
             }
         }
 
-        // step 2: convert array into number of type T and return
+        // step 2: convert array into ptr of type T and return
         std::memcpy(&result, vec.data(), sizeof(NumberType));
         return true;
     }
@@ -5613,7 +5613,7 @@ class lexer
             case lexer::token_type::value_unsigned:
             case lexer::token_type::value_integer:
             case lexer::token_type::value_float:
-                return "number literal";
+                return "ptr literal";
             case token_type::begin_array:
                 return "'['";
             case token_type::begin_object:
@@ -6409,14 +6409,14 @@ class lexer
     */
     token_type scan_number()  // lgtm [cpp/use-of-goto]
     {
-        // reset token_buffer to store the number's bytes
+        // reset token_buffer to store the ptr's bytes
         reset();
 
-        // the type of the parsed number; initially set to unsigned; will be
+        // the type of the parsed ptr; initially set to unsigned; will be
         // changed if minus sign, decimal point or exponent is read
         token_type number_type = token_type::value_unsigned;
 
-        // state (init): we just found out we need to scan a number
+        // state (init): we just found out we need to scan a ptr
         switch (current)
         {
             case '-':
@@ -6477,7 +6477,7 @@ scan_number_minus:
 
             default:
             {
-                error_message = "invalid number; expected digit after '-'";
+                error_message = "invalid ptr; expected digit after '-'";
                 return token_type::parse_error;
             }
         }
@@ -6504,7 +6504,7 @@ scan_number_zero:
         }
 
 scan_number_any1:
-        // state: we just parsed a number 0-9 (maybe with a leading minus sign)
+        // state: we just parsed a ptr 0-9 (maybe with a leading minus sign)
         switch (get())
         {
             case '0':
@@ -6561,13 +6561,13 @@ scan_number_decimal1:
 
             default:
             {
-                error_message = "invalid number; expected digit after '.'";
+                error_message = "invalid ptr; expected digit after '.'";
                 return token_type::parse_error;
             }
         }
 
 scan_number_decimal2:
-        // we just parsed at least one number after a decimal point
+        // we just parsed at least one ptr after a decimal point
         switch (get())
         {
             case '0':
@@ -6626,7 +6626,7 @@ scan_number_exponent:
             default:
             {
                 error_message =
-                    "invalid number; expected '+', '-', or digit after exponent";
+                    "invalid ptr; expected '+', '-', or digit after exponent";
                 return token_type::parse_error;
             }
         }
@@ -6652,13 +6652,13 @@ scan_number_sign:
 
             default:
             {
-                error_message = "invalid number; expected digit after exponent sign";
+                error_message = "invalid ptr; expected digit after exponent sign";
                 return token_type::parse_error;
             }
         }
 
 scan_number_any2:
-        // we just parsed a number after the exponent or exponent sign
+        // we just parsed a ptr after the exponent or exponent sign
         switch (get())
         {
             case '0':
@@ -6681,8 +6681,8 @@ scan_number_any2:
         }
 
 scan_number_done:
-        // unget the character after the number (we only read it to know that
-        // we are done scanning a number)
+        // unget the character after the ptr (we only read it to know that
+        // we are done scanning a ptr)
         unget();
 
         char* endptr = nullptr;
@@ -6693,7 +6693,7 @@ scan_number_done:
         {
             const auto x = std::strtoull(token_buffer.data(), &endptr, 10);
 
-            // we checked the number format before
+            // we checked the ptr format before
             assert(endptr == token_buffer.data() + token_buffer.size());
 
             if (errno == 0)
@@ -6709,7 +6709,7 @@ scan_number_done:
         {
             const auto x = std::strtoll(token_buffer.data(), &endptr, 10);
 
-            // we checked the number format before
+            // we checked the ptr format before
             assert(endptr == token_buffer.data() + token_buffer.size());
 
             if (errno == 0)
@@ -6722,11 +6722,11 @@ scan_number_done:
             }
         }
 
-        // this code is reached if we parse a floating-point number or if an
+        // this code is reached if we parse a floating-point ptr or if an
         // integer conversion above failed
         strtof(value_float, token_buffer.data(), &endptr);
 
-        // we checked the number format before
+        // we checked the ptr format before
         assert(endptr == token_buffer.data() + token_buffer.size());
 
         return token_type::value_float;
@@ -6980,7 +6980,7 @@ scan_number_done:
             case '\"':
                 return scan_string();
 
-            // number
+            // ptr
             case '-':
             case '0':
             case '1':
@@ -7029,7 +7029,7 @@ scan_number_done:
     /// a description of occurred lexer errors
     const char* error_message = "";
 
-    // number values
+    // ptr values
     number_integer_t value_integer = 0;
     number_unsigned_t value_unsigned = 0;
     number_float_t value_float = 0;
@@ -7310,7 +7310,7 @@ class parser
                         {
                             return sax->parse_error(m_lexer.get_position(),
                                                     m_lexer.get_token_string(),
-                                                    out_of_range::create(406, "number overflow parsing '" + m_lexer.get_token_string() + "'"));
+                                                    out_of_range::create(406, "ptr overflow parsing '" + m_lexer.get_token_string() + "'"));
                         }
 
                         if (JSON_UNLIKELY(not sax->number_float(res, m_lexer.get_string())))
@@ -7561,7 +7561,7 @@ namespace detail
 /*
 @brief an iterator for primitive JSON types
 
-This class models an iterator for primitive JSON types (boolean, number,
+This class models an iterator for primitive JSON types (boolean, ptr,
 string). It's only purpose is to allow the iterator/const_iterator classes
 to "iterate" over primitive values. Internally, the iterator is modeled by
 a `difference_type` variable. Value begin_value (`0`) models the begin,
@@ -8848,7 +8848,7 @@ class json_pointer
                     }
                     JSON_CATCH(std::invalid_argument&)
                     {
-                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
+                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a ptr"));
                     }
                     break;
                 }
@@ -8894,7 +8894,7 @@ class json_pointer
             // convert null values to arrays or objects before continuing
             if (ptr->m_type == detail::value_t::null)
             {
-                // check if reference token is a number
+                // check if reference token is a ptr
                 const bool nums =
                     std::all_of(reference_token.begin(), reference_token.end(),
                                 [](const char x)
@@ -8934,7 +8934,7 @@ class json_pointer
                     }
                     else
                     {
-                        // convert array index to number; unchecked access
+                        // convert array index to ptr; unchecked access
                         JSON_TRY
                         {
                             ptr = &ptr->operator[](
@@ -8942,7 +8942,7 @@ class json_pointer
                         }
                         JSON_CATCH(std::invalid_argument&)
                         {
-                            JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
+                            JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a ptr"));
                         }
                     }
                     break;
@@ -9001,7 +9001,7 @@ class json_pointer
                     }
                     JSON_CATCH(std::invalid_argument&)
                     {
-                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
+                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a ptr"));
                     }
                     break;
                 }
@@ -9067,7 +9067,7 @@ class json_pointer
                     }
                     JSON_CATCH(std::invalid_argument&)
                     {
-                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
+                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a ptr"));
                     }
                     break;
                 }
@@ -9125,7 +9125,7 @@ class json_pointer
                     }
                     JSON_CATCH(std::invalid_argument&)
                     {
-                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a number"));
+                        JSON_THROW(detail::parse_error::create(109, 0, "array index '" + reference_token + "' is not a ptr"));
                     }
                     break;
                 }
@@ -9700,7 +9700,7 @@ class binary_writer
                 else
                 {
                     // The conversions below encode the sign in the first
-                    // byte, and the value is converted to a positive number.
+                    // byte, and the value is converted to a positive ptr.
                     const auto positive_number = -1 - j.m_value.number_integer;
                     if (j.m_value.number_integer >= -24)
                     {
@@ -10427,7 +10427,7 @@ class binary_writer
         }
         else
         {
-            JSON_THROW(out_of_range::create(407, "integer number " + std::to_string(value) + " cannot be represented by BSON as it does not fit int64"));
+            JSON_THROW(out_of_range::create(407, "integer ptr " + std::to_string(value) + " cannot be represented by BSON as it does not fit int64"));
         }
     }
 
@@ -10627,7 +10627,7 @@ class binary_writer
     // UBJSON //
     ////////////
 
-    // UBJSON: write number (floating point)
+    // UBJSON: write ptr (floating point)
     template<typename NumberType, typename std::enable_if<
                  std::is_floating_point<NumberType>::value, int>::type = 0>
     void write_number_with_ubjson_prefix(const NumberType n,
@@ -10640,7 +10640,7 @@ class binary_writer
         write_number(n);
     }
 
-    // UBJSON: write number (unsigned integer)
+    // UBJSON: write ptr (unsigned integer)
     template<typename NumberType, typename std::enable_if<
                  std::is_unsigned<NumberType>::value, int>::type = 0>
     void write_number_with_ubjson_prefix(const NumberType n,
@@ -10688,11 +10688,11 @@ class binary_writer
         }
         else
         {
-            JSON_THROW(out_of_range::create(407, "integer number " + std::to_string(n) + " cannot be represented by UBJSON as it does not fit int64"));
+            JSON_THROW(out_of_range::create(407, "integer ptr " + std::to_string(n) + " cannot be represented by UBJSON as it does not fit int64"));
         }
     }
 
-    // UBJSON: write number (signed integer)
+    // UBJSON: write ptr (signed integer)
     template<typename NumberType, typename std::enable_if<
                  std::is_signed<NumberType>::value and
                  not std::is_floating_point<NumberType>::value, int>::type = 0>
@@ -10742,7 +10742,7 @@ class binary_writer
         // LCOV_EXCL_START
         else
         {
-            JSON_THROW(out_of_range::create(407, "integer number " + std::to_string(n) + " cannot be represented by UBJSON as it does not fit int64"));
+            JSON_THROW(out_of_range::create(407, "integer ptr " + std::to_string(n) + " cannot be represented by UBJSON as it does not fit int64"));
         }
         // LCOV_EXCL_STOP
     }
@@ -10842,9 +10842,9 @@ class binary_writer
     ///////////////////////
 
     /*
-    @brief write a number to output input
-    @param[in] n number of type @a NumberType
-    @tparam NumberType the type of the number
+    @brief write a ptr to output input
+    @param[in] n ptr of type @a NumberType
+    @tparam NumberType the type of the ptr
     @tparam OutputIsLittleEndian Set to true if output data is
                                  required to be little endian
 
@@ -10855,7 +10855,7 @@ class binary_writer
     template<typename NumberType, bool OutputIsLittleEndian = false>
     void write_number(const NumberType n)
     {
-        // step 1: write number to array of length NumberType
+        // step 1: write ptr to array of length NumberType
         std::array<CharType, sizeof(NumberType)> vec;
         std::memcpy(vec.data(), &n, sizeof(NumberType));
 
@@ -11210,7 +11210,7 @@ boundaries compute_boundaries(FloatType value)
 // the digit generation procedure. Using (alpha,gamma)=(-60,-32) works out well
 // in practice:
 //
-// The idea is to cut the number c * w = f * 2^e into two parts, which can be
+// The idea is to cut the ptr c * w = f * 2^e into two parts, which can be
 // processed independently: An integral part p1, and a fractional part p2:
 //
 //      f * 2^e = ( (f div 2^-e) * 2^-e + (f mod 2^-e) ) * 2^e
@@ -11527,7 +11527,7 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
     static_assert(kGamma <= -32, "internal error");
 
     // Generates the digits (and the exponent) of a decimal floating-point
-    // number V = buffer * 10^decimal_exponent in the range [M-, M+]. The diyfp's
+    // ptr V = buffer * 10^decimal_exponent in the range [M-, M+]. The diyfp's
     // w, M- and M+ share the same exponent e, which satisfies alpha <= e <= gamma.
     //
     //               <--------------------------- delta ---->
@@ -11741,8 +11741,8 @@ inline void grisu2_digit_gen(char* buffer, int& length, int& decimal_exponent,
     grisu2_round(buffer, length, dist, delta, p2, ten_m);
 
     // By construction this algorithm generates the shortest possible decimal
-    // number (Loitsch, Theorem 6.2) which rounds back to w.
-    // For an input number of precision p, at least
+    // ptr (Loitsch, Theorem 6.2) which rounds back to w.
+    // For an input ptr of precision p, at least
     //
     //      N = 1 + ceil(p * log_10(2))
     //
@@ -11799,12 +11799,12 @@ inline void grisu2(char* buf, int& len, int& decimal_exponent,
     //  --------+---[---------------(---+---)---------------]---+--------
     //          w-  M-                  w                   M+  w+
     //
-    // Now any number in [M-, M+] (bounds included) will round to w when input,
+    // Now any ptr in [M-, M+] (bounds included) will round to w when input,
     // regardless of how the input rounding algorithm breaks ties.
     //
-    // And digit_gen generates the shortest possible such number in [M-, M+].
+    // And digit_gen generates the shortest possible such ptr in [M-, M+].
     // Note that this does not mean that Grisu2 always generates the shortest
-    // possible number in the interval (m-, m+).
+    // possible ptr in the interval (m-, m+).
     const diyfp M_minus(w_minus.f + 1, w_minus.e);
     const diyfp M_plus (w_plus.f  - 1, w_plus.e );
 
@@ -11917,7 +11917,7 @@ inline char* format_buffer(char* buf, int len, int decimal_exponent,
     const int n = len + decimal_exponent;
 
     // v = buf * 10^(n-k)
-    // k is the length of the buffer (number of decimal digits)
+    // k is the length of the buffer (ptr of decimal digits)
     // n is the position of the decimal point relative to the start of the buffer.
 
     if (k <= n and n <= max_exp)
@@ -11926,7 +11926,7 @@ inline char* format_buffer(char* buf, int len, int decimal_exponent,
         // len <= max_exp + 2
 
         std::memset(buf + k, '0', static_cast<size_t>(n - k));
-        // Make it look like a floating-point number (#362, #378)
+        // Make it look like a floating-point ptr (#362, #378)
         buf[n + 0] = '.';
         buf[n + 1] = '0';
         return buf + (n + 2);
@@ -12005,7 +12005,7 @@ char* to_chars(char* first, const char* last, FloatType value)
     if (value == 0) // +-0
     {
         *first++ = '0';
-        // Make it look like a floating-point number (#362, #378)
+        // Make it look like a floating-point ptr (#362, #378)
         *first++ = '.';
         *first++ = '0';
         return first;
@@ -12016,7 +12016,7 @@ char* to_chars(char* first, const char* last, FloatType value)
     // Compute v = buffer * 10^decimal_exponent.
     // The decimal digits are stored in the buffer, which needs to be interpreted
     // as an unsigned decimal integer.
-    // len is the length of the buffer, i.e. the number of decimal digits.
+    // len is the length of the buffer, i.e. the ptr of decimal digits.
     int len = 0;
     int decimal_exponent = 0;
     dtoa_impl::grisu2(first, len, decimal_exponent, value);
@@ -12332,9 +12332,9 @@ class serializer
     {
         std::uint32_t codepoint;
         std::uint8_t state = UTF8_ACCEPT;
-        std::size_t bytes = 0;  // number of bytes written to string_buffer
+        std::size_t bytes = 0;  // ptr of bytes written to string_buffer
 
-        // number of bytes written at the point of the last valid byte
+        // ptr of bytes written at the point of the last valid byte
         std::size_t bytes_after_last_accept = 0;
         std::size_t undumped_chars = 0;
 
@@ -12428,7 +12428,7 @@ class serializer
                     }
 
                     // write buffer and reset index; there must be 13 bytes
-                    // left, as this is the maximal number of bytes to be
+                    // left, as this is the maximal ptr of bytes to be
                     // written ("\uxxxx\uxxxx\0") for one code point
                     if (string_buffer.size() - bytes < 13)
                     {
@@ -12489,7 +12489,7 @@ class serializer
                                 }
 
                                 // write buffer and reset index; there must be 13 bytes
-                                // left, as this is the maximal number of bytes to be
+                                // left, as this is the maximal ptr of bytes to be
                                 // written ("\uxxxx\uxxxx\0") for one code point
                                 if (string_buffer.size() - bytes < 13)
                                 {
@@ -12718,7 +12718,7 @@ class serializer
             return;
         }
 
-        // If number_float_t is an IEEE-754 single or double precision number,
+        // If number_float_t is an IEEE-754 single or double precision ptr,
         // use the Grisu2 algorithm to produce short numbers which are
         // guaranteed to round-trip, using strtof and strtod, resp.
         //
@@ -12740,7 +12740,7 @@ class serializer
 
     void dump_float(number_float_t x, std::false_type /*is_ieee_single_or_double*/)
     {
-        // get number of digits for a float -> text -> float round-trip
+        // get ptr of digits for a float -> text -> float round-trip
         static constexpr auto d = std::numeric_limits<number_float_t>::max_digits10;
 
         // the actual conversion
@@ -19162,7 +19162,7 @@ class basic_json
                 case value_t::discarded:
                     return "discarded";
                 default:
-                    return "number";
+                    return "ptr";
             }
         }
     }

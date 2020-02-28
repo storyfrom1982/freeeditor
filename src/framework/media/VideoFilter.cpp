@@ -34,9 +34,9 @@ void VideoFilter::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
 //            sr_buffer_frame_set_image_format(&pkt.frame,
 //                    (uint8_t *) pkt.msg.GetPtr(), mSrcWidth,mSrcHeight, mSrcImageFormat);
             SmartPkt y420 = mBufferPool->GetPkt();
-            if (y420.buffer){
+            if (y420.GetDataPtr()){
                 sr_buffer_frame_set_image_format(&y420.frame,
-                                                 y420.buffer->data, mCodecWidth, mCodecHeight,
+                                                 y420.GetDataPtr(), mCodecWidth, mCodecHeight,
                                                  mCodecImageFormat);
                 sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, mSrcRotation);
                 MediaChainImpl::ProcessMedia(chain, y420);
@@ -48,7 +48,7 @@ void VideoFilter::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
 }
 
 void VideoFilter::MessageOpen(SmartPkt pkt) {
-    mConfig = static_cast<MediaChain *>(pkt.msg.ptr)->GetConfig(this);
+    mConfig = static_cast<MediaChain *>(pkt.GetPtr())->GetConfig(this);
     if (mStatus == Status_Closed){
         ModuleOpen(mConfig);
         onOpened();

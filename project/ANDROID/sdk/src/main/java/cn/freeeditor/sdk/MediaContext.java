@@ -162,11 +162,13 @@ public class MediaContext extends JNIContext {
             audioSource.release();
             audioSource = null;
         }
+        sMediaContext = null;
+        disconnectMediaContext();
     }
 
     public long connectRecorder(){
         JNIMessage msg = getMessage(GetMsg_ConnectRecorder);
-        return msg.number;
+        return msg.ptr;
     }
 
     public void disconnectRecorder(long context){
@@ -229,8 +231,9 @@ public class MediaContext extends JNIContext {
         connectMediaContext(getContextPointer());
     }
 
-    public native void debug();
+    public static native void debug();
 
     private native void connectMediaContext(long contextPointer);
+    private native void disconnectMediaContext();
 
 }

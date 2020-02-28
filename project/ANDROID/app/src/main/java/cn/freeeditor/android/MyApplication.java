@@ -9,14 +9,14 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        MediaContext.Instance().setAppContext(getApplicationContext());
+//        MediaContext.Instance().setAppContext(getApplicationContext());
 //        MContext.Apply(getApplicationContext());
     }
 
     @Override
     public void onTerminate() {
         super.onTerminate();
-        MediaContext.Instance().release();
+//        MediaContext.Instance().release();
 //        MContext.Instance().remove();
     }
 }

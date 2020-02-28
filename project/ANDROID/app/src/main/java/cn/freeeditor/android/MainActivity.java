@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 //        record.release();
 //        record = null;
 //        MediaContext.Instance().release();
-        MediaContext.Instance().debug();
+//        MediaContext.Instance().debug();
     }
 
     private final View.OnClickListener openPublishListener = new View.OnClickListener() {

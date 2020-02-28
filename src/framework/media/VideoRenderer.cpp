@@ -49,7 +49,7 @@ void VideoRenderer::FinalClear() {
 }
 
 void VideoRenderer::MessageOpen(SmartPkt pkt) {
-    mConfig = static_cast<MediaChain *>(pkt.msg.ptr)->GetConfig(this);
+    mConfig = static_cast<MediaChain *>(pkt.GetPtr())->GetConfig(this);
     if (mStatus == Status_Closed){
         if (ModuleOpen(mConfig) != 0){
             return;
@@ -72,7 +72,7 @@ void VideoRenderer::MessageProcessMedia(SmartPkt pkt) {
 }
 
 void VideoRenderer::MessageControl(SmartPkt pkt) {
-    switch (pkt.msg.key){
+    switch (pkt.GetKey()){
         case RecvMsg_SetVideoWindow:
             MessageSetVideoWindow(pkt);
             break;
@@ -131,7 +131,7 @@ void VideoRenderer::SetVideoWindow(void *ptr) {
 }
 
 void VideoRenderer::MessageSetVideoWindow(SmartPkt pkt) {
-    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.msg.ptr));
+    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.GetPtr()));
     if (mStatus == Status_Opened){
         mVideoWindow->SetCallback(this);
     }
@@ -160,7 +160,7 @@ void VideoRenderer::MessageWindowCreated(SmartPkt pkt) {
     isSurfaceCreated = true;
     isSurfaceDestroyed = false;
     if (renderer){
-        gl_renderer_set_window(renderer, pkt.msg.ptr);
+        gl_renderer_set_window(renderer, pkt.GetPtr());
     }
 }
 

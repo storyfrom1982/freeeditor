@@ -28,15 +28,18 @@ enum {
 
 AudioSource::AudioSource(int mediaType, int mediaNumber, std::string mediaName)
         : MediaChainImpl(mediaType, mediaNumber, mediaName) {
-    MessageContext *context = MediaContext::Instance().ConnectMicrophone();
+//    MessageContext *context = MediaContext::Instance().ConnectMicrophone();
+    MessageContext *context = MediaContext::Instance()->ConnectMicrophone();
     ConnectContext(context);
+    SetContextName(mediaName);
 }
 
 AudioSource::~AudioSource() {
     LOGD("AudioSource::~AudioSource\n");
     Close(this);
     DisconnectContext();
-    MediaContext::Instance().DisconnectMicrophone();
+//    MediaContext::Instance().DisconnectMicrophone();
+    MediaContext::Instance()->DisconnectMicrophone();
 }
 
 void AudioSource::onRecvMessage(SmartPkt msg) {
@@ -49,9 +52,7 @@ SmartPkt AudioSource::onObtainMessage(int key) {
 
 void AudioSource::Open(MediaChain *chain) {
     mConfig = chain->GetConfig(this);
-    std::string str = mConfig.dump();
-    SmartPkt msg(PutMsg_Open, str.c_str(), str.length());
-    SendMessage(msg);
+    SendMessage(GetJsonPkt(PutMsg_Open, mConfig.dump()));
 }
 
 void AudioSource::Close(MediaChain *chain) {

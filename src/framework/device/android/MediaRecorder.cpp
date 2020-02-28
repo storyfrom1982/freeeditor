@@ -69,7 +69,7 @@ void MediaRecorder::FinalClear() {
 }
 
 void MediaRecorder::MessageProcess(SmartPkt pkt) {
-    switch (pkt.msg.key){
+    switch (pkt.GetKey()){
         case RecvMsg_Open:
             Open(pkt);
             break;
@@ -111,7 +111,7 @@ void MediaRecorder::onRecvMessage(SmartPkt pkt) {
 void MediaRecorder::Open(SmartPkt pkt) {
     if (mStatus == Status_Closed){
 
-        mConfig = json::parse(std::string(pkt.msg.json, pkt.msg.size));
+        mConfig = json::parse(pkt.GetString());
 
         LOGD("MediaRecorder config >> %s\n", mConfig.dump(4).c_str());
 
@@ -124,7 +124,7 @@ void MediaRecorder::Open(SmartPkt pkt) {
 
         mVideoSource->AddOutputChain(mVideoFilter);
         mVideoFilter->AddOutputChain(mVideoRenderer);
-//        mVideoFilter->AddOutputChain(mVideoEncoder);
+        mVideoFilter->AddOutputChain(mVideoEncoder);
 
         mVideoSource->Open(this);
 
@@ -193,7 +193,7 @@ void MediaRecorder::StartPreview(SmartPkt pkt) {
         }
         if (mStatus == Status_Started){
             LOGD("MediaRecorder::StartPreview 2\n");
-            mVideoRenderer->SetVideoWindow(pkt.msg.ptr);
+            mVideoRenderer->SetVideoWindow(pkt.GetPtr());
             isPreviewing = true;
         }
     }
@@ -239,7 +239,7 @@ json &MediaRecorder::GetConfig(MediaChain *chain) {
 }
 
 void MediaRecorder::onEvent(MediaChain *chain, SmartPkt pkt) {
-    LOGD("MediaRecorder::onEvent[%d]\n", pkt.msg.key);
+    LOGD("MediaRecorder::onEvent[%d]\n", pkt.GetKey());
     ProcessMessage(pkt);
 }
 

@@ -80,6 +80,8 @@ public class RecordActivity extends Activity {
 
         publishHandler.sendEmptyMessage(HANDLER_PERMISSION_GAN);
 
+        MediaContext.Instance().setAppContext(getApplicationContext());
+
         fadeIn();
 
         openRecorder("test");
@@ -108,7 +110,8 @@ public class RecordActivity extends Activity {
         recorder.stopRecord();
         recorder.stopCapture();
         recorder.release();
-//        MediaContext.Instance().release();
+        MediaContext.Instance().release();
+        MediaContext.debug();
     }
 
     private void changeOrientation(){

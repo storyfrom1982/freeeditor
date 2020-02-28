@@ -29,25 +29,25 @@ VideoSource::VideoSource(MessageContext *context)
     : MediaChainImpl(MediaType_Video, MediaNumber_VideoSource, "VideoSource") {
     mStatus = Status_Closed;
     if (context == nullptr){
-        context = MediaContext::Instance().ConnectCamera();
+//        context = MediaContext::Instance().ConnectCamera();
+        context = MediaContext::Instance()->ConnectCamera();
     }
     ConnectContext(context);
+    SetContextName("VideoSource");
 }
 
 VideoSource::~VideoSource() {
     LOGD("VideoSource::~VideoSource enter\n");
     DisconnectContext();
-    MediaContext::Instance().DisconnectCamera();
+//    MediaContext::Instance().DisconnectCamera();
+    MediaContext::Instance()->DisconnectCamera();
     LOGD("VideoSource::~VideoSource exit\n");
 }
 
 void VideoSource::Open(MediaChain *chain) {
     LOGD("VideoSource::Open enter\n");
     mConfig = chain->GetConfig(this);
-    std::string str = mConfig.dump();
-    SmartPkt pkt(SendMsg_Open, str.c_str(), str.length());
-    LOGD("VideoSource::Open: %s\n", pkt.msg.json);
-    SendMessage(pkt);
+    SendMessage(GetJsonPkt(SendMsg_Open, mConfig.dump()));
     LOGD("VideoSource::Open exit\n");
 }
 
@@ -71,13 +71,13 @@ void VideoSource::Stop(MediaChain *chain) {
 
 void VideoSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
     sr_buffer_frame_set_image_format(
-            &pkt.frame, (uint8_t *) pkt.msg.ptr,
+            &pkt.frame, pkt.frame.data,
             mSrcWidth, mSrcHeight, mSrcImageFormat);
     onProcessMedia(pkt);
 }
 
 void VideoSource::onRecvMessage(SmartPkt pkt) {
-    switch (pkt.msg.key){
+    switch (pkt.GetKey()){
         case OnRecvMsg_ProcessPicture:
             ProcessMedia(this, pkt);
             break;
@@ -109,7 +109,7 @@ void VideoSource::onRecvMessage(SmartPkt pkt) {
 
 void VideoSource::UpdateMediaConfig(SmartPkt pkt) {
 //    LOGD("VideoSource::UpdateMediaConfig >> %s\n", pkt.msg.json);
-    mConfig = json::parse(pkt.msg.json);
+    mConfig = json::parse(pkt.GetString());
     mSrcWidth = mConfig["srcWidth"];
     mSrcHeight = mConfig["srcHeight"];
     std::string srcFormat = mConfig["srcImageFormat"];

@@ -77,25 +77,25 @@ int VideoWindow::height() {
 }
 
 void VideoWindow::onRecvMessage(SmartPkt pkt) {
-    if (pkt.msg.key == RecvMsg_SurfaceCreated){
+    if (pkt.GetKey() == RecvMsg_SurfaceCreated){
 #ifdef __ANDROID__
         JniEnv env;
         AutoLock lock(mLock);
-        mWindowHolder = pkt.msg.troubledPtr;
-        mWindowHolder = env->NewGlobalRef(static_cast<jobject>(pkt.msg.troubledPtr));
+//        mWindowHolder = pkt.GetPtr();
+        mWindowHolder = env->NewGlobalRef(static_cast<jobject>(pkt.GetPtr()));
         mNativeWindow = ANativeWindow_fromSurface(env.m_pEnv, (jobject)mWindowHolder);
         if (mCallback){
             mCallback->onSurfaceCreated(mNativeWindow);
         }
 #endif
-    }else if (pkt.msg.key == RecvMsg_SurfaceChanged){
+    }else if (pkt.GetKey() == RecvMsg_SurfaceChanged){
         AutoLock lock(mLock);
         if (mCallback){
-            LOGD("RecvMsg_SurfaceChanged[%s]\n", pkt.msg.json);
-            json js = json::parse(pkt.msg.json);
+            LOGD("RecvMsg_SurfaceChanged[%s]\n", pkt.GetString().c_str());
+            json js = json::parse(pkt.GetString());
             mCallback->onSurfaceChanged(js["width"], js["height"]);
         }
-    }else if (pkt.msg.key == RecvMsg_SurfaceDestroyed){
+    }else if (pkt.GetKey() == RecvMsg_SurfaceDestroyed){
         AutoLock lock(mLock);
         if (mCallback){
             mCallback->onSurfaceDestroyed();

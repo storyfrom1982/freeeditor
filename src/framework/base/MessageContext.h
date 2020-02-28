@@ -19,10 +19,12 @@ namespace freee{
 
         MessageContext(){
             messageContext = NULL;
+            bufferPool = new BufferPool(2, 4096);
         }
 
         virtual ~MessageContext(){
             LOGD("~MessageContext()[%s]\n", name.c_str());
+            delete bufferPool;
         };
 
         void ConnectContext(MessageContext *context){
@@ -70,9 +72,13 @@ namespace freee{
             return SmartPkt();
         }
 
+        SmartPkt GetJsonPkt(int key, std::string str){
+            return bufferPool->GetPkt(key, str);
+        }
+
     private:
         std::string name;
-
+        BufferPool *bufferPool;
         Lock mLock;
         MessageContext *messageContext;
     };

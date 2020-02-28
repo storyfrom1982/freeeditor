@@ -66,7 +66,7 @@ void MessageProcessor::MessageProcessorLoop() {
         mLock.signal();
         mLock.unlock();
 
-        if (pkt.msg.key == 0){
+        if (pkt.GetKey() == PktMsgExit){
             break;
         }
 

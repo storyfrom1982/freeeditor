@@ -61,8 +61,8 @@ namespace freee {
         }
 
         void ProcessMedia(MediaChain *chain, SmartPkt pkt) override {
-            pkt.msg.key = RecvMsg_ProcessMedia;
-            pkt.msg.ptr = chain;
+            pkt.SetKey(RecvMsg_ProcessMedia);
+//            pkt.msg.ptr = chain;
             ProcessMessage(pkt);
         }
 
@@ -157,7 +157,7 @@ namespace freee {
         virtual void MessageControl(SmartPkt pkt){};
 
         void MessageProcess(SmartPkt pkt) override {
-            switch (pkt.msg.key){
+            switch (pkt.GetKey()){
                 case RecvMsg_Open:
                     MessageOpen(pkt);
                     break;

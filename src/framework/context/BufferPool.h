@@ -27,6 +27,13 @@ namespace freee {
         PktMsgExit = 0,
     };
 
+    enum {
+        PktMsgType_Unknown = -1,
+        PktMsgType_None = 0,
+        PktMsgType_Ptr,
+        PktMsgType_String,
+    };
+
     class SmartPkt {
 
     public:
@@ -37,21 +44,30 @@ namespace freee {
         SmartPkt(int _key) : SmartPkt()
         {
             msg.key = _key;
+            msg.type = PktMsgType_None;
         }
         SmartPkt(int _key, void *_ptr) : SmartPkt()
         {
             msg.key = _key;
             msg.ptr = _ptr;
-        }
-        SmartPkt(int _key, const char *data, int size) : SmartPkt()
-        {
-            msg.key = _key;
-            msg.size = size;
-            msg.json = strndup(data, size);
+            msg.type = PktMsgType_Ptr;
         }
         SmartPkt (sr_buffer_data_t *_buffer) : SmartPkt()
         {
             buffer = _buffer;
+        }
+        SmartPkt(int _key, std::string str, sr_buffer_data_t *_buffer) : SmartPkt()
+        {
+            buffer = _buffer;
+            msg.key = _key;
+            msg.size = str.length();
+            msg.type = PktMsgType_String;
+            if (buffer->data_size < msg.size){
+                free(buffer->head);
+                buffer->data_size = msg.size << 2;
+                buffer->data = buffer->head = (unsigned char*)malloc(buffer->data_size);
+            }
+            memcpy(buffer->data, str.c_str(), msg.size + 1);
         }
         SmartPkt(const SmartPkt &pkt)
         {
@@ -70,10 +86,6 @@ namespace freee {
                 if (buffer){
                     sr_buffer_pool_put(buffer);
                 }
-                if (msg.json){
-                    free(msg.json);
-                    msg.json = nullptr;
-                }
                 delete reference_count;
             }
         }
@@ -89,23 +101,49 @@ namespace freee {
         }
 
     public:
-        struct {
-            int key;
-            int size;
-            char *json;
-            union {
-                void *ptr;
-                int64_t number;
-            };
-            double decimal;
-            void *troubledPtr;
-        }msg;
+        void SetKey(int key){
+            msg.key = key;
+        }
+        int GetKey(){
+            return msg.key;
+        }
+        int GetType(){
+            return msg.type;
+        }
+        void* GetPtr(){
+            return msg.ptr;
+        }
+        int64_t GetNumber(){
+            return msg.number;
+        }
+        std::string GetString(){
+            return std::string((char*)buffer->data, msg.size);
+        }
+        unsigned char* GetHeadPtr(){
+            return buffer->head;
+        }
+        unsigned char* GetDataPtr(){
+            return buffer->data;
+        }
+        size_t GetDataSize(){
+            return buffer->data_size;
+        }
 
-        sr_buffer_data_t *buffer;
+    public:
         sr_buffer_frame_t frame;
 
     private:
         int *reference_count;
+        struct {
+            int key;
+            int type;
+            union {
+                void *ptr;
+                size_t size;
+                int64_t number;
+            };
+        }msg;
+        sr_buffer_data_t *buffer;
     };
 
 
@@ -126,9 +164,9 @@ namespace freee {
         {
             return SmartPkt(sr_buffer_pool_get(pool));
         }
-        SmartPkt AllocPkt()
+        SmartPkt GetPkt(int key, std::string str)
         {
-            return SmartPkt(sr_buffer_pool_get(pool));
+            return SmartPkt(key, str, sr_buffer_pool_get(pool));
         }
 
     private:

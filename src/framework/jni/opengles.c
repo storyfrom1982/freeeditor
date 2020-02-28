@@ -252,7 +252,7 @@ int32_t Setup(opengles_t *gles)
 	glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, maxTextureImageUnits);
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, maxTextureSize);
 
-	LOGD("number of textures %d, size %d", (int) maxTextureImageUnits[0], (int) maxTextureSize[0]);
+	LOGD("ptr of textures %d, size %d", (int) maxTextureImageUnits[0], (int) maxTextureSize[0]);
 
 	gles->_program = createProgram(g_vertextShader, g_fragmentShader);
 	if (!gles->_program)

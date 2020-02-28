@@ -367,7 +367,6 @@ typedef struct sr_buffer_pool sr_buffer_pool_t;
 sr_buffer_pool_t* sr_buffer_pool_create(size_t buffer_count, size_t data_size, size_t head_size);
 void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool);
 
-sr_buffer_data_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool);
 sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool);
 void sr_buffer_pool_put(sr_buffer_data_t *buffer);
 

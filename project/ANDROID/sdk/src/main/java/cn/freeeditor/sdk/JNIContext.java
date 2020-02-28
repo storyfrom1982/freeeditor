@@ -29,19 +29,11 @@ abstract public class JNIContext extends MessageProcessor {
     protected abstract void onRecvMessage(JNIMessage msg);
 
     protected void sendMessage(int key){
-        sendMessage(key, 0, 0, contextPointer);
+        sendMessage(key, 0, contextPointer);
     }
 
-//    protected void sendMessage(JNIMessage msg){
-//        sendMessage(msg, contextPointer);
-//    }
-
-    protected void sendMessage(int key, long number){
-        sendMessage(key, number, 0, contextPointer);
-    }
-
-    protected void sendMessage(int key, double decimal){
-        sendMessage(key, 0, decimal, contextPointer);
+    protected void sendMessage(int key, long ptr){
+        sendMessage(key, ptr, contextPointer);
     }
 
     protected void sendMessage(int key, Object obj){
@@ -52,17 +44,14 @@ abstract public class JNIContext extends MessageProcessor {
         sendMessage(key, json, contextPointer);
     }
 
-    protected void sendMessage(int key, byte[] buffer, int size){
-        sendMessage(key, buffer, size, contextPointer);
+    protected void sendMessage(int key, byte[] buffer, long timestamp){
+        sendMessage(key, buffer, timestamp, contextPointer);
     }
 
     protected JNIMessage getMessage(int key){
         return getMessage(key, contextPointer);
     }
 
-    protected JNIMessage createJniMessage(int key, long number, double decimal, Object obj, String string){
-        return new JNIMessage(key, number, decimal, obj, string);
-    }
 
     static {
         System.loadLibrary("freeeditor");
@@ -80,7 +69,7 @@ abstract public class JNIContext extends MessageProcessor {
 //    private native void sendMessage(int key, long contextPointer);
     private native void sendMessage(int key, Object obj, long contextPointer);
     private native void sendMessage(int key, String json, long contextPointer);
-    private native void sendMessage(int key, long number, double decimal, long contextPointer);
-    private native void sendMessage(int key, byte[] buffer, int size, long contextPointer);
+    private native void sendMessage(int key, long ptr, long contextPointer);
+    private native void sendMessage(int key, byte[] buffer, long timestamp, long contextPointer);
 //    private native void sendMessage(JNIMessage msg, long contextPointer);
 }

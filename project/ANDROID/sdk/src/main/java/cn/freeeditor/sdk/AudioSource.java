@@ -111,8 +111,8 @@ public class AudioSource extends JNIContext
     }
 
     @Override
-    public void onRecordFrame(byte[] data, int size) {
-        sendMessage(PutMsg_ProcessSound, size);
+    public void onRecordFrame(byte[] data, long timestamp) {
+        sendMessage(PutMsg_ProcessSound, timestamp);
     }
 
     @Override

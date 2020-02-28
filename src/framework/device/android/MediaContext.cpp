@@ -28,35 +28,42 @@ enum {
     SendMsg_DisconnectMicrophone = 2,
 };
 
+static MediaContext *sMediaContext = nullptr;
 
 MediaContext::MediaContext(){
     SetContextName("MediaContext");
 };
 
 MediaContext::~MediaContext(){
+    sMediaContext = nullptr;
     LOGD("MediaContext::~MediaContext()\n");
 };
 
-
-MediaContext& MediaContext::Instance() {
-    static MediaContext globalMediaContext;
-    return globalMediaContext;
+MediaContext* MediaContext::Instance() {
+    if (sMediaContext == nullptr){
+        sMediaContext = new MediaContext();
+    }
+    return sMediaContext;
 }
+
+//MediaContext& MediaContext::Instance() {
+//    static MediaContext globalMediaContext;
+//    return globalMediaContext;
+//}
 
 SmartPkt MediaContext::onObtainMessage(int key) {
     if (key == OnGetMsg_CreateRecorder){
         return SmartPkt(key, new MediaRecorder());
     }else if (key == OnGetMsg_GetRecorderConfig){
         json js = MConfig::load();
-        std::string str = js.dump();
-        return SmartPkt(key, str.c_str(), str.length());
+        return GetJsonPkt(key, js.dump());
     }
     return SmartPkt();
 }
 
 void MediaContext::onRecvMessage(SmartPkt pkt) {
-    if (pkt.msg.key == OnRecvMsg_DisconnectRecorder){
-        MediaRecorder *recorder = static_cast<MediaRecorder *>(pkt.msg.ptr);
+    if (pkt.GetKey() == OnRecvMsg_DisconnectRecorder){
+        MediaRecorder *recorder = static_cast<MediaRecorder *>(pkt.GetPtr());
         delete recorder;
     }
 }
@@ -71,16 +78,16 @@ SmartPkt MediaContext::GetMessage(int key) {
 
 MessageContext *MediaContext::ConnectCamera() {
     SmartPkt pkt = MessageContext::GetMessage(GetMsg_ConnectCamera);
-    assert(pkt.msg.ptr);
-    assert(pkt.msg.key == GetMsg_ConnectCamera);
-    return static_cast<MessageContext *>(pkt.msg.ptr);
+    assert(pkt.GetPtr());
+    assert(pkt.GetKey() == GetMsg_ConnectCamera);
+    return static_cast<MessageContext *>(pkt.GetPtr());
 }
 
 MessageContext *MediaContext::ConnectMicrophone() {
     SmartPkt pkt = MessageContext::GetMessage(GetMsg_ConnectMicrophone);
-    assert(pkt.msg.ptr);
-    assert(pkt.msg.key == GetMsg_ConnectMicrophone);
-    return static_cast<MessageContext *>(pkt.msg.ptr);
+    assert(pkt.GetPtr());
+    assert(pkt.GetKey() == GetMsg_ConnectMicrophone);
+    return static_cast<MessageContext *>(pkt.GetPtr());
 }
 
 void MediaContext::DisconnectCamera() {

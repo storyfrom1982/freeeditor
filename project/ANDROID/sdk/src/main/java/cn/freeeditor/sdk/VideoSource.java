@@ -205,7 +205,7 @@ public class VideoSource extends JNIContext
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        sendMessage(SendMsg_ProcessPicture, data, data.length);
+        sendMessage(SendMsg_ProcessPicture, data, System.currentTimeMillis());
         mCamera.addCallbackBuffer(data);
     }
 

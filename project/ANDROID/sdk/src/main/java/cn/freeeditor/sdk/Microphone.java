@@ -32,7 +32,7 @@ public class Microphone implements Runnable {
     private AudioRecord mAudioRecord = null;
 
     public interface RecordCallback {
-        void onRecordFrame(byte[] data, int size);
+        void onRecordFrame(byte[] data, long timestamp);
     }
 
     public interface ErrorCallback {
@@ -200,7 +200,7 @@ public class Microphone implements Runnable {
                 synchronized (callbackLock){
                     if (mRecordCallback != null){
 //                        Log.d(TAG, "Microphone thread id " + Thread.currentThread().getId());
-                        mRecordCallback.onRecordFrame(codecBuffer, mCodecBufferSize);
+                        mRecordCallback.onRecordFrame(codecBuffer, System.currentTimeMillis());
                     }
                 }
             }

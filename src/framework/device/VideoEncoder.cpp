@@ -36,7 +36,7 @@ void VideoEncoder::FinalClear() {
 }
 
 void VideoEncoder::MessageOpen(SmartPkt pkt) {
-    MediaChain *chain = static_cast<MediaChain *>(pkt.msg.ptr);
+    MediaChain *chain = static_cast<MediaChain *>(pkt.GetPtr());
     mConfig = chain->GetConfig(this);
     ModuleOpen(mConfig);
     int w = mConfig["codecWidth"];

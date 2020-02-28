@@ -13,7 +13,8 @@ namespace freee {
 
     public:
 
-        static MediaContext& Instance();
+//        static MediaContext& Instance();
+        static MediaContext* Instance();
 
         ~MediaContext() override ;
 
