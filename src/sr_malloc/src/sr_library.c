@@ -364,9 +364,7 @@ int sr_queue_push_front(sr_queue_t *queue, sr_node_t *node)
 int sr_queue_push_back(sr_queue_t *queue, sr_node_t *node)
 {
     assert(queue != NULL && node != NULL);
-    if (node == queue->end.prev){
-        assert(node != queue->end.prev);
-    }
+//    assert(node != queue->end.prev);
     node->prev = queue->end.prev;
     node->next = &(queue->end);
     node->prev->next = node;
@@ -377,25 +375,15 @@ int sr_queue_push_back(sr_queue_t *queue, sr_node_t *node)
 
 int sr_queue_pop_front(sr_queue_t *queue, sr_node_t **pp_node)
 {
-    LOGD("sr_queue_pop_front enter\n");
     assert(queue != NULL && pp_node != NULL);
-    LOGD("sr_queue_pop_front 1\n");
     if (queue->length == 0){
-        LOGD("sr_queue_pop_front 2\n");
         return QUEUE_RESULT_ERROR_EMPTY;
     }
-    if (queue->head.next == &queue->end){
-        LOGD("sr_queue_pop_front 2.5 (%d)\n", queue->length);
-    }
-    LOGD("sr_queue_pop_front 3 (%d)\n", queue->length);
     (*pp_node) = queue->head.next;
-    LOGD("sr_queue_pop_front 4\n");
+//    assert(queue->head.next != &queue->end);
     queue->head.next = (*pp_node)->next;
-    LOGD("sr_queue_pop_front 5 %p\n", (*pp_node)->next);
     (*pp_node)->next->prev = &(queue->head);
-    LOGD("sr_queue_pop_front 6\n");
     __sr_atom_sub(queue->length, 1);
-    LOGD("sr_queue_pop_front exit\n");
     return queue->length;
 }
 
