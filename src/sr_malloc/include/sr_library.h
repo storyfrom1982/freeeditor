@@ -42,8 +42,8 @@ static inline int64_t sr_time_passed(int64_t begin_microsecond)
 ////原子
 ///////////////////////////////////////////////////////////////
 
-#define	__is_true(x)		__sync_bool_compare_and_swap(&(x), true, true)
 #define	__is_false(x)		__sync_bool_compare_and_swap(&(x), false, false)
+#define	__is_true(x)		(!__is_false(x))
 #define	__set_true(x)		__sync_bool_compare_and_swap(&(x), false, true)
 #define	__set_false(x)		__sync_bool_compare_and_swap(&(x), true, false)
 

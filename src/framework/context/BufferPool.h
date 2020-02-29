@@ -25,6 +25,13 @@ namespace freee {
     enum {
         PktMsgError = -1,
         PktMsgExit = 0,
+        PktMsgOpen = 1,
+        PktMsgStart = 2,
+        PktMsgStop = 3,
+        PktMsgClose = 4,
+        PktMsgProcessMedia = 5,
+        PktMsgControl = 6,
+        PktMsgReserved = 10,
     };
 
     class SmartPkt {
@@ -72,8 +79,7 @@ namespace freee {
         }
         ~SmartPkt()
         {
-            __sr_atom_sub(*p_reference_count, 1);
-            if ((*p_reference_count) == 0){
+            if (__sr_atom_sub(*p_reference_count, 1) == 0){
                 if (p_buffer){
                     sr_buffer_pool_put(p_buffer);
                 }
@@ -144,7 +150,7 @@ namespace freee {
     public:
         BufferPool(size_t buffer_count,
                 size_t data_size,
-                size_t buffer_max_count = 1024,
+                size_t buffer_max_count = 64,
                 size_t head_size = 0)
         {
             p_pool = sr_buffer_pool_create(buffer_count, data_size, buffer_max_count, head_size);

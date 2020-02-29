@@ -357,31 +357,45 @@ int sr_queue_push_front(sr_queue_t *queue, sr_node_t *node)
     node->next->prev = node;
     node->prev = &(queue->head);
     queue->head.next = node;
-    queue->length++;
+    __sr_atom_add(queue->length, 1);
     return queue->length;
 }
 
 int sr_queue_push_back(sr_queue_t *queue, sr_node_t *node)
 {
     assert(queue != NULL && node != NULL);
+    if (node == queue->end.prev){
+        assert(node != queue->end.prev);
+    }
     node->prev = queue->end.prev;
+    node->next = &(queue->end);
     node->prev->next = node;
     queue->end.prev = node;
-    node->next = &(queue->end);
-    queue->length++;
+    __sr_atom_add(queue->length, 1);
     return queue->length;
 }
 
 int sr_queue_pop_front(sr_queue_t *queue, sr_node_t **pp_node)
 {
+    LOGD("sr_queue_pop_front enter\n");
     assert(queue != NULL && pp_node != NULL);
+    LOGD("sr_queue_pop_front 1\n");
     if (queue->length == 0){
+        LOGD("sr_queue_pop_front 2\n");
         return QUEUE_RESULT_ERROR_EMPTY;
     }
+    if (queue->head.next == &queue->end){
+        LOGD("sr_queue_pop_front 2.5 (%d)\n", queue->length);
+    }
+    LOGD("sr_queue_pop_front 3 (%d)\n", queue->length);
     (*pp_node) = queue->head.next;
+    LOGD("sr_queue_pop_front 4\n");
     queue->head.next = (*pp_node)->next;
+    LOGD("sr_queue_pop_front 5 %p\n", (*pp_node)->next);
     (*pp_node)->next->prev = &(queue->head);
-    queue->length--;
+    LOGD("sr_queue_pop_front 6\n");
+    __sr_atom_sub(queue->length, 1);
+    LOGD("sr_queue_pop_front exit\n");
     return queue->length;
 }
 
@@ -394,7 +408,7 @@ int sr_queue_pop_back(sr_queue_t *queue, sr_node_t **pp_node)
     (*pp_node) = queue->end.prev;
     queue->end.prev = (*pp_node)->prev;
     (*pp_node)->prev->next = &(queue->end);
-    queue->length--;
+    __sr_atom_sub(queue->length, 1);
     return queue->length;
 }
 
@@ -406,7 +420,7 @@ int sr_queue_remove_node(sr_queue_t *queue, sr_node_t *node)
         node->prev->next = node->next;
         node->next->prev = node->prev;
         node->prev = node->next = NULL;
-        queue->length--;
+        __sr_atom_sub(queue->length, 1);
     }
     return queue->length;
 }
@@ -513,15 +527,13 @@ int sr_queue_block_pop_front(sr_queue_t *queue, sr_node_t **pp_node)
     assert(queue != NULL && pp_node != NULL);
     sr_mutex_lock(queue->mutex);
     while ((result = sr_queue_pop_front(queue, pp_node)) == QUEUE_RESULT_ERROR_EMPTY){
-        if (sr_queue_length(queue) == 0){
-            if (__is_false(queue->stopped)){
-                __sr_atom_add(queue->waiting, 1);
-                sr_mutex_wait(queue->mutex);
-                __sr_atom_sub(queue->waiting, 1);
-            }else {
-                sr_mutex_unlock(queue->mutex);
-                return QUEUE_RESULT_ERROR_STOPPED;
-            }
+        if (__is_false(queue->stopped)){
+            __sr_atom_add(queue->waiting, 1);
+            sr_mutex_wait(queue->mutex);
+            __sr_atom_sub(queue->waiting, 1);
+        }else {
+            sr_mutex_unlock(queue->mutex);
+            return QUEUE_RESULT_ERROR_STOPPED;
         }
     }
     sr_mutex_unlock(queue->mutex);
@@ -535,15 +547,13 @@ int sr_queue_block_pop_back(sr_queue_t *queue, sr_node_t **pp_node)
     assert(queue != NULL && pp_node != NULL);
     sr_mutex_lock(queue->mutex);
     while ((result = sr_queue_pop_back(queue, pp_node)) == QUEUE_RESULT_ERROR_EMPTY){
-        if (sr_queue_length(queue) == 0){
-            if (__is_false(queue->stopped)){
-                __sr_atom_add(queue->waiting, 1);
-                sr_mutex_wait(queue->mutex);
-                __sr_atom_sub(queue->waiting, 1);
-            }else {
-                sr_mutex_unlock(queue->mutex);
-                return QUEUE_RESULT_ERROR_STOPPED;
-            }
+        if (__is_false(queue->stopped)){
+            __sr_atom_add(queue->waiting, 1);
+            sr_mutex_wait(queue->mutex);
+            __sr_atom_sub(queue->waiting, 1);
+        }else {
+            sr_mutex_unlock(queue->mutex);
+            return QUEUE_RESULT_ERROR_STOPPED;
         }
     }
     sr_mutex_unlock(queue->mutex);
@@ -1114,12 +1124,12 @@ sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool)
         return &node->buffer;
     }
     if (pool->buffer_count < pool->buffer_max_count){
+        __sr_atom_add(pool->buffer_count, 1);
         sr_buffer_node_t *node = malloc(sizeof(sr_buffer_node_t));
         node->buffer.data_size = pool->data_size;
         node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
         node->buffer.data = node->buffer.head + pool->head_size;
         node->pool = pool;
-        __sr_atom_add(pool->buffer_count, 1);
         return &node->buffer;
     }
     return NULL;

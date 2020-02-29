@@ -20,16 +20,16 @@ namespace freee {
         Status_Stopped = 3,
     };
 
-    enum {
-        RecvMsg_Error = PktMsgError,
-        RecvMsg_Exit = PktMsgExit,
-        RecvMsg_Open = 1,
-        RecvMsg_Start = 2,
-        RecvMsg_Stop = 3,
-        RecvMsg_Close = 4,
-        RecvMsg_ProcessMedia = 5,
-        RecvMsg_Control = 6,
-    };
+//    enum {
+//        RecvMsg_Error = PktMsgError,
+//        RecvMsg_Exit = PktMsgExit,
+//        PktMsgOpen = 1,
+//        PktMsgStart = 2,
+//        PktMsgStop = 3,
+//        PktMsgClose = 4,
+//        PktMsgProcessMedia = 5,
+//        PktMsgControl = 6,
+//    };
 
     class MediaChainImpl : public MediaChain, public MessageProcessor {
 
@@ -46,19 +46,19 @@ namespace freee {
         }
 
         void Open(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(RecvMsg_Open, chain));
+            ProcessMessage(SmartPkt(PktMsgOpen, chain));
         }
 
         void Close(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(RecvMsg_Close, chain));
+            ProcessMessage(SmartPkt(PktMsgClose, chain));
         }
 
         void Start(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(RecvMsg_Start, chain));
+            ProcessMessage(SmartPkt(PktMsgStart, chain));
         }
 
         void Stop(MediaChain *chain) override {
-            ProcessMessage(SmartPkt(RecvMsg_Stop, chain));
+            ProcessMessage(SmartPkt(PktMsgStop, chain));
         }
 
         void ProcessMedia(MediaChain *chain, SmartPkt pkt) override {
@@ -158,22 +158,22 @@ namespace freee {
 
         void MessageProcess(SmartPkt pkt) override {
             switch (pkt.GetKey()){
-                case RecvMsg_Open:
+                case PktMsgOpen:
                     MessageOpen(pkt);
                     break;
-                case RecvMsg_Close:
+                case PktMsgClose:
                     MessageClose(pkt);
                     break;
-                case RecvMsg_Start:
+                case PktMsgStart:
                     MessageStart(pkt);
                     break;
-                case RecvMsg_Stop:
+                case PktMsgStop:
                     MessageStop(pkt);
                     break;
-                case RecvMsg_ProcessMedia:
+                case PktMsgProcessMedia:
                     MessageProcessMedia(pkt);
                     break;
-                case RecvMsg_Control:
+                case PktMsgControl:
                 default:
                     MessageControl(pkt);
             }

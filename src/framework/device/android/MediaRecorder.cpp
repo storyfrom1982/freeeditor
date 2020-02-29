@@ -40,7 +40,7 @@ MediaRecorder::MediaRecorder()
 }
 
 MediaRecorder::~MediaRecorder() {
-    ProcessMessage(SmartPkt(RecvMsg_Close));
+    ProcessMessage(SmartPkt(PktMsgClose));
     StopProcessor();
 //    FinalClear();
 }
@@ -70,10 +70,10 @@ void MediaRecorder::FinalClear() {
 
 void MediaRecorder::MessageProcess(SmartPkt pkt) {
     switch (pkt.GetKey()){
-        case RecvMsg_Open:
+        case PktMsgOpen:
             Open(pkt);
             break;
-        case RecvMsg_Close:
+        case PktMsgClose:
             Close();
             break;
         case RecvMsg_StartRecord:
@@ -88,10 +88,10 @@ void MediaRecorder::MessageProcess(SmartPkt pkt) {
         case RecvMsg_StopPreview:
             StopPreview();
             break;
-        case RecvMsg_Start:
+        case PktMsgStart:
             Start();
             break;
-        case RecvMsg_Stop:
+        case PktMsgStop:
             Stop();
             break;
         case RecvMsg_UpdateConfig:

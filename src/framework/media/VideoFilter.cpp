@@ -33,7 +33,7 @@ void VideoFilter::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
         || m_srcWidth != m_codecWidth
         || m_srcHeight != m_codecHeight){
         if (p_bufferPool){
-            SmartPkt y420 = p_bufferPool->GetPkt(RecvMsg_ProcessMedia);
+            SmartPkt y420 = p_bufferPool->GetPkt(PktMsgProcessMedia);
             if (y420.GetDataPtr()){
                 sr_buffer_frame_set_image_format(&y420.frame, y420.GetDataPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
                 sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, m_srcRotation);

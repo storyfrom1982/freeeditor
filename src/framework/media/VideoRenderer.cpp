@@ -10,7 +10,7 @@
 using namespace freee;
 
 enum {
-    RecvMsg_SetVideoWindow = RecvMsg_Control + 1,
+    RecvMsg_SetVideoWindow = PktMsgControl + 1,
     RecvMsg_SurfaceCreated,
     RecvMsg_SurfaceChanged,
     RecvMsg_SurfaceDestroyed,
