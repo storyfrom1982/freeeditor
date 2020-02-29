@@ -40,8 +40,8 @@ namespace freee{
         void FinalClear() override ;
 
     protected:
-        size_t bufferSize;
-        BufferPool *bufferPool;
+        size_t m_bufferSize;
+        BufferPool *p_bufferPool;
 
     };
 

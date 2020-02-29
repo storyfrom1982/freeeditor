@@ -66,7 +66,7 @@ public class Editor implements IEditor, Runnable, SurfaceHolder.Callback {
             e.printStackTrace();
         }
 
-//        mMsgHandler.sendRequest(new Msg(MSG_SendReq_SaveConfig, mConfig.toString()));
+//        mMsgHandler.sendRequest(new Msg(MSG_SendReq_SaveConfig, m_config.toString()));
 
 //        mVideoSource = new VideoSource();
 //        mMsgHandler.sendMessage(new Msg(MSG_SendCmd_SetVideoSource, mVideoSource.getInstance()));

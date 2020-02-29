@@ -1049,8 +1049,10 @@ struct sr_buffer_pool {
     size_t head_size;
     size_t data_size;
     size_t buffer_count;
+    size_t buffer_max_count;
     bool destroyed;
     sr_queue_t *queue;
+    char *name;
 };
 
 static void release_buffer_node(sr_node_t *node){
@@ -1059,9 +1061,15 @@ static void release_buffer_node(sr_node_t *node){
     free(buffer_node);
 }
 
-sr_buffer_pool_t* sr_buffer_pool_create(size_t buffer_count, size_t data_size, size_t head_size){
+sr_buffer_pool_t* sr_buffer_pool_create(
+        size_t buffer_count,
+        size_t data_size,
+        size_t buffer_max_count,
+        size_t head_size)
+{
     sr_buffer_pool_t *pool = (sr_buffer_pool_t*) calloc(1, sizeof(sr_buffer_pool_t));
     pool->buffer_count = buffer_count;
+    pool->buffer_max_count = buffer_max_count;
     pool->data_size = data_size;
     pool->head_size = head_size;
     pool->queue = sr_queue_create(release_buffer_node);
@@ -1082,28 +1090,43 @@ void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool){
         __set_true(pool->destroyed);
         if (sr_queue_length(pool->queue) == pool->buffer_count){
             sr_queue_release(&pool->queue);
+            if (pool->name){
+                LOGD("sr_buffer_pool_release()[%s][%lu]\n", pool->name, pool->buffer_count);
+                free(pool->name);
+            }
             free(pool);
         }
     }
 }
 
-sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool){
+void sr_buffer_pool_set_name(sr_buffer_pool_t *pool, const char *name)
+{
+    assert(pool != NULL);
+    pool->name = strdup(name);
+}
+
+sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool)
+{
     assert(pool != NULL);
     if (sr_queue_length(pool->queue) > 0){
         sr_buffer_node_t *node;
         __sr_queue_block_pop_front(pool->queue, node);
         return &node->buffer;
     }
-    sr_buffer_node_t *node = malloc(sizeof(sr_buffer_node_t));
-    node->buffer.data_size = pool->data_size;
-    node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
-    node->buffer.data = node->buffer.head + pool->head_size;
-    node->pool = pool;
-    __sr_atom_add(pool->buffer_count, 1);
-    return &node->buffer;
+    if (pool->buffer_count < pool->buffer_max_count){
+        sr_buffer_node_t *node = malloc(sizeof(sr_buffer_node_t));
+        node->buffer.data_size = pool->data_size;
+        node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
+        node->buffer.data = node->buffer.head + pool->head_size;
+        node->pool = pool;
+        __sr_atom_add(pool->buffer_count, 1);
+        return &node->buffer;
+    }
+    return NULL;
 }
 
-void sr_buffer_pool_put(sr_buffer_data_t *buffer){
+void sr_buffer_pool_put(sr_buffer_data_t *buffer)
+{
     assert(buffer != NULL);
     sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)buffer - sizeof(sr_node_t));
     __sr_queue_block_push_back(node->pool->queue, node);
@@ -1111,6 +1134,10 @@ void sr_buffer_pool_put(sr_buffer_data_t *buffer){
         sr_buffer_pool_t *pool = node->pool;
         if (sr_queue_length(pool->queue) == pool->buffer_count){
             sr_queue_release(&pool->queue);
+            if (pool->name){
+                LOGD("sr_buffer_pool_release_delayed()[%s][%lu]\n", pool->name, pool->buffer_count);
+                free(pool->name);
+            }
             free(pool);
         }
     }

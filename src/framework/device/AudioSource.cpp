@@ -35,7 +35,6 @@ AudioSource::AudioSource(int mediaType, int mediaNumber, std::string mediaName)
 }
 
 AudioSource::~AudioSource() {
-    LOGD("AudioSource::~AudioSource\n");
     Close(this);
     DisconnectContext();
 //    MediaContext::Instance().DisconnectMicrophone();
@@ -51,8 +50,8 @@ SmartPkt AudioSource::onObtainMessage(int key) {
 }
 
 void AudioSource::Open(MediaChain *chain) {
-    mConfig = chain->GetConfig(this);
-    SendMessage(GetJsonPkt(PutMsg_Open, mConfig.dump()));
+    m_config = chain->GetConfig(this);
+    SendMessage(NewJsonPkt(PutMsg_Open, m_config.dump()));
 }
 
 void AudioSource::Close(MediaChain *chain) {

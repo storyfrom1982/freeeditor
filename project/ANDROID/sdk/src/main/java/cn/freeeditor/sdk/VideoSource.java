@@ -56,7 +56,6 @@ public class VideoSource extends JNIContext
     }
 
     public void release(){
-        Log.d(TAG, "VideoSource ########################### release()");
         msgHandler.sendMessage(msgHandler.obtainMessage(RecvMsg_Close));
         stopHandler();
     }

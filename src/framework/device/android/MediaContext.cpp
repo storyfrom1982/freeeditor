@@ -36,7 +36,6 @@ MediaContext::MediaContext(){
 
 MediaContext::~MediaContext(){
     sMediaContext = nullptr;
-    LOGD("MediaContext::~MediaContext()\n");
 };
 
 MediaContext* MediaContext::Instance() {
@@ -56,7 +55,7 @@ SmartPkt MediaContext::onObtainMessage(int key) {
         return SmartPkt(key, new MediaRecorder());
     }else if (key == OnGetMsg_GetRecorderConfig){
         json js = MConfig::load();
-        return GetJsonPkt(key, js.dump());
+        return NewJsonPkt(key, js.dump());
     }
     return SmartPkt();
 }

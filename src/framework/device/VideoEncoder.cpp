@@ -16,7 +16,7 @@ VideoEncoder *VideoEncoder::Create(std::string name) {
 
 VideoEncoder::VideoEncoder(int mediaType, int mediaNumber, const std::string &mediaName)
         : MediaModule(mediaType, mediaNumber, mediaName) {
-    bufferPool = nullptr;
+    p_bufferPool = nullptr;
     StartProcessor(mediaName);
 }
 
@@ -28,20 +28,20 @@ VideoEncoder::~VideoEncoder() {
 }
 
 void VideoEncoder::FinalClear() {
-    if (bufferPool){
-        delete bufferPool;
-        bufferPool = nullptr;
+    if (p_bufferPool){
+        delete p_bufferPool;
+        p_bufferPool = nullptr;
     }
     ModuleClose();
 }
 
 void VideoEncoder::MessageOpen(SmartPkt pkt) {
     MediaChain *chain = static_cast<MediaChain *>(pkt.GetPtr());
-    mConfig = chain->GetConfig(this);
-    ModuleOpen(mConfig);
-    int w = mConfig["codecWidth"];
-    int h = mConfig["codecHeight"];
-    bufferPool = new BufferPool(10, w*h);
+    m_config = chain->GetConfig(this);
+    ModuleOpen(m_config);
+    int w = m_config["codecWidth"];
+    int h = m_config["codecHeight"];
+    p_bufferPool = new BufferPool(10, w*h);
 }
 
 void VideoEncoder::MessageClose(SmartPkt pkt) {

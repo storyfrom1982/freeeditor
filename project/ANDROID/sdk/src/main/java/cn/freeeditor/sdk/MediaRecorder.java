@@ -23,14 +23,14 @@ public class MediaRecorder extends JNIContext {
     private static final int SendMsg_UpdateConfig = 9;
 
     private long recorderContext;
-    private VideoSurfaceView videoView;
+    private VideoWindow videoView;
 
     private String mUrl;
     private JSONObject mConfig;
 
     public MediaRecorder(){
         startHandler();
-        videoView = new VideoSurfaceView();
+        videoView = new VideoWindow();
         recorderContext = MediaContext.Instance().connectRecorder();
         connectContext(recorderContext);
         String config = MediaContext.Instance().getRecorderConfig();

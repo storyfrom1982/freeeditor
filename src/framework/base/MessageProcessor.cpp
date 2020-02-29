@@ -8,16 +8,16 @@
 
 using namespace freee;
 
-MessageProcessor::MessageProcessor() : mThreadId(0) {}
+MessageProcessor::MessageProcessor() : m_threadId(0) {}
 
 void MessageProcessor::StartProcessor(std::string name) {
-    AutoLock lock(mLock);
-    if (!mThreadId){
-        this->name = name;
-        length = 256;
-        put_index = get_index = 0;
-        mPktList = std::vector<SmartPkt>(length);
-        if (pthread_create(&mThreadId, nullptr, MessageProcessorThread, this) != 0) {
+    AutoLock lock(m_lock);
+    if (!m_threadId){
+        this->m_name = name;
+        m_length = 256;
+        m_putIndex = m_getIndex = 0;
+        m_pktList = std::vector<SmartPkt>(m_length);
+        if (pthread_create(&m_threadId, nullptr, MessageProcessorThread, this) != 0) {
             LOGF("pthread_create failed\n");
         }
     }
@@ -25,46 +25,46 @@ void MessageProcessor::StartProcessor(std::string name) {
 
 void MessageProcessor::StopProcessor() {
     ProcessMessage(SmartPkt(PktMsgExit));
-    mLock.lock();
-    pthread_t tid = mThreadId;
-    mThreadId = 0;
-    mLock.unlock();
+    m_lock.lock();
+    pthread_t tid = m_threadId;
+    m_threadId = 0;
+    m_lock.unlock();
     if (tid){
         pthread_join(tid, nullptr);
-        mThreadId = 0;
+        m_threadId = 0;
     }
-    mPktList.clear();
+    m_pktList.clear();
 }
 
 void MessageProcessor::ProcessMessage(SmartPkt pkt) {
-    mLock.lock();
-    while (0 == (length - put_index + get_index)){
-        mLock.wait();
+    m_lock.lock();
+    while (0 == (m_length - m_putIndex + m_getIndex)){
+        m_lock.wait();
     }
-    mPktList[put_index & (length - 1)] = pkt;
-    put_index ++;
-    mLock.signal();
-    mLock.unlock();
+    m_pktList[m_putIndex & (m_length - 1)] = pkt;
+    m_putIndex ++;
+    m_lock.signal();
+    m_lock.unlock();
 }
 
 void MessageProcessor::MessageProcessorLoop() {
 
-    LOGD("MessageProcessor::MessageProcessorLoop [%s] enter\n", name.c_str());
+    LOGD("MessageProcessor >>>>>>>>>>>>>>>>>>>>>>>>>> [%s] started\n", m_name.c_str());
 
     while (true) {
 
-        mLock.lock();
+        m_lock.lock();
 
-        while (0 == (put_index - get_index)){
-            mLock.wait();
+        while (0 == (m_putIndex - m_getIndex)){
+            m_lock.wait();
         }
 
-        SmartPkt pkt = mPktList[get_index & (length - 1)];
-        mPktList[get_index & (length - 1)] = SmartPkt(0);
-        get_index ++;
+        SmartPkt pkt = m_pktList[m_getIndex & (m_length - 1)];
+        m_pktList[m_getIndex & (m_length - 1)] = SmartPkt(0);
+        m_getIndex ++;
 
-        mLock.signal();
-        mLock.unlock();
+        m_lock.signal();
+        m_lock.unlock();
 
         if (pkt.GetKey() == PktMsgExit){
             break;
@@ -73,7 +73,7 @@ void MessageProcessor::MessageProcessorLoop() {
         MessageProcess(pkt);
     }
 
-    LOGD("MessageProcessor::MessageProcessorLoop [%s] exit\n", name.c_str());
+    LOGD("MessageProcessor >>>>>>>>>>>>>>>>>>>>>>>>>> [%s] stopped\n", m_name.c_str());
 }
 
 void *MessageProcessor::MessageProcessorThread(void *p) {

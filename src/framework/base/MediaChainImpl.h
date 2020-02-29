@@ -35,13 +35,13 @@ namespace freee {
 
     public:
         MediaChainImpl(int mediaType, int mediaNumber, std::string mediaName) :
-            mType(mediaType),
-            mNumber(mediaNumber),
-            mName(mediaName){}
+            m_type(mediaType),
+            m_number(mediaNumber),
+            m_name(mediaName){}
 
         virtual ~MediaChainImpl(){
-            AutoLock lock(mOutputChainLock);
-            mOutputChain.clear();
+            AutoLock lock(m_outputChainLock);
+            m_outputChain.clear();
         }
 
         void Open(MediaChain *chain) override {
@@ -61,89 +61,88 @@ namespace freee {
         }
 
         void ProcessMedia(MediaChain *chain, SmartPkt pkt) override {
-            pkt.SetKey(RecvMsg_ProcessMedia);
 //            pkt.msg.ptr = chain;
             ProcessMessage(pkt);
         }
 
         void onOpened() override {
-            AutoLock lock(mOutputChainLock);
-            for (int i = 0; i < mOutputChain.size(); ++i){
-                mOutputChain[i]->Open(this);
+            AutoLock lock(m_outputChainLock);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Open(this);
             }
         }
 
         void onClosed() override {
-            AutoLock lock(mOutputChainLock);
-            for (int i = 0; i < mOutputChain.size(); ++i){
-                mOutputChain[i]->Close(this);
+            AutoLock lock(m_outputChainLock);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Close(this);
             }
         }
 
         void onStarted() override {
-            AutoLock lock(mOutputChainLock);
-            for (int i = 0; i < mOutputChain.size(); ++i){
-                mOutputChain[i]->Start(this);
+            AutoLock lock(m_outputChainLock);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Start(this);
             }
         }
 
         void onStopped() override {
-            AutoLock lock(mOutputChainLock);
-            for (int i = 0; i < mOutputChain.size(); ++i){
-                mOutputChain[i]->Stop(this);
+            AutoLock lock(m_outputChainLock);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Stop(this);
             }
         }
 
         void onProcessMedia(SmartPkt pkt) override {
-            AutoLock lock(mOutputChainLock);
-            for (int i = 0; i < mOutputChain.size(); ++i){
-                mOutputChain[i]->ProcessMedia(this, pkt);
+            AutoLock lock(m_outputChainLock);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->ProcessMedia(this, pkt);
             }
         }
 
         int GetType(MediaChain *chain) override {
-            return mType;
+            return m_type;
         }
 
         json &GetConfig(MediaChain *chain) override {
-            return mConfig;
+            return m_config;
         }
 
         int GetNumber(MediaChain *chain) override {
-            return mNumber;
+            return m_number;
         }
 
         std::string GetName(MediaChain *chain) override {
-            return mName;
+            return m_name;
         }
 
         virtual void AddOutputChain(MediaChain *chain) override {
             if (chain){
-                AutoLock lock(mOutputChainLock);
-                this->mOutputChain.push_back(chain);
+                AutoLock lock(m_outputChainLock);
+                this->m_outputChain.push_back(chain);
             }
         }
 
         virtual void RemoveOutputChain(MediaChain *chain) override {
-            AutoLock lock(mOutputChainLock);
-            for (int i = 0; i < mOutputChain.size(); ++i){
-                if (mOutputChain[i] == chain){
-                    mOutputChain.erase(mOutputChain.begin() + i);
+            AutoLock lock(m_outputChainLock);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                if (m_outputChain[i] == chain){
+                    m_outputChain.erase(m_outputChain.begin() + i);
                     break;
                 }
             }
         }
 
         virtual void SetEventCallback(MediaChain::EventCallback *callback) override {
-            AutoLock lock(mCallbackLock);
-            mCallback = callback;
+            AutoLock lock(m_callbackLock);
+            p_callback = callback;
         }
 
     protected:
         virtual void ReportEvent(SmartPkt pkt) {
-            AutoLock lock(mCallbackLock);
-            if (mCallback){
-                mCallback->onEvent(this, pkt);
+            AutoLock lock(m_callbackLock);
+            if (p_callback){
+                p_callback->onEvent(this, pkt);
             }
         }
 
@@ -181,16 +180,16 @@ namespace freee {
 
 
     protected:
-        int mType;
-        int mNumber;
-        json mConfig;
-        std::string mName;
+        int m_type;
+        int m_number;
+        json m_config;
+        std::string m_name;
 
-        Lock mCallbackLock;
-        MediaChain::EventCallback *mCallback;
+        Lock m_callbackLock;
+        MediaChain::EventCallback *p_callback;
 
-        Lock mOutputChainLock;
-        std::vector<MediaChain*> mOutputChain;
+        Lock m_outputChainLock;
+        std::vector<MediaChain*> m_outputChain;
 
     };
 

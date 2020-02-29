@@ -41,14 +41,14 @@ namespace freee {
         void FinalClear() override ;
 
     private:
-        int mStatus;
-        int mSrcRotation;
-        int mSrcWidth, mSrcHeight;
-        int mCodecWidth, mCodecHeight;
-        int mSrcImageFormat, mCodecImageFormat;
+        int m_status;
+        int m_srcRotation;
+        int m_srcWidth, m_srcHeight;
+        int m_codecWidth, m_codecHeight;
+        uint32_t m_srcImageFormat, m_codecImageFormat;
 
-        size_t mBufferSize;
-        BufferPool *mBufferPool = nullptr;
+        size_t m_bufferSize;
+        BufferPool *p_bufferPool = nullptr;
 
     };
 

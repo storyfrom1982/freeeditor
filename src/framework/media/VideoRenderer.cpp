@@ -49,9 +49,9 @@ void VideoRenderer::FinalClear() {
 }
 
 void VideoRenderer::MessageOpen(SmartPkt pkt) {
-    mConfig = static_cast<MediaChain *>(pkt.GetPtr())->GetConfig(this);
+    m_config = static_cast<MediaChain *>(pkt.GetPtr())->GetConfig(this);
     if (mStatus == Status_Closed){
-        if (ModuleOpen(mConfig) != 0){
+        if (ModuleOpen(m_config) != 0){
             return;
         }
         mStatus = Status_Opened;

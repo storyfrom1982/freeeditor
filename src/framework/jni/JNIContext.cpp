@@ -48,14 +48,10 @@ public:
         env->DeleteLocalRef(m_cls);
 
         m_msgCls = static_cast<jclass>(env->NewGlobalRef(env->FindClass("cn/freeeditor/sdk/JNIMessage")));
-        m_newPtrMessage = env->GetMethodID(m_msgCls, "<init>", "(IJ)V");
-        m_newObjectMessage = env->GetMethodID(m_msgCls, "<init>", "(ILjava/lang/Object;)V");
-        m_newStringMessage = env->GetMethodID(m_msgCls, "<init>", "(ILjava/lang/String;)V");
+        m_newJniMessage = env->GetMethodID(m_msgCls, "<init>", "(IJLjava/lang/String;)V");
 
         m_keyField = env->GetFieldID(m_msgCls, "key", "I");
-        m_typeField = env->GetFieldID(m_msgCls, "type", "I");
         m_ptrField = env->GetFieldID(m_msgCls, "ptr", "J");
-        m_objField = env->GetFieldID(m_msgCls, "obj", "Ljava/lang/Object;");
         m_stringField = env->GetFieldID(m_msgCls, "string", "Ljava/lang/String;");
     }
 
@@ -81,8 +77,7 @@ public:
 
     void SendMessage(int key, jstring json, JNIEnv *env){
         const char *js = env->GetStringUTFChars(json, 0);
-        MessageContext::SendMessage(GetJsonPkt(key,
-                std::string(js, env->GetStringUTFLength(json))));
+        MessageContext::SendMessage(NewJsonPkt(key, std::string(js, env->GetStringUTFLength(json))));
         env->ReleaseStringUTFChars(json, js);
     }
 
@@ -93,70 +88,42 @@ public:
         MessageContext::SendMessage(pkt);
     }
 
-//    void SendJNIMessage(jobject jmsg) {
-//        JniEnv env;
-//        SmartPkt pkt;
-//        pkt.msg.key = env->GetIntField(jmsg, m_keyField);
-//        pkt.msg.ptr = env->GetLongField(jmsg, m_ptrField);
-//        pkt.msg.decimal = env->GetDoubleField(jmsg, m_typeField);
-//        pkt.msg.troubledPtr = env->GetObjectField(jmsg, m_objField);
-//        jstring str = static_cast<jstring>(env->GetObjectField(jmsg, m_stringField));
-//        if (str != nullptr){
-//            const char *js = env->GetStringUTFChars(str, 0);
-//            pkt.msg.json = strdup(js);
-//            env->ReleaseStringUTFChars(str, js);
-//        }
-//        MessageContext::SendMessage(pkt);
-//    }
-
-    jobject GetJNIMessage(JNIEnv *env, int key) {
-        jobject msg = nullptr;
+    jobject GetMessage(JNIEnv *env, int key) {
+        jstring str = nullptr;
         SmartPkt pkt = MessageContext::GetMessage(key);
-        if (pkt.GetType() == PktMsgType_String){
-            jstring str = env->NewStringUTF(pkt.GetString().c_str());
-            msg = env->NewObject(m_msgCls, m_newStringMessage, pkt.GetKey(), str);
+        if (!pkt.GetString().empty()){
+            str = env->NewStringUTF(pkt.GetString().c_str());
+        }
+        jobject msg = env->NewObject(m_msgCls, m_newJniMessage, pkt.GetKey(), pkt.GetNumber(), str);
+        if (str != nullptr){
             env->DeleteLocalRef(str);
-        }else if (pkt.GetType() == PktMsgType_Ptr){
-            msg = env->NewObject(m_msgCls, m_newPtrMessage, pkt.GetKey(), pkt.GetNumber());
-        }else if (pkt.GetType() == PktMsgType_Unknown){
-            msg = env->NewObject(m_msgCls, m_newObjectMessage, pkt.GetKey(), pkt.GetNumber());
         }
         return msg;
     }
 
     void onRecvMessage(SmartPkt pkt) override {
         JniEnv env;
-        jobject msg = nullptr;
-        if (pkt.GetType() == PktMsgType_String){
-            jstring str = env->NewStringUTF(pkt.GetString().c_str());
-            msg = env->NewObject(m_msgCls, m_newStringMessage, pkt.GetKey(), str);
+        jstring str = nullptr;
+        if (!pkt.GetString().empty()){
+            str = env->NewStringUTF(pkt.GetString().c_str());
+        }
+        jobject msg = env->NewObject(m_msgCls, m_newJniMessage, pkt.GetKey(), pkt.GetNumber(), str);
+        if (str != nullptr){
             env->DeleteLocalRef(str);
-        }else if (pkt.GetType() == PktMsgType_Ptr){
-            msg = env->NewObject(m_msgCls, m_newPtrMessage, pkt.GetKey(), pkt.GetNumber());
-        }else if (pkt.GetType() == PktMsgType_Unknown){
-            msg = env->NewObject(m_msgCls, m_newObjectMessage, pkt.GetKey(), pkt.GetNumber());
-        }else {
-            msg = env->NewObject(m_msgCls, m_newPtrMessage, pkt.GetKey(), pkt.GetNumber());
         }
-        if (msg != nullptr){
-            env->CallVoidMethod(m_obj, m_onReceiveMessage, msg);
-            env->DeleteLocalRef(msg);
-        }
+        env->CallVoidMethod(m_obj, m_onReceiveMessage, msg);
+        env->DeleteLocalRef(msg);
     }
 
     SmartPkt onObtainMessage(int key) override {
         JniEnv env;
         jobject msg = env->CallObjectMethod(m_obj, m_onObtainMessage, key);
         if (env->GetIntField(msg, m_keyField) == key){
-            int type = env->GetIntField(msg, m_typeField);
-            if (type == PktMsgType_String){
-                jstring str = static_cast<jstring>(env->GetObjectField(msg, m_stringField));
-                return GetJsonPkt(key, std::string(env->GetStringUTFChars(str, 0),
-                        env->GetStringUTFLength(str)));
-            }else if (type == PktMsgType_Ptr){
+            jstring str = static_cast<jstring>(env->GetObjectField(msg, m_stringField));
+            if (str != nullptr){
+                return NewJsonPkt(key, std::string(env->GetStringUTFChars(str, 0), env->GetStringUTFLength(str)));
+            }else {
                 return SmartPkt(key, (void*)env->GetLongField(msg, m_ptrField));
-            }else if (type == PktMsgType_Unknown){
-                return SmartPkt(key, (void*)env->GetObjectField(msg, m_objField));
             }
         }
         return SmartPkt();
@@ -169,14 +136,10 @@ private:
     jmethodID m_onObtainMessage;
 
     jclass m_msgCls;
-    jmethodID m_newPtrMessage;
-    jmethodID m_newObjectMessage;
-    jmethodID m_newStringMessage;
+    jmethodID m_newJniMessage;
 
     jfieldID m_keyField;
-    jfieldID m_typeField;
     jfieldID m_ptrField;
-    jfieldID m_objField;
     jfieldID m_stringField;
 };
 
@@ -228,28 +191,6 @@ Java_cn_freeeditor_sdk_JNIContext_disconnectContext__J(JNIEnv *env, jobject inst
         pJNIContext->DisconnectContext();
     }
 }
-
-//extern "C"
-//JNIEXPORT void JNICALL
-//Java_cn_freeeditor_sdk_JNIContext_sendMessage__IJ(JNIEnv *env, jobject instance, jint key,
-//                                                 jlong contextPointer) {
-//    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(contextPointer);
-//    if (pJNIContext){
-//        pJNIContext->SendMessage(key);
-//    }
-//}
-//
-//extern "C"
-//JNIEXPORT void JNICALL
-//Java_cn_freeeditor_sdk_JNIContext_sendMessage__Lcn_freeeditor_sdk_JNIMessage_2J(JNIEnv *env,
-//                                                                                jobject instance,
-//                                                                                jobject msg,
-//                                                                                jlong contextPointer) {
-//    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(contextPointer);
-//    if (pJNIContext){
-//        pJNIContext->SendJNIMessage(msg);
-//    }
-//}
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -303,7 +244,7 @@ Java_cn_freeeditor_sdk_JNIContext_getMessage__IJ(JNIEnv *env, jobject instance, 
                                                  jlong contextPointer) {
     JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(contextPointer);
     assert(pJNIContext);
-    return pJNIContext->GetJNIMessage(env, key);
+    return pJNIContext->GetMessage(env, key);
 }
 
 extern "C"
@@ -321,8 +262,21 @@ Java_cn_freeeditor_sdk_MediaContext_disconnectMediaContext(JNIEnv *env, jobject 
 }
 
 extern "C"
+JNIEXPORT jobject JNICALL
+Java_cn_freeeditor_sdk_JNIMessage_getObject__J(JNIEnv *env, jobject instance, jlong ptr) {
+    return (jobject)ptr;
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_cn_freeeditor_sdk_JNIMessage_getPointer(JNIEnv *env, jobject instance, jobject obj) {
+    obj = env->NewGlobalRef(obj);
+    return (jlong)obj;
+}
+
+extern "C"
 JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_MediaContext_debug(JNIEnv *env, jobject instance) {
+Java_cn_freeeditor_sdk_MediaContext_debug(JNIEnv *env, jclass type) {
     sr_malloc_debug(sr_log_msg);
 }
 

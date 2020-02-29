@@ -111,14 +111,14 @@ void MediaRecorder::onRecvMessage(SmartPkt pkt) {
 void MediaRecorder::Open(SmartPkt pkt) {
     if (mStatus == Status_Closed){
 
-        mConfig = json::parse(pkt.GetString());
+        m_config = json::parse(pkt.GetString());
 
-        LOGD("MediaRecorder config >> %s\n", mConfig.dump(4).c_str());
+        LOGD("MediaRecorder config >> %s\n", m_config.dump(4).c_str());
 
         mVideoSource = new VideoSource();
         mVideoFilter = new VideoFilter();
         mVideoRenderer = new VideoRenderer();
-        mVideoEncoder = VideoEncoder::Create(mConfig["video"]["codecName"]);
+        mVideoEncoder = VideoEncoder::Create(m_config["video"]["codecName"]);
 
         mVideoSource->SetEventCallback(this);
 
@@ -187,12 +187,10 @@ void MediaRecorder::StopRecord() {
 void MediaRecorder::StartPreview(SmartPkt pkt) {
     LOGD("MediaRecorder::StartPreview enter\n");
     if (!isPreviewing){
-        LOGD("MediaRecorder::StartPreview 1\n");
         if (mStatus != Status_Started){
             Start();
         }
         if (mStatus == Status_Started){
-            LOGD("MediaRecorder::StartPreview 2\n");
             mVideoRenderer->SetVideoWindow(pkt.GetPtr());
             isPreviewing = true;
         }
@@ -231,9 +229,9 @@ void MediaRecorder::Stop() {
 
 json &MediaRecorder::GetConfig(MediaChain *chain) {
     if (chain->GetType(this) == MediaType_Video){
-        return mConfig["video"];
+        return m_config["video"];
     }else if (chain->GetType(this) == MediaType_Audio){
-        return mConfig["audio"];
+        return m_config["audio"];
     }
     return MediaChainImpl::GetConfig(chain);
 }

@@ -37,8 +37,9 @@ namespace freee {
         void UpdateMediaConfig(SmartPkt pkt);
 
     private:
-        int mStatus;
-        int mSrcWidth, mSrcHeight, mSrcImageFormat;
+        int m_status;
+        int m_srcWidth, m_srcHeight;
+        uint32_t m_srcImageFormat;
     };
 
 }

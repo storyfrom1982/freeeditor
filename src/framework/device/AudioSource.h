@@ -39,8 +39,6 @@ namespace freee {
 
         virtual SmartPkt onObtainMessage(int key) override;
 
-    private:
-
     };
 
 

@@ -32,16 +32,15 @@ namespace freee {
         static void* MessageProcessorThread(void *p);
 
     private:
-        unsigned int length;
-        unsigned int put_index;
-        unsigned int get_index;
+        std::string m_name;
 
-        std::string name;
+        unsigned int m_length;
+        unsigned int m_putIndex;
+        unsigned int m_getIndex;
 
-        Lock mLock;
-        pthread_t mThreadId;
-
-        std::vector<SmartPkt> mPktList;
+        Lock m_lock;
+        pthread_t m_threadId;
+        std::vector<SmartPkt> m_pktList;
     };
 
 }

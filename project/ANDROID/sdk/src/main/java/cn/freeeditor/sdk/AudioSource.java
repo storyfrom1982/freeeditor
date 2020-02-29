@@ -25,7 +25,6 @@ public class AudioSource extends JNIContext
     }
 
     public void release(){
-        Log.d(TAG, "AudioSource ########################### release()");
         msgHandler.sendEmptyMessage(OnPutMsg_CloseRecord);
         stopHandler();
     }

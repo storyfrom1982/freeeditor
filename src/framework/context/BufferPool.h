@@ -27,123 +27,114 @@ namespace freee {
         PktMsgExit = 0,
     };
 
-    enum {
-        PktMsgType_Unknown = -1,
-        PktMsgType_None = 0,
-        PktMsgType_Ptr,
-        PktMsgType_String,
-    };
-
     class SmartPkt {
 
     public:
-        SmartPkt() : msg({0}), frame({0}), buffer(nullptr)
+        SmartPkt() : frame({0}), m_msg({0}), p_buffer(nullptr)
         {
-            reference_count = new int(1);
+            p_reference_count = new int(1);
         }
-        SmartPkt(int _key) : SmartPkt()
+        SmartPkt(int key) : SmartPkt()
         {
-            msg.key = _key;
-            msg.type = PktMsgType_None;
+            m_msg.key = key;
         }
-        SmartPkt(int _key, void *_ptr) : SmartPkt()
+        SmartPkt(int key, void *ptr) : SmartPkt()
         {
-            msg.key = _key;
-            msg.ptr = _ptr;
-            msg.type = PktMsgType_Ptr;
+            m_msg.key = key;
+            m_msg.ptr = ptr;
         }
-        SmartPkt (sr_buffer_data_t *_buffer) : SmartPkt()
+        SmartPkt (int key, sr_buffer_data_t *buffer) : SmartPkt()
         {
-            buffer = _buffer;
+            m_msg.key = key;
+            p_buffer = buffer;
         }
-        SmartPkt(int _key, std::string str, sr_buffer_data_t *_buffer) : SmartPkt()
+        SmartPkt(int key, std::string str, sr_buffer_data_t *buffer) : SmartPkt()
         {
-            buffer = _buffer;
-            msg.key = _key;
-            msg.size = str.length();
-            msg.type = PktMsgType_String;
-            if (buffer->data_size < msg.size){
-                free(buffer->head);
-                buffer->data_size = msg.size << 2;
-                buffer->data = buffer->head = (unsigned char*)malloc(buffer->data_size);
+            p_buffer = buffer;
+            m_msg.key = key;
+            m_msg.size = str.length();
+            if (p_buffer->data_size < m_msg.size){
+                free(p_buffer->head);
+                p_buffer->data_size = m_msg.size << 2;
+                p_buffer->data = p_buffer->head = (unsigned char*)malloc(p_buffer->data_size);
             }
-            memcpy(buffer->data, str.c_str(), msg.size + 1);
+            memcpy(p_buffer->data, str.c_str(), m_msg.size + 1);
         }
         SmartPkt(const SmartPkt &pkt)
         {
             if (this != &pkt){
-                this->msg = pkt.msg;
-                this->buffer = pkt.buffer;
                 this->frame = pkt.frame;
-                this->reference_count = pkt.reference_count;
-                __sr_atom_add(*reference_count, 1);
+                this->m_msg = pkt.m_msg;
+                this->p_buffer = pkt.p_buffer;
+                this->p_reference_count = pkt.p_reference_count;
+                __sr_atom_add(*p_reference_count, 1);
             }
         }
         ~SmartPkt()
         {
-            __sr_atom_sub(*reference_count, 1);
-            if ((*reference_count) == 0){
-                if (buffer){
-                    sr_buffer_pool_put(buffer);
+            __sr_atom_sub(*p_reference_count, 1);
+            if ((*p_reference_count) == 0){
+                if (p_buffer){
+                    sr_buffer_pool_put(p_buffer);
                 }
-                delete reference_count;
+                delete p_reference_count;
             }
         }
         const SmartPkt& operator =(const SmartPkt& pkt)
         {
             this->~SmartPkt();
-            this->msg = pkt.msg;
             this->frame = pkt.frame;
-            this->buffer = pkt.buffer;
-            this->reference_count = pkt.reference_count;
-            __sr_atom_add(*reference_count, 1);
+            this->m_msg = pkt.m_msg;
+            this->p_buffer = pkt.p_buffer;
+            this->p_reference_count = pkt.p_reference_count;
+            __sr_atom_add(*p_reference_count, 1);
             return *this;
         }
 
     public:
         void SetKey(int key){
-            msg.key = key;
+            m_msg.key = key;
         }
         int GetKey(){
-            return msg.key;
-        }
-        int GetType(){
-            return msg.type;
+            return m_msg.key;
         }
         void* GetPtr(){
-            return msg.ptr;
+            return m_msg.ptr;
         }
         int64_t GetNumber(){
-            return msg.number;
+            return m_msg.number;
         }
         std::string GetString(){
-            return std::string((char*)buffer->data, msg.size);
+            if (p_buffer && p_buffer->data){
+                return std::string((char*)p_buffer->data, m_msg.size);
+            }
+            return std::string();
         }
         unsigned char* GetHeadPtr(){
-            return buffer->head;
+            return p_buffer->head;
         }
         unsigned char* GetDataPtr(){
-            return buffer->data;
+            return p_buffer->data;
         }
         size_t GetDataSize(){
-            return buffer->data_size;
+            return p_buffer->data_size;
         }
 
     public:
         sr_buffer_frame_t frame;
 
     private:
-        int *reference_count;
         struct {
             int key;
-            int type;
             union {
                 void *ptr;
                 size_t size;
                 int64_t number;
             };
-        }msg;
-        sr_buffer_data_t *buffer;
+        }m_msg;
+
+        int *p_reference_count;
+        sr_buffer_data_t *p_buffer;
     };
 
 
@@ -151,26 +142,35 @@ namespace freee {
     class BufferPool {
 
     public:
-        BufferPool(size_t buffer_count, size_t data_size, size_t head_size = 0)
+        BufferPool(size_t buffer_count,
+                size_t data_size,
+                size_t buffer_max_count = 1024,
+                size_t head_size = 0)
         {
-            pool = sr_buffer_pool_create(buffer_count, data_size, head_size);
-            assert(pool);
+            p_pool = sr_buffer_pool_create(buffer_count, data_size, buffer_max_count, head_size);
+            assert(p_pool);
         }
         ~BufferPool()
         {
-            sr_buffer_pool_release(&pool);
+//            LOGD("~BufferPool()<DELETE>[%s]\n", m_name.c_str());
+            sr_buffer_pool_release(&p_pool);
         }
-        SmartPkt GetPkt()
+        void SetName(std::string name){
+            m_name = name;
+            sr_buffer_pool_set_name(p_pool, m_name.c_str());
+        }
+        SmartPkt GetPkt(int key)
         {
-            return SmartPkt(sr_buffer_pool_get(pool));
+            return SmartPkt(key, sr_buffer_pool_get(p_pool));
         }
         SmartPkt GetPkt(int key, std::string str)
         {
-            return SmartPkt(key, str, sr_buffer_pool_get(pool));
+            return SmartPkt(key, str, sr_buffer_pool_get(p_pool));
         }
 
     private:
-        sr_buffer_pool_t *pool;
+        std::string m_name;
+        sr_buffer_pool_t *p_pool;
     };
 
 

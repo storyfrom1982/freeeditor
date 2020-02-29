@@ -8,7 +8,7 @@ import android.view.SurfaceView;
 import com.alibaba.fastjson.JSONObject;
 
 
-public class VideoSurfaceView extends JNIContext implements SurfaceHolder.Callback {
+public class VideoWindow extends JNIContext implements SurfaceHolder.Callback {
 
 
     private static final int SendMsg_SurfaceCreated = 1;
@@ -25,7 +25,7 @@ public class VideoSurfaceView extends JNIContext implements SurfaceHolder.Callba
     private final Object lock = new Object();
 
 
-    public VideoSurfaceView() {
+    public VideoWindow() {
         startHandler();
     }
 

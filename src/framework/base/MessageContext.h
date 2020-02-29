@@ -18,35 +18,36 @@ namespace freee{
     public:
 
         MessageContext(){
-            messageContext = NULL;
-            bufferPool = new BufferPool(2, 4096);
+            p_messageContext = NULL;
+            p_bufferPool = new BufferPool(2, 4096);
         }
 
         virtual ~MessageContext(){
-            LOGD("~MessageContext()[%s]\n", name.c_str());
-            delete bufferPool;
+//            LOGD("~MessageContext()<DELETE>[%s]\n", m_name.c_str());
+            delete p_bufferPool;
         };
 
         void ConnectContext(MessageContext *context){
-            AutoLock lock(mLock);
+            AutoLock lock(m_lock);
             if (context){
-                messageContext = context;
-                AutoLock lockContext(messageContext->mLock);
-                messageContext->messageContext = this;
+                p_messageContext = context;
+                AutoLock lockContext(p_messageContext->m_lock);
+                p_messageContext->p_messageContext = this;
             }
         }
 
         void DisconnectContext(){
-            AutoLock lock(mLock);
-            if (messageContext){
-                AutoLock lockContext(messageContext->mLock);
-                messageContext->messageContext = NULL;
-                messageContext = NULL;
+            AutoLock lock(m_lock);
+            if (p_messageContext){
+                AutoLock lockContext(p_messageContext->m_lock);
+                p_messageContext->p_messageContext = NULL;
+                p_messageContext = NULL;
             }
         }
 
         void SetContextName(std::string name){
-            this->name = name;
+            m_name = name;
+            p_bufferPool->SetName(m_name);
         }
 
     public:
@@ -58,29 +59,29 @@ namespace freee{
 
     protected:
         virtual void SendMessage(SmartPkt pkt){
-            AutoLock lock(mLock);
-            if (messageContext){
-                messageContext->onRecvMessage(pkt);
+            AutoLock lock(m_lock);
+            if (p_messageContext){
+                p_messageContext->onRecvMessage(pkt);
             }
         }
 
         virtual SmartPkt GetMessage(int key){
-            AutoLock lock(mLock);
-            if (messageContext){
-                return messageContext->onObtainMessage(key);
+            AutoLock lock(m_lock);
+            if (p_messageContext){
+                return p_messageContext->onObtainMessage(key);
             }
             return SmartPkt();
         }
 
-        SmartPkt GetJsonPkt(int key, std::string str){
-            return bufferPool->GetPkt(key, str);
+        SmartPkt NewJsonPkt(int key, std::string str){
+            return p_bufferPool->GetPkt(key, str);
         }
 
     private:
-        std::string name;
-        BufferPool *bufferPool;
-        Lock mLock;
-        MessageContext *messageContext;
+        Lock m_lock;
+        std::string m_name;
+        BufferPool *p_bufferPool;
+        MessageContext *p_messageContext;
     };
 
 }
