@@ -21,7 +21,7 @@ public class AudioSource extends JNIContext
     public AudioSource(){
         microphone = new Microphone();
         microphone.setErrorCallback(this);
-        startHandler();
+        startHandler("AudioSource");
     }
 
     public void release(){

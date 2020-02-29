@@ -23,7 +23,7 @@ namespace freee{
         }
 
         virtual ~MessageContext(){
-//            LOGD("~MessageContext()<DELETE>[%s]\n", m_name.c_str());
+//            LOGD("[DELETE]<MessageContext>[%s]\n", m_name.c_str());
             delete p_bufferPool;
         };
 

@@ -21,10 +21,8 @@ VideoEncoder::VideoEncoder(int mediaType, int mediaNumber, const std::string &me
 }
 
 VideoEncoder::~VideoEncoder() {
-    LOGD("VideoEncoder::~VideoEncoder  enter\n");
     StopProcessor();
     FinalClear();
-    LOGD("VideoEncoder::~VideoEncoder  exit\n");
 }
 
 void VideoEncoder::FinalClear() {
@@ -42,6 +40,7 @@ void VideoEncoder::MessageOpen(SmartPkt pkt) {
     int w = m_config["codecWidth"];
     int h = m_config["codecHeight"];
     p_bufferPool = new BufferPool(10, w*h);
+    p_bufferPool->SetName(m_name);
 }
 
 void VideoEncoder::MessageClose(SmartPkt pkt) {

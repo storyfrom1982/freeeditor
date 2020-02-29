@@ -9,6 +9,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MessageProcessor implements Runnable {
 
+    protected static final String TAG = "MessageProcessor";
+
+    private String mName;
     private Thread mThread;
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
@@ -16,7 +19,8 @@ public class MessageProcessor implements Runnable {
 
     void onMessageProcessor(Message msg){}
 
-    void startHandler(){
+    void startHandler(String name){
+        mName = name;
         if (!isRunning.get()){
             mThread = new Thread(this);
             mThread.start();
@@ -45,6 +49,7 @@ public class MessageProcessor implements Runnable {
 
     @Override
     public void run() {
+        Log.d(TAG, "[THREAD]<START>[JAVA-" + mName + "] [" + Thread.currentThread().getId() + "]");
         Looper.prepare();
         msgHandler = new MessageHandler(this);
         synchronized (isRunning){
@@ -52,6 +57,7 @@ public class MessageProcessor implements Runnable {
             isRunning.notifyAll();
         }
         Looper.loop();
+        Log.d(TAG, "[THREAD]<STOPPED>[JAVA-" + mName + "] [" + Thread.currentThread().getId() + "]");
     }
 
     MessageHandler msgHandler;

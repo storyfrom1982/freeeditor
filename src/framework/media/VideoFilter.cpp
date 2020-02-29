@@ -39,7 +39,7 @@ void VideoFilter::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
                 sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, m_srcRotation);
                 MediaChainImpl::ProcessMedia(chain, y420);
             }else {
-                LOGE("missed a video frame\n");
+                LOGD("[WARNING] missed a video frame\n");
             }
         }
     }else {
@@ -69,7 +69,7 @@ void VideoFilter::MessageProcessMedia(SmartPkt pkt) {
 }
 
 int VideoFilter::ModuleOpen(json &cfg) {
-    LOGD("VideoFilter::UpdateConfig >> %s\n", m_config.dump().c_str());
+    LOGD("[MediaConfig] VideoFilter::ModuleOpen >>> %s\n", m_config.dump().c_str());
     m_srcWidth = m_config["srcWidth"];
     m_srcHeight = m_config["srcHeight"];
     m_srcRotation = m_config["srcRotation"];

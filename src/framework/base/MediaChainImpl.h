@@ -40,6 +40,7 @@ namespace freee {
             m_name(mediaName){}
 
         virtual ~MediaChainImpl(){
+//            LOGD("[DELETE]<MediaChainImpl>[%s]\n", m_name.c_str());
             AutoLock lock(m_outputChainLock);
             m_outputChain.clear();
         }

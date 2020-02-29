@@ -152,7 +152,7 @@ namespace freee {
         }
         ~BufferPool()
         {
-//            LOGD("~BufferPool()<DELETE>[%s]\n", m_name.c_str());
+            LOGD("[DELETE]<BufferPool>[%s]\n", m_name.c_str());
             sr_buffer_pool_release(&p_pool);
         }
         void SetName(std::string name){

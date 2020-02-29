@@ -49,7 +49,7 @@ void MessageProcessor::ProcessMessage(SmartPkt pkt) {
 
 void MessageProcessor::MessageProcessorLoop() {
 
-    LOGD("MessageProcessor >>>>>>>>>>>>>>>>>>>>>>>>>> [%s] started\n", m_name.c_str());
+    LOGD("[THREAD]<START>[%s] [%p]\n", m_name.c_str(), pthread_self());
 
     while (true) {
 
@@ -73,7 +73,7 @@ void MessageProcessor::MessageProcessorLoop() {
         MessageProcess(pkt);
     }
 
-    LOGD("MessageProcessor >>>>>>>>>>>>>>>>>>>>>>>>>> [%s] stopped\n", m_name.c_str());
+    LOGD("[THREAD]<STOPPED>[%s] [%p]\n", m_name.c_str(), pthread_self());
 }
 
 void *MessageProcessor::MessageProcessorThread(void *p) {

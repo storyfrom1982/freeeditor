@@ -51,7 +51,7 @@ public class VideoSource extends JNIContext
 
 
     public VideoSource(){
-        startHandler();
+        startHandler("VideoSource");
         mStatus = Status_Closed;
     }
 
