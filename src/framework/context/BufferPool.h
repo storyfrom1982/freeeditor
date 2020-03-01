@@ -57,15 +57,17 @@ namespace freee {
         }
         SmartPkt(int key, std::string str, sr_buffer_data_t *buffer) : SmartPkt()
         {
-            p_buffer = buffer;
-            m_msg.key = key;
-            m_msg.size = str.length();
-            if (p_buffer->data_size < m_msg.size){
-                free(p_buffer->head);
-                p_buffer->data_size = m_msg.size << 2;
-                p_buffer->data = p_buffer->head = (unsigned char*)malloc(p_buffer->data_size);
+            if (buffer){
+                p_buffer = buffer;
+                m_msg.key = key;
+                m_msg.size = str.length();
+                if (p_buffer->data_size < m_msg.size){
+                    free(p_buffer->head);
+                    p_buffer->data_size = m_msg.size << 2;
+                    p_buffer->data = p_buffer->head = (unsigned char*)malloc(p_buffer->data_size);
+                }
+                memcpy(p_buffer->data, str.c_str(), m_msg.size + 1);
             }
-            memcpy(p_buffer->data, str.c_str(), m_msg.size + 1);
         }
         SmartPkt(const SmartPkt &pkt)
         {
@@ -117,13 +119,22 @@ namespace freee {
             return std::string();
         }
         unsigned char* GetHeadPtr(){
-            return p_buffer->head;
+            if (p_buffer){
+                return p_buffer->head;
+            }
+            return nullptr;
         }
         unsigned char* GetDataPtr(){
-            return p_buffer->data;
+            if (p_buffer){
+                return p_buffer->data;
+            }
+            return nullptr;
         }
         size_t GetDataSize(){
-            return p_buffer->data_size;
+            if (p_buffer){
+                return p_buffer->data_size;
+            }
+            return 0;
         }
 
     public:
