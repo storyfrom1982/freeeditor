@@ -37,6 +37,7 @@ void VideoFilter::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
             if (y420.GetDataPtr()){
                 sr_buffer_frame_set_image_format(&y420.frame, y420.GetDataPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
                 sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, m_srcRotation);
+                y420.frame.timestamp = pkt.frame.timestamp;
                 MediaChainImpl::ProcessMedia(chain, y420);
             }else {
                 LOGD("[WARNING] missed a video frame\n");
@@ -79,15 +80,15 @@ int VideoFilter::ModuleOpen(json &cfg) {
     std::string codecFormat = m_config["codecImageFormat"];
     union {
         uint32_t format;
-        char fourcc[4];
+        unsigned char fourcc[4];
     }fourcctoint;
     memcpy(&fourcctoint.fourcc[0], srcFormat.c_str(), 4);
     m_srcImageFormat = fourcctoint.format;
     memcpy(&fourcctoint.fourcc[0], codecFormat.c_str(), 4);
     m_codecImageFormat = fourcctoint.format;
-//    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", m_srcImageFormat, m_codecImageFormat);
-    m_bufferSize = m_codecWidth * m_codecHeight / 2 * 3;
-    p_bufferPool = new BufferPool(1, m_bufferSize, 10, 16);
+//    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", m_srcImageFormat, libyuv::FOURCC_NV21);
+    m_bufferSize = m_codecWidth * m_codecHeight / 2 * 3U;
+    p_bufferPool = new BufferPool(2, m_bufferSize, 10);
     p_bufferPool->SetName(m_name);
     return 0;
 }

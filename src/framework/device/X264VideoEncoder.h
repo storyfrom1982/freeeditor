@@ -28,9 +28,9 @@ namespace freee {
         int ModuleProcessMedia(SmartPkt pkt) override;
 
     private:
-        ino64_t m_frameId;
+//        ino64_t m_frameId;
         x264_t   *m_handle;
-        x264_param_t param;
+        x264_param_t m_param;
     };
 }
 

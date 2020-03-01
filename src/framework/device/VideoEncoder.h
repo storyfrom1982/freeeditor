@@ -40,8 +40,12 @@ namespace freee{
         void FinalClear() override ;
 
     protected:
-        size_t m_bufferSize;
-        BufferPool *p_bufferPool;
+        float m_frameRate = 0.0f;
+        int64_t m_frameId = 0;
+        int64_t m_startFrameId = 0;
+
+        size_t m_bufferSize = 0;
+        BufferPool *p_bufferPool = nullptr;
 
     };
 

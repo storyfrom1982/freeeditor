@@ -20,16 +20,16 @@ X264VideoEncoder::~X264VideoEncoder() {
 
 int X264VideoEncoder::ModuleOpen(json &cfg) {
     LOGD("X264VideoEncoder::OnOpenEncoder: %s\n", cfg.dump().c_str());
-    param = (x264_param_t){0};
+    m_param = (x264_param_t){0};
 
-    x264_param_default(&param);
-    x264_param_default_preset(&param, "veryfast",  "zerolatency");//animation");
-    x264_param_apply_profile(&param,"high");
+    x264_param_default(&m_param);
+    x264_param_default_preset(&m_param, "veryfast",  "zerolatency");//animation");
+    x264_param_apply_profile(&m_param,"high");
 
-    param.i_csp = X264_CSP_I420;
-    param.i_log_level = X264_LOG_NONE;
-    param.i_width = cfg["codecWidth"];
-    param.i_height = cfg["codecHeight"];
+    m_param.i_csp = X264_CSP_I420;
+    m_param.i_log_level = X264_LOG_NONE;
+    m_param.i_width = cfg["codecWidth"];
+    m_param.i_height = cfg["codecHeight"];
 
     bool vbr = cfg["codecVBR"];
     uint32_t fr = cfg["codecFPS"];
@@ -37,51 +37,51 @@ int X264VideoEncoder::ModuleOpen(json &cfg) {
 
     // if input buffer rate is reliable, use the buffer rate for calc bitrate
     if ( fr > 0){
-        param.i_fps_num = fr*1000;
-        param.i_fps_den=1000;
-        param.b_vfr_input = 0;
+        m_param.i_fps_num = fr*1000;
+        m_param.i_fps_den=1000;
+        m_param.b_vfr_input = 0;
     }
     else{
         // if input buffer rate is not reliable, use the i64 for calc bitrate
-        param.b_vfr_input = 1;
-        param.i_timebase_num = 1;
-        param.i_timebase_den = 1000000;
-        param.i_fps_num = 0;
+        m_param.b_vfr_input = 1;
+        m_param.i_timebase_num = 1;
+        m_param.i_timebase_den = 1000000;
+        m_param.i_fps_num = 0;
     }
 
     // i_bitrate: kbit
-    param.rc.i_bitrate = bitrate / 1000;
-    param.rc.i_vbv_buffer_size= param.rc.i_bitrate ;
-    param.rc.i_vbv_max_bitrate= param.rc.i_bitrate ;
-    param.rc.f_rate_tolerance = 0.1f;
-    param.rc.i_lookahead = 0;
+    m_param.rc.i_bitrate = bitrate / 1000;
+    m_param.rc.i_vbv_buffer_size= m_param.rc.i_bitrate ;
+    m_param.rc.i_vbv_max_bitrate= m_param.rc.i_bitrate ;
+    m_param.rc.f_rate_tolerance = 0.1f;
+    m_param.rc.i_lookahead = 0;
     //param.rc.f_vbv_buffer_init=0.89;
     //param.rc.f_rate_tolerance = 1.0;
 
     if (bitrate > 0){
         if (vbr)
         {
-            param.rc.i_rc_method = X264_RC_CRF;
-            param.rc.f_rf_constant = 27;
-            param.rc.f_rf_constant_max = 51;
+            m_param.rc.i_rc_method = X264_RC_CRF;
+            m_param.rc.f_rf_constant = 27;
+            m_param.rc.f_rf_constant_max = 51;
         }
         else{
 
-            param.rc.i_rc_method = X264_RC_ABR;
-            param.rc.i_qp_min = 0;//10;
-            param.rc.i_qp_step = 4;
-            param.rc.i_qp_max = 51;//100;
+            m_param.rc.i_rc_method = X264_RC_ABR;
+            m_param.rc.i_qp_min = 0;//10;
+            m_param.rc.i_qp_step = 4;
+            m_param.rc.i_qp_max = 51;//100;
         }
         //param.rc.f_ip_factor = 0.6;
     }
     else
     {
-        param.rc.i_rc_method = X264_RC_CQP;
-        param.rc.i_qp_constant = 23;
-        param.rc.f_ip_factor = 1.4;
+        m_param.rc.i_rc_method = X264_RC_CQP;
+        m_param.rc.i_qp_constant = 23;
+        m_param.rc.f_ip_factor = 1.4;
     }
 
-    m_handle = x264_encoder_open(&param);
+    m_handle = x264_encoder_open(&m_param);
 
     x264_nal_t* encoded = nullptr;
     int nal;
@@ -130,7 +130,6 @@ int X264VideoEncoder::ModuleProcessMedia(SmartPkt pkt) {
     pic.img.i_stride[1] = frame->plane[1].stride;
     pic.img.i_stride[2] = frame->plane[2].stride;
 
-    m_frameId ++;
     long long timeStamp = m_frameId;
     pic.i_pts = timeStamp;
 
@@ -152,8 +151,12 @@ int X264VideoEncoder::ModuleProcessMedia(SmartPkt pkt) {
         frameLen += nal_len;
     }
 
-    long long tmStamp = param.b_vfr_input ? pic_out.i_dts :
-                        pic_out.i_dts*1000000*param.i_fps_den/param.i_fps_num;
+    long long tmStamp = m_param.b_vfr_input ? pic_out.i_dts :
+                        pic_out.i_dts*1000000*m_param.i_fps_den/m_param.i_fps_num;
+
+//    long long tmStamp = (long long)(m_frameId*1000LL/m_frameRate);
+
+//    long long tmStamp = pkt.frame.timestamp / 1000;
 
 //    LOGD("X264VideoEncoder::OnOpenEncoder: size=%d  i64=%ld\n", frameLen, tmStamp);
     return  0;

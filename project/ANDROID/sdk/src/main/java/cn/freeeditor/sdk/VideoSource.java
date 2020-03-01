@@ -44,6 +44,7 @@ public class VideoSource extends JNIContext
     private JSONObject mConfig;
 
     private Camera mCamera;
+    protected long mStartTime;
 
     private int mBufferCount = 4;
     private ArrayList<byte[]> mBufferList = new ArrayList<>();
@@ -155,6 +156,8 @@ public class VideoSource extends JNIContext
         mConfig.put("srcImageFormat", "NV21");
         sendMessage(SendMsg_Opened, mConfig.toString());
 
+        mStartTime = 0;
+
         mStatus = Status_Opened;
     }
 
@@ -204,7 +207,10 @@ public class VideoSource extends JNIContext
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        sendMessage(SendMsg_ProcessPicture, data, System.currentTimeMillis());
+        if (mStartTime == 0){
+            mStartTime = System.currentTimeMillis() * 1000L;
+        }
+        sendMessage(SendMsg_ProcessPicture, data, System.currentTimeMillis() * 1000L - mStartTime);
         mCamera.addCallbackBuffer(data);
     }
 
