@@ -44,6 +44,8 @@ namespace freee {
             AutoLock lock(m_outputChainLock);
             m_outputChain.clear();
             m_inputChain.clear();
+            m_chainToIndex.clear();
+            m_indexToChain.clear();
         }
 
         void Open(MediaChain *chain) override {
@@ -74,28 +76,36 @@ namespace freee {
             ProcessMessage(pkt);
         }
 
+        int GetInputStreamIndex(MediaChain *chain) override {
+            AutoLock lock(m_inputChainLock);
+            return m_chainToIndex[chain];
+        }
+
     protected:
 
-        void SetStreamIndex(int id) override {
-            m_streamIndex = id;
-        }
-
-        int GetStreamIndex() override {
-            return m_streamIndex;
-        }
-
-        void AddPrev(MediaChain *chain) override {
+        void AddInputChain(MediaChain *chain) override {
             if (chain){
                 AutoLock lock(m_inputChainLock);
                 this->m_inputChain.push_back(chain);
+                int index = 0;
+                std::map<int, void*>::iterator it = m_indexToChain.find(index);
+                while (it != m_indexToChain.end()){
+                    ++index;
+                    it = m_indexToChain.find(index);
+                }
+                m_chainToIndex[chain] = index;
+                m_indexToChain[index] = chain;
             }
         }
 
-        void DelPrev(MediaChain *chain) override {
+        void DelInputChain(MediaChain *chain) override {
             AutoLock lock(m_inputChainLock);
             for (int i = 0; i < m_inputChain.size(); ++i){
                 if (m_inputChain[i] == chain){
                     m_inputChain.erase(m_inputChain.begin() + i);
+                    int index = m_chainToIndex[chain];
+                    m_indexToChain.erase(index);
+                    m_chainToIndex.erase(chain);
                     break;
                 }
             }
@@ -118,20 +128,20 @@ namespace freee {
             return m_name;
         }
 
-        virtual void AddNext(MediaChain *chain) override {
+        virtual void AddOutputChain(MediaChain *chain) override {
             if (chain){
                 AutoLock lock(m_outputChainLock);
                 this->m_outputChain.push_back(chain);
-                chain->AddPrev(this);
+                chain->AddInputChain(this);
             }
         }
 
-        virtual void DelNext(MediaChain *chain) override {
+        virtual void DelOutputChain(MediaChain *chain) override {
             AutoLock lock(m_outputChainLock);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 if (m_outputChain[i] == chain){
                     m_outputChain.erase(m_outputChain.begin() + i);
-                    chain->DelPrev(this);
+                    chain->DelInputChain(this);
                     break;
                 }
             }
@@ -227,7 +237,6 @@ namespace freee {
     protected:
         int m_type;
         int m_number;
-        int m_streamIndex;
         json m_config;
         std::string m_name;
 
@@ -236,6 +245,8 @@ namespace freee {
 //        std::vector<EventCallback*> m_callbackList;
 
         Lock m_inputChainLock;
+        std::map<int, void*> m_indexToChain;
+        std::map<void*, int> m_chainToIndex;
         std::vector<MediaChain*> m_inputChain;
 
         Lock m_outputChainLock;

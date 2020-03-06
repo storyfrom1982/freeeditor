@@ -122,6 +122,7 @@ target_link_libraries(
         lib_swscale
         lib_avutil
 
+        z
     log
     EGL
     GLESv1_CM

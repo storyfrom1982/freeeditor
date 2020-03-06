@@ -124,17 +124,17 @@ void MediaRecorder::Open(SmartPkt pkt) {
 
 //        m_videoSource->SetEventCallback(this);
 
-        m_videoSource->AddNext(m_videoFilter);
-        m_videoFilter->AddNext(m_videoRenderer);
-        m_videoFilter->AddNext(m_videoEncoder);
+        m_videoSource->AddOutputChain(m_videoFilter);
+        m_videoFilter->AddOutputChain(m_videoRenderer);
+        m_videoFilter->AddOutputChain(m_videoEncoder);
         m_videoSource->Open(this);
 
 
         m_audioSource = new AudioSource();
         m_audioFilter = new AudioFilter();
         m_audioEncoder = AudioEncoder::Create(m_config["audio"]["codecName"]);
-        m_audioSource->AddNext(m_audioFilter);
-        m_audioFilter->AddNext(m_audioEncoder);
+        m_audioSource->AddOutputChain(m_audioFilter);
+        m_audioFilter->AddOutputChain(m_audioEncoder);
         m_audioSource->Open(this);
 
         m_status = Status_Opened;
@@ -148,9 +148,9 @@ void MediaRecorder::Close() {
     if (m_status == Status_Opened
         || m_status == Status_Stopped){
 
-        m_videoSource->DelNext(m_videoFilter);
-        m_videoFilter->DelNext(m_videoRenderer);
-        m_videoFilter->DelNext(m_videoEncoder);
+        m_videoSource->DelOutputChain(m_videoFilter);
+        m_videoFilter->DelOutputChain(m_videoRenderer);
+        m_videoFilter->DelOutputChain(m_videoEncoder);
 
         m_videoSource->Close(this);
         m_videoFilter->Close(this);
@@ -163,8 +163,8 @@ void MediaRecorder::Close() {
         delete m_videoFilter;
 
 
-        m_audioSource->DelNext(m_audioFilter);
-        m_audioFilter->DelNext(m_audioEncoder);
+        m_audioSource->DelOutputChain(m_audioFilter);
+        m_audioFilter->DelOutputChain(m_audioEncoder);
         m_audioSource->Close(this);
         m_audioFilter->Close(this);
         m_audioEncoder->Close(this);

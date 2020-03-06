@@ -37,3 +37,7 @@ void MediaStream::onMsgProcessMedia(SmartPkt pkt) {
 void MediaStream::onMsgControl(SmartPkt pkt) {
     MediaChainImpl::onMsgControl(pkt);
 }
+
+MediaStream *MediaStream::Create(std::string name) {
+    return nullptr;
+}

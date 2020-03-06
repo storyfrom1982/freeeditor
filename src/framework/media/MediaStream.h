@@ -12,12 +12,18 @@ namespace freee {
 
     class MediaStream : public MediaModule {
     public:
+        static MediaStream* Create(std::string name);
+
         MediaStream(int mediaType = MediaType_All,
                 int mediaNumber = MediaNumber_OutputProtocal,
                 const std::string &mediaName = "MediaStream");
         ~MediaStream();
 
         void FinalClear() override;
+
+        virtual void ConnectStream(std::string url){};
+
+        virtual void DisconnectStream(){};
 
     protected:
         void onMsgOpen(SmartPkt pkt) override;

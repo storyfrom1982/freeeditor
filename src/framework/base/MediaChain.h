@@ -56,14 +56,12 @@ namespace freee {
         virtual json& GetConfig(MediaChain *chain) = 0;
         virtual std::string GetName(MediaChain *chain) = 0;
 
-        virtual void SetStreamIndex(int id) = 0;
-        virtual int GetStreamIndex() = 0;
+        virtual void AddInputChain(MediaChain *chain) = 0;
+        virtual void DelInputChain(MediaChain *chain) = 0;
+        virtual int GetInputStreamIndex(MediaChain *chain) = 0;
 
-        virtual void AddPrev(MediaChain *chain) = 0;
-        virtual void DelPrev(MediaChain *chain) = 0;
-
-        virtual void AddNext(MediaChain *chain) = 0;
-        virtual void DelNext(MediaChain *chain) = 0;
+        virtual void AddOutputChain(MediaChain *chain) = 0;
+        virtual void DelOutputChain(MediaChain *chain) = 0;
 
     protected:
 
