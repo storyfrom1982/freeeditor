@@ -30,13 +30,13 @@ void VideoEncoder::FinalClear() {
         delete p_bufferPool;
         p_bufferPool = nullptr;
     }
-    ModuleClose();
+    CloseModule();
 }
 
-void VideoEncoder::MessageOpen(SmartPkt pkt) {
+void VideoEncoder::onMsgOpen(SmartPkt pkt) {
     MediaChain *chain = static_cast<MediaChain *>(pkt.GetPtr());
     m_config = chain->GetConfig(this);
-    ModuleOpen(m_config);
+    OpenModule();
     m_frameId = 0;
     m_startFrameId = -1;
     m_frameRate = m_config["codecFPS"];
@@ -46,11 +46,11 @@ void VideoEncoder::MessageOpen(SmartPkt pkt) {
     p_bufferPool->SetName(m_name);
 }
 
-void VideoEncoder::MessageClose(SmartPkt pkt) {
-    ModuleClose();
+void VideoEncoder::onMsgClose(SmartPkt pkt) {
+    CloseModule();
 }
 
-void VideoEncoder::MessageProcessMedia(SmartPkt pkt) {
+void VideoEncoder::onMsgProcessMedia(SmartPkt pkt) {
     if ( m_frameRate > 0) {
 //        LOGD("m_framerate ================  delay[%f]\n", m_frameRate);
         long long timeStamp = pkt.frame.timestamp;
@@ -69,7 +69,7 @@ void VideoEncoder::MessageProcessMedia(SmartPkt pkt) {
             for (int i = 0; i < error; i++) {
 //                LOGD("fill a video frame[%lf]\n", error);
                 m_frameId++;
-                ModuleProcessMedia(pkt);
+                ProcessMediaByModule(pkt);
             }
         }
         if (error < -0.555) {// drop
@@ -78,9 +78,9 @@ void VideoEncoder::MessageProcessMedia(SmartPkt pkt) {
         }
     }
     m_frameId++;
-    ModuleProcessMedia(pkt);
+    ProcessMediaByModule(pkt);
 }
 
-void VideoEncoder::MessageControl(SmartPkt pkt) {
-    MediaChainImpl::MessageControl(pkt);
+void VideoEncoder::onMsgControl(SmartPkt pkt) {
+    MediaChainImpl::onMsgControl(pkt);
 }

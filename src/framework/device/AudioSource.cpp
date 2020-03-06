@@ -11,18 +11,18 @@ using namespace freee;
 
 
 enum {
-    PutMsg_Open = 1,
-    PutMsg_Close = 2,
-    PutMsg_Start = 3,
-    PutMsg_Stop = 4,
+    SendMsg_Open = 1,
+    SendMsg_Close = 2,
+    SendMsg_Start = 3,
+    SendMsg_Stop = 4,
 };
 
 enum {
-    OnPutMsg_Opened = 1,
-    OnPutMsg_Closed = 2,
-    OnPutMsg_Started = 3,
-    OnPutMsg_Stopped = 4,
-    OnPutMsg_ProcessSound = 5
+    OnRecvMsg_Opened = 1,
+    OnRecvMsg_Started = 2,
+    OnRecvMsg_Stopped = 3,
+    OnRecvMsg_Closed = 4,
+    OnRecvMsg_ProcessSound = 5
 };
 
 
@@ -39,10 +39,44 @@ AudioSource::~AudioSource() {
     DisconnectContext();
 //    MediaContext::Instance().DisconnectMicrophone();
     MediaContext::Instance()->DisconnectMicrophone();
+    FinalClear();
 }
 
-void AudioSource::onRecvMessage(SmartPkt msg) {
-//    LOGD("AudioSource::onRecvMessage data %d\n", msg.GetKey());
+void AudioSource::onRecvMessage(SmartPkt pkt) {
+    switch (pkt.GetKey()){
+        case OnRecvMsg_ProcessSound:
+            ProcessMedia(this, pkt);
+            break;
+        case OnRecvMsg_Opened:
+            m_status = Status_Opened;
+            LOGD("AudioSource Opened\n");
+            UpdateConfig(pkt);
+            pkt.SetKey(PktMsgOpen);
+            MediaChainImpl::onMsgOpen(pkt);
+//            ReportEvent(SmartPkt(Status_Opened + m_number));
+            break;
+        case OnRecvMsg_Closed:
+            m_status = Status_Closed;
+//            CloseNext();
+            pkt.SetKey(PktMsgClose);
+            MediaChainImpl::onMsgClose(pkt);
+//            ReportEvent(SmartPkt(Status_Closed + m_number));
+            FinalClear();
+            LOGD("AudioSource Closed\n");
+            break;
+        case OnRecvMsg_Started:
+            m_status = Status_Started;
+//            ReportEvent(SmartPkt(Status_Started + m_number));
+            LOGD("AudioSource Started\n");
+            break;
+        case OnRecvMsg_Stopped:
+//            ReportEvent(SmartPkt(Status_Stopped + m_number));
+            m_status = Status_Stopped;
+            LOGD("AudioSource Stopped\n");
+            break;
+        default:
+            break;
+    }
 }
 
 SmartPkt AudioSource::onObtainMessage(int key) {
@@ -51,29 +85,46 @@ SmartPkt AudioSource::onObtainMessage(int key) {
 
 void AudioSource::Open(MediaChain *chain) {
     m_config = chain->GetConfig(this);
-    SendMessage(NewJsonPkt(PutMsg_Open, m_config.dump()));
+    SendMessage(NewJsonPkt(SendMsg_Open, m_config.dump()));
 }
 
 void AudioSource::Close(MediaChain *chain) {
-    SmartPkt pkt(PutMsg_Close);
+    SmartPkt pkt(SendMsg_Close);
     SendMessage(pkt);
 }
 
 void AudioSource::Start(MediaChain *chain) {
-    SmartPkt pkt(PutMsg_Start);
+    SmartPkt pkt(SendMsg_Start);
     SendMessage(pkt);
 }
 
 void AudioSource::Stop(MediaChain *chain) {
-    SmartPkt pkt(PutMsg_Stop);
+    SmartPkt pkt(SendMsg_Stop);
     SendMessage(pkt);
 }
 
 void AudioSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
-    MediaChainImpl::ProcessMedia(chain, pkt);
+    SmartPkt resample = p_bufferPool->GetPkt(PktMsgProcessMedia);
+    memcpy(resample.GetDataPtr(), pkt.frame.data, resample.GetDataSize());
+    MediaChainImpl::onMsgProcessMedia(resample);
 }
 
 void AudioSource::FinalClear() {
+    if (p_bufferPool){
+        delete p_bufferPool;
+        p_bufferPool = nullptr;
+    }
+}
 
+void AudioSource::UpdateConfig(SmartPkt ptk) {
+    m_config = json::parse(ptk.GetString());
+    m_codecSampleRate = m_config["codecSampleRate"];
+    m_codecChannelCount = m_config["codecChannelCount"];
+    m_codecBytePerSample = m_config["codecBytePerSample"];
+    m_codecSamplePerFrame = m_config["codecSamplePerFrame"];
+
+    m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplePerFrame;
+    p_bufferPool = new BufferPool(2, m_bufferSize, 10);
+    p_bufferPool->SetName("AudioSource");
 }
 

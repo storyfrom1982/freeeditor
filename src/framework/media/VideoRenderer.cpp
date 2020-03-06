@@ -48,30 +48,30 @@ void VideoRenderer::FinalClear() {
     }
 }
 
-void VideoRenderer::MessageOpen(SmartPkt pkt) {
+void VideoRenderer::onMsgOpen(SmartPkt pkt) {
     m_config = static_cast<MediaChain *>(pkt.GetPtr())->GetConfig(this);
     if (mStatus == Status_Closed){
-        if (ModuleOpen(m_config) != 0){
+        if (OpenModule() != 0){
             return;
         }
         mStatus = Status_Opened;
-        onOpened();
+        MediaChainImpl::onMsgOpen(pkt);
     }
 }
 
-void VideoRenderer::MessageClose(SmartPkt pkt) {
+void VideoRenderer::onMsgClose(SmartPkt pkt) {
     if (mStatus == Status_Opened){
-        ModuleClose();
+        CloseModule();
         mStatus = Status_Closed;
-        onClosed();
+        MediaChainImpl::onMsgClose(pkt);
     }
 }
 
-void VideoRenderer::MessageProcessMedia(SmartPkt pkt) {
-    ModuleProcessMedia(pkt);
+void VideoRenderer::onMsgProcessMedia(SmartPkt pkt) {
+    ProcessMediaByModule(pkt);
 }
 
-void VideoRenderer::MessageControl(SmartPkt pkt) {
+void VideoRenderer::onMsgControl(SmartPkt pkt) {
     switch (pkt.GetKey()){
         case RecvMsg_SetVideoWindow:
             MessageSetVideoWindow(pkt);
@@ -90,9 +90,9 @@ void VideoRenderer::MessageControl(SmartPkt pkt) {
     }
 }
 
-int VideoRenderer::ModuleOpen(json &cfg) {
-    int width = cfg["codecWidth"];
-    int height = cfg["codecHeight"];
+int VideoRenderer::OpenModule() {
+    int width = m_config["codecWidth"];
+    int height = m_config["codecHeight"];
     renderer = gl_renderer_create(width, height);
     if (!renderer){
         return -1;
@@ -104,7 +104,7 @@ int VideoRenderer::ModuleOpen(json &cfg) {
     return 0;
 }
 
-void VideoRenderer::ModuleClose() {
+void VideoRenderer::CloseModule() {
     if (renderer){
         gl_renderer_release(&renderer);
     }
@@ -117,12 +117,13 @@ void VideoRenderer::ModuleClose() {
     }
 }
 
-int VideoRenderer::ModuleProcessMedia(SmartPkt pkt) {
+int VideoRenderer::ProcessMediaByModule(SmartPkt pkt) {
     AutoLock lock(mLock);
     if (!isSurfaceDestroyed){
         opengles_render(opengles, &pkt.frame);
         gl_renderer_swap_buffers(renderer);
     }
+    MediaChainImpl::onMsgProcessMedia(pkt);
     return 0;
 }
 

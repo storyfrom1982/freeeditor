@@ -168,6 +168,8 @@ public class Microphone implements Runnable {
             isRunning.set(false);
         }
 
+        long startTime = 0;
+
         while (isRunning.get()){
 
             result = mAudioRecord.read(cacheBuffer, cacheWritePos, mRecordBufferSize);
@@ -199,7 +201,10 @@ public class Microphone implements Runnable {
                 }
                 synchronized (callbackLock){
                     if (mRecordCallback != null){
-                        mRecordCallback.onRecordFrame(codecBuffer, System.currentTimeMillis());
+                        if (startTime == 0){
+                            startTime = System.currentTimeMillis() * 1000;
+                        }
+                        mRecordCallback.onRecordFrame(codecBuffer, System.currentTimeMillis() * 1000 - startTime);
                     }
                 }
             }

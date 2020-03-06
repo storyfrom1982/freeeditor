@@ -11,48 +11,83 @@ public class AudioSource extends JNIContext
 
     protected static final String TAG = "AudioSource";
 
+    private static final int Status_Closed = 0;
+    private static final int Status_Opened = 1;
+    private static final int Status_Started = 2;
+    private static final int Status_Stopped = 3;
+
     private int mSampleRate;
     private int mChannelCount;
     private int mBytesPerSample;
     private int mSamplesPerFrame;
 
+    private int mStatus;
+    private JSONObject mConfig;
     private Microphone microphone;
 
     public AudioSource(){
+        mStatus = Status_Closed;
         microphone = new Microphone();
         microphone.setErrorCallback(this);
         startHandler("AudioSource");
     }
 
     public void release(){
-        msgHandler.sendEmptyMessage(OnPutMsg_CloseRecord);
+        msgHandler.sendEmptyMessage(OnRecvMsg_CloseRecord);
         stopHandler();
     }
 
-    public int open(String cfgStr){
-        JSONObject cfg = JSON.parseObject(cfgStr);
-        Log.d(TAG, "AudioSource config: " + cfg.toJSONString());
-        mSampleRate = cfg.getIntValue("srcSampleRate");
-        mChannelCount = cfg.getIntValue("srcChannelCount");
-        mBytesPerSample = cfg.getIntValue("srcBytesPerSample");
-        mSamplesPerFrame = cfg.getIntValue("codecSamplesPerFrame");
-        return microphone.open(mSampleRate, mChannelCount, mBytesPerSample, mSamplesPerFrame);
+    public void open(String cfgStr){
+        if (mStatus != Status_Closed){
+            return ;
+        }
+        mConfig = JSON.parseObject(cfgStr);
+        Log.d(TAG, "AudioSource config: " + mConfig.toJSONString());
+        mSampleRate = mConfig.getIntValue("srcSampleRate");
+        mChannelCount = mConfig.getIntValue("srcChannelCount");
+        mBytesPerSample = mConfig.getIntValue("srcBytePerSample");
+        mSamplesPerFrame = mConfig.getIntValue("codecSamplePerFrame");
+        microphone.open(mSampleRate, mChannelCount, mBytesPerSample, mSamplesPerFrame);
+
+        mStatus = Status_Opened;
+        sendMessage(SendMsg_Opened, this.mConfig.toString());
     }
 
 
     public void start(){
-        microphone.start();
-        microphone.setRecordCallback(this);
+        if (mStatus == Status_Opened || mStatus == Status_Stopped){
+            if (microphone != null){
+                microphone.start();
+                microphone.setRecordCallback(this);
+                sendMessage(SendMsg_Started);
+                mStatus = Status_Started;
+            }
+        }
     }
 
 
     public void stop(){
-        microphone.stop();
+        if (mStatus == Status_Started){
+            if (microphone != null){
+                microphone.stop();
+                sendMessage(SendMsg_Stopped);
+                mStatus = Status_Stopped;
+            }
+        }
     }
 
 
     public void close() {
-        microphone.close();
+        if (mStatus == Status_Started){
+            stop();
+        }
+        if (mStatus == Status_Opened || mStatus == Status_Stopped){
+            if (microphone != null){
+                microphone.close();
+                mStatus = Status_Closed;
+                sendMessage(SendMsg_Closed);
+            }
+        }
     }
 
     @Override
@@ -60,36 +95,36 @@ public class AudioSource extends JNIContext
         super.release();
     }
 
-    private static final int OnPutMsg_OpenRecord = 1;
-    private static final int OnPutMsg_CloseRecord = 2;
-    private static final int OnPutMsg_StartRecord = 3;
-    private static final int OnPutMsg_StopRecord = 4;
+    private static final int OnRecvMsg_OpenRecord = 1;
+    private static final int OnRecvMsg_CloseRecord = 2;
+    private static final int OnRecvMsg_StartRecord = 3;
+    private static final int OnRecvMsg_StopRecord = 4;
 
 
-    private static final int PutMsg_Opened = 1;
-    private static final int PutMsg_Closed = 2;
-    private static final int PutMsg_Started = 3;
-    private static final int PutMsg_Stopped = 4;
-    private static final int PutMsg_ProcessSound = 5;
+    private static final int SendMsg_Opened = 1;
+    private static final int SendMsg_Started = 2;
+    private static final int SendMsg_Stopped = 3;
+    private static final int SendMsg_Closed = 4;
+    private static final int SendMsg_ProcessSound = 5;
 
     @Override
     void onMessageProcessor(Message msg) {
         JNIMessage jmsg = (JNIMessage) msg.obj;
         switch (msg.what){
 
-            case OnPutMsg_OpenRecord:
+            case OnRecvMsg_OpenRecord:
                 open(jmsg.string);
                 break;
 
-            case OnPutMsg_StartRecord:
+            case OnRecvMsg_StartRecord:
                 start();
                 break;
 
-            case OnPutMsg_StopRecord:
+            case OnRecvMsg_StopRecord:
                 stop();
                 break;
 
-            case OnPutMsg_CloseRecord:
+            case OnRecvMsg_CloseRecord:
                 close();
                 break;
 
@@ -111,7 +146,7 @@ public class AudioSource extends JNIContext
 
     @Override
     public void onRecordFrame(byte[] data, long timestamp) {
-        sendMessage(PutMsg_ProcessSound, timestamp);
+        sendMessage(SendMsg_ProcessSound, data, timestamp);
     }
 
     @Override

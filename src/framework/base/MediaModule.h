@@ -19,10 +19,10 @@ namespace freee {
         virtual ~MediaModule(){};
 
     protected:
-        virtual int ModuleOpen(json &cfg){ return 0;};
-        virtual void ModuleClose(){};
-        virtual int ModuleProcessMedia(SmartPkt pkt){ return 0;};
-        virtual void onModuleProcessMedia(SmartPkt pkt){};
+        virtual int OpenModule(){ return 0;};
+        virtual void CloseModule(){};
+        virtual int ProcessMediaByModule(SmartPkt pkt){ return 0;};
+        virtual void onProcessMediaByModule(SmartPkt pkt){};
     };
 
 }

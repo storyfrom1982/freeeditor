@@ -11,22 +11,24 @@
 #include <VideoEncoder.h>
 #include <MessageProcessor.h>
 #include <MediaModule.h>
+#include <AudioEncoder.h>
 #include "../../media/VideoSource.h"
 #include "../../media/VideoRenderer.h"
 #include "../../media/VideoFilter.h"
+#include "../../media/AudioFilter.h"
 
 namespace freee{
 
-class MediaRecorder : public MessageContext, MediaChainImpl, MediaChain::EventCallback {
+    class MediaRecorder : public MessageContext, MediaChainImpl {
 
-public:
+    public:
         MediaRecorder();
         ~MediaRecorder();
 
-private:
-    void FinalClear() override;
+    private:
+        void FinalClear() override;
 
-private:
+    private:
         void onRecvMessage(SmartPkt pkt) override;
 
     protected:
@@ -43,22 +45,26 @@ private:
         void StopPreview();
 
         void FinalClearVideoChain();
-        void onEvent(MediaChain *chain, SmartPkt pkt) override;
 
+    public:
+        void ConnectContext(MessageContext *context) override;
         json &GetConfig(MediaChain *chain) override;
 
     private:
-        int mStatus;
+        int m_status;
 
-        bool isRecording;
-        bool isPreviewing;
+        bool is_recording;
+        bool is_previewing;
 
 
-        AudioSource *mAudioSource;
-        VideoFilter *mVideoFilter;
-        VideoSource *mVideoSource;
-        VideoRenderer *mVideoRenderer;
-        VideoEncoder *mVideoEncoder;
+        AudioSource *m_audioSource;
+        AudioFilter *m_audioFilter;
+        AudioEncoder *m_audioEncoder;
+
+        VideoFilter *m_videoFilter;
+        VideoSource *m_videoSource;
+        VideoRenderer *m_videoRenderer;
+        VideoEncoder *m_videoEncoder;
     };
 }
 

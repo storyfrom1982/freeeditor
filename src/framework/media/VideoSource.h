@@ -38,8 +38,13 @@ namespace freee {
 
     private:
         int m_status;
+        int m_srcRotation;
         int m_srcWidth, m_srcHeight;
-        uint32_t m_srcImageFormat;
+        int m_codecWidth, m_codecHeight;
+        uint32_t m_srcImageFormat, m_codecImageFormat;
+
+        size_t m_bufferSize;
+        BufferPool *p_bufferPool = nullptr;
     };
 
 }

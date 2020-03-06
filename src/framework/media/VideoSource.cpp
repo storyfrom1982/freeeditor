@@ -40,6 +40,7 @@ VideoSource::~VideoSource() {
     DisconnectContext();
 //    MediaContext::Instance().DisconnectCamera();
     MediaContext::Instance()->DisconnectCamera();
+    FinalClear();
 }
 
 void VideoSource::Open(MediaChain *chain) {
@@ -71,7 +72,23 @@ void VideoSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
     sr_buffer_frame_set_image_format(
             &pkt.frame, pkt.frame.data,
             m_srcWidth, m_srcHeight, m_srcImageFormat);
-    onProcessMedia(pkt);
+    if (m_srcImageFormat != m_codecImageFormat
+        || m_srcWidth != m_codecWidth
+        || m_srcHeight != m_codecHeight){
+        if (p_bufferPool){
+            SmartPkt y420 = p_bufferPool->GetPkt(PktMsgProcessMedia);
+            if (y420.GetDataPtr()){
+                sr_buffer_frame_set_image_format(&y420.frame, y420.GetDataPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
+                sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, m_srcRotation);
+                y420.frame.timestamp = pkt.frame.timestamp;
+                MediaChainImpl::onMsgProcessMedia(y420);
+            }else {
+                LOGD("[WARNING] missed a video frame\n");
+            }
+        }
+    }else {
+        MediaChainImpl::onMsgProcessMedia(pkt);
+    }
 }
 
 void VideoSource::onRecvMessage(SmartPkt pkt) {
@@ -82,21 +99,25 @@ void VideoSource::onRecvMessage(SmartPkt pkt) {
         case OnRecvMsg_Opened:
             m_status = Status_Opened;
             LOGD("VideoSource Opened\n");
+            pkt.SetKey(PktMsgOpen);
             UpdateMediaConfig(pkt);
-            ReportEvent(SmartPkt(Status_Opened + m_number));
+//            ReportEvent(SmartPkt(Status_Opened + m_number));
             break;
         case OnRecvMsg_Closed:
             m_status = Status_Closed;
-            ReportEvent(SmartPkt(Status_Closed + m_number));
+            pkt.SetKey(PktMsgClose);
+            MediaChainImpl::onMsgClose(pkt);
+            FinalClear();
+//            ReportEvent(SmartPkt(Status_Closed + m_number));
             LOGD("VideoSource Closed\n");
             break;
         case OnRecvMsg_Started:
             m_status = Status_Started;
-            ReportEvent(SmartPkt(Status_Started + m_number));
+//            ReportEvent(SmartPkt(Status_Started + m_number));
             LOGD("VideoSource Started\n");
             break;
         case OnRecvMsg_Stopped:
-            ReportEvent(SmartPkt(Status_Stopped + m_number));
+//            ReportEvent(SmartPkt(Status_Stopped + m_number));
             m_status = Status_Stopped;
             LOGD("VideoSource Stopped\n");
             break;
@@ -110,16 +131,30 @@ void VideoSource::UpdateMediaConfig(SmartPkt pkt) {
     m_config = json::parse(pkt.GetString());
     m_srcWidth = m_config["srcWidth"];
     m_srcHeight = m_config["srcHeight"];
+    m_srcRotation = m_config["srcRotation"];
+    m_codecWidth = m_config["codecWidth"];
+    m_codecHeight = m_config["codecHeight"];
     std::string srcFormat = m_config["srcImageFormat"];
+    std::string codecFormat = m_config["codecImageFormat"];
     union {
         uint32_t format;
-        char fourcc[4];
+        unsigned char fourcc[4];
     }fourcctoint;
     memcpy(&fourcctoint.fourcc[0], srcFormat.c_str(), 4);
     m_srcImageFormat = fourcctoint.format;
-    onOpened();
+    memcpy(&fourcctoint.fourcc[0], codecFormat.c_str(), 4);
+    m_codecImageFormat = fourcctoint.format;
+//    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", m_srcImageFormat, libyuv::FOURCC_NV21);
+    m_bufferSize = m_codecWidth * m_codecHeight / 2 * 3U;
+    p_bufferPool = new BufferPool(2, m_bufferSize, 10);
+    p_bufferPool->SetName("VideoSource");
+
+    MediaChainImpl::onMsgOpen(pkt);
 }
 
 void VideoSource::FinalClear() {
-
+    if (p_bufferPool){
+        delete p_bufferPool;
+        p_bufferPool = nullptr;
+    }
 }

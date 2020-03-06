@@ -21,21 +21,20 @@ namespace freee {
 
         ~VideoFilter();
 
-    public:
-        void ProcessMedia(MediaChain *chain, SmartPkt pkt) override;
+//        void ProcessMedia(MediaChain *chain, SmartPkt pkt) override;
 
     protected:
-        void MessageOpen(SmartPkt pkt) override;
+        void onMsgOpen(SmartPkt pkt) override;
 
-        void MessageClose(SmartPkt pkt) override;
+        void onMsgClose(SmartPkt pkt) override;
 
-        void MessageProcessMedia(SmartPkt pkt) override;
+        void onMsgProcessMedia(SmartPkt pkt) override;
 
-        int ModuleOpen(json &cfg) override;
+        int OpenModule() override;
 
-        void ModuleClose() override;
+        void CloseModule() override;
 
-        int ModuleProcessMedia(SmartPkt pkt) override;
+        int ProcessMediaByModule(SmartPkt pkt) override;
 
     private:
         void FinalClear() override ;

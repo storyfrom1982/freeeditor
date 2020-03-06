@@ -75,6 +75,8 @@ void MConfig::buildDefaultConfig(json &config) {
 
             {"video", {
 
+                {"type", "video"},
+
                 {"srcWidth", 640},
                 {"srcHeight", 360},
                 {"srcImageFormat", "NV21"},
@@ -103,9 +105,11 @@ void MConfig::buildDefaultConfig(json &config) {
 
 
             {"audio", {
+                {"type", "audio"},
+
                 {"srcSampleRate", 48000},
                 {"srcChannelCount", 1},
-                {"srcBytesPerSample", 2},
+                {"srcBytePerSample", 2},
                 {"srcPosition", "center"},
                 {"srcAEC", false},
 
@@ -114,8 +118,8 @@ void MConfig::buildDefaultConfig(json &config) {
                 {"codecBitRate", 128},
                 {"codecSampleRate", 48000},
                 {"codecChannelCount", 1},
-                {"codecBytesPerSample", 2},
-                {"codecSamplesPerFrame", 1024},
+                {"codecBytePerSample", 2},
+                {"codecSamplePerFrame", 1024},
             }},
 
             {"audioEffect", {

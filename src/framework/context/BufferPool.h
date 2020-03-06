@@ -24,14 +24,14 @@ namespace freee {
 
     enum {
         PktMsgError = -1,
-        PktMsgExit = 0,
+        PktMsgClosed = 0,
         PktMsgOpen = 1,
         PktMsgStart = 2,
         PktMsgStop = 3,
         PktMsgClose = 4,
         PktMsgProcessMedia = 5,
-        PktMsgControl = 6,
-        PktMsgReserved = 10,
+        PktMsgRecvEvent = 6,
+        PktMsgControl = 10,
     };
 
     class SmartPkt {
@@ -103,9 +103,15 @@ namespace freee {
         void SetKey(int key){
             m_msg.key = key;
         }
+        void SetPtr(void *ptr){
+            m_msg.ptr = ptr;
+        }
         int GetKey(){
             return m_msg.key;
         }
+//        MediaChain* GetChain(){
+//            return (MediaChain*)m_msg.ptr;
+//        }
         void* GetPtr(){
             return m_msg.ptr;
         }
@@ -143,9 +149,10 @@ namespace freee {
     private:
         struct {
             int key;
+            int event;
+            size_t size;
             union {
                 void *ptr;
-                size_t size;
                 int64_t number;
             };
         }m_msg;

@@ -27,7 +27,7 @@ namespace freee{
             delete p_bufferPool;
         };
 
-        void ConnectContext(MessageContext *context){
+        virtual void ConnectContext(MessageContext *context){
             AutoLock lock(m_lock);
             if (context){
                 p_messageContext = context;

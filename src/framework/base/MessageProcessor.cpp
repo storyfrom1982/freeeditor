@@ -24,7 +24,7 @@ void MessageProcessor::StartProcessor(std::string name) {
 }
 
 void MessageProcessor::StopProcessor() {
-    ProcessMessage(SmartPkt(PktMsgExit));
+    ProcessMessage(SmartPkt(PktMsgClosed));
     m_lock.lock();
     pthread_t tid = m_threadId;
     m_threadId = 0;
@@ -66,7 +66,7 @@ void MessageProcessor::MessageProcessorLoop() {
         m_lock.signal();
         m_lock.unlock();
 
-        if (pkt.GetKey() == PktMsgExit){
+        if (pkt.GetKey() == PktMsgClosed){
             break;
         }
 

@@ -18,8 +18,8 @@ X264VideoEncoder::~X264VideoEncoder() {
 }
 
 
-int X264VideoEncoder::ModuleOpen(json &cfg) {
-    LOGD("X264VideoEncoder::OnOpenEncoder: %s\n", cfg.dump().c_str());
+int X264VideoEncoder::OpenModule() {
+    LOGD("X264VideoEncoder::OnOpenEncoder: %s\n", m_config.dump().c_str());
     m_param = (x264_param_t){0};
 
     x264_param_default(&m_param);
@@ -28,12 +28,12 @@ int X264VideoEncoder::ModuleOpen(json &cfg) {
 
     m_param.i_csp = X264_CSP_I420;
     m_param.i_log_level = X264_LOG_NONE;
-    m_param.i_width = cfg["codecWidth"];
-    m_param.i_height = cfg["codecHeight"];
+    m_param.i_width = m_config["codecWidth"];
+    m_param.i_height = m_config["codecHeight"];
 
-    bool vbr = cfg["codecVBR"];
-    uint32_t fr = cfg["codecFPS"];
-    uint32_t bitrate = cfg["codecBitRate"];
+    bool vbr = m_config["codecVBR"];
+    uint32_t fr = m_config["codecFPS"];
+    uint32_t bitrate = m_config["codecBitRate"];
 
     // if input buffer rate is reliable, use the buffer rate for calc bitrate
     if ( fr > 0){
@@ -104,14 +104,14 @@ int X264VideoEncoder::ModuleOpen(json &cfg) {
     return 0;
 }
 
-void X264VideoEncoder::ModuleClose() {
+void X264VideoEncoder::CloseModule() {
     if (m_handle){
         x264_encoder_close(m_handle);
         m_handle = nullptr;
     }
 }
 
-int X264VideoEncoder::ModuleProcessMedia(SmartPkt pkt) {
+int X264VideoEncoder::ProcessMediaByModule(SmartPkt pkt) {
     //    LOGD("X264VideoEncoder::OnOpenEncoder: enter\n");
 
     sr_buffer_frame_t *frame = &(pkt.frame);

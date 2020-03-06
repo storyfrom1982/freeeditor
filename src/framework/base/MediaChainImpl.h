@@ -22,7 +22,7 @@ namespace freee {
 
 //    enum {
 //        RecvMsg_Error = PktMsgError,
-//        RecvMsg_Exit = PktMsgExit,
+//        RecvMsg_Exit = PktMsgClosed,
 //        PktMsgOpen = 1,
 //        PktMsgStart = 2,
 //        PktMsgStop = 3,
@@ -43,6 +43,7 @@ namespace freee {
 //            LOGD("[DELETE]<MediaChainImpl>[%s]\n", m_name.c_str());
             AutoLock lock(m_outputChainLock);
             m_outputChain.clear();
+            m_inputChain.clear();
         }
 
         void Open(MediaChain *chain) override {
@@ -62,45 +63,45 @@ namespace freee {
         }
 
         void ProcessMedia(MediaChain *chain, SmartPkt pkt) override {
-//            pkt.msg.ptr = chain;
+            pkt.SetKey(PktMsgProcessMedia);
+            pkt.SetPtr(chain);
             ProcessMessage(pkt);
         }
 
-        void onOpened() override {
-            AutoLock lock(m_outputChainLock);
-            for (int i = 0; i < m_outputChain.size(); ++i){
-                m_outputChain[i]->Open(this);
+        void onRecvEvent(MediaChain *chain, SmartPkt pkt) override {
+            pkt.SetKey(PktMsgRecvEvent);
+            pkt.SetPtr(chain);
+            ProcessMessage(pkt);
+        }
+
+    protected:
+
+        void SetStreamIndex(int id) override {
+            m_streamIndex = id;
+        }
+
+        int GetStreamIndex() override {
+            return m_streamIndex;
+        }
+
+        void AddPrev(MediaChain *chain) override {
+            if (chain){
+                AutoLock lock(m_inputChainLock);
+                this->m_inputChain.push_back(chain);
             }
         }
 
-        void onClosed() override {
-            AutoLock lock(m_outputChainLock);
-            for (int i = 0; i < m_outputChain.size(); ++i){
-                m_outputChain[i]->Close(this);
+        void DelPrev(MediaChain *chain) override {
+            AutoLock lock(m_inputChainLock);
+            for (int i = 0; i < m_inputChain.size(); ++i){
+                if (m_inputChain[i] == chain){
+                    m_inputChain.erase(m_inputChain.begin() + i);
+                    break;
+                }
             }
         }
 
-        void onStarted() override {
-            AutoLock lock(m_outputChainLock);
-            for (int i = 0; i < m_outputChain.size(); ++i){
-                m_outputChain[i]->Start(this);
-            }
-        }
-
-        void onStopped() override {
-            AutoLock lock(m_outputChainLock);
-            for (int i = 0; i < m_outputChain.size(); ++i){
-                m_outputChain[i]->Stop(this);
-            }
-        }
-
-        void onProcessMedia(SmartPkt pkt) override {
-            AutoLock lock(m_outputChainLock);
-            for (int i = 0; i < m_outputChain.size(); ++i){
-                m_outputChain[i]->ProcessMedia(this, pkt);
-            }
-        }
-
+    public:
         int GetType(MediaChain *chain) override {
             return m_type;
         }
@@ -117,65 +118,108 @@ namespace freee {
             return m_name;
         }
 
-        virtual void AddOutputChain(MediaChain *chain) override {
+        virtual void AddNext(MediaChain *chain) override {
             if (chain){
                 AutoLock lock(m_outputChainLock);
                 this->m_outputChain.push_back(chain);
+                chain->AddPrev(this);
             }
         }
 
-        virtual void RemoveOutputChain(MediaChain *chain) override {
+        virtual void DelNext(MediaChain *chain) override {
             AutoLock lock(m_outputChainLock);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 if (m_outputChain[i] == chain){
                     m_outputChain.erase(m_outputChain.begin() + i);
+                    chain->DelPrev(this);
                     break;
                 }
             }
         }
 
-        virtual void SetEventCallback(MediaChain::EventCallback *callback) override {
-            AutoLock lock(m_callbackLock);
-            p_callback = callback;
-        }
+//        virtual void SetEventCallback(MediaChain::EventCallback *callback) override {
+//            AutoLock lock(m_callbackLock);
+//            m_callbackList.push_back(callback);
+////            p_callback = callback;
+//        }
+//
+//    protected:
+//        virtual void ReportEvent(SmartPkt pkt) {
+//            AutoLock lock(m_callbackLock);
+//            for (int i = 0; i < m_callbackList.size(); ++i){
+//                m_callbackList[i]->onEvent(this, pkt);
+//            }
+////            if (p_callback){
+////                p_callback->onEvent(this, pkt);
+////            }
+//        }
+
 
     protected:
-        virtual void ReportEvent(SmartPkt pkt) {
-            AutoLock lock(m_callbackLock);
-            if (p_callback){
-                p_callback->onEvent(this, pkt);
+        virtual void onMsgOpen(SmartPkt pkt){
+            AutoLock lock(m_outputChainLock);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Open(this);
             }
-        }
+        };
+        virtual void onMsgClose(SmartPkt pkt){
+            AutoLock lock(m_outputChainLock);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Close(this);
+            }
+        };
+        virtual void onMsgStart(SmartPkt pkt){
+            AutoLock lock(m_outputChainLock);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Start(this);
+            }
+        };
+        virtual void onMsgStop(SmartPkt pkt){
+            AutoLock lock(m_outputChainLock);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Stop(this);
+            }
+        };
+        virtual void onMsgProcessMedia(SmartPkt pkt){
+            AutoLock lock(m_outputChainLock);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->ProcessMedia(this, pkt);
+            }
+        };
+        virtual void onMsgRecvEvent(SmartPkt pkt){
+            AutoLock lock(m_inputChainLock);
+            for (int i = 0; i < m_inputChain.size(); ++i){
+                if (m_inputChain[i] != nullptr){
+                    m_inputChain[i]->onRecvEvent(this, pkt);
+                }
+            }
+        };
+        virtual void onMsgControl(SmartPkt pkt){};
 
-
-    protected:
-        virtual void MessageOpen(SmartPkt pkt){};
-        virtual void MessageClose(SmartPkt pkt){};
-        virtual void MessageStart(SmartPkt pkt){};
-        virtual void MessageStop(SmartPkt pkt){};
-        virtual void MessageProcessMedia(SmartPkt pkt){};
-        virtual void MessageControl(SmartPkt pkt){};
-
+        //Async
         void MessageProcess(SmartPkt pkt) override {
             switch (pkt.GetKey()){
                 case PktMsgOpen:
-                    MessageOpen(pkt);
+                    onMsgOpen(pkt);
                     break;
                 case PktMsgClose:
-                    MessageClose(pkt);
+                    onMsgClose(pkt);
                     break;
                 case PktMsgStart:
-                    MessageStart(pkt);
+                    onMsgStart(pkt);
                     break;
                 case PktMsgStop:
-                    MessageStop(pkt);
+                    onMsgStop(pkt);
                     break;
                 case PktMsgProcessMedia:
-                    MessageProcessMedia(pkt);
+                    onMsgProcessMedia(pkt);
+                    break;
+                case PktMsgRecvEvent:
+                    onMsgRecvEvent(pkt);
                     break;
                 case PktMsgControl:
                 default:
-                    MessageControl(pkt);
+                    onMsgControl(pkt);
             }
         }
 
@@ -183,11 +227,16 @@ namespace freee {
     protected:
         int m_type;
         int m_number;
+        int m_streamIndex;
         json m_config;
         std::string m_name;
 
-        Lock m_callbackLock;
-        MediaChain::EventCallback *p_callback;
+//        Lock m_callbackLock;
+////        MediaChain::EventCallback *p_callback = nullptr;
+//        std::vector<EventCallback*> m_callbackList;
+
+        Lock m_inputChainLock;
+        std::vector<MediaChain*> m_inputChain;
 
         Lock m_outputChainLock;
         std::vector<MediaChain*> m_outputChain;

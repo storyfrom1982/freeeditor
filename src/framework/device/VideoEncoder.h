@@ -14,6 +14,7 @@
 #include <MediaChainImpl.h>
 #include <MediaModule.h>
 
+
 namespace freee{
 
     class VideoEncoder : public MediaModule {
@@ -23,13 +24,13 @@ namespace freee{
         virtual ~VideoEncoder();
 
     protected:
-        void MessageOpen(SmartPkt pkt) override;
+        void onMsgOpen(SmartPkt pkt) override;
 
-        void MessageClose(SmartPkt pkt) override;
+        void onMsgClose(SmartPkt pkt) override;
 
-        void MessageProcessMedia(SmartPkt pkt) override;
+        void onMsgProcessMedia(SmartPkt pkt) override;
 
-        void MessageControl(SmartPkt pkt) override;
+        void onMsgControl(SmartPkt pkt) override;
 
     protected:
         VideoEncoder(int mediaType = MediaType_Video,

@@ -21,11 +21,11 @@ namespace freee {
         ~X264VideoEncoder();
 
     protected:
-        int ModuleOpen(json &cfg) override;
+        int OpenModule() override;
 
-        void ModuleClose() override;
+        void CloseModule() override;
 
-        int ModuleProcessMedia(SmartPkt pkt) override;
+        int ProcessMediaByModule(SmartPkt pkt) override;
 
     private:
 //        ino64_t m_frameId;

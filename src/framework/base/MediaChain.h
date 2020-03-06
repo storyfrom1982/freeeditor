@@ -44,32 +44,39 @@ namespace freee {
         virtual ~MediaChain(){};
         virtual void FinalClear() = 0;
 
-        virtual void onOpened() = 0;
-        virtual void onClosed() = 0;
-        virtual void onStarted() = 0;
-        virtual void onStopped() = 0;
-        virtual void onProcessMedia(SmartPkt pkt) = 0;
-
         virtual void Open(MediaChain *chain) = 0;
         virtual void Close(MediaChain *chain) = 0;
         virtual void Start(MediaChain *chain) = 0;
         virtual void Stop(MediaChain *chain) = 0;
         virtual void ProcessMedia(MediaChain *chain, SmartPkt pkt) = 0;
+        virtual void onRecvEvent(MediaChain *chain, SmartPkt pkt) = 0;
 
         virtual int GetType(MediaChain *chain) = 0;
         virtual int GetNumber(MediaChain *chain) = 0;
         virtual json& GetConfig(MediaChain *chain) = 0;
         virtual std::string GetName(MediaChain *chain) = 0;
 
-        virtual void AddOutputChain(MediaChain *chain) = 0;
-        virtual void RemoveOutputChain(MediaChain *chain) = 0;
+        virtual void SetStreamIndex(int id) = 0;
+        virtual int GetStreamIndex() = 0;
 
-        class EventCallback {
-        public:
-            virtual void onEvent(MediaChain *chain, SmartPkt pkt) = 0;
-        };
+        virtual void AddPrev(MediaChain *chain) = 0;
+        virtual void DelPrev(MediaChain *chain) = 0;
 
-        virtual void SetEventCallback(EventCallback *callback) = 0;
+        virtual void AddNext(MediaChain *chain) = 0;
+        virtual void DelNext(MediaChain *chain) = 0;
+
+    protected:
+
+//        class EventCallback {
+//        public:
+//            virtual void onOpened(MediaChain *chain) = 0;
+//            virtual void onStarted(MediaChain *chain) = 0;
+//            virtual void onStopped(MediaChain *chain) = 0;
+//            virtual void onClosed(MediaChain *chain) = 0;
+//            virtual void onEvent(MediaChain *chain, SmartPkt pkt) = 0;
+//        };
+//
+//        virtual void SetEventCallback(EventCallback *callback) = 0;
     };
 
 }
