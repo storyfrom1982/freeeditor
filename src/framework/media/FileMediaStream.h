@@ -30,21 +30,21 @@ namespace freee {
 
         void onMsgClose(SmartPkt pkt) override;
 
-        void onMsgProcessMedia(SmartPkt pkt) override;
+        void onMsgProcessData(SmartPkt pkt) override;
 
         void onMsgConnectStream(SmartPkt pkt) override;
 
         void onMsgDisconnectStream() override;
 
     private:
-        AVStream* addAudioStream(MediaChain *chain);
-        AVStream* addVideoStream(MediaChain *chain);
+        AVStream* addAudioStream(MessageChain *chain);
+        AVStream* addVideoStream(MessageChain *chain);
 
     private:
         int m_status = 0;
         AVFormatContext *m_pContext = nullptr;
         std::vector<AVStream*> m_Streams;
-        std::map<MediaChain*, AVStream*> m_streamMap;
+        std::map<MessageChain*, AVStream*> m_streamMap;
     };
 
 }

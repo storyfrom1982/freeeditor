@@ -204,7 +204,7 @@ int X264VideoEncoder::ProcessMediaByModule(SmartPkt pkt) {
 
 //    long long tmStamp = pkt.frame.timestamp / 1000;
 
-    MediaChainImpl::onMsgProcessMedia(opkt);
+    MessageChainImpl::onMsgProcessData(opkt);
 
 //    LOGD("X264VideoEncoder::OnOpenEncoder: size=%d  i64=%ld\n", frameLen, tmStamp);
     return  0;
@@ -245,7 +245,7 @@ std::string X264VideoEncoder::GenAvc1() {
     return str;
 }
 
-std::string X264VideoEncoder::GetExtraConfig(MediaChain *chain) {
+std::string X264VideoEncoder::GetExtraConfig(MessageChain *chain) {
     return m_extraConfig;
 }
 

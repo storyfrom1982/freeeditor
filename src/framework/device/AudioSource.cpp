@@ -27,7 +27,7 @@ enum {
 
 
 AudioSource::AudioSource(int mediaType, int mediaNumber, std::string mediaName)
-        : MediaChainImpl(mediaType, mediaNumber, mediaName) {
+        : MessageChainImpl(mediaType, mediaNumber, mediaName) {
 //    MessageContext *context = MediaContext::Instance().ConnectMicrophone();
     MessageContext *context = MediaContext::Instance()->ConnectMicrophone();
     ConnectContext(context);
@@ -45,21 +45,21 @@ AudioSource::~AudioSource() {
 void AudioSource::onRecvMessage(SmartPkt pkt) {
     switch (pkt.GetKey()){
         case OnRecvMsg_ProcessSound:
-            ProcessMedia(this, pkt);
+            ProcessData(this, pkt);
             break;
         case OnRecvMsg_Opened:
             m_status = Status_Opened;
             LOGD("AudioSource Opened\n");
             UpdateConfig(pkt);
             pkt.SetKey(PktMsgOpen);
-            MediaChainImpl::onMsgOpen(pkt);
+            MessageChainImpl::onMsgOpen(pkt);
 //            ReportEvent(SmartPkt(Status_Opened + m_number));
             break;
         case OnRecvMsg_Closed:
             m_status = Status_Closed;
 //            CloseNext();
             pkt.SetKey(PktMsgClose);
-            MediaChainImpl::onMsgClose(pkt);
+            MessageChainImpl::onMsgClose(pkt);
 //            ReportEvent(SmartPkt(Status_Closed + m_number));
             FinalClear();
             LOGD("AudioSource Closed\n");
@@ -83,31 +83,31 @@ SmartPkt AudioSource::onObtainMessage(int key) {
     return MessageContext::onObtainMessage(key);
 }
 
-void AudioSource::Open(MediaChain *chain) {
+void AudioSource::Open(MessageChain *chain) {
     m_config = chain->GetConfig(this);
     SendMessage(NewJsonPkt(SendMsg_Open, m_config.dump()));
 }
 
-void AudioSource::Close(MediaChain *chain) {
+void AudioSource::Close(MessageChain *chain) {
     SmartPkt pkt(SendMsg_Close);
     SendMessage(pkt);
 }
 
-void AudioSource::Start(MediaChain *chain) {
+void AudioSource::Start(MessageChain *chain) {
     SmartPkt pkt(SendMsg_Start);
     SendMessage(pkt);
 }
 
-void AudioSource::Stop(MediaChain *chain) {
+void AudioSource::Stop(MessageChain *chain) {
     SmartPkt pkt(SendMsg_Stop);
     SendMessage(pkt);
 }
 
-void AudioSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
+void AudioSource::ProcessData(MessageChain *chain, SmartPkt pkt) {
     SmartPkt resample = p_bufferPool->GetPkt(PktMsgProcessMedia);
     memcpy(resample.GetDataPtr(), pkt.frame.data, resample.GetDataSize());
     resample.frame.timestamp = pkt.frame.timestamp;
-    MediaChainImpl::onMsgProcessMedia(resample);
+    MessageChainImpl::onMsgProcessData(resample);
 }
 
 void AudioSource::FinalClear() {

@@ -12,7 +12,7 @@
 namespace freee {
 
 
-    class VideoSource : public MediaChainImpl {
+    class VideoSource : public MessageChainImpl {
 
     public:
         VideoSource(MessageContext *context = nullptr);
@@ -20,15 +20,15 @@ namespace freee {
 
         void FinalClear() override;
 
-        void Open(MediaChain *chain) override;
+        void Open(MessageChain *chain) override;
 
-        void Close(MediaChain *chain) override;
+        void Close(MessageChain *chain) override;
 
-        void Start(MediaChain *chain) override;
+        void Start(MessageChain *chain) override;
 
-        void Stop(MediaChain *chain) override;
+        void Stop(MessageChain *chain) override;
 
-        void ProcessMedia(MediaChain *chain, SmartPkt pkt) override;
+        void ProcessData(MessageChain *chain, SmartPkt pkt) override;
 
 
     private:

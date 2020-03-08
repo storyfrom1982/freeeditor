@@ -7,13 +7,13 @@
 
 
 #include <MessageContext.h>
-#include <MediaChainImpl.h>
+#include <MessageChainImpl.h>
 
 
 namespace freee {
 
 
-    class AudioSource : public MediaChainImpl {
+    class AudioSource : public MessageChainImpl {
     public:
         void FinalClear() override;
 
@@ -25,15 +25,15 @@ namespace freee {
 
         ~AudioSource();
 
-        void Open(MediaChain *chain) override;
+        void Open(MessageChain *chain) override;
 
-        void Close(MediaChain *chain) override;
+        void Close(MessageChain *chain) override;
 
-        void Start(MediaChain *chain) override;
+        void Start(MessageChain *chain) override;
 
-        void Stop(MediaChain *chain) override;
+        void Stop(MessageChain *chain) override;
 
-        void ProcessMedia(MediaChain *chain, SmartPkt pkt) override;
+        void ProcessData(MessageChain *chain, SmartPkt pkt) override;
 
         virtual void onRecvMessage(SmartPkt pkt) override;
 

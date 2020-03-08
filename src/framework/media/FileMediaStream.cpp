@@ -50,7 +50,7 @@ void FileMediaStream::onMsgDisconnectStream() {
 }
 
 void FileMediaStream::onMsgOpen(SmartPkt pkt) {
-    MediaChain *chain = static_cast<MediaChain *>(pkt.GetPtr());
+    MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
     if (m_chainToStream[chain] == nullptr){
         LOGD("FileMediaStream::onMsgOpen type[%s] extraConfig %lu\n", chain->GetName(this).c_str(), chain->GetExtraConfig(this).size());
         if (chain->GetType(this) == MediaType_Audio){
@@ -73,7 +73,7 @@ void FileMediaStream::onMsgOpen(SmartPkt pkt) {
             usleep(200000);
             SmartPkt event(PktMsgProcessEvent);
             event.SetEvent(PktMsgOpen);
-            MediaChainImpl::onMsgProcessEvent(event);
+            MessageChainImpl::onMsgProcessEvent(event);
         }
     }
 }
@@ -82,8 +82,8 @@ void FileMediaStream::onMsgClose(SmartPkt pkt) {
     MediaStream::onMsgClose(pkt);
 }
 
-void FileMediaStream::onMsgProcessMedia(SmartPkt pkt) {
-    MediaChain *chain = static_cast<MediaChain *>(pkt.GetPtr());
+void FileMediaStream::onMsgProcessData(SmartPkt pkt) {
+    MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
 
     AVStream* pStream = (AVStream*)m_chainToStream[chain];
 
@@ -126,7 +126,7 @@ void FileMediaStream::onMsgProcessMedia(SmartPkt pkt) {
     }
 }
 
-AVStream *FileMediaStream::addAudioStream(MediaChain *chain) {
+AVStream *FileMediaStream::addAudioStream(MessageChain *chain) {
 
     json cfg = chain->GetConfig(this);
 
@@ -164,7 +164,7 @@ AVStream *FileMediaStream::addAudioStream(MediaChain *chain) {
     return avStream;
 }
 
-AVStream *FileMediaStream::addVideoStream(MediaChain *chain) {
+AVStream *FileMediaStream::addVideoStream(MessageChain *chain) {
 
     json cfg = chain->GetConfig(this);
 

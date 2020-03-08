@@ -6,16 +6,16 @@
 #define ANDROID_MEDIAMODULE_H
 
 
-#include "MediaChainImpl.h"
+#include "MessageChainImpl.h"
 
 namespace freee {
 
 
-    class MediaModule : public MediaChainImpl{
+    class MediaModule : public MessageChainImpl{
 
     public:
         MediaModule(int mediaType, int mediaNumber, const std::string &mediaName)
-                : MediaChainImpl(mediaType, mediaNumber, mediaName){};
+                : MessageChainImpl(mediaType, mediaNumber, mediaName){};
         virtual ~MediaModule(){};
 
     protected:

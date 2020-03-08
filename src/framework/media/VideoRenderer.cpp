@@ -49,13 +49,13 @@ void VideoRenderer::FinalClear() {
 }
 
 void VideoRenderer::onMsgOpen(SmartPkt pkt) {
-    m_config = static_cast<MediaChain *>(pkt.GetPtr())->GetConfig(this);
+    m_config = static_cast<MessageChain *>(pkt.GetPtr())->GetConfig(this);
     if (mStatus == Status_Closed){
         if (OpenModule() != 0){
             return;
         }
         mStatus = Status_Opened;
-        MediaChainImpl::onMsgOpen(pkt);
+        MessageChainImpl::onMsgOpen(pkt);
     }
 }
 
@@ -63,11 +63,11 @@ void VideoRenderer::onMsgClose(SmartPkt pkt) {
     if (mStatus == Status_Opened){
         CloseModule();
         mStatus = Status_Closed;
-        MediaChainImpl::onMsgClose(pkt);
+        MessageChainImpl::onMsgClose(pkt);
     }
 }
 
-void VideoRenderer::onMsgProcessMedia(SmartPkt pkt) {
+void VideoRenderer::onMsgProcessData(SmartPkt pkt) {
     ProcessMediaByModule(pkt);
 }
 
@@ -123,7 +123,7 @@ int VideoRenderer::ProcessMediaByModule(SmartPkt pkt) {
         opengles_render(opengles, &pkt.frame);
         gl_renderer_swap_buffers(renderer);
     }
-    MediaChainImpl::onMsgProcessMedia(pkt);
+    MessageChainImpl::onMsgProcessData(pkt);
     return 0;
 }
 

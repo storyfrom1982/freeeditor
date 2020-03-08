@@ -82,7 +82,7 @@ int FaacAudioEncoder::OpenModule() {
     return ret;
 }
 
-std::string FaacAudioEncoder::GetExtraConfig(MediaChain *chain) {
+std::string FaacAudioEncoder::GetExtraConfig(MessageChain *chain) {
     return m_extraConfig;
 }
 
@@ -139,7 +139,7 @@ int FaacAudioEncoder::ProcessMediaByModule(SmartPkt pkt) {
     opkt.frame.timestamp = pkt.frame.timestamp / 1000;
     opkt.frame.flag = PktFlag_PFrame;
 
-    MediaChainImpl::onMsgProcessMedia(opkt);
+    MessageChainImpl::onMsgProcessData(opkt);
 
     return 0;
 }

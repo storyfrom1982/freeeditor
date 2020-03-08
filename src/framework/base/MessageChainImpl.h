@@ -6,7 +6,7 @@
 #define ANDROID_MEDIACHAINIMPL_H
 
 #include <BufferPool.h>
-#include "MediaChain.h"
+#include "MessageChain.h"
 #include "AutoLock.h"
 #include "MessageProcessor.h"
 
@@ -31,15 +31,15 @@ namespace freee {
 //        PktMsgControl = 6,
 //    };
 
-    class MediaChainImpl : public MediaChain {
+    class MessageChainImpl : public MessageChain {
 
     public:
-        MediaChainImpl(int mediaType, int mediaNumber, std::string mediaName) :
+        MessageChainImpl(int mediaType, int mediaNumber, std::string mediaName) :
             m_type(mediaType),
             m_number(mediaNumber),
             m_name(mediaName){}
 
-        virtual ~MediaChainImpl(){
+        virtual ~MessageChainImpl(){
 //            LOGD("[DELETE]<MediaChainImpl>[%s]\n", m_name.c_str());
             AutoLock lock(m_lockOutputChain);
             m_outputChain.clear();
@@ -48,29 +48,29 @@ namespace freee {
             m_chainToStream.clear();
         }
 
-        void Open(MediaChain *chain) override {
+        void Open(MessageChain *chain) override {
             ProcessMessage(SmartPkt(PktMsgOpen, chain));
         }
 
-        void Close(MediaChain *chain) override {
+        void Close(MessageChain *chain) override {
             ProcessMessage(SmartPkt(PktMsgClose, chain));
         }
 
-        void Start(MediaChain *chain) override {
+        void Start(MessageChain *chain) override {
             ProcessMessage(SmartPkt(PktMsgStart, chain));
         }
 
-        void Stop(MediaChain *chain) override {
+        void Stop(MessageChain *chain) override {
             ProcessMessage(SmartPkt(PktMsgStop, chain));
         }
 
-        void ProcessMedia(MediaChain *chain, SmartPkt pkt) override {
+        void ProcessData(MessageChain *chain, SmartPkt pkt) override {
             pkt.SetKey(PktMsgProcessMedia);
             pkt.SetPtr(chain);
             ProcessMessage(pkt);
         }
 
-        void ProcessEvent(MediaChain *chain, SmartPkt pkt) override {
+        void ProcessEvent(MessageChain *chain, SmartPkt pkt) override {
             pkt.SetKey(PktMsgProcessEvent);
             pkt.SetPtr(chain);
             ProcessMessage(pkt);
@@ -78,7 +78,7 @@ namespace freee {
 
 
     protected:
-        void AddInput(MediaChain *chain) override {
+        void AddInput(MessageChain *chain) override {
             if (chain){
                 AutoLock lock(m_lockInputChain);
                 m_inputChain.push_back(chain);
@@ -86,7 +86,7 @@ namespace freee {
             }
         }
 
-        void DelInput(MediaChain *chain) override {
+        void DelInput(MessageChain *chain) override {
             AutoLock lock(m_lockInputChain);
             auto it = std::find(m_inputChain.begin(), m_inputChain.end(), chain);
             if (it != m_inputChain.end()){
@@ -107,27 +107,27 @@ namespace freee {
         }
 
     public:
-        int GetType(MediaChain *chain) override {
+        int GetType(MessageChain *chain) override {
             return m_type;
         }
 
-        int GetNumber(MediaChain *chain) override {
+        int GetNumber(MessageChain *chain) override {
             return m_number;
         }
 
-        std::string GetName(MediaChain *chain) override {
+        std::string GetName(MessageChain *chain) override {
             return m_name;
         }
 
-        json &GetConfig(MediaChain *chain) override {
+        json &GetConfig(MessageChain *chain) override {
             return m_config;
         }
 
-        std::string GetExtraConfig(MediaChain *chain) override {
+        std::string GetExtraConfig(MessageChain *chain) override {
             return m_extraConfig;
         }
 
-        virtual void AddOutput(MediaChain *chain) override {
+        virtual void AddOutput(MessageChain *chain) override {
             if (chain){
                 AutoLock lock(m_lockOutputChain);
                 this->m_outputChain.push_back(chain);
@@ -135,7 +135,7 @@ namespace freee {
             }
         }
 
-        virtual void DelOutput(MediaChain *chain) override {
+        virtual void DelOutput(MessageChain *chain) override {
             AutoLock lock(m_lockOutputChain);
             for (auto it = m_outputChain.cbegin(); it != m_outputChain.cend(); it++){
                 if ((*it) == chain){
@@ -153,7 +153,7 @@ namespace freee {
 //            }
         }
 
-        void SetEventListener(MediaChain *listener) override {
+        void SetEventListener(MessageChain *listener) override {
             AutoLock lock(m_lockEventListener);
             m_pEventListener = listener;
         }
@@ -193,10 +193,10 @@ namespace freee {
                 m_outputChain[i]->Stop(this);
             }
         };
-        virtual void onMsgProcessMedia(SmartPkt pkt){
+        virtual void onMsgProcessData(SmartPkt pkt){
             AutoLock lock(m_lockOutputChain);
             for (int i = 0; i < m_outputChain.size(); ++i){
-                m_outputChain[i]->ProcessMedia(this, pkt);
+                m_outputChain[i]->ProcessData(this, pkt);
             }
         };
         virtual void onMsgProcessEvent(SmartPkt pkt){
@@ -225,7 +225,7 @@ namespace freee {
                     onMsgStop(pkt);
                     break;
                 case PktMsgProcessMedia:
-                    onMsgProcessMedia(pkt);
+                    onMsgProcessData(pkt);
                     break;
                 case PktMsgProcessEvent:
                     onMsgProcessEvent(pkt);
@@ -245,15 +245,15 @@ namespace freee {
         std::string m_name;
 
         Lock m_lockEventListener;
-        MediaChain *m_pEventListener = nullptr;
+        MessageChain *m_pEventListener = nullptr;
 
         Lock m_lockInputChain;
         std::map<void*, void*> m_chainToStream;
-        std::vector<MediaChain*> m_inputChain;
+        std::vector<MessageChain*> m_inputChain;
 
         Lock m_lockOutputChain;
         int m_outputChainStatus = 0;
-        std::vector<MediaChain*> m_outputChain;
+        std::vector<MessageChain*> m_outputChain;
 
     };
 

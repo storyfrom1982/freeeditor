@@ -20,7 +20,7 @@ namespace freee {
         X264VideoEncoder();
         ~X264VideoEncoder();
 
-        std::string GetExtraConfig(MediaChain *chain) override;
+        std::string GetExtraConfig(MessageChain *chain) override;
 
     protected:
         int OpenModule() override;

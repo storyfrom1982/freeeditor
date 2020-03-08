@@ -20,7 +20,7 @@
 
 namespace freee{
 
-    class MediaRecorder : public MediaChainImpl {
+    class MediaRecorder : public MessageChainImpl {
 
     public:
         MediaRecorder();
@@ -49,7 +49,7 @@ namespace freee{
 
     public:
         void ConnectContext(MessageContext *context) override;
-        json &GetConfig(MediaChain *chain) override;
+        json &GetConfig(MessageChain *chain) override;
 
     private:
         int m_status;

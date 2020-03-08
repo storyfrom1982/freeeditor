@@ -34,7 +34,7 @@ void VideoEncoder::FinalClear() {
 }
 
 void VideoEncoder::onMsgOpen(SmartPkt pkt) {
-    MediaChain *chain = static_cast<MediaChain *>(pkt.GetPtr());
+    MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
     m_config = chain->GetConfig(this);
     OpenModule();
     m_frameId = 0;
@@ -45,15 +45,15 @@ void VideoEncoder::onMsgOpen(SmartPkt pkt) {
     p_bufferPool = new BufferPool(4, w*h, 256, 16);
     p_bufferPool->SetName(m_name);
     pkt.frame.media_type = MediaType_Video;
-    MediaChainImpl::onMsgOpen(pkt);
+    MessageChainImpl::onMsgOpen(pkt);
 }
 
 void VideoEncoder::onMsgClose(SmartPkt pkt) {
     CloseModule();
-    MediaChainImpl::onMsgClose(pkt);
+    MessageChainImpl::onMsgClose(pkt);
 }
 
-void VideoEncoder::onMsgProcessMedia(SmartPkt pkt) {
+void VideoEncoder::onMsgProcessData(SmartPkt pkt) {
 
     if ( m_outputChainStatus == Status_Opened) {
 //        LOGD("m_framerate ================  delay[%f]\n", m_frameRate);
@@ -87,7 +87,7 @@ void VideoEncoder::onMsgProcessMedia(SmartPkt pkt) {
 }
 
 void VideoEncoder::onMsgControl(SmartPkt pkt) {
-    MediaChainImpl::onMsgControl(pkt);
+    MessageChainImpl::onMsgControl(pkt);
 }
 
 void VideoEncoder::onMsgProcessEvent(SmartPkt pkt) {

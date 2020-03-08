@@ -17,19 +17,19 @@ AudioFilter::~AudioFilter() {
 }
 
 void AudioFilter::onMsgOpen(SmartPkt pkt) {
-    m_config = static_cast<MediaChain *>(pkt.GetPtr())->GetConfig(this);
+    m_config = static_cast<MessageChain *>(pkt.GetPtr())->GetConfig(this);
     OpenModule();
-    MediaChainImpl::onMsgOpen(pkt);
+    MessageChainImpl::onMsgOpen(pkt);
 //    OpenNext();
 }
 
 void AudioFilter::onMsgClose(SmartPkt pkt) {
     CloseModule();
-    MediaChainImpl::onMsgClose(pkt);
+    MessageChainImpl::onMsgClose(pkt);
 //    CloseNext();
 }
 
-void AudioFilter::onMsgProcessMedia(SmartPkt pkt) {
+void AudioFilter::onMsgProcessData(SmartPkt pkt) {
 //    LOGD("AudioFilter::onMsgProcessMedia data %d\n", pkt.GetKey());
     ProcessMediaByModule(pkt);
 }
@@ -55,7 +55,7 @@ void AudioFilter::CloseModule() {
 }
 
 int AudioFilter::ProcessMediaByModule(SmartPkt pkt) {
-    MediaChainImpl::onMsgProcessMedia(pkt);
+    MessageChainImpl::onMsgProcessData(pkt);
     return 0;
 }
 

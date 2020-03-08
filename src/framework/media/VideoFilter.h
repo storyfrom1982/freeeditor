@@ -6,7 +6,7 @@
 #define ANDROID_VIDEOFILTER_H
 
 
-#include <MediaChainImpl.h>
+#include <MessageChainImpl.h>
 #include <MessageProcessor.h>
 #include <MediaModule.h>
 
@@ -28,7 +28,7 @@ namespace freee {
 
         void onMsgClose(SmartPkt pkt) override;
 
-        void onMsgProcessMedia(SmartPkt pkt) override;
+        void onMsgProcessData(SmartPkt pkt) override;
 
         int OpenModule() override;
 
