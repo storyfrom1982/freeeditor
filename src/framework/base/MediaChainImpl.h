@@ -31,7 +31,7 @@ namespace freee {
 //        PktMsgControl = 6,
 //    };
 
-    class MediaChainImpl : public MediaChain, public MessageProcessor {
+    class MediaChainImpl : public MediaChain {
 
     public:
         MediaChainImpl(int mediaType, int mediaNumber, std::string mediaName) :
@@ -43,6 +43,7 @@ namespace freee {
 //            LOGD("[DELETE]<MediaChainImpl>[%s]\n", m_name.c_str());
             AutoLock lock(m_lockOutputChain);
             m_outputChain.clear();
+            AutoLock autoLock(m_lockInputChain);
             m_inputChain.clear();
             m_chainToStream.clear();
         }
@@ -69,8 +70,8 @@ namespace freee {
             ProcessMessage(pkt);
         }
 
-        void onRecvEvent(MediaChain *chain, SmartPkt pkt) override {
-            pkt.SetKey(PktMsgRecvEvent);
+        void ProcessEvent(MediaChain *chain, SmartPkt pkt) override {
+            pkt.SetKey(PktMsgProcessEvent);
             pkt.SetPtr(chain);
             ProcessMessage(pkt);
         }
@@ -87,7 +88,7 @@ namespace freee {
 
         void DelInput(MediaChain *chain) override {
             AutoLock lock(m_lockInputChain);
-            std::vector<MediaChain*>::iterator it = std::find(m_inputChain.begin(), m_inputChain.end(), chain);
+            auto it = std::find(m_inputChain.begin(), m_inputChain.end(), chain);
             if (it != m_inputChain.end()){
                 m_inputChain.erase(it);
             }
@@ -123,7 +124,7 @@ namespace freee {
         }
 
         std::string GetExtraConfig(MediaChain *chain) override {
-            return std::string();
+            return m_extraConfig;
         }
 
         virtual void AddOutput(MediaChain *chain) override {
@@ -136,13 +137,20 @@ namespace freee {
 
         virtual void DelOutput(MediaChain *chain) override {
             AutoLock lock(m_lockOutputChain);
-            for (int i = 0; i < m_outputChain.size(); ++i){
-                if (m_outputChain[i] == chain){
-                    m_outputChain.erase(m_outputChain.begin() + i);
+            for (auto it = m_outputChain.cbegin(); it != m_outputChain.cend(); it++){
+                if ((*it) == chain){
+                    m_outputChain.erase(it);
                     chain->DelInput(this);
                     break;
                 }
             }
+//            for (int i = 0; i < m_outputChain.size(); ++i){
+//                if (m_outputChain[i] == chain){
+//                    m_outputChain.erase(m_outputChain.begin() + i);
+//                    chain->DelInput(this);
+//                    break;
+//                }
+//            }
         }
 
         void SetEventListener(MediaChain *listener) override {
@@ -150,22 +158,14 @@ namespace freee {
             m_pEventListener = listener;
         }
 
-//        virtual void SetEventCallback(MediaChain::EventCallback *callback) override {
-//            AutoLock lock(m_callbackLock);
-//            m_callbackList.push_back(callback);
-////            p_callback = callback;
-//        }
-//
-//    protected:
-//        virtual void ReportEvent(SmartPkt pkt) {
-//            AutoLock lock(m_callbackLock);
-//            for (int i = 0; i < m_callbackList.size(); ++i){
-//                m_callbackList[i]->onEvent(this, pkt);
-//            }
-////            if (p_callback){
-////                p_callback->onEvent(this, pkt);
-////            }
-//        }
+
+    protected:
+        virtual void SendEvent(SmartPkt pkt) {
+            AutoLock lock(m_lockEventListener);
+            if (m_pEventListener){
+                m_pEventListener->ProcessEvent(this, pkt);
+            }
+        }
 
 
     protected:
@@ -199,11 +199,11 @@ namespace freee {
                 m_outputChain[i]->ProcessMedia(this, pkt);
             }
         };
-        virtual void onMsgRecvEvent(SmartPkt pkt){
+        virtual void onMsgProcessEvent(SmartPkt pkt){
             AutoLock lock(m_lockInputChain);
-            for (int i = 0; i < m_inputChain.size(); ++i){
-                if (m_inputChain[i] != nullptr){
-                    m_inputChain[i]->onRecvEvent(this, pkt);
+            for (auto it = m_inputChain.cbegin(); it != m_inputChain.cend(); it++){
+                if ((*it)){
+                    (*it)->ProcessEvent(this, pkt);
                 }
             }
         };
@@ -227,8 +227,8 @@ namespace freee {
                 case PktMsgProcessMedia:
                     onMsgProcessMedia(pkt);
                     break;
-                case PktMsgRecvEvent:
-                    onMsgRecvEvent(pkt);
+                case PktMsgProcessEvent:
+                    onMsgProcessEvent(pkt);
                     break;
                 case PktMsgControl:
                 default:
@@ -241,6 +241,7 @@ namespace freee {
         int m_type;
         int m_number;
         json m_config;
+        std::string m_extraConfig;
         std::string m_name;
 
         Lock m_lockEventListener;

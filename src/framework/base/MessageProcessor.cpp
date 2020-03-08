@@ -16,7 +16,7 @@ void MessageProcessor::StartProcessor(std::string name) {
         this->m_name = name;
         m_length = 256;
         m_putIndex = m_getIndex = 0;
-        m_pktList = std::vector<SmartPkt>(m_length);
+        m_pktQueue = std::vector<SmartPkt>(m_length);
         if (pthread_create(&m_threadId, nullptr, MessageProcessorThread, this) != 0) {
             LOGF("pthread_create failed\n");
         }
@@ -33,7 +33,7 @@ void MessageProcessor::StopProcessor() {
         pthread_join(tid, nullptr);
         m_threadId = 0;
     }
-    m_pktList.clear();
+    m_pktQueue.clear();
 }
 
 void MessageProcessor::ProcessMessage(SmartPkt pkt) {
@@ -41,7 +41,7 @@ void MessageProcessor::ProcessMessage(SmartPkt pkt) {
     while (0 == (m_length - m_putIndex + m_getIndex)){
         m_lock.wait();
     }
-    m_pktList[m_putIndex & (m_length - 1)] = pkt;
+    m_pktQueue[m_putIndex & (m_length - 1)] = pkt;
     m_putIndex ++;
     m_lock.signal();
     m_lock.unlock();
@@ -59,8 +59,8 @@ void MessageProcessor::MessageProcessorLoop() {
             m_lock.wait();
         }
 
-        SmartPkt pkt = m_pktList[m_getIndex & (m_length - 1)];
-        m_pktList[m_getIndex & (m_length - 1)] = SmartPkt(0);
+        SmartPkt pkt = m_pktQueue[m_getIndex & (m_length - 1)];
+        m_pktQueue[m_getIndex & (m_length - 1)] = SmartPkt(0);
         m_getIndex ++;
 
         m_lock.signal();

@@ -8,6 +8,7 @@
 
 #include <MConfig.h>
 #include <BufferPool.h>
+#include "MessageProcessor.h"
 
 namespace freee {
 
@@ -38,7 +39,7 @@ namespace freee {
         MediaNumber_VideoFilter = 500000,
     };
 
-    class MediaChain {
+    class MediaChain : public MessageProcessor {
 
     public:
         virtual ~MediaChain(){};
@@ -49,7 +50,7 @@ namespace freee {
         virtual void Start(MediaChain *chain) = 0;
         virtual void Stop(MediaChain *chain) = 0;
         virtual void ProcessMedia(MediaChain *chain, SmartPkt pkt) = 0;
-        virtual void onRecvEvent(MediaChain *chain, SmartPkt pkt) = 0;
+        virtual void ProcessEvent(MediaChain *chain, SmartPkt pkt) = 0;
 
         virtual void SetEventListener(MediaChain *listener) = 0;
 

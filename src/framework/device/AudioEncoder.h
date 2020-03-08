@@ -26,7 +26,7 @@ namespace freee {
 
         void onMsgProcessMedia(SmartPkt pkt) override;
 
-        void onMsgRecvEvent(SmartPkt pkt) override;
+        void onMsgProcessEvent(SmartPkt pkt) override;
 
         void onMsgControl(SmartPkt pkt) override;
 

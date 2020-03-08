@@ -42,7 +42,7 @@ void VideoEncoder::onMsgOpen(SmartPkt pkt) {
     m_frameRate = m_config["codecFPS"];
     uint32_t w = m_config["codecWidth"];
     uint32_t h = m_config["codecHeight"];
-    p_bufferPool = new BufferPool(2, w*h, 10, 16);
+    p_bufferPool = new BufferPool(4, w*h, 256, 16);
     p_bufferPool->SetName(m_name);
     pkt.frame.media_type = MediaType_Video;
     MediaChainImpl::onMsgOpen(pkt);
@@ -90,7 +90,7 @@ void VideoEncoder::onMsgControl(SmartPkt pkt) {
     MediaChainImpl::onMsgControl(pkt);
 }
 
-void VideoEncoder::onMsgRecvEvent(SmartPkt pkt) {
+void VideoEncoder::onMsgProcessEvent(SmartPkt pkt) {
     switch (pkt.GetEvent()){
         case PktMsgOpen:
             m_outputChainStatus = Status_Opened;

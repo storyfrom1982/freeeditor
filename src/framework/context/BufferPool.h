@@ -30,7 +30,7 @@ namespace freee {
         PktMsgStop = 3,
         PktMsgClose = 4,
         PktMsgProcessMedia = 5,
-        PktMsgRecvEvent = 6,
+        PktMsgProcessEvent = 6,
         PktMsgControl = 10,
     };
 

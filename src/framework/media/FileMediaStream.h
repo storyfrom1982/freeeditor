@@ -41,8 +41,8 @@ namespace freee {
         AVStream* addVideoStream(MediaChain *chain);
 
     private:
-        int m_streamCount;
-        AVFormatContext *m_pContext;
+        int m_status = 0;
+        AVFormatContext *m_pContext = nullptr;
         std::vector<AVStream*> m_Streams;
         std::map<MediaChain*, AVStream*> m_streamMap;
     };

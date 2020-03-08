@@ -65,7 +65,7 @@ namespace freee{
             }
         }
 
-        virtual SmartPkt GetMessage(int key){
+        virtual SmartPkt RequestMessage(int key){
             AutoLock lock(m_lock);
             if (p_messageContext){
                 return p_messageContext->onObtainMessage(key);

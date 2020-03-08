@@ -12,7 +12,7 @@
 namespace freee {
 
 
-    class VideoSource : public MessageContext, public MediaChainImpl {
+    class VideoSource : public MediaChainImpl {
 
     public:
         VideoSource(MessageContext *context = nullptr);

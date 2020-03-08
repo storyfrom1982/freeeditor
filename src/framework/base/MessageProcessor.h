@@ -8,13 +8,14 @@
 
 #include <BufferPool.h>
 #include "AutoLock.h"
+#include "MessageContext.h"
 #include <string>
 #include <vector>
 
 namespace freee {
 
 
-    class MessageProcessor {
+    class MessageProcessor : public MessageContext {
 
     public:
         MessageProcessor();
@@ -40,7 +41,7 @@ namespace freee {
 
         Lock m_lock;
         pthread_t m_threadId;
-        std::vector<SmartPkt> m_pktList;
+        std::vector<SmartPkt> m_pktQueue;
     };
 
 }

@@ -28,8 +28,6 @@ namespace freee {
 
     private:
 
-        std::string m_extraConfig;
-
         unsigned long m_intputSamples;
         unsigned long m_intputSize;
         unsigned long m_outputSize;

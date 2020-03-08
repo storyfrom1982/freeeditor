@@ -10,7 +10,6 @@ using namespace freee;
 
 FileMediaStream::FileMediaStream() {
     m_pContext = nullptr;
-    m_streamCount = 0;
     m_Streams = std::vector<AVStream*>(3);
 }
 
@@ -42,11 +41,11 @@ void FileMediaStream::onMsgConnectStream(SmartPkt pkt) {
 
 void FileMediaStream::onMsgDisconnectStream() {
     if (m_pContext){
-        if (m_pContext->pb != NULL) {
+        if (m_status == Status_Opened && m_pContext->pb != NULL) {
             av_write_trailer(m_pContext);
-            avio_close(m_pContext->pb);
-            m_pContext->pb = NULL;
         }
+        avio_close(m_pContext->pb);
+        m_pContext->pb = NULL;
     }
 }
 
@@ -70,10 +69,11 @@ void FileMediaStream::onMsgOpen(SmartPkt pkt) {
                 LOGD("[FileMediaStream] avformat_write_header failed %d %s\n", result, buffer);
             }
 
+            m_status = Status_Opened;
             usleep(200000);
-            SmartPkt event(PktMsgRecvEvent);
+            SmartPkt event(PktMsgProcessEvent);
             event.SetEvent(PktMsgOpen);
-            MediaChainImpl::onMsgRecvEvent(event);
+            MediaChainImpl::onMsgProcessEvent(event);
         }
     }
 }

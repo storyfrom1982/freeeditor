@@ -21,7 +21,7 @@ namespace freee {
         SmartPkt GetStringPkt(int key, std::string str);
 
         void SendMessage(SmartPkt pkt) override;
-        SmartPkt GetMessage(int key) override;
+        SmartPkt RequestMessage(int key) override;
 
     public:
 

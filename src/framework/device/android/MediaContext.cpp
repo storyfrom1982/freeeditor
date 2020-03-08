@@ -71,19 +71,19 @@ void MediaContext::SendMessage(SmartPkt pkt) {
     MessageContext::SendMessage(pkt);
 }
 
-SmartPkt MediaContext::GetMessage(int key) {
-    return MessageContext::GetMessage(key);
+SmartPkt MediaContext::RequestMessage(int key) {
+    return MessageContext::RequestMessage(key);
 }
 
 MessageContext *MediaContext::ConnectCamera() {
-    SmartPkt pkt = MessageContext::GetMessage(GetMsg_ConnectCamera);
+    SmartPkt pkt = MessageContext::RequestMessage(GetMsg_ConnectCamera);
     assert(pkt.GetPtr());
     assert(pkt.GetKey() == GetMsg_ConnectCamera);
     return static_cast<MessageContext *>(pkt.GetPtr());
 }
 
 MessageContext *MediaContext::ConnectMicrophone() {
-    SmartPkt pkt = MessageContext::GetMessage(GetMsg_ConnectMicrophone);
+    SmartPkt pkt = MessageContext::RequestMessage(GetMsg_ConnectMicrophone);
     assert(pkt.GetPtr());
     assert(pkt.GetKey() == GetMsg_ConnectMicrophone);
     return static_cast<MessageContext *>(pkt.GetPtr());

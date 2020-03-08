@@ -90,7 +90,7 @@ public:
 
     jobject GetMessage(JNIEnv *env, int key) {
         jstring str = nullptr;
-        SmartPkt pkt = MessageContext::GetMessage(key);
+        SmartPkt pkt = MessageContext::RequestMessage(key);
         if (!pkt.GetString().empty()){
             str = env->NewStringUTF(pkt.GetString().c_str());
         }

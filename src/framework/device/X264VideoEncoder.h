@@ -34,7 +34,6 @@ namespace freee {
         std::string GenH264Config();
 
     private:
-        std::string m_extraConfig;
         x264_t   *m_handle;
         x264_param_t m_param;
     };
