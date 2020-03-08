@@ -21,18 +21,17 @@ namespace freee {
 
         void FinalClear() override;
 
-        virtual void ConnectStream(std::string url){};
+        virtual void ConnectStream(std::string url);
 
-        virtual void DisconnectStream(){};
+        virtual void DisconnectStream();
 
     protected:
-        void onMsgOpen(SmartPkt pkt) override;
-
-        void onMsgClose(SmartPkt pkt) override;
-
-        void onMsgProcessMedia(SmartPkt pkt) override;
 
         void onMsgControl(SmartPkt pkt) override;
+
+        virtual void onMsgConnectStream(SmartPkt pkt);
+
+        virtual void onMsgDisconnectStream();
 
     protected:
         std::vector<json> m_configList;

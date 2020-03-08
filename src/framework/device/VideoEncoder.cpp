@@ -44,10 +44,13 @@ void VideoEncoder::onMsgOpen(SmartPkt pkt) {
     uint32_t h = m_config["codecHeight"];
     p_bufferPool = new BufferPool(2, w*h, 10, 16);
     p_bufferPool->SetName(m_name);
+    pkt.frame.media_type = MediaType_Video;
+    MediaChainImpl::onMsgOpen(pkt);
 }
 
 void VideoEncoder::onMsgClose(SmartPkt pkt) {
     CloseModule();
+    MediaChainImpl::onMsgClose(pkt);
 }
 
 void VideoEncoder::onMsgProcessMedia(SmartPkt pkt) {

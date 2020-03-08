@@ -3,6 +3,7 @@
 //
 
 #include <sr_buffer_frame.h>
+#include <bitstream.h>
 #include "X264VideoEncoder.h"
 
 
@@ -50,7 +51,7 @@ int X264VideoEncoder::OpenModule() {
     }
 
     // i_bitrate: kbit
-    m_param.rc.i_bitrate = bitrate / 1000;
+    m_param.rc.i_bitrate = bitrate / 1;
     m_param.rc.i_vbv_buffer_size= m_param.rc.i_bitrate ;
     m_param.rc.i_vbv_max_bitrate= m_param.rc.i_bitrate ;
     m_param.rc.f_rate_tolerance = 0.1f;
@@ -83,23 +84,8 @@ int X264VideoEncoder::OpenModule() {
 
     m_handle = x264_encoder_open(&m_param);
 
-    x264_nal_t* encoded = nullptr;
-    int nal;
+    m_extraConfig = GenAvc1();
 
-    if (x264_encoder_headers(m_handle, &encoded, &nal) < 0){
-        return -1;
-    }
-
-    if (nal < 2)
-        return -1;
-
-    unsigned char *sps = encoded[0].p_payload + 4;
-    unsigned char *pps = encoded[1].p_payload + 4;
-    short sps_size = encoded[0].i_payload-4;
-    short pps_size = encoded[1].i_payload - 4;
-
-//    free(encoded);
-    m_frameId = 0;
     LOGD("X264VideoEncoder::OnOpenEncoder: %p\n", m_handle);
     return 0;
 }
@@ -151,15 +137,115 @@ int X264VideoEncoder::ProcessMediaByModule(SmartPkt pkt) {
         frameLen += nal_len;
     }
 
-    long long tmStamp = m_param.b_vfr_input ? pic_out.i_dts :
-                        pic_out.i_dts*1000000*m_param.i_fps_den/m_param.i_fps_num;
+    SmartPkt opkt = p_bufferPool->GetPkt(PktMsgProcessMedia);
+    opkt.SetPtr(this);
+    opkt.frame.flag = PktFlag_PFrame;
 
-//    long long tmStamp = (long long)(m_frameId*1000LL/m_frameRate);
+    uint8_t *dst = opkt.GetDataPtr();
+    int offset = 0;
+
+    x264_nal_t *p_spspps;
+    int i_spspps;
+    // Translate int to enum
+    switch (pic_out.i_type) {
+        case X264_TYPE_IDR:
+//            x264_encoder_headers(m_handle, &p_spspps, &i_spspps);
+            LOGD("x264_encoder_encode nal idr frame count %d\n", i_nal);
+//            memcpy(dst + offset, m_extraConfig.c_str(), m_extraConfig.size());
+//            offset += m_extraConfig.size();
+
+//            memcpy(dst + offset, p_spspps[0].p_payload, p_spspps[0].i_payload);
+//            offset += p_spspps[0].i_payload;
+//            memcpy(dst + offset, p_spspps[1].p_payload, p_spspps[1].i_payload);
+//            offset += p_spspps[1].i_payload;
+            opkt.frame.flag = PktFlag_KeyFrame;
+            break;
+        case X264_TYPE_I:
+            LOGD("x264_encoder_encode nal iframe count %d\n", i_nal);
+            break;
+        case X264_TYPE_P:
+            LOGD("x264_encoder_encode nal pframe count %d\n", i_nal);
+            break;
+
+        case X264_TYPE_B:
+        case X264_TYPE_BREF:
+            LOGD("x264_encoder_encode nal bframe count %d\n", i_nal);
+            break;
+        default:
+            // The API is defined as returning a type.
+            break;
+    }
+
+    for (int i = 0; i < i_nal; i++){
+        int nal_len = nal[i].i_payload;
+        memcpy(&dst[offset], nal[i].p_payload, nal_len);
+        offset += nal_len;
+    }
+
+//    for (int i = 0; i < i_nal; i++){
+//        int nal_len = nal[i].i_payload;
+//        memcpy(&dst[offset + 4], nal[i].p_payload + 4, nal_len - 4);
+//        dst[offset + 0] = 0;
+//        dst[offset + 1] = 0;
+//        dst[offset + 2] = 0;
+//        dst[offset + 3] = 1;
+//        offset += nal_len;
+//    }
+
+//    long long tmStamp = m_param.b_vfr_input ? pic_out.i_dts :
+//                        pic_out.i_dts*1000000*m_param.i_fps_den/m_param.i_fps_num;
+
+    long long tmStamp = (long long)(m_frameId*1000LL/m_frameRate);
+    opkt.frame.timestamp = tmStamp;
+    opkt.frame.size = frameLen;
+    opkt.frame.data = opkt.GetDataPtr();
+    opkt.frame.media_type = MediaType_Video;
 
 //    long long tmStamp = pkt.frame.timestamp / 1000;
 
+    MediaChainImpl::onMsgProcessMedia(opkt);
+
 //    LOGD("X264VideoEncoder::OnOpenEncoder: size=%d  i64=%ld\n", frameLen, tmStamp);
     return  0;
+}
+
+std::string X264VideoEncoder::GenAvc1() {
+    x264_nal_t* encoded;
+    int nal;
+
+    if (x264_encoder_headers(m_handle, &encoded, &nal) < 0)
+        return std::string();
+    if (nal < 2)
+        return std::string();
+
+    unsigned char *sps = encoded[0].p_payload + 4;
+    unsigned char *pps = encoded[1].p_payload + 4;
+    short sps_size = encoded[0].i_payload-4;
+    short pps_size = encoded[1].i_payload - 4;
+
+    Bitstream bs ;
+
+    bs << (unsigned char)1; /* version */
+    bs << (unsigned char)sps[1]; /* profile */
+    bs << (unsigned char)sps[2]; /* profile compat */
+    bs << (unsigned char)sps[3]; /* level */
+    bs << (unsigned char)0xff; /* 6 bits reserved (111111) + 2 bits nal size length - 1 (11) */
+    bs << (unsigned char)0xe1; /* 3 bits reserved (111) + 5 bits number of sps (00001) */
+
+    bs << sps_size;
+    bs.write( sps, sps_size);
+    bs << (unsigned char)1; /* number of pps */
+    bs << pps_size ;
+    bs.write(pps, pps_size);
+
+    bs.getWriteBytes();
+
+    std::string str = bs.getBuffer();
+    return str;
+}
+
+std::string X264VideoEncoder::GetExtraConfig(MediaChain *chain) {
+    return m_extraConfig;
 }
 
 

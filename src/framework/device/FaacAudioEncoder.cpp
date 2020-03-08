@@ -77,7 +77,13 @@ int FaacAudioEncoder::OpenModule() {
         return 1;
     }
 
+    m_extraConfig = std::string((char*)info.confBuf, info.confSize);
+
     return ret;
+}
+
+std::string FaacAudioEncoder::GetExtraConfig(MediaChain *chain) {
+    return m_extraConfig;
 }
 
 void FaacAudioEncoder::CloseModule() {
@@ -106,8 +112,12 @@ int FaacAudioEncoder::ProcessMediaByModule(SmartPkt pkt) {
     in_buf.bufSizes = &in_size;
     in_buf.bufElSizes = &in_elem_size;
 
-    out_ptr = malloc(1024 * 2 * 2);
-    out_size = 1024 * 2 * 2;
+
+    SmartPkt opkt = p_bufferPool->GetPkt(PktMsgProcessMedia);
+    opkt.SetPtr(this);
+
+    out_ptr = opkt.GetDataPtr();
+    out_size = opkt.GetDataSize();
     out_elem_size = 1;
     out_buf.numBufs = 1;
     out_buf.bufs = &out_ptr;
@@ -118,13 +128,18 @@ int FaacAudioEncoder::ProcessMediaByModule(SmartPkt pkt) {
     int ret;
     if ((ret = aacEncEncode(m_pHandle, &in_buf, &out_buf, &in_args, &out_args)) != AACENC_OK) {
         LOGD("[FaacAudioEncoder] encode_frame failed %x\n", ret);
-        free(out_ptr);
         return -11;
     }
 
 //    LOGD("[FaacAudioEncoder] EncodeVideo out_size=%d  out_elem_size=%d\n", out_args.numOutBytes, out_elem_size);
 
-    free(out_ptr);
+    opkt.frame.media_type = MediaType_Audio;
+    opkt.frame.size = out_args.numOutBytes;
+    opkt.frame.data = opkt.GetDataPtr();
+    opkt.frame.timestamp = pkt.frame.timestamp / 1000;
+    opkt.frame.flag = 1;
+
+    MediaChainImpl::onMsgProcessMedia(opkt);
 
     return 0;
 }

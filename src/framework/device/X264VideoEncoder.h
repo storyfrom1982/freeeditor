@@ -20,6 +20,8 @@ namespace freee {
         X264VideoEncoder();
         ~X264VideoEncoder();
 
+        std::string GetExtraConfig(MediaChain *chain) override;
+
     protected:
         int OpenModule() override;
 
@@ -28,7 +30,10 @@ namespace freee {
         int ProcessMediaByModule(SmartPkt pkt) override;
 
     private:
-//        ino64_t m_frameId;
+        std::string GenAvc1();
+
+    private:
+        std::string m_extraConfig;
         x264_t   *m_handle;
         x264_param_t m_param;
     };

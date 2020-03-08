@@ -32,6 +32,10 @@ namespace freee {
         AudioEncoder(int mediaType = MediaType_Audio,
                      int mediaNumber = MediaNumber_AudioEncoder,
                      const std::string &mediaName = "AudioEncoder");
+
+    protected:
+        size_t m_bufferSize = 0;
+        BufferPool *p_bufferPool = nullptr;
     };
 
 }

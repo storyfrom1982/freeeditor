@@ -18,6 +18,8 @@ namespace freee {
 
         ~MediaContext() override ;
 
+        SmartPkt GetStringPkt(int key, std::string str);
+
         void SendMessage(SmartPkt pkt) override;
         SmartPkt GetMessage(int key) override;
 

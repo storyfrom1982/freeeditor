@@ -96,3 +96,7 @@ void MediaContext::DisconnectCamera() {
 void MediaContext::DisconnectMicrophone() {
     SendMessage(SmartPkt(SendMsg_DisconnectMicrophone));
 }
+
+SmartPkt MediaContext::GetStringPkt(int key, std::string str) {
+    return NewJsonPkt(key, str);
+}

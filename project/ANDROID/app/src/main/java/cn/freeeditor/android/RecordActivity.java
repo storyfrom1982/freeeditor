@@ -84,11 +84,36 @@ public class RecordActivity extends Activity {
 
         fadeIn();
 
-        openRecorder("test");
+        openRecorder(getUrl());
     }
 
 
+    private String getUrl(){
+        String url;
+        if (mUrlEdit.getText().toString().isEmpty()){
+            url = mUrlEdit.getHint().toString();
+        }else{
+            url = mUrlEdit.getHint().toString();
+        }
 
+        Log.d(TAG, "URL == " + url);
+
+        if (isPublishing){
+            isPublishing = !isPublishing;
+//                recordButton.setEnabled(false);
+            recordButton.setText("Start");
+        }else{
+            isPublishing = !isPublishing;
+//                recordButton.setEnabled(false);
+            recordButton.setText("Stop");
+            try {
+                url = Environment.getExternalStorageDirectory() + "/" + url;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return url;
+    }
 
 
     @Override
@@ -250,7 +275,8 @@ public class RecordActivity extends Activity {
         PermissionEverywhere.getPermission(getApplicationContext(),
                 new String[]{
                         Manifest.permission.CAMERA,
-                        Manifest.permission.RECORD_AUDIO},
+                        Manifest.permission.RECORD_AUDIO,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 3721).enqueue(new PermissionResultCallback() {
             @Override
             public void onComplete(PermissionResponse permissionResponse) {

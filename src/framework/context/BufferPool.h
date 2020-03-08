@@ -34,6 +34,12 @@ namespace freee {
         PktMsgControl = 10,
     };
 
+
+    enum {
+        PktFlag_PFrame = 0,
+        PktFlag_KeyFrame = 1,
+    };
+
     class SmartPkt {
 
     public:

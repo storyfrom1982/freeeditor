@@ -16,6 +16,7 @@
 #include "../../media/VideoRenderer.h"
 #include "../../media/VideoFilter.h"
 #include "../../media/AudioFilter.h"
+#include "../../media/MediaStream.h"
 
 namespace freee{
 
@@ -40,7 +41,7 @@ namespace freee{
         void Close();
         void Start();
         void Stop();
-        void StartRecord();
+        void StartRecord(SmartPkt pkt);
         void StopRecord();
         void StopPreview();
 
@@ -65,6 +66,8 @@ namespace freee{
         VideoSource *m_videoSource;
         VideoRenderer *m_videoRenderer;
         VideoEncoder *m_videoEncoder;
+
+        MediaStream *m_mediaStream;
     };
 }
 

@@ -12,6 +12,7 @@
 typedef struct sr_buffer_frame_t {
 
     int media_type;
+    int flag;
 
     union {
         struct {

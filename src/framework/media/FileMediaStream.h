@@ -25,22 +25,26 @@ namespace freee {
         FileMediaStream();
         ~FileMediaStream();
 
-        void ConnectStream(std::string url) override;
-
-        void DisconnectStream() override;
-
     protected:
-        int OpenModule() override;
+        void onMsgOpen(SmartPkt pkt) override;
 
-        void CloseModule() override;
+        void onMsgClose(SmartPkt pkt) override;
 
-        int ProcessMediaByModule(SmartPkt pkt) override;
+        void onMsgProcessMedia(SmartPkt pkt) override;
 
+        void onMsgConnectStream(SmartPkt pkt) override;
+
+        void onMsgDisconnectStream() override;
+
+    private:
+        AVStream* addAudioStream(MediaChain *chain);
+        AVStream* addVideoStream(MediaChain *chain);
 
     private:
         int m_streamCount;
         AVFormatContext *m_pContext;
         std::vector<AVStream*> m_Streams;
+        std::map<MediaChain*, AVStream*> m_streamMap;
     };
 
 }

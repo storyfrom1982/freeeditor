@@ -2,10 +2,17 @@
 // Created by yongge on 20-3-5.
 //
 
+#include <android/MediaContext.h>
 #include "MediaStream.h"
+#include "FileMediaStream.h"
 
 
 using namespace freee;
+
+enum {
+    OnRecvMsg_ConnectStream = 11,
+    OnRecvMsg_DisconnectStream = 12,
+};
 
 MediaStream::MediaStream(int mediaType, int mediaNumber, const std::string &mediaName)
         : MediaModule(mediaType, mediaNumber, mediaName) {
@@ -21,23 +28,36 @@ void MediaStream::FinalClear() {
 
 }
 
-void MediaStream::onMsgOpen(SmartPkt pkt) {
-    m_configList.push_back(static_cast<MediaChain *>(pkt.GetPtr())->GetConfig(this));
-    OpenModule();
-}
-
-void MediaStream::onMsgClose(SmartPkt pkt) {
-    CloseModule();
-}
-
-void MediaStream::onMsgProcessMedia(SmartPkt pkt) {
-    ProcessMediaByModule(pkt);
-}
-
 void MediaStream::onMsgControl(SmartPkt pkt) {
-    MediaChainImpl::onMsgControl(pkt);
+    switch (pkt.GetKey()){
+        case OnRecvMsg_ConnectStream:
+            onMsgConnectStream(pkt);
+            break;
+        case OnRecvMsg_DisconnectStream:
+            onMsgDisconnectStream();
+            break;
+        default:
+            break;
+    }
 }
 
 MediaStream *MediaStream::Create(std::string name) {
-    return nullptr;
+    return new FileMediaStream();
+}
+
+void MediaStream::onMsgConnectStream(SmartPkt pkt) {
+
+}
+
+void MediaStream::onMsgDisconnectStream() {
+
+}
+
+void MediaStream::ConnectStream(std::string url) {
+    SmartPkt pkt = MediaContext::Instance()->GetStringPkt(OnRecvMsg_ConnectStream, url);
+    ProcessMessage(pkt);
+}
+
+void MediaStream::DisconnectStream() {
+    ProcessMessage(SmartPkt(OnRecvMsg_DisconnectStream));
 }

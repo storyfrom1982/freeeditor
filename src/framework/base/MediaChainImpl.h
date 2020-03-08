@@ -44,8 +44,7 @@ namespace freee {
             AutoLock lock(m_outputChainLock);
             m_outputChain.clear();
             m_inputChain.clear();
-            m_chainToIndex.clear();
-            m_indexToChain.clear();
+            m_chainToStream.clear();
         }
 
         void Open(MediaChain *chain) override {
@@ -76,48 +75,39 @@ namespace freee {
             ProcessMessage(pkt);
         }
 
-        int GetInputStreamIndex(MediaChain *chain) override {
-            AutoLock lock(m_inputChainLock);
-            return m_chainToIndex[chain];
-        }
 
     protected:
-
-        void AddInputChain(MediaChain *chain) override {
+        void AddInput(MediaChain *chain) override {
             if (chain){
                 AutoLock lock(m_inputChainLock);
                 this->m_inputChain.push_back(chain);
-                int index = 0;
-                std::map<int, void*>::iterator it = m_indexToChain.find(index);
-                while (it != m_indexToChain.end()){
-                    ++index;
-                    it = m_indexToChain.find(index);
-                }
-                m_chainToIndex[chain] = index;
-                m_indexToChain[index] = chain;
+                m_chainToStream[chain] = nullptr;
             }
         }
 
-        void DelInputChain(MediaChain *chain) override {
+        void DelInput(MediaChain *chain) override {
             AutoLock lock(m_inputChainLock);
-            for (int i = 0; i < m_inputChain.size(); ++i){
-                if (m_inputChain[i] == chain){
-                    m_inputChain.erase(m_inputChain.begin() + i);
-                    int index = m_chainToIndex[chain];
-                    m_indexToChain.erase(index);
-                    m_chainToIndex.erase(chain);
-                    break;
-                }
+            std::vector<MediaChain*>::iterator it = std::find(m_inputChain.begin(), m_inputChain.end(), chain);
+            if (it != m_inputChain.end()){
+                m_inputChain.erase(it);
             }
+            if (m_chainToStream.find(chain) != m_chainToStream.end()){
+                m_chainToStream.erase(chain);
+            }
+//            for (int i = 0; i < m_inputChain.size(); ++i){
+//                if (m_inputChain[i] == chain){
+//                    m_inputChain.erase(m_inputChain.begin() + i);
+//                    if (m_chainToStream.find(chain) != m_chainToStream.end()){
+//                        m_chainToStream.erase(chain);
+//                    }
+//                    break;
+//                }
+//            }
         }
 
     public:
         int GetType(MediaChain *chain) override {
             return m_type;
-        }
-
-        json &GetConfig(MediaChain *chain) override {
-            return m_config;
         }
 
         int GetNumber(MediaChain *chain) override {
@@ -128,20 +118,28 @@ namespace freee {
             return m_name;
         }
 
-        virtual void AddOutputChain(MediaChain *chain) override {
+        json &GetConfig(MediaChain *chain) override {
+            return m_config;
+        }
+
+        std::string GetExtraConfig(MediaChain *chain) override {
+            return std::string();
+        }
+
+        virtual void AddOutput(MediaChain *chain) override {
             if (chain){
                 AutoLock lock(m_outputChainLock);
                 this->m_outputChain.push_back(chain);
-                chain->AddInputChain(this);
+                chain->AddInput(this);
             }
         }
 
-        virtual void DelOutputChain(MediaChain *chain) override {
+        virtual void DelOutput(MediaChain *chain) override {
             AutoLock lock(m_outputChainLock);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 if (m_outputChain[i] == chain){
                     m_outputChain.erase(m_outputChain.begin() + i);
-                    chain->DelInputChain(this);
+                    chain->DelInput(this);
                     break;
                 }
             }
@@ -245,8 +243,7 @@ namespace freee {
 //        std::vector<EventCallback*> m_callbackList;
 
         Lock m_inputChainLock;
-        std::map<int, void*> m_indexToChain;
-        std::map<void*, int> m_chainToIndex;
+        std::map<void*, void*> m_chainToStream;
         std::vector<MediaChain*> m_inputChain;
 
         Lock m_outputChainLock;

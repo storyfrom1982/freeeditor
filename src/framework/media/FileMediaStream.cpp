@@ -17,25 +17,172 @@ FileMediaStream::~FileMediaStream() {
 
 }
 
-void FileMediaStream::ConnectStream(std::string url) {
+void FileMediaStream::onMsgConnectStream(SmartPkt pkt) {
+    av_register_all();
+    std::string url = pkt.GetString();
     if (avformat_alloc_output_context2(&m_pContext, NULL, NULL, url.c_str()) < 0) {
         LOGD("[FileMediaStream] ConnectStream failed to %s\n", url.c_str());
         return;
     }
+
+//    m_pContext->flags = AV_CODEC_FLAG_GLOBAL_HEADER;
+//    m_pContext->ctx_flags = AV_CODEC_FLAG_GLOBAL_HEADER;
+
+    int ret = avio_open(&m_pContext->pb, url.c_str(), AVIO_FLAG_WRITE);
+    if (NULL == m_pContext->pb){
+        //open file failed callback
+        char buffer[1024];
+        av_strerror(ret, buffer, sizeof(buffer) - 1);
+        LOGD("[FileMediaStream] open %s failed ret = %d error=%s\n",
+             url.c_str(), ret, buffer);
+    }
+    LOGD("[FileMediaStream] ConnectStream url %s\n", url.c_str());
 }
 
-void FileMediaStream::DisconnectStream() {
-    MediaStream::DisconnectStream();
+void FileMediaStream::onMsgDisconnectStream() {
+    if (m_pContext){
+        if (m_pContext->pb != NULL) {
+            av_write_trailer(m_pContext);
+            avio_close(m_pContext->pb);
+            m_pContext->pb = NULL;
+        }
+    }
 }
 
-int FileMediaStream::OpenModule() {
-    return 0;
+void FileMediaStream::onMsgOpen(SmartPkt pkt) {
+    MediaChain *chain = static_cast<MediaChain *>(pkt.GetPtr());
+    if (m_chainToStream[chain] == nullptr){
+        LOGD("FileMediaStream::onMsgOpen type[%s] extraConfig %lu\n", chain->GetName(this).c_str(), chain->GetExtraConfig(this).size());
+        if (chain->GetType(this) == MediaType_Audio){
+            addAudioStream(chain);
+        }else if (chain->GetType(this) == MediaType_Video){
+            addVideoStream(chain);
+        }
+
+        if (m_pContext->nb_streams == m_chainToStream.size()){
+            AVDictionary* option = NULL;
+            LOGD("FileMediaStream::onMsgOpen avformat_write_header\n");
+            int result = avformat_write_header(m_pContext, &option);
+            if (result < 0){
+                char buffer[1024];
+                av_strerror(result, buffer, sizeof(buffer) - 1);
+                LOGD("[FileMediaStream] avformat_write_header failed %d %s\n", result, buffer);
+            }
+        }
+    }
 }
 
-void FileMediaStream::CloseModule() {
-
+void FileMediaStream::onMsgClose(SmartPkt pkt) {
+    MediaStream::onMsgClose(pkt);
 }
 
-int FileMediaStream::ProcessMediaByModule(SmartPkt pkt) {
-    return MediaModule::ProcessMediaByModule(pkt);
+void FileMediaStream::onMsgProcessMedia(SmartPkt pkt) {
+    MediaChain *chain = static_cast<MediaChain *>(pkt.GetPtr());
+
+    AVStream* pStream = (AVStream*)m_chainToStream[chain];
+
+    AVPacket             avpkt;
+    ::av_init_packet(&avpkt);
+    avpkt.stream_index = pStream->index;
+    avpkt.data = pkt.frame.data;
+    avpkt.size = pkt.frame.size;
+    avpkt.dts = pkt.frame.timestamp;
+    avpkt.pts = avpkt.dts;
+
+
+    avpkt.flags = (pkt.frame.flag | PktFlag_KeyFrame) ? AV_PKT_FLAG_KEY : 0;
+
+    if (m_pContext->nb_streams < m_chainToStream.size()){
+        return;
+    }
+
+    if (m_pContext != NULL && m_pContext->pb != NULL){
+        int result = av_write_frame(m_pContext, &avpkt);
+        if (result < 0){
+            char buffer[1024];
+            av_strerror(result, buffer, sizeof(buffer) - 1);
+            LOGD("[FileMediaStream] av_write_frame %d, ret=%d error=%s\n",
+                   pStream->index, result,buffer);
+        }
+    }
+
+//    if (pkt.frame.media_type == MediaType_Audio){
+//        LOGD("FileMediaStream::onMsgProcessMedia: audio size=%d  i64=%ld\n", pkt.frame.size, pkt.frame.timestamp);
+//    }else if (pkt.frame.media_type == MediaType_Video){
+//        LOGD("FileMediaStream::onMsgProcessMedia: video size=%d  i64=%ld\n", pkt.frame.size, pkt.frame.timestamp);
+//    }
+}
+
+AVStream *FileMediaStream::addAudioStream(MediaChain *chain) {
+
+    json cfg = chain->GetConfig(this);
+
+    AVCodec* codec = avcodec_find_decoder(AV_CODEC_ID_AAC);
+
+    AVStream* avStream = avformat_new_stream(m_pContext, NULL);
+    avStream->codecpar->codec_id = codec->id;
+    avStream->codecpar->codec_type = codec->type;
+
+#if LIBAVFORMAT_VERSION_MAJOR >= 57
+    AVCodecParameters *codecpar = avStream->codecpar;
+#else
+    AVCodecContext*codecpar = avStream->codec;
+#endif
+
+    m_pContext->video_codec_id = codecpar->codec_id;
+    codecpar->sample_rate = cfg["codecSampleRate"];
+    codecpar->channels = cfg["codecChannelCount"];
+    codecpar->bit_rate = cfg["codecBitRate"];;
+    avStream->time_base.den = 1;
+    avStream->time_base.num = 1;
+
+    std::string extraConfig = chain->GetExtraConfig(this);
+    if (extraConfig.size() > 0){
+        codecpar->extradata_size = extraConfig.size();
+        codecpar->extradata = (uint8_t*)av_malloc(codecpar->extradata_size);
+        memcpy(codecpar->extradata,
+               extraConfig.c_str(), extraConfig.size());
+    }
+
+    m_chainToStream[chain] = avStream;
+
+    return avStream;
+}
+
+AVStream *FileMediaStream::addVideoStream(MediaChain *chain) {
+
+    json cfg = chain->GetConfig(this);
+
+    AVCodec* codec = avcodec_find_decoder(AV_CODEC_ID_H264);
+
+    AVStream* avStream = avformat_new_stream(m_pContext, NULL);
+    avStream->codecpar->codec_id = codec->id;
+    avStream->codecpar->codec_type = codec->type;
+
+#if LIBAVFORMAT_VERSION_MAJOR >= 57
+    AVCodecParameters *codecpar = avStream->codecpar;
+#else
+    AVCodecContext*codecpar = avStream->codec;
+#endif
+
+    m_pContext->video_codec_id = codecpar->codec_id;
+    codecpar->width = cfg["codecWidth"];
+    codecpar->height = cfg["codecHeight"];
+    avStream->avg_frame_rate.num = (int)((float)cfg["codecFPS"] * 1000);
+    avStream->avg_frame_rate.den = 1000;
+    codecpar->bit_rate = cfg["codecBitRate"];
+    avStream->time_base.den = 1;
+    avStream->time_base.num = 1;
+
+    std::string extraConfig = chain->GetExtraConfig(this);
+    if (extraConfig.size() > 0){
+        codecpar->extradata_size = extraConfig.size();
+        codecpar->extradata = (uint8_t*)av_malloc(codecpar->extradata_size);
+        memcpy(codecpar->extradata,
+               extraConfig.c_str(), extraConfig.size());
+    }
+
+    m_chainToStream[chain] = avStream;
+
+    return avStream;
 }

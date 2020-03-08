@@ -35,6 +35,7 @@ MediaRecorder::MediaRecorder()
         m_videoFilter(nullptr),
         m_videoRenderer(nullptr),
         m_videoEncoder(nullptr),
+        m_mediaStream(nullptr),
         is_previewing(false),
         m_status(Status_Closed){
     SetContextName("MediaRecorder");
@@ -79,7 +80,7 @@ void MediaRecorder::MessageProcess(SmartPkt pkt) {
             Close();
             break;
         case RecvMsg_StartRecord:
-            StartRecord();
+            StartRecord(pkt);
             break;
         case RecvMsg_StopRecord:
             StopRecord();
@@ -117,6 +118,9 @@ void MediaRecorder::Open(SmartPkt pkt) {
 
         LOGD("MediaRecorder config >> %s\n", m_config.dump(4).c_str());
 
+        m_mediaStream = MediaStream::Create("file");
+        m_mediaStream->ConnectStream("/storage/emulated/0/test.mp4");
+
         m_videoSource = new VideoSource();
         m_videoFilter = new VideoFilter();
         m_videoRenderer = new VideoRenderer();
@@ -124,18 +128,22 @@ void MediaRecorder::Open(SmartPkt pkt) {
 
 //        m_videoSource->SetEventCallback(this);
 
-        m_videoSource->AddOutputChain(m_videoFilter);
-        m_videoFilter->AddOutputChain(m_videoRenderer);
-        m_videoFilter->AddOutputChain(m_videoEncoder);
+        m_videoSource->AddOutput(m_videoFilter);
+        m_videoFilter->AddOutput(m_videoRenderer);
+        m_videoFilter->AddOutput(m_videoEncoder);
+        m_videoEncoder->AddOutput(m_mediaStream);
         m_videoSource->Open(this);
 
 
         m_audioSource = new AudioSource();
         m_audioFilter = new AudioFilter();
         m_audioEncoder = AudioEncoder::Create(m_config["audio"]["codecName"]);
-        m_audioSource->AddOutputChain(m_audioFilter);
-        m_audioFilter->AddOutputChain(m_audioEncoder);
+        m_audioSource->AddOutput(m_audioFilter);
+        m_audioFilter->AddOutput(m_audioEncoder);
+        m_audioEncoder->AddOutput(m_mediaStream);
         m_audioSource->Open(this);
+
+
 
         m_status = Status_Opened;
     }
@@ -148,9 +156,9 @@ void MediaRecorder::Close() {
     if (m_status == Status_Opened
         || m_status == Status_Stopped){
 
-        m_videoSource->DelOutputChain(m_videoFilter);
-        m_videoFilter->DelOutputChain(m_videoRenderer);
-        m_videoFilter->DelOutputChain(m_videoEncoder);
+        m_videoSource->DelOutput(m_videoFilter);
+        m_videoFilter->DelOutput(m_videoRenderer);
+        m_videoFilter->DelOutput(m_videoEncoder);
 
         m_videoSource->Close(this);
         m_videoFilter->Close(this);
@@ -163,21 +171,27 @@ void MediaRecorder::Close() {
         delete m_videoFilter;
 
 
-        m_audioSource->DelOutputChain(m_audioFilter);
-        m_audioFilter->DelOutputChain(m_audioEncoder);
+        m_audioSource->DelOutput(m_audioFilter);
+        m_audioFilter->DelOutput(m_audioEncoder);
         m_audioSource->Close(this);
         m_audioFilter->Close(this);
         m_audioEncoder->Close(this);
+
+        m_mediaStream->DisconnectStream();
+
 
         delete m_audioSource;
         delete m_audioFilter;
         delete m_audioEncoder;
 
+        delete m_mediaStream;
+
         m_status = Status_Closed;
     }
 }
 
-void MediaRecorder::StartRecord() {
+void MediaRecorder::StartRecord(SmartPkt pkt) {
+    LOGD("MediaRecorder::StartRecord url=%s\n", pkt.GetString().c_str());
     if (!is_recording){
         if (m_status != Status_Started){
             Start();

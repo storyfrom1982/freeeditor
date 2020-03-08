@@ -106,6 +106,7 @@ void AudioSource::Stop(MediaChain *chain) {
 void AudioSource::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
     SmartPkt resample = p_bufferPool->GetPkt(PktMsgProcessMedia);
     memcpy(resample.GetDataPtr(), pkt.frame.data, resample.GetDataSize());
+    resample.frame.timestamp = pkt.frame.timestamp;
     MediaChainImpl::onMsgProcessMedia(resample);
 }
 
