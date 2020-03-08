@@ -112,12 +112,15 @@ namespace freee {
         void SetPtr(void *ptr){
             m_msg.ptr = ptr;
         }
+        void SetEvent(int event){
+            m_msg.event = event;
+        }
         int GetKey(){
             return m_msg.key;
         }
-//        MediaChain* GetChain(){
-//            return (MediaChain*)m_msg.ptr;
-//        }
+        int GetEvent(){
+            return m_msg.event;
+        }
         void* GetPtr(){
             return m_msg.ptr;
         }

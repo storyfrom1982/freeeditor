@@ -2,6 +2,7 @@
 // Created by yongge on 20-3-6.
 //
 
+#include <unistd.h>
 #include "FileMediaStream.h"
 
 
@@ -68,6 +69,11 @@ void FileMediaStream::onMsgOpen(SmartPkt pkt) {
                 av_strerror(result, buffer, sizeof(buffer) - 1);
                 LOGD("[FileMediaStream] avformat_write_header failed %d %s\n", result, buffer);
             }
+
+            usleep(200000);
+            SmartPkt event(PktMsgRecvEvent);
+            event.SetEvent(PktMsgOpen);
+            MediaChainImpl::onMsgRecvEvent(event);
         }
     }
 }
@@ -86,9 +92,16 @@ void FileMediaStream::onMsgProcessMedia(SmartPkt pkt) {
     avpkt.stream_index = pStream->index;
     avpkt.data = pkt.frame.data;
     avpkt.size = pkt.frame.size;
-    avpkt.dts = pkt.frame.timestamp;
+    avpkt.dts = pkt.frame.timestamp*pStream->time_base.den / (1000 * pStream->time_base.num);
     avpkt.pts = avpkt.dts;
 
+    if (pkt.frame.media_type == MediaType_Audio){
+        LOGD("FileMediaStream: audio timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
+             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
+    }else if (pkt.frame.media_type == MediaType_Video){
+        LOGD("FileMediaStream: video timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
+             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
+    }
 
     avpkt.flags = (pkt.frame.flag | PktFlag_KeyFrame) ? AV_PKT_FLAG_KEY : 0;
 
@@ -101,16 +114,15 @@ void FileMediaStream::onMsgProcessMedia(SmartPkt pkt) {
         if (result < 0){
             char buffer[1024];
             av_strerror(result, buffer, sizeof(buffer) - 1);
-            LOGD("[FileMediaStream] av_write_frame %d, ret=%d error=%s\n",
-                   pStream->index, result,buffer);
+            if (pkt.frame.media_type == MediaType_Audio){
+                LOGD("[FileMediaStream] av_write_frame audio %d, ret=%d error=%s\n",
+                     pStream->index, result,buffer);
+            }else if (pkt.frame.media_type == MediaType_Video){
+                LOGD("[FileMediaStream] av_write_frame video %d, ret=%d error=%s\n",
+                     pStream->index, result,buffer);
+            }
         }
     }
-
-//    if (pkt.frame.media_type == MediaType_Audio){
-//        LOGD("FileMediaStream::onMsgProcessMedia: audio size=%d  i64=%ld\n", pkt.frame.size, pkt.frame.timestamp);
-//    }else if (pkt.frame.media_type == MediaType_Video){
-//        LOGD("FileMediaStream::onMsgProcessMedia: video size=%d  i64=%ld\n", pkt.frame.size, pkt.frame.timestamp);
-//    }
 }
 
 AVStream *FileMediaStream::addAudioStream(MediaChain *chain) {
@@ -130,11 +142,13 @@ AVStream *FileMediaStream::addAudioStream(MediaChain *chain) {
 #endif
 
     m_pContext->video_codec_id = codecpar->codec_id;
+    int sampleRate = cfg["codecBitRate"];
     codecpar->sample_rate = cfg["codecSampleRate"];
     codecpar->channels = cfg["codecChannelCount"];
-    codecpar->bit_rate = cfg["codecBitRate"];;
-    avStream->time_base.den = 1;
-    avStream->time_base.num = 1;
+    codecpar->bit_rate = cfg["codecBitRate"];
+//    avStream->time_base.den = 1;
+//    avStream->time_base.num = 1;
+    avStream->time_base = (AVRational){ 1, sampleRate };
 
     std::string extraConfig = chain->GetExtraConfig(this);
     if (extraConfig.size() > 0){
@@ -166,13 +180,16 @@ AVStream *FileMediaStream::addVideoStream(MediaChain *chain) {
 #endif
 
     m_pContext->video_codec_id = codecpar->codec_id;
+    int fps = (int)((float)cfg["codecFPS"]);
     codecpar->width = cfg["codecWidth"];
     codecpar->height = cfg["codecHeight"];
-    avStream->avg_frame_rate.num = (int)((float)cfg["codecFPS"] * 1000);
-    avStream->avg_frame_rate.den = 1000;
+//    avStream->avg_frame_rate.num = 1;
+//    avStream->avg_frame_rate.den = 1000;
+    avStream->avg_frame_rate = (AVRational){ 1000, fps * 1000 };
     codecpar->bit_rate = cfg["codecBitRate"];
-    avStream->time_base.den = 1;
-    avStream->time_base.num = 1;
+    avStream->time_base = (AVRational){ 1, 1 };
+//    avStream->time_base.den = 1;
+//    avStream->time_base.num = 1;
 
     std::string extraConfig = chain->GetExtraConfig(this);
     if (extraConfig.size() > 0){

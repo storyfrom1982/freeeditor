@@ -26,6 +26,8 @@ namespace freee {
 
         void onMsgProcessMedia(SmartPkt pkt) override;
 
+        void onMsgRecvEvent(SmartPkt pkt) override;
+
         void onMsgControl(SmartPkt pkt) override;
 
     protected:
@@ -34,6 +36,7 @@ namespace freee {
                      const std::string &mediaName = "AudioEncoder");
 
     protected:
+        int64_t m_startTimestamp = -1;
         size_t m_bufferSize = 0;
         BufferPool *p_bufferPool = nullptr;
     };

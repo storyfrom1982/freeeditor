@@ -54,7 +54,8 @@ void VideoEncoder::onMsgClose(SmartPkt pkt) {
 }
 
 void VideoEncoder::onMsgProcessMedia(SmartPkt pkt) {
-    if ( m_frameRate > 0) {
+
+    if ( m_outputChainStatus == Status_Opened) {
 //        LOGD("m_framerate ================  delay[%f]\n", m_frameRate);
         long long timeStamp = pkt.frame.timestamp;
         double frameIdScope = (double) timeStamp * (m_frameRate / 1000000.0f);
@@ -79,11 +80,25 @@ void VideoEncoder::onMsgProcessMedia(SmartPkt pkt) {
 //            LOGD("drop a video frame[%lf]\n", error);
             return ;
         }
+
+        m_frameId++;
+        ProcessMediaByModule(pkt);
     }
-    m_frameId++;
-    ProcessMediaByModule(pkt);
 }
 
 void VideoEncoder::onMsgControl(SmartPkt pkt) {
     MediaChainImpl::onMsgControl(pkt);
+}
+
+void VideoEncoder::onMsgRecvEvent(SmartPkt pkt) {
+    switch (pkt.GetEvent()){
+        case PktMsgOpen:
+            m_outputChainStatus = Status_Opened;
+            break;
+        case PktMsgClose:
+            m_outputChainStatus = Status_Closed;
+            break;
+        default:
+            break;
+    }
 }

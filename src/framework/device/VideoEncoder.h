@@ -30,6 +30,9 @@ namespace freee{
 
         void onMsgProcessMedia(SmartPkt pkt) override;
 
+        void onMsgRecvEvent(SmartPkt pkt) override;
+
+    protected:
         void onMsgControl(SmartPkt pkt) override;
 
     protected:

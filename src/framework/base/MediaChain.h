@@ -51,6 +51,8 @@ namespace freee {
         virtual void ProcessMedia(MediaChain *chain, SmartPkt pkt) = 0;
         virtual void onRecvEvent(MediaChain *chain, SmartPkt pkt) = 0;
 
+        virtual void SetEventListener(MediaChain *listener) = 0;
+
         virtual int GetType(MediaChain *chain) = 0;
         virtual int GetNumber(MediaChain *chain) = 0;
         virtual json& GetConfig(MediaChain *chain) = 0;
@@ -62,19 +64,6 @@ namespace freee {
 
         virtual void AddOutput(MediaChain *chain) = 0;
         virtual void DelOutput(MediaChain *chain) = 0;
-
-    protected:
-
-//        class EventCallback {
-//        public:
-//            virtual void onOpened(MediaChain *chain) = 0;
-//            virtual void onStarted(MediaChain *chain) = 0;
-//            virtual void onStopped(MediaChain *chain) = 0;
-//            virtual void onClosed(MediaChain *chain) = 0;
-//            virtual void onEvent(MediaChain *chain, SmartPkt pkt) = 0;
-//        };
-//
-//        virtual void SetEventCallback(EventCallback *callback) = 0;
     };
 
 }

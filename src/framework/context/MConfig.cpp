@@ -88,7 +88,7 @@ void MConfig::buildDefaultConfig(json &config) {
                 {"previewMirror", false},
                 {"previewRotation", 0},
 
-                {"codecFPS", 25.0},
+                {"codecFPS", 30.0},
                 {"codecWidth", 640},
                 {"codecHeight", 360},
                 {"codecImageFormat", "I420"},

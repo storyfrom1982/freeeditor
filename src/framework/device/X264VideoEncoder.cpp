@@ -84,7 +84,8 @@ int X264VideoEncoder::OpenModule() {
 
     m_handle = x264_encoder_open(&m_param);
 
-    m_extraConfig = GenAvc1();
+//    m_extraConfig = GenAvc1();
+    m_extraConfig = GenH264Config();
 
     LOGD("X264VideoEncoder::OnOpenEncoder: %p\n", m_handle);
     return 0;
@@ -150,7 +151,7 @@ int X264VideoEncoder::ProcessMediaByModule(SmartPkt pkt) {
     switch (pic_out.i_type) {
         case X264_TYPE_IDR:
 //            x264_encoder_headers(m_handle, &p_spspps, &i_spspps);
-            LOGD("x264_encoder_encode nal idr frame count %d\n", i_nal);
+//            LOGD("x264_encoder_encode nal idr frame count %d\n", i_nal);
 //            memcpy(dst + offset, m_extraConfig.c_str(), m_extraConfig.size());
 //            offset += m_extraConfig.size();
 
@@ -161,15 +162,15 @@ int X264VideoEncoder::ProcessMediaByModule(SmartPkt pkt) {
             opkt.frame.flag = PktFlag_KeyFrame;
             break;
         case X264_TYPE_I:
-            LOGD("x264_encoder_encode nal iframe count %d\n", i_nal);
+//            LOGD("x264_encoder_encode nal iframe count %d\n", i_nal);
             break;
         case X264_TYPE_P:
-            LOGD("x264_encoder_encode nal pframe count %d\n", i_nal);
+//            LOGD("x264_encoder_encode nal pframe count %d\n", i_nal);
             break;
 
         case X264_TYPE_B:
         case X264_TYPE_BREF:
-            LOGD("x264_encoder_encode nal bframe count %d\n", i_nal);
+//            LOGD("x264_encoder_encode nal bframe count %d\n", i_nal);
             break;
         default:
             // The API is defined as returning a type.
@@ -246,6 +247,23 @@ std::string X264VideoEncoder::GenAvc1() {
 
 std::string X264VideoEncoder::GetExtraConfig(MediaChain *chain) {
     return m_extraConfig;
+}
+
+std::string X264VideoEncoder::GenH264Config() {
+
+    int nal;
+    x264_nal_t* encoded;
+
+    if (x264_encoder_headers(m_handle, &encoded, &nal) < 0)
+        return std::string();
+    if (nal < 2)
+        return std::string();
+
+    char head[encoded[0].i_payload + encoded[1].i_payload];
+    memcpy(head, encoded[0].p_payload, encoded[0].i_payload);
+    memcpy(head + encoded[0].i_payload, encoded[1].p_payload, encoded[1].i_payload);
+
+    return std::string(head, encoded[0].i_payload + encoded[1].i_payload);
 }
 
 

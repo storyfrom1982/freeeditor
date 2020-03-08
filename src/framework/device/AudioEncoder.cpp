@@ -37,7 +37,13 @@ void freee::AudioEncoder::onMsgClose(freee::SmartPkt pkt) {
 }
 
 void freee::AudioEncoder::onMsgProcessMedia(freee::SmartPkt pkt) {
-    ProcessMediaByModule(pkt);
+    if (m_outputChainStatus == Status_Opened){
+        if (m_startTimestamp == -1){
+            m_startTimestamp = pkt.frame.timestamp;
+        }
+        pkt.frame.timestamp -= m_startTimestamp;
+        ProcessMediaByModule(pkt);
+    }
 }
 
 void freee::AudioEncoder::onMsgControl(freee::SmartPkt pkt) {
@@ -52,5 +58,18 @@ void freee::AudioEncoder::FinalClear() {
     if (p_bufferPool){
         delete p_bufferPool;
         p_bufferPool = nullptr;
+    }
+}
+
+void freee::AudioEncoder::onMsgRecvEvent(freee::SmartPkt pkt) {
+    switch (pkt.GetEvent()){
+        case PktMsgOpen:
+            m_outputChainStatus = Status_Opened;
+            break;
+        case PktMsgClose:
+            m_outputChainStatus = Status_Closed;
+            break;
+        default:
+            break;
     }
 }

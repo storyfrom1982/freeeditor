@@ -31,6 +31,7 @@ namespace freee {
 
     private:
         std::string GenAvc1();
+        std::string GenH264Config();
 
     private:
         std::string m_extraConfig;
