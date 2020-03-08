@@ -95,15 +95,16 @@ void FileMediaStream::onMsgProcessMedia(SmartPkt pkt) {
     avpkt.dts = pkt.frame.timestamp*pStream->time_base.den / (1000 * pStream->time_base.num);
     avpkt.pts = avpkt.dts;
 
-    if (pkt.frame.media_type == MediaType_Audio){
-        LOGD("FileMediaStream: audio timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
-             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
-    }else if (pkt.frame.media_type == MediaType_Video){
-        LOGD("FileMediaStream: video timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
-             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
-    }
+    avpkt.flags = (pkt.frame.flag & PktFlag_KeyFrame) ? AV_PKT_FLAG_KEY : 0;
 
-    avpkt.flags = (pkt.frame.flag | PktFlag_KeyFrame) ? AV_PKT_FLAG_KEY : 0;
+    if (pkt.frame.media_type == MediaType_Audio){
+//        LOGD("FileMediaStream: audio timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
+//             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
+    }else if (pkt.frame.media_type == MediaType_Video){
+        LOGD("FileMediaStream: video flag %d\n", avpkt.flags);
+//        LOGD("FileMediaStream: video timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
+//             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
+    }
 
     if (m_pContext->nb_streams < m_chainToStream.size()){
         return;

@@ -137,7 +137,7 @@ int FaacAudioEncoder::ProcessMediaByModule(SmartPkt pkt) {
     opkt.frame.size = out_args.numOutBytes;
     opkt.frame.data = opkt.GetDataPtr();
     opkt.frame.timestamp = pkt.frame.timestamp / 1000;
-    opkt.frame.flag = 1;
+    opkt.frame.flag = PktFlag_PFrame;
 
     MediaChainImpl::onMsgProcessMedia(opkt);
 
