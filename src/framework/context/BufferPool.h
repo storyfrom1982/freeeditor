@@ -94,7 +94,7 @@ namespace freee {
             if (buffer){
                 p_buffer = buffer;
                 msg.key = key;
-                msg.size = str.size();
+                msg.size = str.size() + 1;
                 if (p_buffer->data_size < msg.size){
                     free(p_buffer->head);
                     p_buffer->data_size = msg.size << 2;
