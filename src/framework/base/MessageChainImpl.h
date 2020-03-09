@@ -5,6 +5,8 @@
 #ifndef ANDROID_MEDIACHAINIMPL_H
 #define ANDROID_MEDIACHAINIMPL_H
 
+#if 0
+
 #include <BufferPool.h>
 #include "MessageChain.h"
 #include "AutoLock.h"
@@ -258,6 +260,6 @@ namespace freee {
     };
 
 }
-
+#endif
 
 #endif //ANDROID_MEDIACHAINIMPL_H

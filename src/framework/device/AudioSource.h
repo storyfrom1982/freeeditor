@@ -8,12 +8,13 @@
 
 #include <MessageContext.h>
 #include <MessageChainImpl.h>
+#include <MessageChain.h>
 
 
 namespace freee {
 
 
-    class AudioSource : public MessageChainImpl {
+    class AudioSource : public MessageChain {
     public:
         void FinalClear() override;
 

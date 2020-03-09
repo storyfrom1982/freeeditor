@@ -139,7 +139,7 @@ int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
     opkt.frame.timestamp = pkt.frame.timestamp / 1000;
     opkt.frame.flag = PktFlag_PFrame;
 
-    MessageChainImpl::onMsgProcessData(opkt);
+    MessageChain::onMsgProcessData(opkt);
 
     return 0;
 }

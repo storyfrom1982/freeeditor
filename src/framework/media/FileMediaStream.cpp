@@ -73,7 +73,7 @@ void FileMediaStream::onMsgOpen(Message pkt) {
             usleep(200000);
             Message event(MsgKey_ProcessEvent);
             event.SetEvent(MsgKey_Open);
-            MessageChainImpl::onMsgProcessEvent(event);
+            MessageChain::onMsgProcessEvent(event);
         }
     }
 }
@@ -85,7 +85,14 @@ void FileMediaStream::onMsgClose(Message pkt) {
 void FileMediaStream::onMsgProcessData(Message pkt) {
     MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
 
-    AVStream* pStream = (AVStream*)m_chainToStream[chain];
+    AVStream* pStream = nullptr;
+    {
+        AutoLock lock(m_lockInputChain);
+        pStream = (AVStream*)m_chainToStream[chain];
+        if (pStream == nullptr){
+            return;
+        }
+    }
 
     AVPacket             avpkt;
     ::av_init_packet(&avpkt);

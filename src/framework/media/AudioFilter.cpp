@@ -19,13 +19,13 @@ AudioFilter::~AudioFilter() {
 void AudioFilter::onMsgOpen(Message pkt) {
     m_config = static_cast<MessageChain *>(pkt.GetPtr())->GetConfig(this);
     OpenModule();
-    MessageChainImpl::onMsgOpen(pkt);
+    MessageChain::onMsgOpen(pkt);
 //    OpenNext();
 }
 
 void AudioFilter::onMsgClose(Message pkt) {
     CloseModule();
-    MessageChainImpl::onMsgClose(pkt);
+    MessageChain::onMsgClose(pkt);
 //    CloseNext();
 }
 
@@ -55,7 +55,7 @@ void AudioFilter::CloseModule() {
 }
 
 int AudioFilter::ProcessMediaByModule(Message pkt) {
-    MessageChainImpl::onMsgProcessData(pkt);
+    MessageChain::onMsgProcessData(pkt);
     return 0;
 }
 

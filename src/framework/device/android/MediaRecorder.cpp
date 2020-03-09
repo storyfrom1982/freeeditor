@@ -27,7 +27,7 @@ enum {
 
 
 MediaRecorder::MediaRecorder()
-        : MessageChainImpl(MediaType_All, MediaNumber_Recorder, "MediaRecorder"),
+        : MessageChain(MediaType_All, MediaNumber_Recorder, "MediaRecorder"),
         m_audioSource(nullptr),
         m_audioFilter(nullptr),
         m_audioEncoder(nullptr),
@@ -159,6 +159,7 @@ void MediaRecorder::Close() {
         m_videoSource->DelOutput(m_videoFilter);
         m_videoFilter->DelOutput(m_videoRenderer);
         m_videoFilter->DelOutput(m_videoEncoder);
+        m_videoEncoder->DelOutput(m_mediaStream);
 
         m_videoSource->Close(this);
         m_videoFilter->Close(this);
@@ -173,6 +174,7 @@ void MediaRecorder::Close() {
 
         m_audioSource->DelOutput(m_audioFilter);
         m_audioFilter->DelOutput(m_audioEncoder);
+        m_audioEncoder->DelOutput(m_mediaStream);
         m_audioSource->Close(this);
         m_audioFilter->Close(this);
         m_audioEncoder->Close(this);
@@ -260,7 +262,7 @@ json &MediaRecorder::GetConfig(MessageChain *chain) {
     }else if (chain->GetType(this) == MediaType_Audio){
         return m_config["audio"];
     }
-    return MessageChainImpl::GetConfig(chain);
+    return MessageChain::GetConfig(chain);
 }
 
 //void MediaRecorder::onEvent(MediaChain *chain, SmartPkt pkt) {

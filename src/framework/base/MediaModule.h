@@ -7,15 +7,16 @@
 
 
 #include "MessageChainImpl.h"
+#include "MessageChain.h"
 
 namespace freee {
 
 
-    class MediaModule : public MessageChainImpl{
+    class MediaModule : public MessageChain {
 
     public:
         MediaModule(int mediaType, int mediaNumber, const std::string &mediaName)
-                : MessageChainImpl(mediaType, mediaNumber, mediaName){};
+                : MessageChain(mediaType, mediaNumber, mediaName){};
         virtual ~MediaModule(){};
 
     protected:

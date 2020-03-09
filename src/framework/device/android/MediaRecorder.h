@@ -20,7 +20,7 @@
 
 namespace freee{
 
-    class MediaRecorder : public MessageChainImpl {
+    class MediaRecorder : public MessageChain {
 
     public:
         MediaRecorder();

@@ -26,7 +26,7 @@ enum {
 
 
 VideoSource::VideoSource(MessageContext *context)
-    : MessageChainImpl(MediaType_Video, MediaNumber_VideoSource, "VideoSource") {
+    : MessageChain(MediaType_Video, MediaNumber_VideoSource, "VideoSource") {
     m_status = Status_Closed;
     if (context == nullptr){
 //        context = MediaContext::Instance().ConnectCamera();
@@ -81,13 +81,13 @@ void VideoSource::ProcessData(MessageChain *chain, Message pkt) {
                 sr_buffer_frame_set_image_format(&y420.frame, y420.GetDataPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
                 sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, m_srcRotation);
                 y420.frame.timestamp = pkt.frame.timestamp;
-                MessageChainImpl::onMsgProcessData(y420);
+                MessageChain::onMsgProcessData(y420);
             }else {
                 LOGD("[WARNING] missed a video frame\n");
             }
         }
     }else {
-        MessageChainImpl::onMsgProcessData(pkt);
+        MessageChain::onMsgProcessData(pkt);
     }
 }
 
@@ -106,7 +106,7 @@ void VideoSource::onRecvMessage(Message pkt) {
         case OnRecvMsg_Closed:
             m_status = Status_Closed;
             pkt.SetKey(MsgKey_Close);
-            MessageChainImpl::onMsgClose(pkt);
+            MessageChain::onMsgClose(pkt);
             FinalClear();
 //            ReportEvent(SmartPkt(Status_Closed + m_number));
             LOGD("VideoSource Closed\n");
@@ -149,7 +149,7 @@ void VideoSource::UpdateMediaConfig(Message pkt) {
     p_bufferPool = new BufferPool(2, m_bufferSize, 10);
     p_bufferPool->SetName("VideoSource");
 
-    MessageChainImpl::onMsgOpen(pkt);
+    MessageChain::onMsgOpen(pkt);
 }
 
 void VideoSource::FinalClear() {

@@ -20,6 +20,13 @@ namespace freee {
     };
 
     enum {
+        Status_Closed = 0,
+        Status_Opened = 1,
+        Status_Started = 2,
+        Status_Stopped = 3,
+    };
+
+    enum {
         MediaNumber_Player = 0,
         MediaNumber_Recorder = 5000,
 
@@ -42,29 +49,228 @@ namespace freee {
     class MessageChain : public MessageProcessor {
 
     public:
-        virtual ~MessageChain(){};
-        virtual void FinalClear() = 0;
+        MessageChain(int mediaType, int mediaNumber, std::string mediaName) :
+                m_type(mediaType),
+                m_number(mediaNumber),
+                m_name(mediaName){}
 
-        virtual void Open(MessageChain *chain) = 0;
-        virtual void Close(MessageChain *chain) = 0;
-        virtual void Start(MessageChain *chain) = 0;
-        virtual void Stop(MessageChain *chain) = 0;
-        virtual void ProcessData(MessageChain *chain, Message pkt) = 0;
-        virtual void ProcessEvent(MessageChain *chain, Message pkt) = 0;
+        virtual ~MessageChain(){
+//            LOGD("[DELETE]<MediaChainImpl>[%s]\n", m_name.c_str());
+            AutoLock lock(m_lockOutputChain);
+            m_outputChain.clear();
+            AutoLock autoLock(m_lockInputChain);
+            m_inputChain.clear();
+            m_chainToStream.clear();
+        }
 
-        virtual void SetEventListener(MessageChain *listener) = 0;
+        virtual void FinalClear() {};
 
-        virtual int GetType(MessageChain *chain) = 0;
-        virtual int GetNumber(MessageChain *chain) = 0;
-        virtual json& GetConfig(MessageChain *chain) = 0;
-        virtual std::string GetExtraConfig(MessageChain *chain) = 0;
-        virtual std::string GetName(MessageChain *chain) = 0;
+        virtual void Open(MessageChain *chain) {
+            ProcessMessage(Message(MsgKey_Open, chain));
+        }
 
-        virtual void AddInput(MessageChain *chain) = 0;
-        virtual void DelInput(MessageChain *chain) = 0;
+        virtual void Close(MessageChain *chain) {
+            ProcessMessage(Message(MsgKey_Close, chain));
+        }
 
-        virtual void AddOutput(MessageChain *chain) = 0;
-        virtual void DelOutput(MessageChain *chain) = 0;
+        virtual void Start(MessageChain *chain) {
+            ProcessMessage(Message(MsgKey_Start, chain));
+        }
+
+        virtual void Stop(MessageChain *chain) {
+            ProcessMessage(Message(MsgKey_Stop, chain));
+        }
+
+        virtual void ProcessData(MessageChain *chain, Message pkt) {
+            pkt.SetKey(MsgKey_ProcessData);
+            pkt.SetPtr(chain);
+            ProcessMessage(pkt);
+        }
+
+        virtual void ProcessEvent(MessageChain *chain, Message pkt) {
+            pkt.SetKey(MsgKey_ProcessEvent);
+            pkt.SetPtr(chain);
+            ProcessMessage(pkt);
+        }
+
+
+    protected:
+        void AddInput(MessageChain *chain) {
+            if (chain){
+                AutoLock lock(m_lockInputChain);
+                m_inputChain.push_back(chain);
+                m_chainToStream[chain] = nullptr;
+            }
+        }
+
+        void DelInput(MessageChain *chain) {
+            AutoLock lock(m_lockInputChain);
+            auto it = std::find(m_inputChain.begin(), m_inputChain.end(), chain);
+            if (it != m_inputChain.end()){
+                m_inputChain.erase(it);
+            }
+            if (m_chainToStream.find(chain) != m_chainToStream.end()){
+                m_chainToStream.erase(chain);
+            }
+//            for (int i = 0; i < m_inputChain.size(); ++i){
+//                if (m_inputChain[i] == chain){
+//                    m_inputChain.erase(m_inputChain.begin() + i);
+//                    if (m_chainToStream.find(chain) != m_chainToStream.end()){
+//                        m_chainToStream.erase(chain);
+//                    }
+//                    break;
+//                }
+//            }
+        }
+
+    public:
+        virtual int GetType(MessageChain *chain) {
+            return m_type;
+        }
+
+        virtual int GetNumber(MessageChain *chain) {
+            return m_number;
+        }
+
+        virtual std::string GetName(MessageChain *chain) {
+            return m_name;
+        }
+
+        virtual json &GetConfig(MessageChain *chain) {
+            return m_config;
+        }
+
+        virtual std::string GetExtraConfig(MessageChain *chain) {
+            return m_extraConfig;
+        }
+
+        virtual void AddOutput(MessageChain *chain) {
+            if (chain){
+                AutoLock lock(m_lockOutputChain);
+                this->m_outputChain.push_back(chain);
+                chain->AddInput(this);
+            }
+        }
+
+        virtual void DelOutput(MessageChain *chain) {
+            AutoLock lock(m_lockOutputChain);
+            for (auto it = m_outputChain.cbegin(); it != m_outputChain.cend(); it++){
+                if ((*it) == chain){
+                    m_outputChain.erase(it);
+                    chain->DelInput(this);
+                    break;
+                }
+            }
+//            for (int i = 0; i < m_outputChain.size(); ++i){
+//                if (m_outputChain[i] == chain){
+//                    m_outputChain.erase(m_outputChain.begin() + i);
+//                    chain->DelInput(this);
+//                    break;
+//                }
+//            }
+        }
+
+        void SetEventListener(MessageChain *listener) {
+            AutoLock lock(m_lockEventListener);
+            m_pEventListener = listener;
+        }
+
+
+    protected:
+        virtual void SendEvent(Message pkt) {
+            AutoLock lock(m_lockEventListener);
+            if (m_pEventListener){
+                m_pEventListener->ProcessEvent(this, pkt);
+            }
+        }
+
+
+    protected:
+        virtual void onMsgOpen(Message pkt){
+            AutoLock lock(m_lockOutputChain);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Open(this);
+            }
+        };
+        virtual void onMsgClose(Message pkt){
+            AutoLock lock(m_lockOutputChain);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Close(this);
+            }
+        };
+        virtual void onMsgStart(Message pkt){
+            AutoLock lock(m_lockOutputChain);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Start(this);
+            }
+        };
+        virtual void onMsgStop(Message pkt){
+            AutoLock lock(m_lockOutputChain);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->Stop(this);
+            }
+        };
+        virtual void onMsgProcessData(Message pkt){
+            AutoLock lock(m_lockOutputChain);
+            for (int i = 0; i < m_outputChain.size(); ++i){
+                m_outputChain[i]->ProcessData(this, pkt);
+            }
+        };
+        virtual void onMsgProcessEvent(Message pkt){
+            AutoLock lock(m_lockInputChain);
+            for (auto it = m_inputChain.cbegin(); it != m_inputChain.cend(); it++){
+                if ((*it)){
+                    (*it)->ProcessEvent(this, pkt);
+                }
+            }
+        };
+        virtual void onMsgControl(Message pkt){};
+
+        //Async
+        void MessageProcess(Message pkt) override {
+            switch (pkt.GetKey()){
+                case MsgKey_Open:
+                    onMsgOpen(pkt);
+                    break;
+                case MsgKey_Close:
+                    onMsgClose(pkt);
+                    break;
+                case MsgKey_Start:
+                    onMsgStart(pkt);
+                    break;
+                case MsgKey_Stop:
+                    onMsgStop(pkt);
+                    break;
+                case MsgKey_ProcessData:
+                    onMsgProcessData(pkt);
+                    break;
+                case MsgKey_ProcessEvent:
+                    onMsgProcessEvent(pkt);
+                    break;
+                case MsgKey_ProcessControl:
+                default:
+                    onMsgControl(pkt);
+            }
+        }
+
+
+    protected:
+        int m_type;
+        int m_number;
+        json m_config;
+        std::string m_extraConfig;
+        std::string m_name;
+
+        Lock m_lockEventListener;
+        MessageChain *m_pEventListener = nullptr;
+
+        Lock m_lockInputChain;
+        std::map<void*, void*> m_chainToStream;
+        std::vector<MessageChain*> m_inputChain;
+
+        Lock m_lockOutputChain;
+        int m_outputChainStatus = 0;
+        std::vector<MessageChain*> m_outputChain;
     };
 
 }

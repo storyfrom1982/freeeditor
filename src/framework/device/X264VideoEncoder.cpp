@@ -203,7 +203,7 @@ int X264VideoEncoder::ProcessMediaByModule(Message pkt) {
 
 //    long long tmStamp = pkt.frame.timestamp / 1000;
 
-    MessageChainImpl::onMsgProcessData(opkt);
+    MessageChain::onMsgProcessData(opkt);
 
 //    LOGD("X264VideoEncoder::OnOpenEncoder: size=%d  i64=%ld\n", frameLen, tmStamp);
     return  0;

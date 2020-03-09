@@ -24,12 +24,12 @@ void freee::AudioEncoder::onMsgOpen(freee::Message pkt) {
     p_bufferPool = new BufferPool(10, m_bufferSize, 256, 16);
     OpenModule();
     pkt.frame.type = MediaType_Audio;
-    MessageChainImpl::onMsgOpen(pkt);
+    MessageChain::onMsgOpen(pkt);
 }
 
 void freee::AudioEncoder::onMsgClose(freee::Message pkt) {
     CloseModule();
-    MessageChainImpl::onMsgClose(pkt);
+    MessageChain::onMsgClose(pkt);
     if (p_bufferPool){
         delete p_bufferPool;
         p_bufferPool = nullptr;

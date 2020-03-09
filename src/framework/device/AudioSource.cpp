@@ -27,7 +27,7 @@ enum {
 
 
 AudioSource::AudioSource(int mediaType, int mediaNumber, std::string mediaName)
-        : MessageChainImpl(mediaType, mediaNumber, mediaName) {
+        : MessageChain(mediaType, mediaNumber, mediaName) {
 //    MessageContext *context = MediaContext::Instance().ConnectMicrophone();
     MessageContext *context = MediaContext::Instance()->ConnectMicrophone();
     ConnectContext(context);
@@ -52,14 +52,14 @@ void AudioSource::onRecvMessage(Message pkt) {
             LOGD("AudioSource Opened\n");
             UpdateConfig(pkt);
             pkt.SetKey(MsgKey_Open);
-            MessageChainImpl::onMsgOpen(pkt);
+            MessageChain::onMsgOpen(pkt);
 //            ReportEvent(SmartPkt(Status_Opened + m_number));
             break;
         case OnRecvMsg_Closed:
             m_status = Status_Closed;
 //            CloseNext();
             pkt.SetKey(MsgKey_Close);
-            MessageChainImpl::onMsgClose(pkt);
+            MessageChain::onMsgClose(pkt);
 //            ReportEvent(SmartPkt(Status_Closed + m_number));
             FinalClear();
             LOGD("AudioSource Closed\n");
@@ -107,7 +107,7 @@ void AudioSource::ProcessData(MessageChain *chain, Message pkt) {
     Message resample = p_bufferPool->NewFrameMessage(MsgKey_ProcessData);
     memcpy(resample.GetDataPtr(), pkt.frame.data, resample.GetDataSize());
     resample.frame.timestamp = pkt.frame.timestamp;
-    MessageChainImpl::onMsgProcessData(resample);
+    MessageChain::onMsgProcessData(resample);
 }
 
 void AudioSource::FinalClear() {

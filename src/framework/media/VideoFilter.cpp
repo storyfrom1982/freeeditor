@@ -52,7 +52,7 @@ void VideoFilter::onMsgOpen(Message pkt) {
     m_config = static_cast<MessageChain *>(pkt.GetPtr())->GetConfig(this);
     if (m_status == Status_Closed){
         OpenModule();
-        MessageChainImpl::onMsgOpen(pkt);
+        MessageChain::onMsgOpen(pkt);
         m_status = Status_Opened;
     }
 }
@@ -60,7 +60,7 @@ void VideoFilter::onMsgOpen(Message pkt) {
 void VideoFilter::onMsgClose(Message pkt) {
     if (m_status == Status_Opened){
         CloseModule();
-        MessageChainImpl::onMsgClose(pkt);
+        MessageChain::onMsgClose(pkt);
         m_status = Status_Closed;
     }
 }
@@ -101,6 +101,6 @@ void VideoFilter::CloseModule() {
 }
 
 int VideoFilter::ProcessMediaByModule(Message pkt) {
-    MessageChainImpl::onMsgProcessData(pkt);
+    MessageChain::onMsgProcessData(pkt);
     return 0;
 }

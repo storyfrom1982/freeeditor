@@ -55,7 +55,7 @@ void VideoRenderer::onMsgOpen(Message pkt) {
             return;
         }
         mStatus = Status_Opened;
-        MessageChainImpl::onMsgOpen(pkt);
+        MessageChain::onMsgOpen(pkt);
     }
 }
 
@@ -63,7 +63,7 @@ void VideoRenderer::onMsgClose(Message pkt) {
     if (mStatus == Status_Opened){
         CloseModule();
         mStatus = Status_Closed;
-        MessageChainImpl::onMsgClose(pkt);
+        MessageChain::onMsgClose(pkt);
     }
 }
 
@@ -123,7 +123,7 @@ int VideoRenderer::ProcessMediaByModule(Message pkt) {
         opengles_render(opengles, &pkt.frame);
         gl_renderer_swap_buffers(renderer);
     }
-    MessageChainImpl::onMsgProcessData(pkt);
+    MessageChain::onMsgProcessData(pkt);
     return 0;
 }
 

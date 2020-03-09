@@ -45,12 +45,12 @@ void VideoEncoder::onMsgOpen(Message pkt) {
     p_bufferPool = new BufferPool(4, w*h, 256, 16);
     p_bufferPool->SetName(m_name);
     pkt.frame.type = MediaType_Video;
-    MessageChainImpl::onMsgOpen(pkt);
+    MessageChain::onMsgOpen(pkt);
 }
 
 void VideoEncoder::onMsgClose(Message pkt) {
     CloseModule();
-    MessageChainImpl::onMsgClose(pkt);
+    MessageChain::onMsgClose(pkt);
 }
 
 void VideoEncoder::onMsgProcessData(Message pkt) {
@@ -87,7 +87,7 @@ void VideoEncoder::onMsgProcessData(Message pkt) {
 }
 
 void VideoEncoder::onMsgControl(Message pkt) {
-    MessageChainImpl::onMsgControl(pkt);
+    MessageChain::onMsgControl(pkt);
 }
 
 void VideoEncoder::onMsgProcessEvent(Message pkt) {
