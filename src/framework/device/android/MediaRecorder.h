@@ -30,18 +30,18 @@ namespace freee{
         void FinalClear() override;
 
     private:
-        void onRecvMessage(SmartPkt pkt) override;
+        void onRecvMessage(Message pkt) override;
 
     protected:
-        void MessageProcess(SmartPkt pkt) override;
+        void MessageProcess(Message pkt) override;
 
     private:
-        void StartPreview(SmartPkt pkt);
-        void Open(SmartPkt pkt);
+        void StartPreview(Message pkt);
+        void Open(Message pkt);
         void Close();
         void Start();
         void Stop();
-        void StartRecord(SmartPkt pkt);
+        void StartRecord(Message pkt);
         void StopRecord();
         void StopPreview();
 

@@ -48,7 +48,7 @@ void VideoFilter::FinalClear() {
 //    }
 //}
 
-void VideoFilter::onMsgOpen(SmartPkt pkt) {
+void VideoFilter::onMsgOpen(Message pkt) {
     m_config = static_cast<MessageChain *>(pkt.GetPtr())->GetConfig(this);
     if (m_status == Status_Closed){
         OpenModule();
@@ -57,7 +57,7 @@ void VideoFilter::onMsgOpen(SmartPkt pkt) {
     }
 }
 
-void VideoFilter::onMsgClose(SmartPkt pkt) {
+void VideoFilter::onMsgClose(Message pkt) {
     if (m_status == Status_Opened){
         CloseModule();
         MessageChainImpl::onMsgClose(pkt);
@@ -65,7 +65,7 @@ void VideoFilter::onMsgClose(SmartPkt pkt) {
     }
 }
 
-void VideoFilter::onMsgProcessData(SmartPkt pkt) {
+void VideoFilter::onMsgProcessData(Message pkt) {
     ProcessMediaByModule(pkt);
 }
 
@@ -100,7 +100,7 @@ void VideoFilter::CloseModule() {
     }
 }
 
-int VideoFilter::ProcessMediaByModule(SmartPkt pkt) {
+int VideoFilter::ProcessMediaByModule(Message pkt) {
     MessageChainImpl::onMsgProcessData(pkt);
     return 0;
 }

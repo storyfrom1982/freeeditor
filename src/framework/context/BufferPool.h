@@ -23,15 +23,15 @@ extern "C" {
 namespace freee {
 
     enum {
-        PktMsgError = -1,
-        PktMsgClosed = 0,
-        PktMsgOpen = 1,
-        PktMsgStart = 2,
-        PktMsgStop = 3,
-        PktMsgClose = 4,
-        PktMsgProcessMedia = 5,
-        PktMsgProcessEvent = 6,
-        PktMsgControl = 10,
+        MsgKey_Error = -1,
+        MsgKey_Exit = 0,
+        MsgKey_Open = 1,
+        MsgKey_Start = 2,
+        MsgKey_Stop = 3,
+        MsgKey_Close = 4,
+        MsgKey_ProcessData = 5,
+        MsgKey_ProcessEvent = 6,
+        MsgKey_ProcessControl = 10,
     };
 
 
@@ -40,110 +40,134 @@ namespace freee {
         PktFlag_KeyFrame = 1,
     };
 
-    class SmartPkt {
+    static int global_reference_count = -(INT32_MAX);
+
+    class Message {
 
     public:
-        SmartPkt() : frame({0}), m_msg({0}), p_buffer(nullptr)
+        Message(int key = 0)
         {
-            p_reference_count = new int(1);
+            msg.key = key;
         }
-        SmartPkt(int key) : SmartPkt()
+        Message(int key, int event)
         {
-            m_msg.key = key;
+            msg.key = key;
+            msg.event = event;
         }
-        SmartPkt(int key, void *ptr) : SmartPkt()
+        Message(int key, void *ptr)
         {
-            m_msg.key = key;
-            m_msg.ptr = ptr;
+            msg.key = key;
+            msg.ptr = ptr;
         }
-        SmartPkt (int key, sr_buffer_data_t *buffer) : SmartPkt()
+        Message(int key, int64_t number)
         {
-            m_msg.key = key;
-            p_buffer = buffer;
+            msg.key = key;
+            msg.number = number;
         }
-        SmartPkt(int key, std::string str, sr_buffer_data_t *buffer) : SmartPkt()
+        Message (int key, sr_buffer_data_t *buffer)
+        {
+            if (buffer){
+                msg.key = key;
+                p_buffer = buffer;
+                p_reference_count = new int(1);
+            }
+        }
+        Message(int key, unsigned char *data, size_t size, sr_buffer_data_t *buffer)
+        {
+            if (buffer){
+                msg.key = key;
+                msg.size = size;
+                p_buffer = buffer;
+                if (p_buffer->data_size < msg.size){
+                    free(p_buffer->head);
+                    p_buffer->data_size = msg.size << 2;
+                    p_buffer->data = p_buffer->head = (unsigned char*)malloc(p_buffer->data_size);
+                }
+                if (data){
+                    memcpy(p_buffer->data, data, msg.size);
+                }
+                p_reference_count = new int(1);
+            }
+        }
+        Message(int key, std::string str, sr_buffer_data_t *buffer)
         {
             if (buffer){
                 p_buffer = buffer;
-                m_msg.key = key;
-                m_msg.size = str.length();
-                if (p_buffer->data_size < m_msg.size){
+                msg.key = key;
+                msg.size = str.size();
+                if (p_buffer->data_size < msg.size){
                     free(p_buffer->head);
-                    p_buffer->data_size = m_msg.size << 2;
+                    p_buffer->data_size = msg.size << 2;
                     p_buffer->data = p_buffer->head = (unsigned char*)malloc(p_buffer->data_size);
                 }
-                memcpy(p_buffer->data, str.c_str(), m_msg.size + 1);
+                memcpy(p_buffer->data, str.c_str(), msg.size);
+                p_reference_count = new int(1);
             }
         }
-        SmartPkt(const SmartPkt &pkt)
+        Message(const Message &pkt)
         {
             if (this != &pkt){
+                this->msg = pkt.msg;
                 this->frame = pkt.frame;
-                this->m_msg = pkt.m_msg;
                 this->p_buffer = pkt.p_buffer;
                 this->p_reference_count = pkt.p_reference_count;
                 __sr_atom_add(*p_reference_count, 1);
             }
         }
-        ~SmartPkt()
+        ~Message()
         {
             if (__sr_atom_sub(*p_reference_count, 1) == 0){
                 if (p_buffer){
                     sr_buffer_pool_put(p_buffer);
+                    delete p_reference_count;
                 }
-                delete p_reference_count;
             }
         }
-        const SmartPkt& operator =(const SmartPkt& pkt)
+        const Message& operator =(const Message& pkt)
         {
-            this->~SmartPkt();
-            this->frame = pkt.frame;
-            this->m_msg = pkt.m_msg;
-            this->p_buffer = pkt.p_buffer;
-            this->p_reference_count = pkt.p_reference_count;
-            __sr_atom_add(*p_reference_count, 1);
+            if (this != &pkt){
+                if (__sr_atom_sub(*p_reference_count, 1) == 0){
+                    if (p_buffer){
+                        sr_buffer_pool_put(p_buffer);
+                        delete p_reference_count;
+                    }
+                }
+                this->msg = pkt.msg;
+                this->frame = pkt.frame;
+                this->p_buffer = pkt.p_buffer;
+                this->p_reference_count = pkt.p_reference_count;
+                __sr_atom_add(*p_reference_count, 1);
+            }
             return *this;
         }
 
     public:
         void SetKey(int key){
-            m_msg.key = key;
+            msg.key = key;
         }
         void SetPtr(void *ptr){
-            m_msg.ptr = ptr;
+            msg.ptr = ptr;
         }
         void SetEvent(int event){
-            m_msg.event = event;
+            msg.event = event;
         }
         int GetKey(){
-            return m_msg.key;
+            return msg.key;
         }
         int GetEvent(){
-            return m_msg.event;
+            return msg.event;
         }
         void* GetPtr(){
-            return m_msg.ptr;
+            return msg.ptr;
         }
         int64_t GetNumber(){
-            return m_msg.number;
+            return msg.number;
         }
         std::string GetString(){
             if (p_buffer && p_buffer->data){
-                return std::string((char*)p_buffer->data, m_msg.size);
+                return std::string((char*)p_buffer->data, msg.size);
             }
             return std::string();
-        }
-        unsigned char* GetHeadPtr(){
-            if (p_buffer){
-                return p_buffer->head;
-            }
-            return nullptr;
-        }
-        unsigned char* GetDataPtr(){
-            if (p_buffer){
-                return p_buffer->data;
-            }
-            return nullptr;
         }
         size_t GetDataSize(){
             if (p_buffer){
@@ -151,11 +175,20 @@ namespace freee {
             }
             return 0;
         }
+        unsigned char* GetDataPtr(){
+            if (p_buffer){
+                return p_buffer->data;
+            }
+            return nullptr;
+        }
+        unsigned char* GetHeadPtr(){
+            if (p_buffer){
+                return p_buffer->head;
+            }
+            return nullptr;
+        }
 
     public:
-        sr_buffer_frame_t frame;
-
-    private:
         struct {
             int key;
             int event;
@@ -164,13 +197,13 @@ namespace freee {
                 void *ptr;
                 int64_t number;
             };
-        }m_msg;
+        }msg = {0};
+        sr_buffer_frame_t frame = {0};
 
-        int *p_reference_count;
-        sr_buffer_data_t *p_buffer;
+    private:
+        sr_buffer_data_t *p_buffer = nullptr;
+        int *p_reference_count = &global_reference_count;
     };
-
-
 
     class BufferPool {
 
@@ -192,13 +225,13 @@ namespace freee {
             m_name = name;
             sr_buffer_pool_set_name(p_pool, m_name.c_str());
         }
-        SmartPkt GetPkt(int key)
+        Message NewFrameMessage(int key)
         {
-            return SmartPkt(key, sr_buffer_pool_get(p_pool));
+            return Message(key, sr_buffer_pool_get(p_pool));
         }
-        SmartPkt GetPkt(int key, std::string str)
+        Message NewStringMessage(int key, std::string str)
         {
-            return SmartPkt(key, str, sr_buffer_pool_get(p_pool));
+            return Message(key, str, sr_buffer_pool_get(p_pool));
         }
 
     private:

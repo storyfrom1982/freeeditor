@@ -49,29 +49,29 @@ namespace freee {
         }
 
         void Open(MessageChain *chain) override {
-            ProcessMessage(SmartPkt(PktMsgOpen, chain));
+            ProcessMessage(Message(MsgKey_Open, chain));
         }
 
         void Close(MessageChain *chain) override {
-            ProcessMessage(SmartPkt(PktMsgClose, chain));
+            ProcessMessage(Message(MsgKey_Close, chain));
         }
 
         void Start(MessageChain *chain) override {
-            ProcessMessage(SmartPkt(PktMsgStart, chain));
+            ProcessMessage(Message(MsgKey_Start, chain));
         }
 
         void Stop(MessageChain *chain) override {
-            ProcessMessage(SmartPkt(PktMsgStop, chain));
+            ProcessMessage(Message(MsgKey_Stop, chain));
         }
 
-        void ProcessData(MessageChain *chain, SmartPkt pkt) override {
-            pkt.SetKey(PktMsgProcessMedia);
+        void ProcessData(MessageChain *chain, Message pkt) override {
+            pkt.SetKey(MsgKey_ProcessData);
             pkt.SetPtr(chain);
             ProcessMessage(pkt);
         }
 
-        void ProcessEvent(MessageChain *chain, SmartPkt pkt) override {
-            pkt.SetKey(PktMsgProcessEvent);
+        void ProcessEvent(MessageChain *chain, Message pkt) override {
+            pkt.SetKey(MsgKey_ProcessEvent);
             pkt.SetPtr(chain);
             ProcessMessage(pkt);
         }
@@ -160,7 +160,7 @@ namespace freee {
 
 
     protected:
-        virtual void SendEvent(SmartPkt pkt) {
+        virtual void SendEvent(Message pkt) {
             AutoLock lock(m_lockEventListener);
             if (m_pEventListener){
                 m_pEventListener->ProcessEvent(this, pkt);
@@ -169,37 +169,37 @@ namespace freee {
 
 
     protected:
-        virtual void onMsgOpen(SmartPkt pkt){
+        virtual void onMsgOpen(Message pkt){
             AutoLock lock(m_lockOutputChain);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 m_outputChain[i]->Open(this);
             }
         };
-        virtual void onMsgClose(SmartPkt pkt){
+        virtual void onMsgClose(Message pkt){
             AutoLock lock(m_lockOutputChain);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 m_outputChain[i]->Close(this);
             }
         };
-        virtual void onMsgStart(SmartPkt pkt){
+        virtual void onMsgStart(Message pkt){
             AutoLock lock(m_lockOutputChain);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 m_outputChain[i]->Start(this);
             }
         };
-        virtual void onMsgStop(SmartPkt pkt){
+        virtual void onMsgStop(Message pkt){
             AutoLock lock(m_lockOutputChain);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 m_outputChain[i]->Stop(this);
             }
         };
-        virtual void onMsgProcessData(SmartPkt pkt){
+        virtual void onMsgProcessData(Message pkt){
             AutoLock lock(m_lockOutputChain);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 m_outputChain[i]->ProcessData(this, pkt);
             }
         };
-        virtual void onMsgProcessEvent(SmartPkt pkt){
+        virtual void onMsgProcessEvent(Message pkt){
             AutoLock lock(m_lockInputChain);
             for (auto it = m_inputChain.cbegin(); it != m_inputChain.cend(); it++){
                 if ((*it)){
@@ -207,30 +207,30 @@ namespace freee {
                 }
             }
         };
-        virtual void onMsgControl(SmartPkt pkt){};
+        virtual void onMsgControl(Message pkt){};
 
         //Async
-        void MessageProcess(SmartPkt pkt) override {
+        void MessageProcess(Message pkt) override {
             switch (pkt.GetKey()){
-                case PktMsgOpen:
+                case MsgKey_Open:
                     onMsgOpen(pkt);
                     break;
-                case PktMsgClose:
+                case MsgKey_Close:
                     onMsgClose(pkt);
                     break;
-                case PktMsgStart:
+                case MsgKey_Start:
                     onMsgStart(pkt);
                     break;
-                case PktMsgStop:
+                case MsgKey_Stop:
                     onMsgStop(pkt);
                     break;
-                case PktMsgProcessMedia:
+                case MsgKey_ProcessData:
                     onMsgProcessData(pkt);
                     break;
-                case PktMsgProcessEvent:
+                case MsgKey_ProcessEvent:
                     onMsgProcessEvent(pkt);
                     break;
-                case PktMsgControl:
+                case MsgKey_ProcessControl:
                 default:
                     onMsgControl(pkt);
             }

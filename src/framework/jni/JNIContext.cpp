@@ -66,12 +66,12 @@ public:
     }
 
     void SendMessage(int key, jlong ptr){
-        SmartPkt pkt(key, (void*)ptr);
+        Message pkt(key, (void*)ptr);
         MessageContext::SendMessage(pkt);
     }
 
     void SendMessage(int key, jobject obj){
-        SmartPkt pkt(key, obj);
+        Message pkt(key, obj);
         MessageContext::SendMessage(pkt);
     }
 
@@ -82,7 +82,7 @@ public:
     }
 
     void SendMessage(int key, jbyte *buffer, jlong timestamp){
-        SmartPkt pkt(key);
+        Message pkt(key);
         pkt.frame.data = (uint8_t*)buffer;
         pkt.frame.timestamp = timestamp;
         MessageContext::SendMessage(pkt);
@@ -90,7 +90,7 @@ public:
 
     jobject GetMessage(JNIEnv *env, int key) {
         jstring str = nullptr;
-        SmartPkt pkt = MessageContext::RequestMessage(key);
+        Message pkt = MessageContext::RequestMessage(key);
         if (!pkt.GetString().empty()){
             str = env->NewStringUTF(pkt.GetString().c_str());
         }
@@ -101,7 +101,7 @@ public:
         return msg;
     }
 
-    void onRecvMessage(SmartPkt pkt) override {
+    void onRecvMessage(Message pkt) override {
         JniEnv env;
         jstring str = nullptr;
         if (!pkt.GetString().empty()){
@@ -115,7 +115,7 @@ public:
         env->DeleteLocalRef(msg);
     }
 
-    SmartPkt onObtainMessage(int key) override {
+    Message onObtainMessage(int key) override {
         JniEnv env;
         jobject msg = env->CallObjectMethod(m_obj, m_onObtainMessage, key);
         if (env->GetIntField(msg, m_keyField) == key){
@@ -123,10 +123,10 @@ public:
             if (str != nullptr){
                 return NewJsonPkt(key, std::string(env->GetStringUTFChars(str, 0), env->GetStringUTFLength(str)));
             }else {
-                return SmartPkt(key, (void*)env->GetLongField(msg, m_ptrField));
+                return Message(key, (void*)env->GetLongField(msg, m_ptrField));
             }
         }
-        return SmartPkt();
+        return Message();
     }
 
 private:

@@ -15,7 +15,7 @@ freee::AudioEncoder::~AudioEncoder() {
     FinalClear();
 }
 
-void freee::AudioEncoder::onMsgOpen(freee::SmartPkt pkt) {
+void freee::AudioEncoder::onMsgOpen(freee::Message pkt) {
     MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
     m_config = chain->GetConfig(this);
     size_t bytePerSample = m_config["codecBytePerSample"];
@@ -23,11 +23,11 @@ void freee::AudioEncoder::onMsgOpen(freee::SmartPkt pkt) {
     m_bufferSize = bytePerSample * samplePerFrame;
     p_bufferPool = new BufferPool(10, m_bufferSize, 256, 16);
     OpenModule();
-    pkt.frame.media_type = MediaType_Audio;
+    pkt.frame.type = MediaType_Audio;
     MessageChainImpl::onMsgOpen(pkt);
 }
 
-void freee::AudioEncoder::onMsgClose(freee::SmartPkt pkt) {
+void freee::AudioEncoder::onMsgClose(freee::Message pkt) {
     CloseModule();
     MessageChainImpl::onMsgClose(pkt);
     if (p_bufferPool){
@@ -36,7 +36,7 @@ void freee::AudioEncoder::onMsgClose(freee::SmartPkt pkt) {
     }
 }
 
-void freee::AudioEncoder::onMsgProcessData(freee::SmartPkt pkt) {
+void freee::AudioEncoder::onMsgProcessData(freee::Message pkt) {
     if (m_outputChainStatus == Status_Opened){
         if (m_startTimestamp == -1){
             m_startTimestamp = pkt.frame.timestamp;
@@ -46,7 +46,7 @@ void freee::AudioEncoder::onMsgProcessData(freee::SmartPkt pkt) {
     }
 }
 
-void freee::AudioEncoder::onMsgControl(freee::SmartPkt pkt) {
+void freee::AudioEncoder::onMsgControl(freee::Message pkt) {
 
 }
 
@@ -61,12 +61,12 @@ void freee::AudioEncoder::FinalClear() {
     }
 }
 
-void freee::AudioEncoder::onMsgProcessEvent(freee::SmartPkt pkt) {
+void freee::AudioEncoder::onMsgProcessEvent(freee::Message pkt) {
     switch (pkt.GetEvent()){
-        case PktMsgOpen:
+        case MsgKey_Open:
             m_outputChainStatus = Status_Opened;
             break;
-        case PktMsgClose:
+        case MsgKey_Close:
             m_outputChainStatus = Status_Closed;
             break;
         default:

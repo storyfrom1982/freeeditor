@@ -42,13 +42,13 @@ namespace freee {
     private:
         void FinalClear() override ;
 
-        void MessageSetVideoWindow(SmartPkt pkt);
+        void MessageSetVideoWindow(Message pkt);
 
-        void MessageWindowCreated(SmartPkt pkt);
+        void MessageWindowCreated(Message pkt);
 
-        void MessageWindowDestroyed(SmartPkt pkt);
+        void MessageWindowDestroyed(Message pkt);
 
-        void MessageWindowChanged(SmartPkt pkt);
+        void MessageWindowChanged(Message pkt);
 
         void onSurfaceCreated(void *ptr) override;
 
@@ -60,13 +60,13 @@ namespace freee {
 
 
     private:
-        void onMsgOpen(SmartPkt pkt) override;
+        void onMsgOpen(Message pkt) override;
 
-        void onMsgClose(SmartPkt pkt) override;
+        void onMsgClose(Message pkt) override;
 
-        void onMsgProcessData(SmartPkt pkt) override;
+        void onMsgProcessData(Message pkt) override;
 
-        void onMsgControl(SmartPkt pkt) override;
+        void onMsgControl(Message pkt) override;
 
 
     private:
@@ -74,7 +74,7 @@ namespace freee {
 
         void CloseModule() override;
 
-        int ProcessMediaByModule(SmartPkt pkt) override;
+        int ProcessMediaByModule(Message pkt) override;
 
 
     private:

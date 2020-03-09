@@ -43,7 +43,7 @@ MediaRecorder::MediaRecorder()
 }
 
 MediaRecorder::~MediaRecorder() {
-    ProcessMessage(SmartPkt(PktMsgClose));
+    ProcessMessage(Message(MsgKey_Close));
     StopProcessor();
 //    FinalClear();
 }
@@ -71,12 +71,12 @@ void MediaRecorder::FinalClear() {
     }
 }
 
-void MediaRecorder::MessageProcess(SmartPkt pkt) {
+void MediaRecorder::MessageProcess(Message pkt) {
     switch (pkt.GetKey()){
-        case PktMsgOpen:
+        case MsgKey_Open:
             Open(pkt);
             break;
-        case PktMsgClose:
+        case MsgKey_Close:
             Close();
             break;
         case RecvMsg_StartRecord:
@@ -91,10 +91,10 @@ void MediaRecorder::MessageProcess(SmartPkt pkt) {
         case RecvMsg_StopPreview:
             StopPreview();
             break;
-        case PktMsgStart:
+        case MsgKey_Start:
             Start();
             break;
-        case PktMsgStop:
+        case MsgKey_Stop:
             Stop();
             break;
         case RecvMsg_UpdateConfig:
@@ -107,11 +107,11 @@ void MediaRecorder::MessageProcess(SmartPkt pkt) {
     }
 }
 
-void MediaRecorder::onRecvMessage(SmartPkt pkt) {
-    ProcessMessage(SmartPkt(pkt));
+void MediaRecorder::onRecvMessage(Message pkt) {
+    ProcessMessage(Message(pkt));
 }
 
-void MediaRecorder::Open(SmartPkt pkt) {
+void MediaRecorder::Open(Message pkt) {
     if (m_status == Status_Closed){
 
         m_config = json::parse(pkt.GetString());
@@ -190,7 +190,7 @@ void MediaRecorder::Close() {
     }
 }
 
-void MediaRecorder::StartRecord(SmartPkt pkt) {
+void MediaRecorder::StartRecord(Message pkt) {
     LOGD("MediaRecorder::StartRecord url=%s\n", pkt.GetString().c_str());
     if (!is_recording){
         if (m_status != Status_Started){
@@ -211,7 +211,7 @@ void MediaRecorder::StopRecord() {
     }
 }
 
-void MediaRecorder::StartPreview(SmartPkt pkt) {
+void MediaRecorder::StartPreview(Message pkt) {
     LOGD("MediaRecorder::StartPreview enter\n");
     if (!is_previewing){
         if (m_status != Status_Started){

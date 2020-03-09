@@ -28,13 +28,13 @@ namespace freee {
 
         void Stop(MessageChain *chain) override;
 
-        void ProcessData(MessageChain *chain, SmartPkt pkt) override;
+        void ProcessData(MessageChain *chain, Message pkt) override;
 
 
     private:
-        void onRecvMessage(SmartPkt pkt) override;
+        void onRecvMessage(Message pkt) override;
 
-        void UpdateMediaConfig(SmartPkt pkt);
+        void UpdateMediaConfig(Message pkt);
 
     private:
         int m_status;

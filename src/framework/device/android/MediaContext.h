@@ -18,15 +18,15 @@ namespace freee {
 
         ~MediaContext() override ;
 
-        SmartPkt GetStringPkt(int key, std::string str);
+        Message GetStringPkt(int key, std::string str);
 
-        void SendMessage(SmartPkt pkt) override;
-        SmartPkt RequestMessage(int key) override;
+        void SendMessage(Message pkt) override;
+        Message RequestMessage(int key) override;
 
     public:
 
-        void onRecvMessage(SmartPkt pkt) override;
-        SmartPkt onObtainMessage(int key) override;
+        void onRecvMessage(Message pkt) override;
+        Message onObtainMessage(int key) override;
 
         MessageContext* ConnectCamera();
         MessageContext* ConnectMicrophone();

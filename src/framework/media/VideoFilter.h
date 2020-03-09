@@ -24,17 +24,17 @@ namespace freee {
 //        void ProcessMedia(MediaChain *chain, SmartPkt pkt) override;
 
     protected:
-        void onMsgOpen(SmartPkt pkt) override;
+        void onMsgOpen(Message pkt) override;
 
-        void onMsgClose(SmartPkt pkt) override;
+        void onMsgClose(Message pkt) override;
 
-        void onMsgProcessData(SmartPkt pkt) override;
+        void onMsgProcessData(Message pkt) override;
 
         int OpenModule() override;
 
         void CloseModule() override;
 
-        int ProcessMediaByModule(SmartPkt pkt) override;
+        int ProcessMediaByModule(Message pkt) override;
 
     private:
         void FinalClear() override ;

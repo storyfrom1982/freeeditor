@@ -51,30 +51,30 @@ namespace freee{
         }
 
     public:
-        virtual void onRecvMessage(SmartPkt pkt) {};
+        virtual void onRecvMessage(Message pkt) {};
 
-        virtual SmartPkt onObtainMessage(int key){
-            return SmartPkt();
+        virtual Message onObtainMessage(int key){
+            return Message();
         }
 
     protected:
-        virtual void SendMessage(SmartPkt pkt){
+        virtual void SendMessage(Message pkt){
             AutoLock lock(m_lock);
             if (p_messageContext){
                 p_messageContext->onRecvMessage(pkt);
             }
         }
 
-        virtual SmartPkt RequestMessage(int key){
+        virtual Message RequestMessage(int key){
             AutoLock lock(m_lock);
             if (p_messageContext){
                 return p_messageContext->onObtainMessage(key);
             }
-            return SmartPkt();
+            return Message();
         }
 
-        SmartPkt NewJsonPkt(int key, std::string str){
-            return p_bufferPool->GetPkt(key, str);
+        Message NewJsonPkt(int key, std::string str){
+            return p_bufferPool->NewStringMessage(key, str);
         }
 
     private:

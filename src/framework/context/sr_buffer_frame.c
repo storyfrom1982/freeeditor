@@ -78,32 +78,32 @@ int sr_buffer_frame_set_image_format(sr_buffer_frame_t *frame, const uint8_t *da
         return -1;
     }
 
-    frame->image_format = fourcc;
+    frame->video_format = fourcc;
     frame->width = width;
     frame->height = height;
 
-    frame->plane[0].stride = frame->width;
-    frame->plane[0].size = (size_t)(frame->width * frame->height);
+    frame->channel[0].stride = frame->width;
+    frame->channel[0].size = (size_t)(frame->width * frame->height);
 
     frame->data = (uint8_t*)data;
-    frame->plane[0].data = frame->data;
+    frame->channel[0].data = frame->data;
 
-    switch (frame->image_format){
+    switch (frame->video_format){
         case FOURCC_I420:
-            frame->max_plane = 3;
-            frame->plane[1].stride = (frame->plane[0].stride + 1) >> 1;
-            frame->plane[1].size = frame->plane[0].size >> 2;
-            frame->plane[1].data = frame->plane[0].data + frame->plane[0].size;
-            frame->plane[2].stride = frame->plane[1].stride;
-            frame->plane[2].size = frame->plane[1].size;
-            frame->plane[2].data = frame->plane[1].data + frame->plane[1].size;
+            frame->channel_count = 3;
+            frame->channel[1].stride = (frame->channel[0].stride + 1) >> 1;
+            frame->channel[1].size = frame->channel[0].size >> 2;
+            frame->channel[1].data = frame->channel[0].data + frame->channel[0].size;
+            frame->channel[2].stride = frame->channel[1].stride;
+            frame->channel[2].size = frame->channel[1].size;
+            frame->channel[2].data = frame->channel[1].data + frame->channel[1].size;
             break;
         case FOURCC_NV12:
         case FOURCC_NV21:
-            frame->max_plane = 2;
-            frame->plane[1].stride = frame->plane[0].stride;
-            frame->plane[1].size = frame->plane[0].size >> 1;
-            frame->plane[1].data = frame->plane[0].data + frame->plane[0].size;
+            frame->channel_count = 2;
+            frame->channel[1].stride = frame->channel[0].stride;
+            frame->channel[1].size = frame->channel[0].size >> 1;
+            frame->channel[1].data = frame->channel[0].data + frame->channel[0].size;
             break;
         default:
             return -1;
@@ -111,8 +111,8 @@ int sr_buffer_frame_set_image_format(sr_buffer_frame_t *frame, const uint8_t *da
 
     frame->size = 0;
 
-    for (int i = 0; i < frame->max_plane; ++i){
-        frame->size += frame->plane[i].size;
+    for (int i = 0; i < frame->channel_count; ++i){
+        frame->size += frame->channel[i].size;
     }
 
     return 0;
@@ -121,8 +121,8 @@ int sr_buffer_frame_set_image_format(sr_buffer_frame_t *frame, const uint8_t *da
 int sr_buffer_frame_convert_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst, int _rotation)
 {
     if (src == NULL || dst == NULL
-        || (src->image_format != FOURCC_NV12
-            && src->image_format != FOURCC_NV21)){
+        || (src->video_format != FOURCC_NV12
+            && src->video_format != FOURCC_NV21)){
         return -1;
     }
 
@@ -142,41 +142,41 @@ int sr_buffer_frame_convert_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t
         rotation = kRotate180;
     }
 
-    int crop_x = (src->width - width + 1) >> 1;
-    int crop_y = (src->height - height + 1) >> 1;
+    src->x = (src->width - width + 1) >> 1;
+    src->y = (src->height - height + 1) >> 1;
 
     return ConvertToI420(
             src->data, src->size,
-            dst->plane[0].data, dst->plane[0].stride,
-            dst->plane[1].data, dst->plane[1].stride,
-            dst->plane[2].data, dst->plane[2].stride,
-            crop_x, crop_y,
+            dst->channel[0].data, dst->channel[0].stride,
+            dst->channel[1].data, dst->channel[1].stride,
+            dst->channel[2].data, dst->channel[2].stride,
+            src->x, src->y,
             src->width, src->height,
             width, height,
-            rotation, src->image_format);
+            rotation, src->video_format);
 }
 
 int sr_buffer_frame_convert_from_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *dst)
 {
-    if (src->image_format != FOURCC_I420){
+    if (src->video_format != FOURCC_I420){
         return -1;
     }
 
-    if (dst->image_format == FOURCC_NV21){
+    if (dst->video_format == FOURCC_NV21){
         return I420ToNV21(
-                src->plane[0].data, src->plane[0].stride,
-                src->plane[1].data, src->plane[1].stride,
-                src->plane[2].data, src->plane[2].stride,
-                dst->plane[0].data, dst->plane[0].stride,
-                dst->plane[1].data, dst->plane[1].stride,
+                src->channel[0].data, src->channel[0].stride,
+                src->channel[1].data, src->channel[1].stride,
+                src->channel[2].data, src->channel[2].stride,
+                dst->channel[0].data, dst->channel[0].stride,
+                dst->channel[1].data, dst->channel[1].stride,
                 dst->width, dst->height);
-    }else if (dst->image_format == FOURCC_NV12){
+    }else if (dst->video_format == FOURCC_NV12){
         return I420ToNV12(
-                src->plane[0].data, src->plane[0].stride,
-                src->plane[1].data, src->plane[1].stride,
-                src->plane[2].data, src->plane[2].stride,
-                dst->plane[0].data, dst->plane[0].stride,
-                dst->plane[1].data, dst->plane[1].stride,
+                src->channel[0].data, src->channel[0].stride,
+                src->channel[1].data, src->channel[1].stride,
+                src->channel[2].data, src->channel[2].stride,
+                dst->channel[0].data, dst->channel[0].stride,
+                dst->channel[1].data, dst->channel[1].stride,
                 dst->width, dst->height);
     }
 

@@ -24,16 +24,16 @@ namespace freee{
         virtual ~VideoEncoder();
 
     protected:
-        void onMsgOpen(SmartPkt pkt) override;
+        void onMsgOpen(Message pkt) override;
 
-        void onMsgClose(SmartPkt pkt) override;
+        void onMsgClose(Message pkt) override;
 
-        void onMsgProcessData(SmartPkt pkt) override;
+        void onMsgProcessData(Message pkt) override;
 
-        void onMsgProcessEvent(SmartPkt pkt) override;
+        void onMsgProcessEvent(Message pkt) override;
 
     protected:
-        void onMsgControl(SmartPkt pkt) override;
+        void onMsgControl(Message pkt) override;
 
     protected:
         VideoEncoder(int mediaType = MediaType_Video,

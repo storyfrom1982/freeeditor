@@ -25,8 +25,8 @@ namespace freee {
         void StartProcessor(std::string name);
         void StopProcessor();
 
-        virtual void ProcessMessage(SmartPkt pkt);
-        virtual void MessageProcess(SmartPkt pkt){}
+        virtual void ProcessMessage(Message pkt);
+        virtual void MessageProcess(Message pkt){}
 
     private:
         void MessageProcessorLoop();
@@ -41,7 +41,7 @@ namespace freee {
 
         Lock m_lock;
         pthread_t m_threadId;
-        std::vector<SmartPkt> m_pktQueue;
+        std::vector<Message> m_pktQueue;
     };
 
 }

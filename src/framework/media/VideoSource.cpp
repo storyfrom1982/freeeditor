@@ -52,23 +52,23 @@ void VideoSource::Open(MessageChain *chain) {
 
 void VideoSource::Close(MessageChain *chain) {
     LOGD("VideoSource::Close enter\n");
-    SendMessage(SmartPkt(SendMsg_Close));
+    SendMessage(Message(SendMsg_Close));
     LOGD("VideoSource::Close exit\n");
 }
 
 void VideoSource::Start(MessageChain *chain) {
     LOGD("VideoSource::Start enter\n");
-    SendMessage(SmartPkt(SendMsg_Start));
+    SendMessage(Message(SendMsg_Start));
     LOGD("VideoSource::Start exit\n");
 }
 
 void VideoSource::Stop(MessageChain *chain) {
     LOGD("VideoSource::Stop enter\n");
-    SendMessage(SmartPkt(SendMsg_Stop));
+    SendMessage(Message(SendMsg_Stop));
     LOGD("VideoSource::Stop exit\n");
 }
 
-void VideoSource::ProcessData(MessageChain *chain, SmartPkt pkt) {
+void VideoSource::ProcessData(MessageChain *chain, Message pkt) {
     sr_buffer_frame_set_image_format(
             &pkt.frame, pkt.frame.data,
             m_srcWidth, m_srcHeight, m_srcImageFormat);
@@ -76,7 +76,7 @@ void VideoSource::ProcessData(MessageChain *chain, SmartPkt pkt) {
         || m_srcWidth != m_codecWidth
         || m_srcHeight != m_codecHeight){
         if (p_bufferPool){
-            SmartPkt y420 = p_bufferPool->GetPkt(PktMsgProcessMedia);
+            Message y420 = p_bufferPool->NewFrameMessage(MsgKey_ProcessData);
             if (y420.GetDataPtr()){
                 sr_buffer_frame_set_image_format(&y420.frame, y420.GetDataPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
                 sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, m_srcRotation);
@@ -91,7 +91,7 @@ void VideoSource::ProcessData(MessageChain *chain, SmartPkt pkt) {
     }
 }
 
-void VideoSource::onRecvMessage(SmartPkt pkt) {
+void VideoSource::onRecvMessage(Message pkt) {
     switch (pkt.GetKey()){
         case OnRecvMsg_ProcessPicture:
             ProcessData(this, pkt);
@@ -99,13 +99,13 @@ void VideoSource::onRecvMessage(SmartPkt pkt) {
         case OnRecvMsg_Opened:
             m_status = Status_Opened;
             LOGD("VideoSource Opened\n");
-            pkt.SetKey(PktMsgOpen);
+            pkt.SetKey(MsgKey_Open);
             UpdateMediaConfig(pkt);
 //            ReportEvent(SmartPkt(Status_Opened + m_number));
             break;
         case OnRecvMsg_Closed:
             m_status = Status_Closed;
-            pkt.SetKey(PktMsgClose);
+            pkt.SetKey(MsgKey_Close);
             MessageChainImpl::onMsgClose(pkt);
             FinalClear();
 //            ReportEvent(SmartPkt(Status_Closed + m_number));
@@ -126,7 +126,7 @@ void VideoSource::onRecvMessage(SmartPkt pkt) {
     }
 }
 
-void VideoSource::UpdateMediaConfig(SmartPkt pkt) {
+void VideoSource::UpdateMediaConfig(Message pkt) {
 //    LOGD("VideoSource::UpdateMediaConfig >> %s\n", pkt.msg.json);
     m_config = json::parse(pkt.GetString());
     m_srcWidth = m_config["srcWidth"];

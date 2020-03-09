@@ -26,13 +26,13 @@ namespace freee {
         ~FileMediaStream();
 
     protected:
-        void onMsgOpen(SmartPkt pkt) override;
+        void onMsgOpen(Message pkt) override;
 
-        void onMsgClose(SmartPkt pkt) override;
+        void onMsgClose(Message pkt) override;
 
-        void onMsgProcessData(SmartPkt pkt) override;
+        void onMsgProcessData(Message pkt) override;
 
-        void onMsgConnectStream(SmartPkt pkt) override;
+        void onMsgConnectStream(Message pkt) override;
 
         void onMsgDisconnectStream() override;
 

@@ -2,7 +2,6 @@
 // Created by yongge on 20-2-14.
 //
 
-#include <sr_buffer_frame.h>
 #include <bitstream.h>
 #include "X264VideoEncoder.h"
 
@@ -98,7 +97,7 @@ void X264VideoEncoder::CloseModule() {
     }
 }
 
-int X264VideoEncoder::ProcessMediaByModule(SmartPkt pkt) {
+int X264VideoEncoder::ProcessMediaByModule(Message pkt) {
     //    LOGD("X264VideoEncoder::OnOpenEncoder: enter\n");
 
     sr_buffer_frame_t *frame = &(pkt.frame);
@@ -110,12 +109,12 @@ int X264VideoEncoder::ProcessMediaByModule(SmartPkt pkt) {
 
     pic.img.i_csp = X264_CSP_I420;
     for (int i=0; i<3; i++){
-        pic.img.plane[i] = frame->plane[i].data;
+        pic.img.plane[i] = frame->channel[i].data;
     }
     pic.img.i_plane = 3;
-    pic.img.i_stride[0] = frame->plane[0].stride;
-    pic.img.i_stride[1] = frame->plane[1].stride;
-    pic.img.i_stride[2] = frame->plane[2].stride;
+    pic.img.i_stride[0] = frame->channel[0].stride;
+    pic.img.i_stride[1] = frame->channel[1].stride;
+    pic.img.i_stride[2] = frame->channel[2].stride;
 
     long long timeStamp = m_frameId;
     pic.i_pts = timeStamp;
@@ -138,7 +137,7 @@ int X264VideoEncoder::ProcessMediaByModule(SmartPkt pkt) {
         frameLen += nal_len;
     }
 
-    SmartPkt opkt = p_bufferPool->GetPkt(PktMsgProcessMedia);
+    Message opkt = p_bufferPool->NewFrameMessage(MsgKey_ProcessData);
     opkt.SetPtr(this);
     opkt.frame.flag = PktFlag_PFrame;
 
@@ -200,7 +199,7 @@ int X264VideoEncoder::ProcessMediaByModule(SmartPkt pkt) {
     opkt.frame.timestamp = tmStamp;
     opkt.frame.size = frameLen;
     opkt.frame.data = opkt.GetDataPtr();
-    opkt.frame.media_type = MediaType_Video;
+    opkt.frame.type = MediaType_Video;
 
 //    long long tmStamp = pkt.frame.timestamp / 1000;
 

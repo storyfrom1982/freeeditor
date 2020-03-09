@@ -20,15 +20,15 @@ namespace freee {
         void FinalClear() override;
 
     protected:
-        void onMsgOpen(SmartPkt pkt) override;
+        void onMsgOpen(Message pkt) override;
 
-        void onMsgClose(SmartPkt pkt) override;
+        void onMsgClose(Message pkt) override;
 
-        void onMsgProcessData(SmartPkt pkt) override;
+        void onMsgProcessData(Message pkt) override;
 
-        void onMsgProcessEvent(SmartPkt pkt) override;
+        void onMsgProcessEvent(Message pkt) override;
 
-        void onMsgControl(SmartPkt pkt) override;
+        void onMsgControl(Message pkt) override;
 
     protected:
         AudioEncoder(int mediaType = MediaType_Audio,

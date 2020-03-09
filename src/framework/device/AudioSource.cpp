@@ -42,7 +42,7 @@ AudioSource::~AudioSource() {
     FinalClear();
 }
 
-void AudioSource::onRecvMessage(SmartPkt pkt) {
+void AudioSource::onRecvMessage(Message pkt) {
     switch (pkt.GetKey()){
         case OnRecvMsg_ProcessSound:
             ProcessData(this, pkt);
@@ -51,14 +51,14 @@ void AudioSource::onRecvMessage(SmartPkt pkt) {
             m_status = Status_Opened;
             LOGD("AudioSource Opened\n");
             UpdateConfig(pkt);
-            pkt.SetKey(PktMsgOpen);
+            pkt.SetKey(MsgKey_Open);
             MessageChainImpl::onMsgOpen(pkt);
 //            ReportEvent(SmartPkt(Status_Opened + m_number));
             break;
         case OnRecvMsg_Closed:
             m_status = Status_Closed;
 //            CloseNext();
-            pkt.SetKey(PktMsgClose);
+            pkt.SetKey(MsgKey_Close);
             MessageChainImpl::onMsgClose(pkt);
 //            ReportEvent(SmartPkt(Status_Closed + m_number));
             FinalClear();
@@ -79,7 +79,7 @@ void AudioSource::onRecvMessage(SmartPkt pkt) {
     }
 }
 
-SmartPkt AudioSource::onObtainMessage(int key) {
+Message AudioSource::onObtainMessage(int key) {
     return MessageContext::onObtainMessage(key);
 }
 
@@ -89,22 +89,22 @@ void AudioSource::Open(MessageChain *chain) {
 }
 
 void AudioSource::Close(MessageChain *chain) {
-    SmartPkt pkt(SendMsg_Close);
+    Message pkt(SendMsg_Close);
     SendMessage(pkt);
 }
 
 void AudioSource::Start(MessageChain *chain) {
-    SmartPkt pkt(SendMsg_Start);
+    Message pkt(SendMsg_Start);
     SendMessage(pkt);
 }
 
 void AudioSource::Stop(MessageChain *chain) {
-    SmartPkt pkt(SendMsg_Stop);
+    Message pkt(SendMsg_Stop);
     SendMessage(pkt);
 }
 
-void AudioSource::ProcessData(MessageChain *chain, SmartPkt pkt) {
-    SmartPkt resample = p_bufferPool->GetPkt(PktMsgProcessMedia);
+void AudioSource::ProcessData(MessageChain *chain, Message pkt) {
+    Message resample = p_bufferPool->NewFrameMessage(MsgKey_ProcessData);
     memcpy(resample.GetDataPtr(), pkt.frame.data, resample.GetDataSize());
     resample.frame.timestamp = pkt.frame.timestamp;
     MessageChainImpl::onMsgProcessData(resample);
@@ -117,7 +117,7 @@ void AudioSource::FinalClear() {
     }
 }
 
-void AudioSource::UpdateConfig(SmartPkt ptk) {
+void AudioSource::UpdateConfig(Message ptk) {
     m_config = json::parse(ptk.GetString());
     m_codecSampleRate = m_config["codecSampleRate"];
     m_codecChannelCount = m_config["codecChannelCount"];

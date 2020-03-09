@@ -7,41 +7,8 @@
 
 
 #include <libyuv.h>
+#include <sr_library.h>
 
-
-typedef struct sr_buffer_frame_t {
-
-    int media_type;
-    int flag;
-
-    union {
-        struct {
-            int width;
-            int height;
-            int image_format;
-        };
-        struct {
-            int sample_rate;
-            int sample_size;
-            int channel_count;
-        };
-    };
-
-    int max_plane;
-
-    struct {
-        int stride;
-        size_t size;
-        uint8_t *data;
-    }plane[4];
-
-    int64_t timestamp;
-
-    size_t size;
-
-    uint8_t *data;
-
-}sr_buffer_frame_t;
 
 int sr_buffer_frame_set_image_format(sr_buffer_frame_t *frame, const uint8_t *data, int width,
                                      int height, uint32_t fourcc);

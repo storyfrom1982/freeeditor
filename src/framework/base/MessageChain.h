@@ -49,8 +49,8 @@ namespace freee {
         virtual void Close(MessageChain *chain) = 0;
         virtual void Start(MessageChain *chain) = 0;
         virtual void Stop(MessageChain *chain) = 0;
-        virtual void ProcessData(MessageChain *chain, SmartPkt pkt) = 0;
-        virtual void ProcessEvent(MessageChain *chain, SmartPkt pkt) = 0;
+        virtual void ProcessData(MessageChain *chain, Message pkt) = 0;
+        virtual void ProcessEvent(MessageChain *chain, Message pkt) = 0;
 
         virtual void SetEventListener(MessageChain *listener) = 0;
 

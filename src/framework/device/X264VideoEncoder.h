@@ -27,7 +27,7 @@ namespace freee {
 
         void CloseModule() override;
 
-        int ProcessMediaByModule(SmartPkt pkt) override;
+        int ProcessMediaByModule(Message pkt) override;
 
     private:
         std::string GenAvc1();

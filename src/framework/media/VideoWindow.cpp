@@ -76,7 +76,7 @@ int VideoWindow::height() {
     return 0;
 }
 
-void VideoWindow::onRecvMessage(SmartPkt pkt) {
+void VideoWindow::onRecvMessage(Message pkt) {
     if (pkt.GetKey() == RecvMsg_SurfaceCreated){
 #ifdef __ANDROID__
         JniEnv env;
@@ -118,8 +118,8 @@ void VideoWindow::SetCallback(VideoWindow::VideoWindowCallback *callback) {
     AutoLock lock(mLock);
     mCallback = callback;
     if (mCallback){
-        SendMessage(SmartPkt(SendMsg_WindowCreated));
+        SendMessage(Message(SendMsg_WindowCreated));
     }else {
-        SendMessage(SmartPkt(SendMsg_WindowDestroyed));
+        SendMessage(Message(SendMsg_WindowDestroyed));
     }
 }

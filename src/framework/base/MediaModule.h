@@ -21,8 +21,8 @@ namespace freee {
     protected:
         virtual int OpenModule(){ return 0;};
         virtual void CloseModule(){};
-        virtual int ProcessMediaByModule(SmartPkt pkt){ return 0;};
-        virtual void onProcessMediaByModule(SmartPkt pkt){};
+        virtual int ProcessMediaByModule(Message pkt){ return 0;};
+        virtual void onProcessMediaByModule(Message pkt){};
     };
 
 }

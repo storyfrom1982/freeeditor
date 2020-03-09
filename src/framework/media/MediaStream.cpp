@@ -28,7 +28,7 @@ void MediaStream::FinalClear() {
 
 }
 
-void MediaStream::onMsgControl(SmartPkt pkt) {
+void MediaStream::onMsgControl(Message pkt) {
     switch (pkt.GetKey()){
         case OnRecvMsg_ConnectStream:
             onMsgConnectStream(pkt);
@@ -45,7 +45,7 @@ MediaStream *MediaStream::Create(std::string name) {
     return new FileMediaStream();
 }
 
-void MediaStream::onMsgConnectStream(SmartPkt pkt) {
+void MediaStream::onMsgConnectStream(Message pkt) {
 
 }
 
@@ -54,10 +54,10 @@ void MediaStream::onMsgDisconnectStream() {
 }
 
 void MediaStream::ConnectStream(std::string url) {
-    SmartPkt pkt = MediaContext::Instance()->GetStringPkt(OnRecvMsg_ConnectStream, url);
+    Message pkt = MediaContext::Instance()->GetStringPkt(OnRecvMsg_ConnectStream, url);
     ProcessMessage(pkt);
 }
 
 void MediaStream::DisconnectStream() {
-    ProcessMessage(SmartPkt(OnRecvMsg_DisconnectStream));
+    ProcessMessage(Message(OnRecvMsg_DisconnectStream));
 }

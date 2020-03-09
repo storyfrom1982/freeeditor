@@ -33,15 +33,15 @@ namespace freee {
 
         void Stop(MessageChain *chain) override;
 
-        void ProcessData(MessageChain *chain, SmartPkt pkt) override;
+        void ProcessData(MessageChain *chain, Message pkt) override;
 
-        virtual void onRecvMessage(SmartPkt pkt) override;
+        virtual void onRecvMessage(Message pkt) override;
 
-        virtual SmartPkt onObtainMessage(int key) override;
+        virtual Message onObtainMessage(int key) override;
 
 
     private:
-        void UpdateConfig(SmartPkt pkt);
+        void UpdateConfig(Message pkt);
 
 
     private:

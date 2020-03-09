@@ -33,7 +33,7 @@ void VideoEncoder::FinalClear() {
     CloseModule();
 }
 
-void VideoEncoder::onMsgOpen(SmartPkt pkt) {
+void VideoEncoder::onMsgOpen(Message pkt) {
     MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
     m_config = chain->GetConfig(this);
     OpenModule();
@@ -44,16 +44,16 @@ void VideoEncoder::onMsgOpen(SmartPkt pkt) {
     uint32_t h = m_config["codecHeight"];
     p_bufferPool = new BufferPool(4, w*h, 256, 16);
     p_bufferPool->SetName(m_name);
-    pkt.frame.media_type = MediaType_Video;
+    pkt.frame.type = MediaType_Video;
     MessageChainImpl::onMsgOpen(pkt);
 }
 
-void VideoEncoder::onMsgClose(SmartPkt pkt) {
+void VideoEncoder::onMsgClose(Message pkt) {
     CloseModule();
     MessageChainImpl::onMsgClose(pkt);
 }
 
-void VideoEncoder::onMsgProcessData(SmartPkt pkt) {
+void VideoEncoder::onMsgProcessData(Message pkt) {
 
     if ( m_outputChainStatus == Status_Opened) {
 //        LOGD("m_framerate ================  delay[%f]\n", m_frameRate);
@@ -86,16 +86,16 @@ void VideoEncoder::onMsgProcessData(SmartPkt pkt) {
     }
 }
 
-void VideoEncoder::onMsgControl(SmartPkt pkt) {
+void VideoEncoder::onMsgControl(Message pkt) {
     MessageChainImpl::onMsgControl(pkt);
 }
 
-void VideoEncoder::onMsgProcessEvent(SmartPkt pkt) {
+void VideoEncoder::onMsgProcessEvent(Message pkt) {
     switch (pkt.GetEvent()){
-        case PktMsgOpen:
+        case MsgKey_Open:
             m_outputChainStatus = Status_Opened;
             break;
-        case PktMsgClose:
+        case MsgKey_Close:
             m_outputChainStatus = Status_Closed;
             break;
         default:

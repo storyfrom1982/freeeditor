@@ -10,7 +10,7 @@
 using namespace freee;
 
 enum {
-    RecvMsg_SetVideoWindow = PktMsgControl + 1,
+    RecvMsg_SetVideoWindow = MsgKey_ProcessControl + 1,
     RecvMsg_SurfaceCreated,
     RecvMsg_SurfaceChanged,
     RecvMsg_SurfaceDestroyed,
@@ -48,7 +48,7 @@ void VideoRenderer::FinalClear() {
     }
 }
 
-void VideoRenderer::onMsgOpen(SmartPkt pkt) {
+void VideoRenderer::onMsgOpen(Message pkt) {
     m_config = static_cast<MessageChain *>(pkt.GetPtr())->GetConfig(this);
     if (mStatus == Status_Closed){
         if (OpenModule() != 0){
@@ -59,7 +59,7 @@ void VideoRenderer::onMsgOpen(SmartPkt pkt) {
     }
 }
 
-void VideoRenderer::onMsgClose(SmartPkt pkt) {
+void VideoRenderer::onMsgClose(Message pkt) {
     if (mStatus == Status_Opened){
         CloseModule();
         mStatus = Status_Closed;
@@ -67,11 +67,11 @@ void VideoRenderer::onMsgClose(SmartPkt pkt) {
     }
 }
 
-void VideoRenderer::onMsgProcessData(SmartPkt pkt) {
+void VideoRenderer::onMsgProcessData(Message pkt) {
     ProcessMediaByModule(pkt);
 }
 
-void VideoRenderer::onMsgControl(SmartPkt pkt) {
+void VideoRenderer::onMsgControl(Message pkt) {
     switch (pkt.GetKey()){
         case RecvMsg_SetVideoWindow:
             MessageSetVideoWindow(pkt);
@@ -117,7 +117,7 @@ void VideoRenderer::CloseModule() {
     }
 }
 
-int VideoRenderer::ProcessMediaByModule(SmartPkt pkt) {
+int VideoRenderer::ProcessMediaByModule(Message pkt) {
     AutoLock lock(mLock);
     if (!isSurfaceDestroyed){
         opengles_render(opengles, &pkt.frame);
@@ -128,10 +128,10 @@ int VideoRenderer::ProcessMediaByModule(SmartPkt pkt) {
 }
 
 void VideoRenderer::SetVideoWindow(void *ptr) {
-    ProcessMessage(SmartPkt(RecvMsg_SetVideoWindow, ptr));
+    ProcessMessage(Message(RecvMsg_SetVideoWindow, ptr));
 }
 
-void VideoRenderer::MessageSetVideoWindow(SmartPkt pkt) {
+void VideoRenderer::MessageSetVideoWindow(Message pkt) {
     mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.GetPtr()));
     if (mStatus == Status_Opened){
         mVideoWindow->SetCallback(this);
@@ -140,12 +140,12 @@ void VideoRenderer::MessageSetVideoWindow(SmartPkt pkt) {
 
 void VideoRenderer::onSurfaceCreated(void *ptr) {
     AutoLock lock(mLock);
-    ProcessMessage(SmartPkt(RecvMsg_SurfaceCreated, ptr));
+    ProcessMessage(Message(RecvMsg_SurfaceCreated, ptr));
 }
 
 void VideoRenderer::onSurfaceChanged(int width, int height) {
 //    assert(width != 0 && height != 0);
-    SmartPkt pkt(RecvMsg_SurfaceChanged);
+    Message pkt(RecvMsg_SurfaceChanged);
     pkt.frame.width = width;
     pkt.frame.height = height;
     ProcessMessage(pkt);
@@ -154,10 +154,10 @@ void VideoRenderer::onSurfaceChanged(int width, int height) {
 void VideoRenderer::onSurfaceDestroyed() {
     AutoLock lock(mLock);
     isSurfaceDestroyed = true;
-    ProcessMessage(SmartPkt(RecvMsg_SurfaceDestroyed));
+    ProcessMessage(Message(RecvMsg_SurfaceDestroyed));
 }
 
-void VideoRenderer::MessageWindowCreated(SmartPkt pkt) {
+void VideoRenderer::MessageWindowCreated(Message pkt) {
     isSurfaceCreated = true;
     isSurfaceDestroyed = false;
     if (renderer){
@@ -165,7 +165,7 @@ void VideoRenderer::MessageWindowCreated(SmartPkt pkt) {
     }
 }
 
-void VideoRenderer::MessageWindowDestroyed(SmartPkt pkt) {
+void VideoRenderer::MessageWindowDestroyed(Message pkt) {
     if (isSurfaceCreated){
         isSurfaceCreated = false;
         if (renderer){
@@ -174,7 +174,7 @@ void VideoRenderer::MessageWindowDestroyed(SmartPkt pkt) {
     }
 }
 
-void VideoRenderer::MessageWindowChanged(SmartPkt pkt) {
+void VideoRenderer::MessageWindowChanged(Message pkt) {
     if (mVideoWindow){
         UpdateViewport(pkt.frame.width, pkt.frame.height);
     }

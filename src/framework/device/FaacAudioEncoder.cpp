@@ -90,7 +90,7 @@ void FaacAudioEncoder::CloseModule() {
     aacEncClose(&m_pHandle);
 }
 
-int FaacAudioEncoder::ProcessMediaByModule(SmartPkt pkt) {
+int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
     AACENC_BufDesc in_buf = { 0 }, out_buf = { 0 };
     AACENC_InArgs in_args = { 0 };
     AACENC_OutArgs out_args = { 0 };
@@ -113,7 +113,7 @@ int FaacAudioEncoder::ProcessMediaByModule(SmartPkt pkt) {
     in_buf.bufElSizes = &in_elem_size;
 
 
-    SmartPkt opkt = p_bufferPool->GetPkt(PktMsgProcessMedia);
+    Message opkt = p_bufferPool->NewFrameMessage(MsgKey_ProcessData);
     opkt.SetPtr(this);
 
     out_ptr = opkt.GetDataPtr();
@@ -133,7 +133,7 @@ int FaacAudioEncoder::ProcessMediaByModule(SmartPkt pkt) {
 
 //    LOGD("[FaacAudioEncoder] EncodeVideo out_size=%d  out_elem_size=%d\n", out_args.numOutBytes, out_elem_size);
 
-    opkt.frame.media_type = MediaType_Audio;
+    opkt.frame.type = MediaType_Audio;
     opkt.frame.size = out_args.numOutBytes;
     opkt.frame.data = opkt.GetDataPtr();
     opkt.frame.timestamp = pkt.frame.timestamp / 1000;

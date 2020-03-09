@@ -224,18 +224,18 @@ static void UpdateTextures(opengles_t *gles, const sr_buffer_frame_t *frameToRen
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, gles->_textureIds[0]);
-	GlTexSubImage2D(width, height, frameToRender->plane[0].stride,
-			frameToRender->plane[0].data);
+	GlTexSubImage2D(width, height, frameToRender->channel[0].stride,
+			frameToRender->channel[0].data);
 
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, gles->_textureIds[1]);
-	GlTexSubImage2D(width / 2, height / 2, frameToRender->plane[1].stride,
-			frameToRender->plane[1].data);
+	GlTexSubImage2D(width / 2, height / 2, frameToRender->channel[1].stride,
+			frameToRender->channel[1].data);
 
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, gles->_textureIds[2]);
-	GlTexSubImage2D(width / 2, height / 2, frameToRender->plane[2].stride,
-			frameToRender->plane[2].data);
+	GlTexSubImage2D(width / 2, height / 2, frameToRender->channel[2].stride,
+			frameToRender->channel[2].data);
 
 	checkGlError("UpdateTextures");
 }

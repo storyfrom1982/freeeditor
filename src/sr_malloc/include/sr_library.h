@@ -356,47 +356,44 @@ extern int sr_message_queue_put(sr_message_queue_t *queue, sr_message_t msg);
 
 
 
+typedef struct sr_buffer_frame_t {
+
+    int type;
+    int flag;
+
+    int x;
+    int y;
+
+    int width;
+    int height;
+    int video_format;
+
+    int sample_rate;
+    int audio_format;
+    int audio_channel;
+
+    int size;
+    unsigned char *data;
+
+    int64_t timestamp;
+
+    int channel_count;
+
+    struct {
+        int size;
+        int stride;
+        unsigned char *data;
+    }channel[4];
+
+}sr_buffer_frame_t;
+
+
 typedef struct sr_buffer_data_t {
-
-//	struct {
-//		int key;
-//		int sub_key;
-//        size_t data_length;
-//		union {
-//			void *ptr;
-//			int64_t number;
-//		};
-//	}msg;
-
-	struct {
-		int type;
-		int flags;
-        int64_t timestamp;
-        int max_plane;
-        struct {
-            int stride;
-            int size;
-            unsigned char *data;
-        }plane[4];
-        union {
-            struct {
-                int width;
-                int height;
-                int image_format;
-            };
-            struct {
-                int sample_rate;
-                int channel_count;
-                int sample_format;
-            };
-        };
-	}frame;
-
 	size_t head_size;
 	size_t data_size;
 	unsigned char *head;
 	unsigned char *data;
-
+    sr_buffer_frame_t frame;
 }sr_buffer_data_t;
 
 typedef struct sr_buffer_pool sr_buffer_pool_t;

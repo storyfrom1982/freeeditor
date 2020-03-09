@@ -27,9 +27,9 @@ namespace freee {
 
     protected:
 
-        void onMsgControl(SmartPkt pkt) override;
+        void onMsgControl(Message pkt) override;
 
-        virtual void onMsgConnectStream(SmartPkt pkt);
+        virtual void onMsgConnectStream(Message pkt);
 
         virtual void onMsgDisconnectStream();
 

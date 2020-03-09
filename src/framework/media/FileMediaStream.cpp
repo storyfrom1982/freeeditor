@@ -17,7 +17,7 @@ FileMediaStream::~FileMediaStream() {
 
 }
 
-void FileMediaStream::onMsgConnectStream(SmartPkt pkt) {
+void FileMediaStream::onMsgConnectStream(Message pkt) {
     av_register_all();
     std::string url = pkt.GetString();
     if (avformat_alloc_output_context2(&m_pContext, NULL, NULL, url.c_str()) < 0) {
@@ -49,7 +49,7 @@ void FileMediaStream::onMsgDisconnectStream() {
     }
 }
 
-void FileMediaStream::onMsgOpen(SmartPkt pkt) {
+void FileMediaStream::onMsgOpen(Message pkt) {
     MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
     if (m_chainToStream[chain] == nullptr){
         LOGD("FileMediaStream::onMsgOpen type[%s] extraConfig %lu\n", chain->GetName(this).c_str(), chain->GetExtraConfig(this).size());
@@ -71,18 +71,18 @@ void FileMediaStream::onMsgOpen(SmartPkt pkt) {
 
             m_status = Status_Opened;
             usleep(200000);
-            SmartPkt event(PktMsgProcessEvent);
-            event.SetEvent(PktMsgOpen);
+            Message event(MsgKey_ProcessEvent);
+            event.SetEvent(MsgKey_Open);
             MessageChainImpl::onMsgProcessEvent(event);
         }
     }
 }
 
-void FileMediaStream::onMsgClose(SmartPkt pkt) {
+void FileMediaStream::onMsgClose(Message pkt) {
     MediaStream::onMsgClose(pkt);
 }
 
-void FileMediaStream::onMsgProcessData(SmartPkt pkt) {
+void FileMediaStream::onMsgProcessData(Message pkt) {
     MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
 
     AVStream* pStream = (AVStream*)m_chainToStream[chain];
@@ -97,10 +97,10 @@ void FileMediaStream::onMsgProcessData(SmartPkt pkt) {
 
     avpkt.flags = (pkt.frame.flag & PktFlag_KeyFrame) ? AV_PKT_FLAG_KEY : 0;
 
-    if (pkt.frame.media_type == MediaType_Audio){
+    if (pkt.frame.type == MediaType_Audio){
 //        LOGD("FileMediaStream: audio timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
 //             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
-    }else if (pkt.frame.media_type == MediaType_Video){
+    }else if (pkt.frame.type == MediaType_Video){
         LOGD("FileMediaStream: video flag %d\n", avpkt.flags);
 //        LOGD("FileMediaStream: video timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
 //             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
@@ -115,10 +115,10 @@ void FileMediaStream::onMsgProcessData(SmartPkt pkt) {
         if (result < 0){
             char buffer[1024];
             av_strerror(result, buffer, sizeof(buffer) - 1);
-            if (pkt.frame.media_type == MediaType_Audio){
+            if (pkt.frame.type == MediaType_Audio){
                 LOGD("[FileMediaStream] av_write_frame audio %d, ret=%d error=%s\n",
                      pStream->index, result,buffer);
-            }else if (pkt.frame.media_type == MediaType_Video){
+            }else if (pkt.frame.type == MediaType_Video){
                 LOGD("[FileMediaStream] av_write_frame video %d, ret=%d error=%s\n",
                      pStream->index, result,buffer);
             }
