@@ -24,7 +24,7 @@ namespace freee {
         int ProcessMediaByModule(Message pkt) override;
 
     public:
-        std::string GetExtraConfig(MessageChain *chain) override;
+        std::string &GetExtraConfig(MessageChain *chain) override;
 
     private:
 

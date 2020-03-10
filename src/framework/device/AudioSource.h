@@ -20,9 +20,7 @@ namespace freee {
 
     public:
 
-        AudioSource(int mediaType = MediaType_Audio,
-                int mediaNumber = MediaNumber_AudioSource,
-                std::string mediaName = "AudioSource");
+        AudioSource(const std::string mediaName = "AudioSource", int mediaType = MediaType_Audio);
 
         ~AudioSource();
 

@@ -82,7 +82,7 @@ int FaacAudioEncoder::OpenModule() {
     return ret;
 }
 
-std::string FaacAudioEncoder::GetExtraConfig(MessageChain *chain) {
+std::string &FaacAudioEncoder::GetExtraConfig(MessageChain *chain) {
     return m_extraConfig;
 }
 

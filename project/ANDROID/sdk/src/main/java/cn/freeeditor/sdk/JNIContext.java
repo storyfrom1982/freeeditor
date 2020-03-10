@@ -4,8 +4,7 @@ package cn.freeeditor.sdk;
 abstract public class JNIContext extends MessageProcessor {
 
     public JNIContext(){
-        contextPointer = createContext();
-        setContextName(super.getClass().getName(), contextPointer);
+        contextPointer = createContext(super.getClass().getName());
     }
 
     public void release(){
@@ -59,9 +58,8 @@ abstract public class JNIContext extends MessageProcessor {
 
     private long contextPointer;
 
-    private native long createContext();
+    private native long createContext(String name);
     private native void deleteContext(long contextPointer);
-    private native void setContextName(String name, long contextPointer);
     private native void connectContext(long messageContext, long contextPointer);
     private native void disconnectContext(long contextPointer);
 

@@ -28,10 +28,9 @@ enum {
 };
 
 
-VideoWindow::VideoWindow(MessageContext *context) {
+VideoWindow::VideoWindow(MessageContext *context) : MessageContext("VideoWindow") {
     mWindowHolder = nullptr;
     mNativeWindow = nullptr;
-    SetContextName("VideoWindow");
     ConnectContext(context);
 }
 

@@ -244,7 +244,7 @@ std::string X264VideoEncoder::GenAvc1() {
     return str;
 }
 
-std::string X264VideoEncoder::GetExtraConfig(MessageChain *chain) {
+std::string &X264VideoEncoder::GetExtraConfig(MessageChain *chain) {
     return m_extraConfig;
 }
 

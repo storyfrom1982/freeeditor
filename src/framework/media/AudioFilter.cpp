@@ -6,9 +6,9 @@
 
 using namespace freee;
 
-AudioFilter::AudioFilter(int mediaType, int mediaNumber, const std::string &mediaName)
-        : MediaModule(mediaType, mediaNumber, mediaName) {
-    StartProcessor("AudioFilter");
+AudioFilter::AudioFilter(const std::string &mediaName, int mediaType)
+        : MediaModule(mediaName, mediaType) {
+    StartProcessor();
 }
 
 AudioFilter::~AudioFilter() {
@@ -42,7 +42,7 @@ int AudioFilter::OpenModule() {
 
     m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplePerFrame;
     p_bufferPool = new BufferPool(2, m_bufferSize, 10);
-    p_bufferPool->SetName(m_name);
+    p_bufferPool->SetName(GetName());
 
     return 0;
 }

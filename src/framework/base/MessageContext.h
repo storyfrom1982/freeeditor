@@ -17,71 +17,84 @@ namespace freee{
 
     public:
 
-        MessageContext(){
-            p_messageContext = NULL;
+        MessageContext(std::string name)
+        {
+            m_name = name;
             p_bufferPool = new BufferPool(2, 4096);
+            p_bufferPool->SetName(m_name);
         }
 
-        virtual ~MessageContext(){
+        virtual ~MessageContext()
+        {
 //            LOGD("[DELETE]<MessageContext>[%s]\n", m_name.c_str());
             delete p_bufferPool;
         };
 
-        virtual void ConnectContext(MessageContext *context){
+        virtual void ConnectContext(MessageContext *pMessageContext)
+        {
             AutoLock lock(m_lock);
-            if (context){
-                p_messageContext = context;
+            if (pMessageContext)
+            {
+                p_messageContext = pMessageContext;
                 AutoLock lockContext(p_messageContext->m_lock);
                 p_messageContext->p_messageContext = this;
             }
         }
 
-        void DisconnectContext(){
+        void DisconnectContext()
+        {
             AutoLock lock(m_lock);
-            if (p_messageContext){
+            if (p_messageContext)
+            {
                 AutoLock lockContext(p_messageContext->m_lock);
                 p_messageContext->p_messageContext = NULL;
                 p_messageContext = NULL;
             }
         }
 
-        void SetContextName(std::string name){
-            m_name = name;
-            p_bufferPool->SetName(m_name);
-        }
-
-    public:
-        virtual void onRecvMessage(Message pkt) {};
-
-        virtual Message onObtainMessage(int key){
-            return Message();
+        std::string GetName()
+        {
+            return m_name;
         }
 
     protected:
-        virtual void SendMessage(Message pkt){
+        virtual void onRecvMessage(Message msg) {};
+
+        virtual Message onObtainMessage(int key)
+        {
+            return Message();
+        }
+
+        virtual void SendMessage(Message msg)
+        {
             AutoLock lock(m_lock);
             if (p_messageContext){
-                p_messageContext->onRecvMessage(pkt);
+                p_messageContext->onRecvMessage(msg);
             }
         }
 
-        virtual Message RequestMessage(int key){
+        virtual Message RequestMessage(int key)
+        {
             AutoLock lock(m_lock);
-            if (p_messageContext){
+            if (p_messageContext)
+            {
                 return p_messageContext->onObtainMessage(key);
             }
             return Message();
         }
 
-        Message NewJsonPkt(int key, std::string str){
+        Message NewJsonPkt(int key, std::string str)
+        {
             return p_bufferPool->NewStringMessage(key, str);
         }
+
+
 
     private:
         Lock m_lock;
         std::string m_name;
-        BufferPool *p_bufferPool;
-        MessageContext *p_messageContext;
+        BufferPool *p_bufferPool = nullptr;
+        MessageContext *p_messageContext = nullptr;
     };
 
 }

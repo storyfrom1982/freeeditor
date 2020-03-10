@@ -26,14 +26,13 @@ enum {
 
 
 VideoSource::VideoSource(MessageContext *context)
-    : MessageChain(MediaType_Video, MediaNumber_VideoSource, "VideoSource") {
+    : MessageChain("VideoSource", MediaType_Video) {
     m_status = Status_Closed;
     if (context == nullptr){
 //        context = MediaContext::Instance().ConnectCamera();
         context = MediaContext::Instance()->ConnectCamera();
     }
     ConnectContext(context);
-    SetContextName("VideoSource");
 }
 
 VideoSource::~VideoSource() {

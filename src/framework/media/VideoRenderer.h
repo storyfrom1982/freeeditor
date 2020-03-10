@@ -29,10 +29,7 @@ namespace freee {
     class VideoRenderer : public MediaModule, VideoWindow::VideoWindowCallback {
 
     public:
-        VideoRenderer(
-                int mediaType = MediaType_Video,
-                int mediaNumber = MediaNumber_VideoRender,
-                const std::string &mediaName = "VideoRenderer");
+        VideoRenderer(const std::string &mediaName = "VideoRenderer", int mediaType = MediaType_Video);
         ~VideoRenderer();
 
 

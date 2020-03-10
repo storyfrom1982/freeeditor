@@ -14,10 +14,10 @@ VideoEncoder *VideoEncoder::Create(std::string name) {
     return new X264VideoEncoder;
 }
 
-VideoEncoder::VideoEncoder(int mediaType, int mediaNumber, const std::string &mediaName)
-        : MediaModule(mediaType, mediaNumber, mediaName) {
+VideoEncoder::VideoEncoder(const std::string &mediaName, int mediaType)
+        : MediaModule(mediaName, mediaType) {
     p_bufferPool = nullptr;
-    StartProcessor(mediaName);
+    StartProcessor();
 }
 
 VideoEncoder::~VideoEncoder() {
@@ -43,7 +43,7 @@ void VideoEncoder::onMsgOpen(Message pkt) {
     uint32_t w = m_config["codecWidth"];
     uint32_t h = m_config["codecHeight"];
     p_bufferPool = new BufferPool(4, w*h, 256, 16);
-    p_bufferPool->SetName(m_name);
+    p_bufferPool->SetName(GetName());
     pkt.frame.type = MediaType_Video;
     MessageChain::onMsgOpen(pkt);
 }

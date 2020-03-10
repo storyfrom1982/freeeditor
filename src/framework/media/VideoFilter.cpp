@@ -9,11 +9,11 @@
 using namespace freee;
 
 
-VideoFilter::VideoFilter(int mediaType, int mediaNumber, const std::string &mediaName)
-        : MediaModule(mediaType, mediaNumber, mediaName) {
+VideoFilter::VideoFilter(const std::string &mediaName, int mediaType)
+        : MediaModule(mediaName, mediaType) {
     m_status = Status_Closed;
     p_bufferPool = nullptr;
-    StartProcessor(mediaName);
+    StartProcessor();
 }
 
 VideoFilter::~VideoFilter() {
@@ -89,7 +89,7 @@ int VideoFilter::OpenModule() {
 //    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", m_srcImageFormat, libyuv::FOURCC_NV21);
     m_bufferSize = m_codecWidth * m_codecHeight / 2 * 3U;
     p_bufferPool = new BufferPool(2, m_bufferSize, 10);
-    p_bufferPool->SetName(m_name);
+    p_bufferPool->SetName(GetName());
     return 0;
 }
 

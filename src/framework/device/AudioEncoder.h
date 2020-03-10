@@ -31,9 +31,8 @@ namespace freee {
         void onMsgControl(Message pkt) override;
 
     protected:
-        AudioEncoder(int mediaType = MediaType_Audio,
-                     int mediaNumber = MediaNumber_AudioEncoder,
-                     const std::string &mediaName = "AudioEncoder");
+        AudioEncoder(const std::string &mediaName = "AudioEncoder",
+                int mediaType = MediaType_Audio);
 
     protected:
         int64_t m_startTimestamp = -1;

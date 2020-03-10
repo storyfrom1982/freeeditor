@@ -15,8 +15,8 @@ namespace freee {
     class MediaModule : public MessageChain {
 
     public:
-        MediaModule(int mediaType, int mediaNumber, const std::string &mediaName)
-                : MessageChain(mediaType, mediaNumber, mediaName){};
+        MediaModule(const std::string &mediaName, int mediaType)
+                : MessageChain(mediaName, mediaType){};
         virtual ~MediaModule(){};
 
     protected:

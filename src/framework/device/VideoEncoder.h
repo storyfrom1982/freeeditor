@@ -36,9 +36,8 @@ namespace freee{
         void onMsgControl(Message pkt) override;
 
     protected:
-        VideoEncoder(int mediaType = MediaType_Video,
-                int mediaNumber = MediaNumber_VideoEncoder,
-                const std::string &mediaName = "VideoEncoder");
+        VideoEncoder(const std::string &mediaName = "VideoEncoder",
+                int mediaType = MediaType_Video);
 
     private:
         void FinalClear() override ;

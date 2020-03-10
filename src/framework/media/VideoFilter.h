@@ -15,9 +15,7 @@ namespace freee {
     class VideoFilter : public MediaModule {
 
     public:
-        VideoFilter(int mediaType = MediaType_Video,
-                int mediaNumber = MediaNumber_VideoFilter,
-                const std::string &mediaName = "VideoFilter");
+        VideoFilter(const std::string &mediaName = "VideoFilter", int mediaType = MediaType_Video);
 
         ~VideoFilter();
 

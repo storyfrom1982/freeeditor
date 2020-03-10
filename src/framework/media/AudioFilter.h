@@ -12,9 +12,7 @@ namespace freee {
 
     class AudioFilter : public MediaModule {
     public:
-        AudioFilter(int mediaType = MediaType_Audio,
-                int mediaNumber = MediaNumber_AudioFilter,
-                const std::string &mediaName = "AudioFilter");
+        AudioFilter(const std::string &mediaName = "AudioFilter", int mediaType = MediaType_Audio);
 
         void FinalClear() override;
 

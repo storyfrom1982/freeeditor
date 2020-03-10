@@ -14,9 +14,9 @@ enum {
     OnRecvMsg_DisconnectStream = 12,
 };
 
-MediaStream::MediaStream(int mediaType, int mediaNumber, const std::string &mediaName)
-        : MediaModule(mediaType, mediaNumber, mediaName) {
-    StartProcessor(mediaName);
+MediaStream::MediaStream(const std::string &mediaName, int mediaType)
+        : MediaModule(mediaName, mediaType) {
+    StartProcessor();
 }
 
 MediaStream::~MediaStream() {

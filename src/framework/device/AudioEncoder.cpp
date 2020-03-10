@@ -5,9 +5,9 @@
 #include "AudioEncoder.h"
 #include "FaacAudioEncoder.h"
 
-freee::AudioEncoder::AudioEncoder(int mediaType, int mediaNumber, const std::string &mediaName)
-        : MediaModule(mediaType, mediaNumber, mediaName) {
-    StartProcessor(mediaName);
+freee::AudioEncoder::AudioEncoder(const std::string &mediaName, int mediaType)
+        : MediaModule(mediaName, mediaType) {
+    StartProcessor();
 }
 
 freee::AudioEncoder::~AudioEncoder() {

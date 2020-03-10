@@ -14,9 +14,7 @@ namespace freee {
     public:
         static MediaStream* Create(std::string name);
 
-        MediaStream(int mediaType = MediaType_All,
-                int mediaNumber = MediaNumber_OutputProtocal,
-                const std::string &mediaName = "MediaStream");
+        MediaStream(const std::string &mediaName = "MediaStream", int mediaType = MediaType_All);
         ~MediaStream();
 
         void FinalClear() override;

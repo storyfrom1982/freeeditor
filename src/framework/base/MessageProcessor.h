@@ -18,30 +18,28 @@ namespace freee {
     class MessageProcessor : public MessageContext {
 
     public:
-        MessageProcessor();
+        MessageProcessor(std::string name);
         virtual ~MessageProcessor(){}
 
     protected:
-        void StartProcessor(std::string name);
+        void StartProcessor();
         void StopProcessor();
 
-        virtual void ProcessMessage(Message pkt);
-        virtual void MessageProcess(Message pkt){}
+        virtual void ProcessMessage(Message msg);
+        virtual void MessageProcess(Message msg){}
 
     private:
         void MessageProcessorLoop();
         static void* MessageProcessorThread(void *p);
 
     private:
-        std::string m_name;
-
         unsigned int m_length;
         unsigned int m_putIndex;
         unsigned int m_getIndex;
 
         Lock m_lock;
-        pthread_t m_threadId;
-        std::vector<Message> m_pktQueue;
+        pthread_t m_threadId = 0;
+        std::vector<Message> m_messageQueue;
     };
 
 }

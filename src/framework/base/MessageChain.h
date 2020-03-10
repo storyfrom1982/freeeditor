@@ -49,10 +49,8 @@ namespace freee {
     class MessageChain : public MessageProcessor {
 
     public:
-        MessageChain(int mediaType, int mediaNumber, std::string mediaName) :
-                m_type(mediaType),
-                m_number(mediaNumber),
-                m_name(mediaName){}
+        MessageChain(std::string name, int type)
+        : MessageProcessor(name), m_type(type){}
 
         virtual ~MessageChain(){
 //            LOGD("[DELETE]<MediaChainImpl>[%s]\n", m_name.c_str());
@@ -112,15 +110,6 @@ namespace freee {
             if (m_chainToStream.find(chain) != m_chainToStream.end()){
                 m_chainToStream.erase(chain);
             }
-//            for (int i = 0; i < m_inputChain.size(); ++i){
-//                if (m_inputChain[i] == chain){
-//                    m_inputChain.erase(m_inputChain.begin() + i);
-//                    if (m_chainToStream.find(chain) != m_chainToStream.end()){
-//                        m_chainToStream.erase(chain);
-//                    }
-//                    break;
-//                }
-//            }
         }
 
     public:
@@ -128,19 +117,11 @@ namespace freee {
             return m_type;
         }
 
-        virtual int GetNumber(MessageChain *chain) {
-            return m_number;
-        }
-
-        virtual std::string GetName(MessageChain *chain) {
-            return m_name;
-        }
-
         virtual json &GetConfig(MessageChain *chain) {
             return m_config;
         }
 
-        virtual std::string GetExtraConfig(MessageChain *chain) {
+        virtual std::string &GetExtraConfig(MessageChain *chain) {
             return m_extraConfig;
         }
 
@@ -161,13 +142,6 @@ namespace freee {
                     break;
                 }
             }
-//            for (int i = 0; i < m_outputChain.size(); ++i){
-//                if (m_outputChain[i] == chain){
-//                    m_outputChain.erase(m_outputChain.begin() + i);
-//                    chain->DelInput(this);
-//                    break;
-//                }
-//            }
         }
 
         void SetEventListener(MessageChain *listener) {
@@ -175,9 +149,7 @@ namespace freee {
             m_pEventListener = listener;
         }
 
-
-    protected:
-        virtual void SendEvent(Message pkt) {
+        void SendEvent(Message pkt) {
             AutoLock lock(m_lockEventListener);
             if (m_pEventListener){
                 m_pEventListener->ProcessEvent(this, pkt);
@@ -256,10 +228,8 @@ namespace freee {
 
     protected:
         int m_type;
-        int m_number;
         json m_config;
         std::string m_extraConfig;
-        std::string m_name;
 
         Lock m_lockEventListener;
         MessageChain *m_pEventListener = nullptr;

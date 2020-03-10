@@ -46,13 +46,14 @@ void FileMediaStream::onMsgDisconnectStream() {
         }
         avio_close(m_pContext->pb);
         m_pContext->pb = NULL;
+        avformat_free_context(m_pContext);
     }
 }
 
 void FileMediaStream::onMsgOpen(Message pkt) {
     MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
     if (m_chainToStream[chain] == nullptr){
-        LOGD("FileMediaStream::onMsgOpen type[%s] extraConfig %lu\n", chain->GetName(this).c_str(), chain->GetExtraConfig(this).size());
+        LOGD("FileMediaStream::onMsgOpen type[%s] extraConfig %lu\n", chain->GetName().c_str(), chain->GetExtraConfig(this).size());
         if (chain->GetType(this) == MediaType_Audio){
             addAudioStream(chain);
         }else if (chain->GetType(this) == MediaType_Video){
@@ -108,7 +109,7 @@ void FileMediaStream::onMsgProcessData(Message pkt) {
 //        LOGD("FileMediaStream: audio timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
 //             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
     }else if (pkt.frame.type == MediaType_Video){
-        LOGD("FileMediaStream: video flag %d\n", avpkt.flags);
+//        LOGD("FileMediaStream: video flag %d\n", avpkt.flags);
 //        LOGD("FileMediaStream: video timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
 //             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
     }

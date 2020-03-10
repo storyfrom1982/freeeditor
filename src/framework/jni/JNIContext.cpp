@@ -38,9 +38,8 @@ JavaVM *global_JVM_Instance;
 class JNIContext : public MessageContext {
 
 public:
-    JNIContext(jobject obj) {
+    JNIContext(const char *name, jobject obj) : MessageContext(name) {
         JniEnv env;
-
         m_obj = env->NewGlobalRef(obj);
         jclass m_cls = env->GetObjectClass(m_obj);
         m_onObtainMessage = env->GetMethodID(m_cls, "onObtainMessage", "(I)Lcn/freeeditor/sdk/JNIMessage;");
@@ -146,8 +145,11 @@ private:
 
 extern "C"
 JNIEXPORT jlong JNICALL
-Java_cn_freeeditor_sdk_JNIContext_createContext(JNIEnv *env, jobject instance) {
-    JNIContext *pJNIContext = new JNIContext(instance);
+Java_cn_freeeditor_sdk_JNIContext_createContext__Ljava_lang_String_2(JNIEnv *env, jobject instance,
+                                                                     jstring name_) {
+    const char *name = env->GetStringUTFChars(name_, 0);
+    JNIContext *pJNIContext = new JNIContext(name, instance);
+    env->ReleaseStringUTFChars(name_, name);
     return (jlong)pJNIContext;
 }
 
@@ -157,18 +159,6 @@ Java_cn_freeeditor_sdk_JNIContext_deleteContext(JNIEnv *env, jobject instance, j
     JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(mCtx);
     if (pJNIContext){
         delete pJNIContext;
-    }
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_JNIContext_setContextName(JNIEnv *env, jobject instance, jstring name_,
-                                                 jlong jniContext) {
-    JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(jniContext);
-    if (pJNIContext){
-        const char *name = env->GetStringUTFChars(name_, 0);
-        pJNIContext->SetContextName(name);
-        env->ReleaseStringUTFChars(name_, name);
     }
 }
 

@@ -30,9 +30,7 @@ enum {
 
 static MediaContext *sMediaContext = nullptr;
 
-MediaContext::MediaContext(){
-    SetContextName("MediaContext");
-};
+MediaContext::MediaContext() : MessageContext("MediaContext"){};
 
 MediaContext::~MediaContext(){
     sMediaContext = nullptr;

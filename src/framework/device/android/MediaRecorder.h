@@ -32,24 +32,27 @@ namespace freee{
     private:
         void onRecvMessage(Message pkt) override;
 
-    protected:
-        void MessageProcess(Message pkt) override;
-
     private:
-        void StartPreview(Message pkt);
-        void Open(Message pkt);
-        void Close();
-        void Start();
-        void Stop();
-        void StartRecord(Message pkt);
-        void StopRecord();
-        void StopPreview();
+        void onMsgStartPreview(Message pkt);
+        void onMsgStartRecord(Message pkt);
+        void onMsgStopRecord(Message pkt);
+        void onMsgStopPreview(Message pkt);
 
-        void FinalClearVideoChain();
 
-    public:
-        void ConnectContext(MessageContext *context) override;
+    protected:
         json &GetConfig(MessageChain *chain) override;
+
+        void onMsgOpen(Message pkt) override;
+
+        void onMsgClose(Message pkt) override;
+
+        void onMsgStart(Message pkt) override;
+
+        void onMsgStop(Message pkt) override;
+
+        void onMsgProcessEvent(Message pkt) override;
+
+        void onMsgControl(Message pkt) override;
 
     private:
         int m_status;

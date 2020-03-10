@@ -13,21 +13,16 @@ using namespace freee;
 
 
 enum {
-    RecvMsg_None = 0,
-    RecvMsg_Open = 1,
-    RecvMsg_Start = 2,
-    RecvMsg_Stop = 3,
-    RecvMsg_Close = 4,
-    RecvMsg_StartRecord = 5,
-    RecvMsg_StopRecord = 6,
-    RecvMsg_StartPreview = 7,
-    RecvMsg_StopPreview = 8,
-    RecvMsg_UpdateConfig = 9,
+    MsgKey_UpdateConfig = 11,
+    MsgKey_StartPreview = 12,
+    MsgKey_StopPreview = 13,
+    MsgKey_StartRecord = 14,
+    MsgKey_StopRecord = 15,
 };
 
 
 MediaRecorder::MediaRecorder()
-        : MessageChain(MediaType_All, MediaNumber_Recorder, "MediaRecorder"),
+        : MessageChain("MediaRecorder", MediaType_All),
         m_audioSource(nullptr),
         m_audioFilter(nullptr),
         m_audioEncoder(nullptr),
@@ -38,8 +33,7 @@ MediaRecorder::MediaRecorder()
         m_mediaStream(nullptr),
         is_previewing(false),
         m_status(Status_Closed){
-    SetContextName("MediaRecorder");
-    StartProcessor("MediaRecorder");
+    StartProcessor();
 }
 
 MediaRecorder::~MediaRecorder() {
@@ -71,47 +65,64 @@ void MediaRecorder::FinalClear() {
     }
 }
 
-void MediaRecorder::MessageProcess(Message pkt) {
-    switch (pkt.GetKey()){
-        case MsgKey_Open:
-            Open(pkt);
-            break;
-        case MsgKey_Close:
-            Close();
-            break;
-        case RecvMsg_StartRecord:
-            StartRecord(pkt);
-            break;
-        case RecvMsg_StopRecord:
-            StopRecord();
-            break;
-        case RecvMsg_StartPreview:
-            StartPreview(pkt);
-            break;
-        case RecvMsg_StopPreview:
-            StopPreview();
-            break;
-        case MsgKey_Start:
-            Start();
-            break;
-        case MsgKey_Stop:
-            Stop();
-            break;
-        case RecvMsg_UpdateConfig:
-            break;
-        case (MediaNumber_VideoSource + Status_Stopped):
-            FinalClearVideoChain();
-            break;
-        default:
-            break;
-    }
-}
-
 void MediaRecorder::onRecvMessage(Message pkt) {
     ProcessMessage(Message(pkt));
 }
 
-void MediaRecorder::Open(Message pkt) {
+void MediaRecorder::onMsgStartRecord(Message pkt) {
+    LOGD("MediaRecorder::StartRecord url=%s\n", pkt.GetString().c_str());
+    if (!is_recording){
+        if (m_status != Status_Started){
+            onMsgStart(pkt);
+        }
+        if (m_status == Status_Started){
+            is_recording = true;
+        }
+    }
+}
+
+void MediaRecorder::onMsgStopRecord(Message msg) {
+    if (is_recording){
+        is_recording = false;
+        if (!is_previewing){
+            onMsgStop(msg);
+        }
+    }
+}
+
+void MediaRecorder::onMsgStartPreview(Message pkt) {
+    LOGD("MediaRecorder::StartPreview enter\n");
+    if (!is_previewing){
+        if (m_status != Status_Started){
+            onMsgStart(pkt);
+        }
+        if (m_status == Status_Started){
+            m_videoRenderer->SetVideoWindow(pkt.GetPtr());
+            is_previewing = true;
+        }
+    }
+    LOGD("MediaRecorder::StartPreview exit\n");
+}
+
+void MediaRecorder::onMsgStopPreview(Message msg) {
+    if (is_previewing){
+        is_previewing = false;
+        if (!is_recording){
+            onMsgStop(msg);
+        }
+    }
+}
+
+json &MediaRecorder::GetConfig(MessageChain *chain) {
+    if (chain->GetType(this) == MediaType_Video){
+        return m_config["video"];
+    }else if (chain->GetType(this) == MediaType_Audio){
+        return m_config["audio"];
+    }
+    return MessageChain::GetConfig(chain);
+}
+
+void MediaRecorder::onMsgOpen(Message pkt) {
     if (m_status == Status_Closed){
 
         m_config = json::parse(pkt.GetString());
@@ -149,9 +160,9 @@ void MediaRecorder::Open(Message pkt) {
     }
 }
 
-void MediaRecorder::Close() {
+void MediaRecorder::onMsgClose(Message pkt) {
     if (m_status == Status_Started){
-        Stop();
+        onMsgStop(pkt);
     }
     if (m_status == Status_Opened
         || m_status == Status_Stopped){
@@ -192,52 +203,7 @@ void MediaRecorder::Close() {
     }
 }
 
-void MediaRecorder::StartRecord(Message pkt) {
-    LOGD("MediaRecorder::StartRecord url=%s\n", pkt.GetString().c_str());
-    if (!is_recording){
-        if (m_status != Status_Started){
-            Start();
-        }
-        if (m_status == Status_Started){
-            is_recording = true;
-        }
-    }
-}
-
-void MediaRecorder::StopRecord() {
-    if (is_recording){
-        is_recording = false;
-        if (!is_previewing){
-            Stop();
-        }
-    }
-}
-
-void MediaRecorder::StartPreview(Message pkt) {
-    LOGD("MediaRecorder::StartPreview enter\n");
-    if (!is_previewing){
-        if (m_status != Status_Started){
-            Start();
-        }
-        if (m_status == Status_Started){
-            m_videoRenderer->SetVideoWindow(pkt.GetPtr());
-            is_previewing = true;
-        }
-    }
-    LOGD("MediaRecorder::StartPreview exit\n");
-}
-
-void MediaRecorder::StopPreview() {
-    if (is_previewing){
-        is_previewing = false;
-
-        if (!is_recording){
-            Stop();
-        }
-    }
-}
-
-void MediaRecorder::Start() {
+void MediaRecorder::onMsgStart(Message pkt) {
     if (m_status != Status_Started){
         if (m_status == Status_Opened
             || m_status == Status_Stopped){
@@ -248,7 +214,7 @@ void MediaRecorder::Start() {
     }
 }
 
-void MediaRecorder::Stop() {
+void MediaRecorder::onMsgStop(Message pkt) {
     if (m_status == Status_Started){
         m_videoSource->Stop(this);
         m_audioSource->Stop(this);
@@ -256,25 +222,28 @@ void MediaRecorder::Stop() {
     }
 }
 
-json &MediaRecorder::GetConfig(MessageChain *chain) {
-    if (chain->GetType(this) == MediaType_Video){
-        return m_config["video"];
-    }else if (chain->GetType(this) == MediaType_Audio){
-        return m_config["audio"];
+void MediaRecorder::onMsgProcessEvent(Message pkt) {
+
+}
+
+void MediaRecorder::onMsgControl(Message pkt) {
+    switch (pkt.GetKey()){
+        case MsgKey_StartRecord:
+            onMsgStartRecord(pkt);
+            break;
+        case MsgKey_StopRecord:
+            onMsgStopRecord(pkt);
+            break;
+        case MsgKey_StartPreview:
+            onMsgStartPreview(pkt);
+            break;
+        case MsgKey_StopPreview:
+            onMsgStopPreview(pkt);
+            break;
+        case MsgKey_UpdateConfig:
+            break;
+        default:
+            break;
     }
-    return MessageChain::GetConfig(chain);
-}
-
-//void MediaRecorder::onEvent(MediaChain *chain, SmartPkt pkt) {
-//    LOGD("MediaRecorder::onEvent[%d]\n", pkt.GetKey());
-//    ProcessMessage(pkt);
-//}
-
-void MediaRecorder::FinalClearVideoChain() {
-
-}
-
-void MediaRecorder::ConnectContext(MessageContext *context) {
-    MessageContext::ConnectContext(context);
 }
 

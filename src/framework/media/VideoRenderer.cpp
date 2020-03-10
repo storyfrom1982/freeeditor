@@ -16,8 +16,8 @@ enum {
     RecvMsg_SurfaceDestroyed,
 };
 
-VideoRenderer::VideoRenderer(int mediaType, int mediaNumber, const std::string &mediaName)
-        : MediaModule(mediaType, mediaNumber, mediaName) {
+VideoRenderer::VideoRenderer(const std::string &mediaName, int mediaType)
+        : MediaModule(mediaName, mediaType) {
     mStatus = Status_Closed;
     isSurfaceCreated = false;
     isSurfaceDestroyed = true;
@@ -25,7 +25,7 @@ VideoRenderer::VideoRenderer(int mediaType, int mediaNumber, const std::string &
     opengles = nullptr;
     mVideoWindow = nullptr;
     width = height = 0;
-    StartProcessor(mediaName);
+    StartProcessor();
 }
 
 VideoRenderer::~VideoRenderer() {

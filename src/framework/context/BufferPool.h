@@ -20,6 +20,9 @@ extern "C" {
 #endif
 
 
+//using namespace std;
+
+
 namespace freee {
 
     enum {

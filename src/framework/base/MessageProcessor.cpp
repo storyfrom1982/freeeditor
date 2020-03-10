@@ -8,15 +8,14 @@
 
 using namespace freee;
 
-MessageProcessor::MessageProcessor() : m_threadId(0) {}
+MessageProcessor::MessageProcessor(std::string name) : MessageContext(name) {}
 
-void MessageProcessor::StartProcessor(std::string name) {
+void MessageProcessor::StartProcessor() {
     AutoLock lock(m_lock);
     if (!m_threadId){
-        this->m_name = name;
         m_length = 256;
         m_putIndex = m_getIndex = 0;
-        m_pktQueue = std::vector<Message>(m_length);
+        m_messageQueue = std::vector<Message>(m_length);
         if (pthread_create(&m_threadId, nullptr, MessageProcessorThread, this) != 0) {
             LOGF("pthread_create failed\n");
         }
@@ -31,17 +30,16 @@ void MessageProcessor::StopProcessor() {
     m_lock.unlock();
     if (tid){
         pthread_join(tid, nullptr);
-        m_threadId = 0;
     }
-    m_pktQueue.clear();
+    m_messageQueue.clear();
 }
 
-void MessageProcessor::ProcessMessage(Message pkt) {
+void MessageProcessor::ProcessMessage(Message msg) {
     m_lock.lock();
     while (0 == (m_length - m_putIndex + m_getIndex)){
         m_lock.wait();
     }
-    m_pktQueue[m_putIndex & (m_length - 1)] = pkt;
+    m_messageQueue[m_putIndex & (m_length - 1)] = msg;
     m_putIndex ++;
     m_lock.signal();
     m_lock.unlock();
@@ -49,7 +47,7 @@ void MessageProcessor::ProcessMessage(Message pkt) {
 
 void MessageProcessor::MessageProcessorLoop() {
 
-    LOGD("[THREAD]<START>[%s] [%p]\n", m_name.c_str(), pthread_self());
+    LOGD("[THREAD]<START>[%s] [%p]\n", GetName().c_str(), pthread_self());
 
     while (true) {
 
@@ -59,8 +57,8 @@ void MessageProcessor::MessageProcessorLoop() {
             m_lock.wait();
         }
 
-        Message pkt = m_pktQueue[m_getIndex & (m_length - 1)];
-        m_pktQueue[m_getIndex & (m_length - 1)] = Message(0);
+        Message pkt = m_messageQueue[m_getIndex & (m_length - 1)];
+        m_messageQueue[m_getIndex & (m_length - 1)] = Message();
         m_getIndex ++;
 
         m_lock.signal();
@@ -73,7 +71,7 @@ void MessageProcessor::MessageProcessorLoop() {
         MessageProcess(pkt);
     }
 
-    LOGD("[THREAD]<STOPPED>[%s] [%p]\n", m_name.c_str(), pthread_self());
+    LOGD("[THREAD]<STOPPED>[%s] [%p]\n", GetName().c_str(), pthread_self());
 }
 
 void *MessageProcessor::MessageProcessorThread(void *p) {
