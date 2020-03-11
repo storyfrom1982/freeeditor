@@ -18,7 +18,7 @@ enum {
 
 VideoRenderer::VideoRenderer(const std::string &mediaName, int mediaType)
         : MessageChain(mediaName, mediaType) {
-    mStatus = Status_Closed;
+    m_status = Status_Closed;
     isSurfaceCreated = false;
     isSurfaceDestroyed = true;
     renderer = nullptr;
@@ -50,19 +50,19 @@ void VideoRenderer::FinalClear() {
 
 void VideoRenderer::onMsgOpen(Message pkt) {
     m_config = static_cast<MessageChain *>(pkt.GetPtr())->GetConfig(this);
-    if (mStatus == Status_Closed){
+    if (m_status == Status_Closed){
         if (OpenModule() != 0){
             return;
         }
-        mStatus = Status_Opened;
+        m_status = Status_Opened;
         MessageChain::onMsgOpen(pkt);
     }
 }
 
 void VideoRenderer::onMsgClose(Message pkt) {
-    if (mStatus == Status_Opened){
+    if (m_status == Status_Opened){
         CloseModule();
-        mStatus = Status_Closed;
+        m_status = Status_Closed;
         MessageChain::onMsgClose(pkt);
     }
 }
@@ -133,7 +133,7 @@ void VideoRenderer::SetVideoWindow(void *ptr) {
 
 void VideoRenderer::MessageSetVideoWindow(Message pkt) {
     mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.GetPtr()));
-    if (mStatus == Status_Opened){
+    if (m_status == Status_Opened){
         mVideoWindow->SetCallback(this);
     }
 }

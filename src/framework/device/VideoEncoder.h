@@ -45,7 +45,6 @@ namespace freee{
         void FinalClear() override ;
 
     protected:
-        int m_status = 0;
         float m_frameRate = 0.0f;
         int64_t m_frameId = 0;
         int64_t m_startFrameId = 0;

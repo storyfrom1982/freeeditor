@@ -32,7 +32,6 @@ namespace freee {
         int ProcessMediaByModule(Message pkt) override;
 
     private:
-        int m_status;
         int m_srcSampleRate;
         int m_srcChannelCount;
         int m_srcBytePerSample;

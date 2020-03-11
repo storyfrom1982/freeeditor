@@ -68,7 +68,8 @@ namespace freee{
         virtual void SendMessage(Message msg)
         {
             AutoLock lock(m_lock);
-            if (p_messageContext){
+            if (p_messageContext)
+            {
                 p_messageContext->onRecvMessage(msg);
             }
         }

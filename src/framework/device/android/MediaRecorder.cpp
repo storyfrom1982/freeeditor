@@ -31,8 +31,7 @@ MediaRecorder::MediaRecorder()
         m_videoRenderer(nullptr),
         m_videoEncoder(nullptr),
         m_mediaStream(nullptr),
-        is_previewing(false),
-        m_status(Status_Closed){
+        is_previewing(false){
     StartProcessor();
 }
 
@@ -76,6 +75,11 @@ void MediaRecorder::onMsgStartRecord(Message pkt) {
             onMsgStart(pkt);
         }
         if (m_status == Status_Started){
+            m_mediaStream->ConnectStream("/storage/emulated/0/test.mp4");
+            m_videoEncoder->AddOutput(m_mediaStream);
+            m_audioEncoder->AddOutput(m_mediaStream);
+            m_videoFilter->AddOutput(m_videoEncoder);
+            m_audioFilter->AddOutput(m_audioEncoder);
             is_recording = true;
         }
     }
@@ -84,6 +88,11 @@ void MediaRecorder::onMsgStartRecord(Message pkt) {
 void MediaRecorder::onMsgStopRecord(Message msg) {
     if (is_recording){
         is_recording = false;
+        m_videoFilter->DelOutput(m_videoEncoder);
+        m_audioFilter->DelOutput(m_audioEncoder);
+        m_videoEncoder->DelOutput(m_mediaStream);
+        m_audioEncoder->DelOutput(m_mediaStream);
+        m_mediaStream->DisconnectStream();
         if (!is_previewing){
             onMsgStop(msg);
         }
@@ -97,6 +106,7 @@ void MediaRecorder::onMsgStartPreview(Message pkt) {
             onMsgStart(pkt);
         }
         if (m_status == Status_Started){
+            m_videoFilter->AddOutput(m_videoRenderer);
             m_videoRenderer->SetVideoWindow(pkt.GetPtr());
             is_previewing = true;
         }
@@ -107,6 +117,7 @@ void MediaRecorder::onMsgStartPreview(Message pkt) {
 void MediaRecorder::onMsgStopPreview(Message msg) {
     if (is_previewing){
         is_previewing = false;
+        m_videoFilter->DelOutput(m_videoRenderer);
         if (!is_recording){
             onMsgStop(msg);
         }
@@ -130,28 +141,21 @@ void MediaRecorder::onMsgOpen(Message pkt) {
         LOGD("MediaRecorder config >> %s\n", m_config.dump(4).c_str());
 
         m_mediaStream = MediaStream::Create("file");
-        m_mediaStream->ConnectStream("/storage/emulated/0/test.mp4");
 
         m_videoSource = new VideoSource();
         m_videoFilter = new VideoFilter();
         m_videoRenderer = new VideoRenderer();
         m_videoEncoder = VideoEncoder::Create(m_config["video"]["codecName"]);
 
-//        m_videoSource->SetEventCallback(this);
-
         m_videoSource->AddOutput(m_videoFilter);
-        m_videoFilter->AddOutput(m_videoRenderer);
-        m_videoFilter->AddOutput(m_videoEncoder);
-        m_videoEncoder->AddOutput(m_mediaStream);
         m_videoSource->Open(this);
 
 
         m_audioSource = new AudioSource();
         m_audioFilter = new AudioFilter();
         m_audioEncoder = AudioEncoder::Create(m_config["audio"]["codecName"]);
+
         m_audioSource->AddOutput(m_audioFilter);
-        m_audioFilter->AddOutput(m_audioEncoder);
-        m_audioEncoder->AddOutput(m_mediaStream);
         m_audioSource->Open(this);
 
 
@@ -167,46 +171,34 @@ void MediaRecorder::onMsgClose(Message pkt) {
     if (m_status == Status_Opened
         || m_status == Status_Stopped){
 
-        LOGD("MediaRecorder::onMsgClose 1");
-        m_videoSource->DelOutput(m_videoFilter);
-        m_videoFilter->DelOutput(m_videoRenderer);
-        m_videoFilter->DelOutput(m_videoEncoder);
-        m_videoEncoder->DelOutput(m_mediaStream);
+        if (is_recording){
+            onMsgStopRecord(pkt);
+        }
+        if (is_previewing){
+            onMsgStopPreview(pkt);
+        }
 
-        LOGD("MediaRecorder::onMsgClose 2");
+        LOGD("MediaRecorder::onMsgClose close video\n");
+        m_videoSource->DelOutput(m_videoFilter);
+
         m_videoSource->Close(this);
-        LOGD("MediaRecorder::onMsgClose 3");
         m_videoFilter->Close(this);
-        LOGD("MediaRecorder::onMsgClose 4");
         m_videoEncoder->Close(this);
-        LOGD("MediaRecorder::onMsgClose 5");
         m_videoRenderer->Close(this);
 
-        LOGD("MediaRecorder::onMsgClose 6");
-        m_audioSource->DelOutput(m_audioFilter);
-        m_audioFilter->DelOutput(m_audioEncoder);
-        m_audioEncoder->DelOutput(m_mediaStream);
 
-        LOGD("MediaRecorder::onMsgClose 7");
+        LOGD("MediaRecorder::onMsgClose close audio\n");
+        m_audioSource->DelOutput(m_audioFilter);
+
         m_audioSource->Close(this);
-        LOGD("MediaRecorder::onMsgClose 8");
         m_audioFilter->Close(this);
-        LOGD("MediaRecorder::onMsgClose 9");
         m_audioEncoder->Close(this);
 
-        LOGD("MediaRecorder::onMsgClose 10");
-        m_mediaStream->DisconnectStream();
-
-        LOGD("MediaRecorder::onMsgClose 11");
         delete m_videoRenderer;
-        LOGD("MediaRecorder::onMsgClose 12");
         delete m_videoEncoder;
-        LOGD("MediaRecorder::onMsgClose 13");
         delete m_videoSource;
-        LOGD("MediaRecorder::onMsgClose 14");
         delete m_videoFilter;
 
-        LOGD("MediaRecorder::onMsgClose 15");
         delete m_audioSource;
         delete m_audioFilter;
         delete m_audioEncoder;

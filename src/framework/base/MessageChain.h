@@ -26,26 +26,6 @@ namespace freee {
         Status_Stopped = 3,
     };
 
-    enum {
-        MediaNumber_Player = 0,
-        MediaNumber_Recorder = 5000,
-
-        MediaNumber_AudioRender = 10000,
-        MediaNumber_VideoRender = 11000,
-        MediaNumber_AudioDecoder = 12000,
-        MediaNumber_VideoDecoder = 13000,
-        MediaNumber_InputProtocal = 14000,
-
-        MediaNumber_AudioSource = 50000,
-        MediaNumber_VideoSource = 51000,
-        MediaNumber_AudioEncoder = 52000,
-        MediaNumber_VideoEncoder = 53000,
-        MediaNumber_OutputProtocal = 54000,
-
-        MediaNumber_AudioFilter = 100000,
-        MediaNumber_VideoFilter = 500000,
-    };
-
     class MessageChain : public MessageProcessor {
 
     public:
@@ -54,9 +34,9 @@ namespace freee {
 
         virtual ~MessageChain(){
 //            LOGD("[DELETE]<MediaChainImpl>[%s]\n", m_name.c_str());
-            AutoLock lock(m_lockOutputChain);
+            AutoLock lockOutput(m_lockOutputChain);
             m_outputChain.clear();
-            AutoLock autoLock(m_lockInputChain);
+            AutoLock lockInput(m_lockInputChain);
             m_inputChain.clear();
             m_chainToStream.clear();
         }
@@ -130,6 +110,9 @@ namespace freee {
                 AutoLock lock(m_lockOutputChain);
                 this->m_outputChain.push_back(chain);
                 chain->AddInput(this);
+                if (m_status == Status_Opened){
+                    chain->Open(this);
+                }
             }
         }
 
@@ -234,6 +217,8 @@ namespace freee {
 
 
     protected:
+        int m_status = Status_Closed;
+
         int m_type;
         json m_config;
         std::string m_extraConfig;

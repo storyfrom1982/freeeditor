@@ -44,7 +44,6 @@ namespace freee {
 
 
     private:
-        int m_status;
         int m_srcSampleRate;
         int m_srcChannelCount;
         int m_srcBytePerSample;

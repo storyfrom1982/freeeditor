@@ -37,7 +37,6 @@ namespace freee {
         void UpdateMediaConfig(Message pkt);
 
     private:
-        int m_status;
         int m_srcRotation;
         int m_srcWidth, m_srcHeight;
         int m_codecWidth, m_codecHeight;

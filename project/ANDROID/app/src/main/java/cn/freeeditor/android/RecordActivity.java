@@ -125,15 +125,14 @@ public class RecordActivity extends Activity {
 
     private void openRecorder(String url){
         recorder = new MediaRecorder();
-        recorder.startCapture();
-        recorder.startRecord(url);
         recorder.startPreview(surfaceView);
+        recorder.startRecord(url);
     }
 
 
     private void closeRecorder(){
-        recorder.stopRecord();
-        recorder.stopCapture();
+//        recorder.stopPreview();
+//        recorder.stopRecord();
         recorder.release();
         MediaContext.Instance().release();
         MediaContext.debug();
@@ -145,7 +144,7 @@ public class RecordActivity extends Activity {
         }else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
-        publishHandler.sendEmptyMessageDelayed(HANDLER_ORENTATION, 2000);
+        publishHandler.sendEmptyMessageDelayed(HANDLER_ORENTATION, 500);
     }
 
 //    @Override

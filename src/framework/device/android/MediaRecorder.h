@@ -55,8 +55,6 @@ namespace freee{
         void onMsgControl(Message pkt) override;
 
     private:
-        int m_status;
-
         bool is_recording;
         bool is_previewing;
 

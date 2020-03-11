@@ -75,7 +75,6 @@ namespace freee {
 
 
     private:
-        int mStatus;
         int width, height;
 
         gl_window_t *window;
