@@ -17,11 +17,17 @@
 
 namespace freee{
 
-    class VideoEncoder : public MediaModule {
+    class VideoEncoder : public MessageChain {
 
     public:
         static VideoEncoder* Create(std::string name);
         virtual ~VideoEncoder();
+        VideoEncoder(const std::string &mediaName = "VideoEncoder",
+                     int mediaType = MediaType_Video);
+
+        virtual int OpenEncoder() = 0;
+        virtual void CloseEncoder(){};
+        virtual int EncoderEncode(Message pkt) = 0;
 
     protected:
         void onMsgOpen(Message pkt) override;
@@ -32,17 +38,14 @@ namespace freee{
 
         void onMsgProcessEvent(Message pkt) override;
 
-    protected:
         void onMsgControl(Message pkt) override;
 
-    protected:
-        VideoEncoder(const std::string &mediaName = "VideoEncoder",
-                int mediaType = MediaType_Video);
 
     private:
         void FinalClear() override ;
 
     protected:
+        int m_status = 0;
         float m_frameRate = 0.0f;
         int64_t m_frameId = 0;
         int64_t m_startFrameId = 0;

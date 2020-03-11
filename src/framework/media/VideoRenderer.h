@@ -26,7 +26,7 @@ extern "C" {
 namespace freee {
 
 
-    class VideoRenderer : public MediaModule, VideoWindow::VideoWindowCallback {
+    class VideoRenderer : public MessageChain, VideoWindow::VideoWindowCallback {
 
     public:
         VideoRenderer(const std::string &mediaName = "VideoRenderer", int mediaType = MediaType_Video);

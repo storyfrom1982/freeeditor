@@ -167,32 +167,46 @@ void MediaRecorder::onMsgClose(Message pkt) {
     if (m_status == Status_Opened
         || m_status == Status_Stopped){
 
+        LOGD("MediaRecorder::onMsgClose 1");
         m_videoSource->DelOutput(m_videoFilter);
         m_videoFilter->DelOutput(m_videoRenderer);
         m_videoFilter->DelOutput(m_videoEncoder);
         m_videoEncoder->DelOutput(m_mediaStream);
 
+        LOGD("MediaRecorder::onMsgClose 2");
         m_videoSource->Close(this);
+        LOGD("MediaRecorder::onMsgClose 3");
         m_videoFilter->Close(this);
+        LOGD("MediaRecorder::onMsgClose 4");
         m_videoEncoder->Close(this);
+        LOGD("MediaRecorder::onMsgClose 5");
         m_videoRenderer->Close(this);
 
-        delete m_videoRenderer;
-        delete m_videoEncoder;
-        delete m_videoSource;
-        delete m_videoFilter;
-
-
+        LOGD("MediaRecorder::onMsgClose 6");
         m_audioSource->DelOutput(m_audioFilter);
         m_audioFilter->DelOutput(m_audioEncoder);
         m_audioEncoder->DelOutput(m_mediaStream);
+
+        LOGD("MediaRecorder::onMsgClose 7");
         m_audioSource->Close(this);
+        LOGD("MediaRecorder::onMsgClose 8");
         m_audioFilter->Close(this);
+        LOGD("MediaRecorder::onMsgClose 9");
         m_audioEncoder->Close(this);
 
+        LOGD("MediaRecorder::onMsgClose 10");
         m_mediaStream->DisconnectStream();
 
+        LOGD("MediaRecorder::onMsgClose 11");
+        delete m_videoRenderer;
+        LOGD("MediaRecorder::onMsgClose 12");
+        delete m_videoEncoder;
+        LOGD("MediaRecorder::onMsgClose 13");
+        delete m_videoSource;
+        LOGD("MediaRecorder::onMsgClose 14");
+        delete m_videoFilter;
 
+        LOGD("MediaRecorder::onMsgClose 15");
         delete m_audioSource;
         delete m_audioFilter;
         delete m_audioEncoder;

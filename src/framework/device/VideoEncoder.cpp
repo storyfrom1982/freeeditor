@@ -15,42 +15,52 @@ VideoEncoder *VideoEncoder::Create(std::string name) {
 }
 
 VideoEncoder::VideoEncoder(const std::string &mediaName, int mediaType)
-        : MediaModule(mediaName, mediaType) {
+        : MessageChain(mediaName, mediaType) {
     p_bufferPool = nullptr;
     StartProcessor();
 }
 
 VideoEncoder::~VideoEncoder() {
+    LOGE("VideoEncoder::~VideoEncoder ===================== : enter\n");
     StopProcessor();
+    LOGE("VideoEncoder::~VideoEncoder ===================== : 1\n");
     FinalClear();
+    LOGE("VideoEncoder::~VideoEncoder ===================== : exit\n");
 }
 
 void VideoEncoder::FinalClear() {
+    LOGE("VideoEncoder::FinalClear ===================== : enter\n");
     if (p_bufferPool){
         delete p_bufferPool;
         p_bufferPool = nullptr;
     }
-    CloseModule();
+//    CloseEncoder();
+    LOGE("VideoEncoder::FinalClear ===================== : exit\n");
 }
 
 void VideoEncoder::onMsgOpen(Message pkt) {
-    MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
-    m_config = chain->GetConfig(this);
-    OpenModule();
-    m_frameId = 0;
-    m_startFrameId = -1;
-    m_frameRate = m_config["codecFPS"];
-    uint32_t w = m_config["codecWidth"];
-    uint32_t h = m_config["codecHeight"];
-    p_bufferPool = new BufferPool(4, w*h, 256, 16);
-    p_bufferPool->SetName(GetName());
-    pkt.frame.type = MediaType_Video;
-    MessageChain::onMsgOpen(pkt);
+    if (m_status == Status_Closed){
+        MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
+        m_config = chain->GetConfig(this);
+        OpenEncoder();
+        m_frameId = 0;
+        m_startFrameId = -1;
+        m_frameRate = m_config["codecFPS"];
+        uint32_t w = m_config["codecWidth"];
+        uint32_t h = m_config["codecHeight"];
+        p_bufferPool = new BufferPool(4, w*h, 256, 16);
+        p_bufferPool->SetName(GetName());
+        pkt.frame.type = MediaType_Video;
+        MessageChain::onMsgOpen(pkt);
+        m_status = Status_Opened;
+    }
 }
 
 void VideoEncoder::onMsgClose(Message pkt) {
-    CloseModule();
-    MessageChain::onMsgClose(pkt);
+    LOGE("VideoEncoder::onMsgClose ===================== : enter\n");
+//    MessageChain::onMsgClose(pkt);
+    CloseEncoder();
+    LOGE("VideoEncoder::onMsgClose ===================== : exit\n");
 }
 
 void VideoEncoder::onMsgProcessData(Message pkt) {
@@ -73,7 +83,7 @@ void VideoEncoder::onMsgProcessData(Message pkt) {
             for (int i = 0; i < error; i++) {
 //                LOGD("fill a video frame[%lf]\n", error);
                 m_frameId++;
-                ProcessMediaByModule(pkt);
+                EncoderEncode(pkt);
             }
         }
         if (error < -0.555) {// drop
@@ -82,7 +92,7 @@ void VideoEncoder::onMsgProcessData(Message pkt) {
         }
 
         m_frameId++;
-        ProcessMediaByModule(pkt);
+        EncoderEncode(pkt);
     }
 }
 

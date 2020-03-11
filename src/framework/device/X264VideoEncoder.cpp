@@ -14,12 +14,17 @@ X264VideoEncoder::X264VideoEncoder() {
 }
 
 X264VideoEncoder::~X264VideoEncoder() {
-
+    StopProcessor();
 }
 
 
-int X264VideoEncoder::OpenModule() {
+int X264VideoEncoder::OpenEncoder() {
     LOGD("X264VideoEncoder::OnOpenEncoder: %s\n", m_config.dump().c_str());
+
+    if (!__set_true(is_opened)){
+        return 0;
+    }
+
     m_param = (x264_param_t){0};
 
     x264_param_default(&m_param);
@@ -81,6 +86,7 @@ int X264VideoEncoder::OpenModule() {
         m_param.rc.f_ip_factor = 1.4;
     }
 
+    m_param.i_threads = 2;
     m_handle = x264_encoder_open(&m_param);
 
 //    m_extraConfig = GenAvc1();
@@ -90,14 +96,19 @@ int X264VideoEncoder::OpenModule() {
     return 0;
 }
 
-void X264VideoEncoder::CloseModule() {
-    if (m_handle){
-        x264_encoder_close(m_handle);
-        m_handle = nullptr;
+void X264VideoEncoder::CloseEncoder() {
+    LOGE("X264VideoEncoder::CloseModule ===================== : enter(%p)\n", m_handle);
+    if (__set_false(is_opened)){
+        if (m_handle){
+            LOGE("X264VideoEncoder::CloseModule ===================== : enter\n");
+            x264_encoder_close(m_handle);
+            m_handle = nullptr;
+            LOGE("X264VideoEncoder::CloseModule ===================== : exit\n");
+        }
     }
 }
 
-int X264VideoEncoder::ProcessMediaByModule(Message pkt) {
+int X264VideoEncoder::EncoderEncode(Message pkt) {
     //    LOGD("X264VideoEncoder::OnOpenEncoder: enter\n");
 
     sr_buffer_frame_t *frame = &(pkt.frame);

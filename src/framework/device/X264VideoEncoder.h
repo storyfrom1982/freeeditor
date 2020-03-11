@@ -22,19 +22,19 @@ namespace freee {
 
         std::string &GetExtraConfig(MessageChain *chain) override;
 
-    protected:
-        int OpenModule() override;
+        virtual int OpenEncoder() override;
 
-        void CloseModule() override;
+        virtual void CloseEncoder() override;
 
-        int ProcessMediaByModule(Message pkt) override;
+        virtual int EncoderEncode(Message pkt) override;
 
     private:
         std::string GenAvc1();
         std::string GenH264Config();
 
     private:
-        x264_t   *m_handle;
+        bool is_opened = false;
+        x264_t   *m_handle = nullptr;
         x264_param_t m_param;
     };
 }

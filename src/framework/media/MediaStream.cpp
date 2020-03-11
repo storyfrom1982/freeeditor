@@ -15,7 +15,7 @@ enum {
 };
 
 MediaStream::MediaStream(const std::string &mediaName, int mediaType)
-        : MediaModule(mediaName, mediaType) {
+        : MessageChain(mediaName, mediaType) {
     StartProcessor();
 }
 

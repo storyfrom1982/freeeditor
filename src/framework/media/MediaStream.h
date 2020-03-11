@@ -10,7 +10,7 @@
 
 namespace freee {
 
-    class MediaStream : public MediaModule {
+    class MediaStream : public MessageChain {
     public:
         static MediaStream* Create(std::string name);
 

@@ -17,7 +17,7 @@ enum {
 };
 
 VideoRenderer::VideoRenderer(const std::string &mediaName, int mediaType)
-        : MediaModule(mediaName, mediaType) {
+        : MessageChain(mediaName, mediaType) {
     mStatus = Status_Closed;
     isSurfaceCreated = false;
     isSurfaceDestroyed = true;

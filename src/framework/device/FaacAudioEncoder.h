@@ -16,6 +16,9 @@ namespace freee {
 
     class FaacAudioEncoder : public AudioEncoder {
     public:
+        FaacAudioEncoder();
+        ~FaacAudioEncoder();
+
     protected:
         int OpenModule() override;
 
@@ -32,7 +35,7 @@ namespace freee {
         unsigned long m_intputSize;
         unsigned long m_outputSize;
 
-        HANDLE_AACENCODER m_pHandle;
+        HANDLE_AACENCODER m_pHandle = nullptr;
     };
 
 

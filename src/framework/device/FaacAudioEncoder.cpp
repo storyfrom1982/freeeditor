@@ -7,6 +7,14 @@
 
 using namespace freee;
 
+FaacAudioEncoder::FaacAudioEncoder() {
+
+}
+
+FaacAudioEncoder::~FaacAudioEncoder() {
+    StopProcessor();
+}
+
 
 int FaacAudioEncoder::OpenModule() {
 

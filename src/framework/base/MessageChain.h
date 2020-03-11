@@ -227,6 +227,13 @@ namespace freee {
 
 
     protected:
+        virtual int OpenModule(){ return 0;};
+        virtual void CloseModule(){};
+        virtual int ProcessMediaByModule(Message pkt){ return 0;};
+        virtual void onProcessMediaByModule(Message pkt){};
+
+
+    protected:
         int m_type;
         json m_config;
         std::string m_extraConfig;

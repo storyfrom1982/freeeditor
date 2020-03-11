@@ -10,7 +10,7 @@
 namespace freee {
 
 
-    class AudioEncoder : public MediaModule {
+    class AudioEncoder : public MessageChain {
     public:
         static AudioEncoder* Create(std::string name);
         ~AudioEncoder();

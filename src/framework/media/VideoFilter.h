@@ -12,7 +12,7 @@
 
 namespace freee {
 
-    class VideoFilter : public MediaModule {
+    class VideoFilter : public MessageChain {
 
     public:
         VideoFilter(const std::string &mediaName = "VideoFilter", int mediaType = MediaType_Video);

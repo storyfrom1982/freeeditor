@@ -10,7 +10,7 @@
 
 namespace freee {
 
-    class AudioFilter : public MediaModule {
+    class AudioFilter : public MessageChain {
     public:
         AudioFilter(const std::string &mediaName = "AudioFilter", int mediaType = MediaType_Audio);
 
