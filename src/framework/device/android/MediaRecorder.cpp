@@ -76,10 +76,6 @@ void MediaRecorder::onMsgStartRecord(Message pkt) {
         }
         if (m_status == Status_Started){
             m_mediaStream->ConnectStream("/storage/emulated/0/test.mp4");
-            m_videoEncoder->AddOutput(m_mediaStream);
-            m_audioEncoder->AddOutput(m_mediaStream);
-            m_videoFilter->AddOutput(m_videoEncoder);
-            m_audioFilter->AddOutput(m_audioEncoder);
             is_recording = true;
         }
     }
@@ -141,6 +137,7 @@ void MediaRecorder::onMsgOpen(Message pkt) {
         LOGD("MediaRecorder config >> %s\n", m_config.dump(4).c_str());
 
         m_mediaStream = MediaStream::Create("file");
+        m_mediaStream->SetEventListener(this);
 
         m_videoSource = new VideoSource();
         m_videoFilter = new VideoFilter();
@@ -229,7 +226,19 @@ void MediaRecorder::onMsgStop(Message pkt) {
 }
 
 void MediaRecorder::onMsgProcessEvent(Message pkt) {
-
+    auto chain = pkt.GetPtr();
+    if (chain == m_mediaStream){
+        if (pkt.GetEvent() == MsgKey_Open){
+            LOGD("MediaStream Opened\n");
+            if (is_recording){
+                m_videoEncoder->AddOutput(m_mediaStream);
+                m_audioEncoder->AddOutput(m_mediaStream);
+                m_videoFilter->AddOutput(m_videoEncoder);
+                m_audioFilter->AddOutput(m_audioEncoder);
+                SendMessage(Message(MsgKey_ProcessEvent, MsgKey_Open));
+            }
+        }
+    }
 }
 
 void MediaRecorder::onMsgControl(Message pkt) {

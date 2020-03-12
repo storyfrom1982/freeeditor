@@ -218,6 +218,7 @@ namespace freee {
 
     protected:
         int m_status = Status_Closed;
+        int m_outputChainStatus = Status_Closed;
 
         int m_type;
         json m_config;
@@ -231,7 +232,6 @@ namespace freee {
         std::vector<MessageChain*> m_inputChain;
 
         Lock m_lockOutputChain;
-        int m_outputChainStatus = 0;
         std::vector<MessageChain*> m_outputChain;
     };
 

@@ -36,6 +36,7 @@ void FileMediaStream::onMsgConnectStream(Message pkt) {
         LOGD("[FileMediaStream] open %s failed ret = %d error=%s\n",
              url.c_str(), ret, buffer);
     }
+    SendEvent(Message(MsgKey_ProcessEvent, MsgKey_Open));
     LOGD("[FileMediaStream] ConnectStream url %s\n", url.c_str());
 }
 

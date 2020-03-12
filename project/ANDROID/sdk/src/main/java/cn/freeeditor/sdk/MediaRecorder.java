@@ -100,11 +100,23 @@ public class MediaRecorder extends JNIContext {
 
     @Override
     protected void onRecvMessage(JNIMessage msg) {
+        msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
+    }
 
+    private void ProcessEvent(JNIMessage msg){
+        Log.d(TAG, "ProcessEvent>>>>: " + msg.key);
     }
 
     @Override
     void onMessageProcessor(Message msg) {
+        JNIMessage jmsg = (JNIMessage) msg.obj;
+        switch (msg.what){
+            case MsgKey_ProcessEvent:
+                ProcessEvent(jmsg);
+                break;
+            default:
+                break;
 
+        }
     }
 }
