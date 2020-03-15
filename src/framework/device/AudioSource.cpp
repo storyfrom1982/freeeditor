@@ -78,8 +78,8 @@ void AudioSource::onRecvMessage(Message pkt) {
     }
 }
 
-Message AudioSource::onObtainMessage(int key) {
-    return MessageContext::onObtainMessage(key);
+Message AudioSource::onRequestMessage(int key) {
+    return MessageContext::onRequestMessage(key);
 }
 
 void AudioSource::Open(MessageChain *chain) {

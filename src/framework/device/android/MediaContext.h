@@ -26,7 +26,7 @@ namespace freee {
     public:
 
         void onRecvMessage(Message pkt) override;
-        Message onObtainMessage(int key) override;
+        Message onRequestMessage(int key) override;
 
         MessageContext* ConnectCamera();
         MessageContext* ConnectMicrophone();

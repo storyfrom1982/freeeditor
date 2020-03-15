@@ -60,7 +60,7 @@ namespace freee{
     protected:
         virtual void onRecvMessage(Message msg) {};
 
-        virtual Message onObtainMessage(int key)
+        virtual Message onRequestMessage(int key)
         {
             return Message();
         }
@@ -79,7 +79,7 @@ namespace freee{
             AutoLock lock(m_lock);
             if (p_messageContext)
             {
-                return p_messageContext->onObtainMessage(key);
+                return p_messageContext->onRequestMessage(key);
             }
             return Message();
         }

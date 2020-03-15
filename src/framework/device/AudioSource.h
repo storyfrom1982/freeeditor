@@ -36,7 +36,7 @@ namespace freee {
 
         virtual void onRecvMessage(Message pkt) override;
 
-        virtual Message onObtainMessage(int key) override;
+        virtual Message onRequestMessage(int key) override;
 
 
     private:

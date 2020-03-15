@@ -47,7 +47,7 @@
                 android:cursorVisible="true"
                 android:inputType="textUri"
                 android:textColor="#ffffffff"
-                android:hint="test.fls"
+                android:hint="test.mp4"
                 android:textColorHint="#ffffffff" />
             <Button
                 android:id="@+id/play_start_button"

@@ -14,13 +14,15 @@ public class MediaContext extends JNIContext {
 
     private static final String TAG = "MediaContext";
 
-    private static final int GetMsg_ConnectRecorder = 1;
-    private static final int GetMsg_GetRecorderConfig = 2;
-
-    private static final int OnGetMsg_ConnectCamera = 1;
-    private static final int OnGetMsg_ConnectMicrophone = 2;
+    private static final int ReqMsg_ConnectRecorder = 1;
+    private static final int ReqMsg_ConnectPlayer = 2;
+    private static final int ReqMsg_GetRecorderConfig = 3;
 
     private static final int SendMsg_DisconnectRecorder = 1;
+    private static final int SendMsg_DisconnectPlayer = 2;
+
+    private static final int OnReqMsg_ConnectCamera = 1;
+    private static final int OnReqMsg_ConnectMicrophone = 2;
 
     private static final int OnRecvMsg_DisconnectCamera = 1;
     private static final int OnRecvMsg_DisconnectMicrophone = 2;
@@ -167,7 +169,7 @@ public class MediaContext extends JNIContext {
     }
 
     public long connectRecorder(){
-        JNIMessage msg = getMessage(GetMsg_ConnectRecorder);
+        JNIMessage msg = requestMessage(ReqMsg_ConnectRecorder);
         return msg.ptr;
     }
 
@@ -175,17 +177,26 @@ public class MediaContext extends JNIContext {
         sendMessage(SendMsg_DisconnectRecorder, context);
     }
 
+    public long connectPlayer(){
+        JNIMessage msg = requestMessage(ReqMsg_ConnectPlayer);
+        return msg.ptr;
+    }
+
+    public void disconnectPlayer(long context){
+        sendMessage(SendMsg_DisconnectPlayer, context);
+    }
+
     public String getRecorderConfig(){
-        JNIMessage msg = getMessage(GetMsg_GetRecorderConfig);
+        JNIMessage msg = requestMessage(ReqMsg_GetRecorderConfig);
         return msg.string;
     }
 
     @Override
     protected JNIMessage onObtainMessage(int key) {
         switch (key){
-            case OnGetMsg_ConnectCamera:
+            case OnReqMsg_ConnectCamera:
                 return new JNIMessage(key, createCamera());
-            case OnGetMsg_ConnectMicrophone:
+            case OnReqMsg_ConnectMicrophone:
                 return new JNIMessage(key, createMicrophone());
             default:
                 break;

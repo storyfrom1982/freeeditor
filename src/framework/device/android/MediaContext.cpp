@@ -6,26 +6,29 @@
 #include <BufferPool.h>
 #include "MediaContext.h"
 #include "MediaRecorder.h"
+#include "MediaPlayer.h"
 
 using namespace freee;
 
 enum {
-    OnGetMsg_CreateRecorder = 1,
-    OnGetMsg_GetRecorderConfig = 2,
+    SendMsg_DisconnectCamera = 1,
+    SendMsg_DisconnectMicrophone = 2,
 };
 
 enum {
-    GetMsg_ConnectCamera = 1,
-    GetMsg_ConnectMicrophone = 2,
+    ReqMsg_ConnectCamera = 1,
+    ReqMsg_ConnectMicrophone = 2,
+};
+
+enum {
+    OnReqMsg_CreateRecorder = 1,
+    OnReqMsg_CreatePlayer = 2,
+    OnReqMsg_GetRecorderConfig = 3,
 };
 
 enum {
     OnRecvMsg_DisconnectRecorder = 1,
-};
-
-enum {
-    SendMsg_DisconnectCamera = 1,
-    SendMsg_DisconnectMicrophone = 2,
+    OnRecvMsg_DisconnectPlayer = 2,
 };
 
 static MediaContext *sMediaContext = nullptr;
@@ -48,10 +51,12 @@ MediaContext* MediaContext::Instance() {
 //    return globalMediaContext;
 //}
 
-Message MediaContext::onObtainMessage(int key) {
-    if (key == OnGetMsg_CreateRecorder){
+Message MediaContext::onRequestMessage(int key) {
+    if (key == OnReqMsg_CreateRecorder){
         return Message(key, new MediaRecorder());
-    }else if (key == OnGetMsg_GetRecorderConfig){
+    }else if (key == OnReqMsg_CreatePlayer){
+        return Message(key, new MediaPlayer());
+    }else if (key == OnReqMsg_GetRecorderConfig){
         json js = MConfig::load();
         return NewJsonPkt(key, js.dump());
     }
@@ -60,8 +65,11 @@ Message MediaContext::onObtainMessage(int key) {
 
 void MediaContext::onRecvMessage(Message pkt) {
     if (pkt.GetKey() == OnRecvMsg_DisconnectRecorder){
-        MediaRecorder *recorder = static_cast<MediaRecorder *>(pkt.GetPtr());
-        delete recorder;
+        MediaRecorder *pRecorder = static_cast<MediaRecorder *>(pkt.GetPtr());
+        delete pRecorder;
+    }else if (pkt.GetKey() == OnRecvMsg_DisconnectPlayer){
+        MediaPlayer *pPlayer = static_cast<MediaPlayer *>(pkt.GetPtr());
+        delete pPlayer;
     }
 }
 
@@ -74,16 +82,16 @@ Message MediaContext::RequestMessage(int key) {
 }
 
 MessageContext *MediaContext::ConnectCamera() {
-    Message pkt = MessageContext::RequestMessage(GetMsg_ConnectCamera);
+    Message pkt = MessageContext::RequestMessage(ReqMsg_ConnectCamera);
     assert(pkt.GetPtr());
-    assert(pkt.GetKey() == GetMsg_ConnectCamera);
+    assert(pkt.GetKey() == ReqMsg_ConnectCamera);
     return static_cast<MessageContext *>(pkt.GetPtr());
 }
 
 MessageContext *MediaContext::ConnectMicrophone() {
-    Message pkt = MessageContext::RequestMessage(GetMsg_ConnectMicrophone);
+    Message pkt = MessageContext::RequestMessage(ReqMsg_ConnectMicrophone);
     assert(pkt.GetPtr());
-    assert(pkt.GetKey() == GetMsg_ConnectMicrophone);
+    assert(pkt.GetKey() == ReqMsg_ConnectMicrophone);
     return static_cast<MessageContext *>(pkt.GetPtr());
 }
 

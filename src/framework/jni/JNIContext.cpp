@@ -114,7 +114,7 @@ public:
         env->DeleteLocalRef(msg);
     }
 
-    Message onObtainMessage(int key) override {
+    Message onRequestMessage(int key) override {
         JniEnv env;
         jobject msg = env->CallObjectMethod(m_obj, m_onObtainMessage, key);
         if (env->GetIntField(msg, m_keyField) == key){
@@ -230,7 +230,7 @@ Java_cn_freeeditor_sdk_JNIContext_sendMessage__I_3BJJ(JNIEnv *env, jobject insta
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_cn_freeeditor_sdk_JNIContext_getMessage__IJ(JNIEnv *env, jobject instance, jint key,
+Java_cn_freeeditor_sdk_JNIContext_requestMessage__IJ(JNIEnv *env, jobject instance, jint key,
                                                  jlong contextPointer) {
     JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(contextPointer);
     assert(pJNIContext);

@@ -22,6 +22,8 @@ import android.widget.TextView;
 
 import java.lang.ref.WeakReference;
 
+import cn.freeeditor.sdk.MediaContext;
+import cn.freeeditor.sdk.MediaPlayer;
 
 
 public class PlayerActivity extends AppCompatActivity {
@@ -49,6 +51,8 @@ public class PlayerActivity extends AppCompatActivity {
     private Button quitButton;
     private SurfaceView playSurface;
     private FrameLayout frameLayout;
+
+    private MediaPlayer player;
 
 
 
@@ -87,6 +91,8 @@ public class PlayerActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                         | View.SYSTEM_UI_FLAG_IMMERSIVE);
 
+        MediaContext.Instance().setAppContext(getApplicationContext());
+        openPlayer();
         fadeIn();
     }
 
@@ -94,6 +100,31 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        closePlayer();
+        MediaContext.Instance().release();
+        MediaContext.debug();
+    }
+
+
+    void openPlayer(){
+        String url = null;
+        if (mUrlEdit.getText().toString().isEmpty()){
+            url = Environment.getExternalStorageDirectory() + "/" + mUrlEdit.getHint().toString();
+        }else{
+            url = Environment.getExternalStorageDirectory() + "/" + mUrlEdit.getHint().toString();
+        }
+        Log.i(TAG, "URL == " + url);
+        player = new MediaPlayer();
+        player.open(url);
+        player.start();
+        stateButton.setText("Stop");
+    }
+
+
+    void closePlayer(){
+        player.release();
+        player = null;
+        stateButton.setText("Play");
     }
 
 
@@ -113,16 +144,11 @@ public class PlayerActivity extends AppCompatActivity {
     private final View.OnClickListener mPlayStateListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
-            String url = null;
-
-            if (mUrlEdit.getText().toString().isEmpty()){
-                url = Environment.getExternalStorageDirectory() + "/" + mUrlEdit.getHint().toString();
-            }else{
-                url = Environment.getExternalStorageDirectory() + "/" + mUrlEdit.getHint().toString();
+            if (player == null){
+                openPlayer();
+            }else {
+                closePlayer();
             }
-
-            Log.i(TAG, "URL == " + url);
         }
     };
 
@@ -248,8 +274,7 @@ public class PlayerActivity extends AppCompatActivity {
     SurfaceHolder.Callback callback = new SurfaceHolder.Callback() {
         @Override
         public void surfaceCreated(SurfaceHolder holder) {
-            createRenderer(holder.getSurface());
-            rendererDraw();
+
         }
 
         @Override
@@ -259,15 +284,8 @@ public class PlayerActivity extends AppCompatActivity {
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
-            releaseRenderer();
+
         }
     };
-
-
-    private native void createRenderer(Surface surface);
-
-    private native void releaseRenderer();
-
-    private native void rendererDraw();
 
 }
