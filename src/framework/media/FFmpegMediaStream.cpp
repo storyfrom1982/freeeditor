@@ -3,21 +3,21 @@
 //
 
 #include <unistd.h>
-#include "FileMediaStream.h"
+#include "FFmpegMediaStream.h"
 
 
 using namespace freee;
 
-FileMediaStream::FileMediaStream() {
+FFmpegMediaStream::FFmpegMediaStream() {
     m_pContext = nullptr;
     m_Streams = std::vector<AVStream*>(3);
 }
 
-FileMediaStream::~FileMediaStream() {
+FFmpegMediaStream::~FFmpegMediaStream() {
 
 }
 
-void FileMediaStream::onMsgConnectStream(Message pkt) {
+void FFmpegMediaStream::onMsgConnectStream(Message pkt) {
     av_register_all();
     std::string url = pkt.GetString();
     if (avformat_alloc_output_context2(&m_pContext, NULL, NULL, url.c_str()) < 0) {
@@ -40,7 +40,7 @@ void FileMediaStream::onMsgConnectStream(Message pkt) {
     LOGD("[FileMediaStream] ConnectStream url %s\n", url.c_str());
 }
 
-void FileMediaStream::onMsgDisconnectStream() {
+void FFmpegMediaStream::onMsgDisconnectStream() {
     if (m_pContext){
         if (m_status == Status_Opened && m_pContext->pb != NULL) {
             av_write_trailer(m_pContext);
@@ -51,7 +51,7 @@ void FileMediaStream::onMsgDisconnectStream() {
     }
 }
 
-void FileMediaStream::onMsgOpen(Message pkt) {
+void FFmpegMediaStream::onMsgOpen(Message pkt) {
     MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
     if (m_chainToStream[chain] == nullptr){
         LOGD("FileMediaStream::onMsgOpen type[%s] extraConfig %lu\n", chain->GetName().c_str(), chain->GetExtraConfig(this).size());
@@ -80,11 +80,11 @@ void FileMediaStream::onMsgOpen(Message pkt) {
     }
 }
 
-void FileMediaStream::onMsgClose(Message pkt) {
+void FFmpegMediaStream::onMsgClose(Message pkt) {
     MediaStream::onMsgClose(pkt);
 }
 
-void FileMediaStream::onMsgProcessData(Message pkt) {
+void FFmpegMediaStream::onMsgProcessData(Message pkt) {
     MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
 
     AVStream* pStream = nullptr;
@@ -135,7 +135,7 @@ void FileMediaStream::onMsgProcessData(Message pkt) {
     }
 }
 
-AVStream *FileMediaStream::addAudioStream(MessageChain *chain) {
+AVStream *FFmpegMediaStream::addAudioStream(MessageChain *chain) {
 
     json cfg = chain->GetConfig(this);
 
@@ -173,7 +173,7 @@ AVStream *FileMediaStream::addAudioStream(MessageChain *chain) {
     return avStream;
 }
 
-AVStream *FileMediaStream::addVideoStream(MessageChain *chain) {
+AVStream *FFmpegMediaStream::addVideoStream(MessageChain *chain) {
 
     json cfg = chain->GetConfig(this);
 

@@ -19,11 +19,11 @@ extern "C"{
 namespace freee {
 
 
-    class FileMediaStream : public MediaStream {
+    class FFmpegMediaStream : public MediaStream {
 
     public:
-        FileMediaStream();
-        ~FileMediaStream();
+        FFmpegMediaStream();
+        ~FFmpegMediaStream();
 
     protected:
         void onMsgOpen(Message pkt) override;

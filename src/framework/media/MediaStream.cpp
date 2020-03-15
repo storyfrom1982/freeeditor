@@ -4,7 +4,7 @@
 
 #include <android/MediaContext.h>
 #include "MediaStream.h"
-#include "FileMediaStream.h"
+#include "FFmpegMediaStream.h"
 
 
 using namespace freee;
@@ -42,7 +42,7 @@ void MediaStream::onMsgControl(Message pkt) {
 }
 
 MediaStream *MediaStream::Create(std::string name) {
-    return new FileMediaStream();
+    return new FFmpegMediaStream();
 }
 
 void MediaStream::onMsgConnectStream(Message pkt) {
