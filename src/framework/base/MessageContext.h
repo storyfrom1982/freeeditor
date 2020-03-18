@@ -84,11 +84,15 @@ namespace freee{
             return Message();
         }
 
-        Message NewJsonPkt(int key, std::string str)
+        Message NewJsonMessage(int key, std::string str)
         {
             return p_bufferPool->NewStringMessage(key, str);
         }
 
+        Message NewDataMessage(int key, unsigned char *data, size_t data_size)
+        {
+            return p_bufferPool->NewDataMessage(key, data, data_size);
+        }
 
 
     private:

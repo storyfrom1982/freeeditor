@@ -59,16 +59,16 @@ namespace freee {
             ProcessMessage(Message(MsgKey_Stop, chain));
         }
 
-        virtual void ProcessData(MessageChain *chain, Message pkt) {
-            pkt.SetKey(MsgKey_ProcessData);
-            pkt.SetPtr(chain);
-            ProcessMessage(pkt);
+        virtual void ProcessData(MessageChain *chain, Message msg) {
+            msg.SetKey(MsgKey_ProcessData);
+            msg.SetPtr(chain);
+            ProcessMessage(msg);
         }
 
-        virtual void ProcessEvent(MessageChain *chain, Message pkt) {
-            pkt.SetKey(MsgKey_ProcessEvent);
-            pkt.SetPtr(chain);
-            ProcessMessage(pkt);
+        virtual void ProcessEvent(MessageChain *chain, Message msg) {
+            msg.SetKey(MsgKey_ProcessEvent);
+            msg.SetPtr(chain);
+            ProcessMessage(msg);
         }
 
 
@@ -93,8 +93,16 @@ namespace freee {
         }
 
     public:
+        void SetStreamId(int streamId){
+            m_streamId = streamId;
+        }
+
         virtual int GetType(MessageChain *chain) {
             return m_type;
+        }
+
+        virtual int GetStreamId(MessageChain *chain){
+            return m_streamId;
         }
 
         virtual json &GetConfig(MessageChain *chain) {
@@ -141,70 +149,70 @@ namespace freee {
 
 
     protected:
-        virtual void onMsgOpen(Message pkt){
+        virtual void onMsgOpen(Message msg){
             AutoLock lock(m_lockOutputChain);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 m_outputChain[i]->Open(this);
             }
         };
-        virtual void onMsgClose(Message pkt){
+        virtual void onMsgClose(Message msg){
             AutoLock lock(m_lockOutputChain);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 m_outputChain[i]->Close(this);
             }
         };
-        virtual void onMsgStart(Message pkt){
+        virtual void onMsgStart(Message msg){
             AutoLock lock(m_lockOutputChain);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 m_outputChain[i]->Start(this);
             }
         };
-        virtual void onMsgStop(Message pkt){
+        virtual void onMsgStop(Message msg){
             AutoLock lock(m_lockOutputChain);
             for (int i = 0; i < m_outputChain.size(); ++i){
                 m_outputChain[i]->Stop(this);
             }
         };
-        virtual void onMsgProcessData(Message pkt){
+        virtual void onMsgProcessData(Message msg){
             AutoLock lock(m_lockOutputChain);
             for (int i = 0; i < m_outputChain.size(); ++i){
-                m_outputChain[i]->ProcessData(this, pkt);
+                m_outputChain[i]->ProcessData(this, msg);
             }
         };
-        virtual void onMsgProcessEvent(Message pkt){
+        virtual void onMsgProcessEvent(Message msg){
             AutoLock lock(m_lockInputChain);
             for (auto it = m_inputChain.cbegin(); it != m_inputChain.cend(); it++){
                 if ((*it)){
-                    (*it)->ProcessEvent(this, pkt);
+                    (*it)->ProcessEvent(this, msg);
                 }
             }
         };
-        virtual void onMsgControl(Message pkt){};
+        virtual void onMsgControl(Message msg){};
 
         //Async
-        void MessageProcess(Message pkt) override {
-            switch (pkt.GetKey()){
+        void MessageProcess(Message msg) override {
+            switch (msg.GetKey()){
                 case MsgKey_Open:
-                    onMsgOpen(pkt);
+                    onMsgOpen(msg);
                     break;
                 case MsgKey_Close:
-                    onMsgClose(pkt);
+                    onMsgClose(msg);
                     break;
                 case MsgKey_Start:
-                    onMsgStart(pkt);
+                    onMsgStart(msg);
                     break;
                 case MsgKey_Stop:
-                    onMsgStop(pkt);
+                    onMsgStop(msg);
                     break;
                 case MsgKey_ProcessData:
-                    onMsgProcessData(pkt);
+                    onMsgProcessData(msg);
                     break;
                 case MsgKey_ProcessEvent:
-                    onMsgProcessEvent(pkt);
+                    onMsgProcessEvent(msg);
                     break;
                 case MsgKey_ProcessControl:
                 default:
-                    onMsgControl(pkt);
+                    onMsgControl(msg);
             }
         }
 
@@ -221,6 +229,7 @@ namespace freee {
         int m_outputChainStatus = Status_Closed;
 
         int m_type;
+        int m_streamId;
         json m_config;
         std::string m_extraConfig;
 

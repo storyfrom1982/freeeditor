@@ -18,24 +18,41 @@ MediaPlayer::~MediaPlayer()
     StopProcessor();
 }
 
-void MediaPlayer::onMsgOpen(Message pkt)
+void MediaPlayer::onMsgOpen(Message msg)
 {
-    LOGD("MediaPlayer::onMsgOpen %s\n", pkt.GetString().c_str());
+    LOGD("MediaPlayer::onMsgOpen %s\n", msg.GetString().c_str());
+    m_pMediaSource = MediaSource::Create("ffmpeg");
+    m_pMediaSource->SetEventListener(this);
+    m_pMediaSource->Open(this);
 }
 
 void MediaPlayer::onMsgClose(Message pkt)
 {
-    MessageChain::onMsgClose(pkt);
+    if (m_pMediaSource){
+        m_pMediaSource->Close(this);
+        delete m_pMediaSource;
+        m_pMediaSource = nullptr;
+    }
+    if (m_pAudioDecoder){
+        m_pAudioDecoder->Close(this);
+        delete m_pAudioDecoder;
+        m_pAudioDecoder = nullptr;
+    }
+    if (m_pVideoDeocder){
+        m_pVideoDeocder->Close(this);
+        delete m_pVideoDeocder;
+        m_pVideoDeocder = nullptr;
+    }
 }
 
 void MediaPlayer::onMsgStart(Message pkt)
 {
-    MessageChain::onMsgStart(pkt);
+    m_pMediaSource->Start(this);
 }
 
 void MediaPlayer::onMsgStop(Message pkt)
 {
-    MessageChain::onMsgStop(pkt);
+    m_pMediaSource->Stop(this);
 }
 
 void MediaPlayer::onMsgControl(Message pkt)
@@ -46,4 +63,21 @@ void MediaPlayer::onMsgControl(Message pkt)
 void MediaPlayer::onRecvMessage(Message msg)
 {
     ProcessMessage(msg);
+}
+
+void MediaPlayer::onMsgProcessEvent(Message pkt)
+{
+    if (pkt.GetPtr() == m_pMediaSource){
+//        LOGD("Open stream config: %s\n", pkt.GetString().c_str());
+        json cfg = json::parse(pkt.GetString());
+        if (cfg["codecType"] == AVMEDIA_TYPE_VIDEO){
+            m_pVideoDeocder = VideoDecoder::Create(cfg["codecTag"]);
+            m_pVideoDeocder->SetStreamId(cfg["streamId"]);
+            m_pMediaSource->AddOutput(m_pVideoDeocder);
+        }else if (cfg["codecType"] == AVMEDIA_TYPE_AUDIO){
+            m_pAudioDecoder = AudioDecoder::Create(cfg["codecTag"]);
+            m_pAudioDecoder->SetStreamId(cfg["streamId"]);
+            m_pMediaSource->AddOutput(m_pAudioDecoder);
+        }
+    }
 }

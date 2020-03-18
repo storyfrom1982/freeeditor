@@ -58,7 +58,7 @@ Message MediaContext::onRequestMessage(int key) {
         return Message(key, new MediaPlayer());
     }else if (key == OnReqMsg_GetRecorderConfig){
         json js = MConfig::load();
-        return NewJsonPkt(key, js.dump());
+        return NewJsonMessage(key, js.dump());
     }
     return Message();
 }
@@ -104,5 +104,5 @@ void MediaContext::DisconnectMicrophone() {
 }
 
 Message MediaContext::GetStringPkt(int key, std::string str) {
-    return NewJsonPkt(key, str);
+    return NewJsonMessage(key, str);
 }

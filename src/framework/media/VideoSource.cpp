@@ -45,7 +45,7 @@ VideoSource::~VideoSource() {
 void VideoSource::Open(MessageChain *chain) {
     LOGD("VideoSource::Open enter\n");
     m_config = chain->GetConfig(this);
-    SendMessage(NewJsonPkt(SendMsg_Open, m_config.dump()));
+    SendMessage(NewJsonMessage(SendMsg_Open, m_config.dump()));
     LOGD("VideoSource::Open exit\n");
 }
 

@@ -7,6 +7,9 @@
 
 
 #include <MessageChain.h>
+#include "../../media/MediaSource.h"
+#include "../../media/VideoDecoder.h"
+#include "../../media/AudioDecoder.h"
 
 namespace freee {
 
@@ -21,7 +24,7 @@ namespace freee {
         void onRecvMessage(Message msg) override;
 
     protected:
-        void onMsgOpen(Message pkt) override;
+        void onMsgOpen(Message msg) override;
 
         void onMsgClose(Message pkt) override;
 
@@ -29,7 +32,14 @@ namespace freee {
 
         void onMsgStop(Message pkt) override;
 
+        void onMsgProcessEvent(Message pkt) override;
+
         void onMsgControl(Message pkt) override;
+
+    private:
+        MediaSource *m_pMediaSource = nullptr;
+        VideoDecoder *m_pVideoDeocder = nullptr;
+        AudioDecoder *m_pAudioDecoder = nullptr;
     };
 
 

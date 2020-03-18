@@ -84,7 +84,7 @@ Message AudioSource::onRequestMessage(int key) {
 
 void AudioSource::Open(MessageChain *chain) {
     m_config = chain->GetConfig(this);
-    SendMessage(NewJsonPkt(SendMsg_Open, m_config.dump()));
+    SendMessage(NewJsonMessage(SendMsg_Open, m_config.dump()));
 }
 
 void AudioSource::Close(MessageChain *chain) {

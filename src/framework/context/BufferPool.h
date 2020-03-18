@@ -55,7 +55,7 @@ namespace freee {
         Message(int key, int event)
         {
             msg.key = key;
-            msg.event = event;
+            msg.subKey = event;
         }
         Message(int key, void *ptr)
         {
@@ -67,7 +67,7 @@ namespace freee {
             msg.key = key;
             msg.number = number;
         }
-        Message (int key, sr_buffer_data_t *buffer)
+        Message(int key, sr_buffer_data_t *buffer)
         {
             if (buffer){
                 msg.key = key;
@@ -79,15 +79,15 @@ namespace freee {
         {
             if (buffer){
                 msg.key = key;
-                msg.size = size;
+                msg.msgLength = size;
                 p_buffer = buffer;
-                if (p_buffer->data_size < msg.size){
+                if (p_buffer->data_size < msg.msgLength){
                     free(p_buffer->head);
-                    p_buffer->data_size = msg.size << 2;
+                    p_buffer->data_size = msg.msgLength << 2;
                     p_buffer->data = p_buffer->head = (unsigned char*)malloc(p_buffer->data_size);
                 }
                 if (data){
-                    memcpy(p_buffer->data, data, msg.size);
+                    memcpy(p_buffer->data, data, msg.msgLength);
                 }
                 p_reference_count = new int(1);
             }
@@ -97,13 +97,13 @@ namespace freee {
             if (buffer){
                 p_buffer = buffer;
                 msg.key = key;
-                msg.size = str.size() + 1;
-                if (p_buffer->data_size < msg.size){
+                msg.msgLength = str.size() + 1;
+                if (p_buffer->data_size < msg.msgLength){
                     free(p_buffer->head);
-                    p_buffer->data_size = msg.size << 2;
+                    p_buffer->data_size = msg.msgLength << 2;
                     p_buffer->data = p_buffer->head = (unsigned char*)malloc(p_buffer->data_size);
                 }
-                memcpy(p_buffer->data, str.c_str(), msg.size);
+                memcpy(p_buffer->data, str.c_str(), msg.msgLength);
                 p_reference_count = new int(1);
             }
         }
@@ -152,23 +152,26 @@ namespace freee {
             msg.ptr = ptr;
         }
         void SetEvent(int event){
-            msg.event = event;
+            msg.subKey = event;
         }
         int GetKey(){
             return msg.key;
         }
         int GetEvent(){
-            return msg.event;
+            return msg.subKey;
         }
         void* GetPtr(){
             return msg.ptr;
+        }
+        size_t GetMsgLength(){
+            return msg.msgLength;
         }
         int64_t GetNumber(){
             return msg.number;
         }
         std::string GetString(){
             if (p_buffer && p_buffer->data){
-                return std::string((char*)p_buffer->data, msg.size);
+                return std::string((char*)p_buffer->data, msg.msgLength);
             }
             return std::string();
         }
@@ -194,8 +197,8 @@ namespace freee {
     public:
         struct {
             int key;
-            int event;
-            size_t size;
+            int subKey;
+            size_t msgLength;
             union {
                 void *ptr;
                 int64_t number;
@@ -235,6 +238,10 @@ namespace freee {
         Message NewStringMessage(int key, std::string str)
         {
             return Message(key, str, sr_buffer_pool_get(p_pool));
+        }
+        Message NewDataMessage(int key, unsigned char *data, size_t data_size)
+        {
+            return Message(key, data, data_size, sr_buffer_pool_get(p_pool));
         }
 
     private:

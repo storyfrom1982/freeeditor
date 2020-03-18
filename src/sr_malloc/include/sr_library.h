@@ -360,6 +360,7 @@ typedef struct sr_buffer_frame_t {
 
     int type;
     int flag;
+    int index;
 
     int x;
     int y;
@@ -393,7 +394,7 @@ typedef struct sr_buffer_data_t {
 	size_t data_size;
 	unsigned char *head;
 	unsigned char *data;
-    sr_buffer_frame_t frame;
+//    sr_buffer_frame_t frame;
 }sr_buffer_data_t;
 
 typedef struct sr_buffer_pool sr_buffer_pool_t;

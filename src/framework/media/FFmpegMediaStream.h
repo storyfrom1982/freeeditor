@@ -8,8 +8,8 @@
 
 extern "C"{
 
-#include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
+#include <libavformat/avformat.h>
 
 }
 

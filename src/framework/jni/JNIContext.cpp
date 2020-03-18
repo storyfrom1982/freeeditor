@@ -76,7 +76,8 @@ public:
 
     void SendMessage(int key, jstring json, JNIEnv *env){
         const char *js = env->GetStringUTFChars(json, 0);
-        MessageContext::SendMessage(NewJsonPkt(key, std::string(js, env->GetStringUTFLength(json))));
+        MessageContext::SendMessage(
+                NewJsonMessage(key, std::string(js, env->GetStringUTFLength(json))));
         env->ReleaseStringUTFChars(json, js);
     }
 
@@ -120,7 +121,8 @@ public:
         if (env->GetIntField(msg, m_keyField) == key){
             jstring str = static_cast<jstring>(env->GetObjectField(msg, m_stringField));
             if (str != nullptr){
-                return NewJsonPkt(key, std::string(env->GetStringUTFChars(str, 0), env->GetStringUTFLength(str)));
+                return NewJsonMessage(key, std::string(env->GetStringUTFChars(str, 0),
+                                                       env->GetStringUTFLength(str)));
             }else {
                 return Message(key, (void*)env->GetLongField(msg, m_ptrField));
             }

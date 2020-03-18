@@ -12,7 +12,23 @@ namespace freee {
 
     class FFmpegMediaSource : public MediaSource
     {
+    public:
+        FFmpegMediaSource();
+        ~FFmpegMediaSource();
 
+    protected:
+        int OpenSource(Message msg) override;
+
+        void CloseSource() override;
+
+        int ReadSource() override;
+
+    public:
+        int m_isAbort = 0;
+
+    private:
+        AVFormatContext *m_pContext = nullptr;
+        AVIOInterruptCB m_interruptCallback = {0};
     };
 
 }
