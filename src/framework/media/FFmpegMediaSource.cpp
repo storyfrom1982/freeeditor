@@ -15,6 +15,7 @@ FFmpegMediaSource::FFmpegMediaSource()
 FFmpegMediaSource::~FFmpegMediaSource()
 {
     StopProcessor();
+    CloseSource();
 }
 
 int FFmpegMediaSource::OpenSource(Message msg)

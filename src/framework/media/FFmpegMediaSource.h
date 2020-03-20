@@ -8,6 +8,13 @@
 
 #include "MediaSource.h"
 
+extern "C"{
+
+#include <libavutil/avutil.h>
+#include <libavformat/avformat.h>
+
+}
+
 namespace freee {
 
     class FFmpegMediaSource : public MediaSource

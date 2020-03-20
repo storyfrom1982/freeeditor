@@ -4,6 +4,8 @@
 
 #include "MediaPlayer.h"
 
+#include <libavcodec/avcodec.h>
+
 
 using namespace freee;
 

@@ -20,13 +20,20 @@ VideoDecoder::~VideoDecoder()
 
 void VideoDecoder::onMsgOpen(Message msg)
 {
+    LOGD("VideoDecoder::onMsgOpen =========================================== enter\n");
+    if (m_status == Status_Opened){
+        return;
+    }
     MessageChain *chain = static_cast<MessageChain *>(msg.GetPtr());
     m_config = chain->GetConfig(this);
+    m_extraConfig = chain->GetExtraConfig(this);
     LOGD("VideoDecoder::onMsgOpen config: %s\n", m_config.dump().c_str());
     OpenDecoder();
     Message event(MsgKey_ProcessEvent);
     event.SetEvent(MsgKey_Open);
     MessageChain::onMsgProcessEvent(event);
+    m_status = Status_Opened;
+    LOGD("VideoDecoder::onMsgOpen =========================================== exit\n");
 }
 
 void VideoDecoder::onMsgClose(Message msg)
@@ -36,7 +43,10 @@ void VideoDecoder::onMsgClose(Message msg)
 
 void VideoDecoder::onMsgProcessData(Message msg)
 {
-    DecodeVideo(msg);
+    static int i = 0;
+    if (i++ < 200){
+        DecodeVideo(msg);
+    }
 }
 
 void VideoDecoder::onMsgProcessEvent(Message msg)

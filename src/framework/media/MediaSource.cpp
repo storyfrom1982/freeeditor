@@ -5,6 +5,13 @@
 #include "MediaSource.h"
 #include "FFmpegMediaSource.h"
 
+extern "C"{
+
+#include <libavutil/avutil.h>
+#include <libavformat/avformat.h>
+
+}
+
 
 using namespace freee;
 
@@ -110,4 +117,9 @@ json &MediaSource::GetConfig(MessageChain *chain)
 {
     m_streamMap[chain->GetStreamId(this)] = chain;
     return m_config[std::to_string(chain->GetStreamId(this))];
+}
+
+std::string &MediaSource::GetExtraConfig(MessageChain *chain)
+{
+    return m_extraConfigMap[chain->GetStreamId(this)];
 }

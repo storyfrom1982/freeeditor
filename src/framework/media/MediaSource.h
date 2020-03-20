@@ -8,12 +8,6 @@
 
 #include <MessageChain.h>
 
-extern "C"{
-
-#include <libavutil/avutil.h>
-#include <libavformat/avformat.h>
-
-}
 
 namespace freee {
 
@@ -26,6 +20,8 @@ namespace freee {
         ~MediaSource();
 
         json &GetConfig(MessageChain *chain) override;
+
+        std::string &GetExtraConfig(MessageChain *chain) override;
 
     protected:
         void onMsgOpen(Message pkt) override;

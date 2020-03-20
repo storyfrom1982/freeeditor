@@ -1074,7 +1074,8 @@ sr_buffer_pool_t* sr_buffer_pool_create(
     for (int i = 0; i < pool->buffer_count; ++i){
         sr_buffer_node_t *node = malloc(sizeof(sr_buffer_node_t));
         node->buffer.data_size = data_size;
-        node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
+//        node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
+        node->buffer.head = (uint8_t*)aligned_alloc(16, pool->data_size + pool->head_size);
         node->buffer.data = node->buffer.head + pool->head_size;
         node->pool = pool;
         __sr_queue_push_back(pool->queue, node);
@@ -1120,7 +1121,9 @@ sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool)
         node->pool = pool;
         return &node->buffer;
     }
-    return NULL;
+    sr_buffer_node_t *node;
+    __sr_queue_block_pop_front(pool->queue, node);
+    return &node->buffer;
 }
 
 void sr_buffer_pool_put(sr_buffer_data_t *buffer)
