@@ -46,6 +46,7 @@ namespace freee {
         BufferPool *m_pBufferPool = nullptr;
         int m_planeCount = 0;
         int m_planeSize[4] = {0};
+        std::map<void*, Message> frameMap;
         AVCodecContext *m_pCodecContext = nullptr;
     };
 

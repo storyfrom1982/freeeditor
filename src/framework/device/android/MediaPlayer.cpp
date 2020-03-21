@@ -7,6 +7,12 @@
 #include <libavcodec/avcodec.h>
 
 
+enum {
+    MsgKey_Control_SetWindow = 1001,
+    MsgKey_Control_Pause = 1002,
+};
+
+
 using namespace freee;
 
 MediaPlayer::MediaPlayer(const std::string &name, int type)
@@ -26,6 +32,7 @@ void MediaPlayer::onMsgOpen(Message msg)
     m_pMediaSource = MediaSource::Create("ffmpeg");
     m_pMediaSource->SetEventListener(this);
     m_pMediaSource->Open(this);
+    m_pVideoRenderer = new VideoRenderer();
 }
 
 void MediaPlayer::onMsgClose(Message pkt)
@@ -45,6 +52,11 @@ void MediaPlayer::onMsgClose(Message pkt)
         delete m_pVideoDeocder;
         m_pVideoDeocder = nullptr;
     }
+    if (m_pVideoRenderer){
+        m_pVideoRenderer->Close(this);
+        delete m_pVideoRenderer;
+        m_pVideoRenderer = nullptr;
+    }
 }
 
 void MediaPlayer::onMsgStart(Message pkt)
@@ -59,7 +71,13 @@ void MediaPlayer::onMsgStop(Message pkt)
 
 void MediaPlayer::onMsgControl(Message pkt)
 {
-    MessageChain::onMsgControl(pkt);
+    switch (pkt.GetKey()){
+        case MsgKey_Control_SetWindow:
+            m_pVideoRenderer->SetVideoWindow(pkt.GetPtr());
+            break;
+        default:
+            break;
+    }
 }
 
 void MediaPlayer::onRecvMessage(Message msg)
@@ -75,6 +93,7 @@ void MediaPlayer::onMsgProcessEvent(Message pkt)
         if (cfg["codecType"] == AVMEDIA_TYPE_VIDEO){
             m_pVideoDeocder = VideoDecoder::Create(cfg["codecTag"]);
             m_pVideoDeocder->SetStreamId(cfg["streamId"]);
+            m_pVideoDeocder->AddOutput(m_pVideoRenderer);
             m_pMediaSource->AddOutput(m_pVideoDeocder);
         }else if (cfg["codecType"] == AVMEDIA_TYPE_AUDIO){
             m_pAudioDecoder = AudioDecoder::Create(cfg["codecTag"]);

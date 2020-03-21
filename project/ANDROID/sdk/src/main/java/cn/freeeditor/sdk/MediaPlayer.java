@@ -1,5 +1,7 @@
 package cn.freeeditor.sdk;
 
+import android.view.SurfaceView;
+
 import com.alibaba.fastjson.JSON;
 
 public class MediaPlayer extends JNIContext {
@@ -13,6 +15,7 @@ public class MediaPlayer extends JNIContext {
     private static final int MsgKey_ProcessData = 5;
     private static final int MsgKey_ProcessEvent = 6;
     private static final int MsgKey_ProcessControl = 10;
+    private static final int MsgKey_ProcessControlSetWindow = 1001;
 
     private long playerContext;
     private VideoWindow videoView;
@@ -37,6 +40,10 @@ public class MediaPlayer extends JNIContext {
         stopHandler();
     }
 
+    public void setSurfaceView(SurfaceView view){
+        videoView.setSurfaceView(view);
+    }
+
     public void open(String url){
         sendMessage(MsgKey_Open, url);
     }
@@ -46,6 +53,7 @@ public class MediaPlayer extends JNIContext {
     }
 
     public void start(){
+        sendMessage(MsgKey_ProcessControlSetWindow, videoView.getContextPointer());
         sendMessage(MsgKey_Start);
     }
 

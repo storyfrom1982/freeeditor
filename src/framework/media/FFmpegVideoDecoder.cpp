@@ -115,6 +115,8 @@ int FFmpegVideoDecoder::DecodeVideo(Message msg)
     memset(&picture, 0, sizeof(picture));
 
 
+    int64_t startTime = sr_time_begin();
+
     int ret;
     ret = avcodec_send_packet(m_pCodecContext, &avpkt);
     if (ret < 0) {
@@ -127,13 +129,19 @@ int FFmpegVideoDecoder::DecodeVideo(Message msg)
     while (ret >= 0) {
         ret = avcodec_receive_frame(m_pCodecContext, &picture);
         if (ret < 0) {
-            if (ret == AVERROR(EAGAIN))
-                return 0;
+            break;
         }else {
-            LOGD("FFmpegVideoDecoder::DecodeVideo data size %d\n", picture.width);
+            if (frameMap.find(picture.opaque) != frameMap.end()){
+                Message message = frameMap[picture.opaque];
+                frameMap.erase(picture.opaque);
+//                LOGD("FFmpegVideoDecoder::DecodeVideo data size %d\n", message.frame.width);
+                MessageChain::onMsgProcessData(message);
+            }
             av_frame_unref(&picture);
         }
     }
+
+//    LOGD("FFmpegVideoDecoder::DecodeVideo decode time %lld\n", sr_time_passed(startTime));
 
     return 0;
 
@@ -171,9 +179,8 @@ int FFmpegVideoDecoder::get_buffer2(struct AVCodecContext *s, AVFrame *frame, in
 
 void FFmpegVideoDecoder::GetVideoBuffer(AVFrame *frame)
 {
-    if (!m_pBufferPool){
-        CreateBufferPool(frame);
-    }
+    int64_t startTime = sr_time_begin();
+    CreateBufferPool(frame);
 
     Message msg = m_pBufferPool->NewFrameMessage(MsgKey_ProcessData);
     int pos = 0;
@@ -193,7 +200,16 @@ void FFmpegVideoDecoder::GetVideoBuffer(AVFrame *frame)
                                          &op::cb,
                                          this, 0);
         frame->data[i] = msg.frame.channel[i].data;
+        msg.frame.channel[i].stride = frame->linesize[i];
     }
+
+//    msg.frame.width = frame->linesize[0];
+    msg.frame.width = frame->width;
+    msg.frame.height = frame->height;
+    frame->opaque = msg.GetBufferPtr();
+
+    frameMap[frame->opaque] = msg;
+    LOGD("FFmpegVideoDecoder::get_buffer2 time %lld\n", sr_time_passed(startTime));
 }
 
 void FFmpegVideoDecoder::CreateBufferPool(AVFrame *frame)
@@ -231,5 +247,7 @@ void FFmpegVideoDecoder::CreateBufferPool(AVFrame *frame)
 
     m_planeCount = i;
 
-    m_pBufferPool = new BufferPool(10, m_bufferSize, 20, 0);
+    if (!m_pBufferPool){
+        m_pBufferPool = new BufferPool(10, m_bufferSize, 10, 0);
+    }
 }

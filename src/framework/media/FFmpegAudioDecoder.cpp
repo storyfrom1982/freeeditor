@@ -29,6 +29,6 @@ void FFmpegAudioDecoder::CloseDecoder()
 
 int FFmpegAudioDecoder::DecodeAudio(Message msg)
 {
-    LOGD("FFmpegAudioDecoder::DecodeAudio data size %lu\n", msg.GetMsgLength());
+//    LOGD("FFmpegAudioDecoder::DecodeAudio data size %lu\n", msg.GetMsgLength());
     return 0;
 }

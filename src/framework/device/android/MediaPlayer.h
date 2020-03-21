@@ -10,6 +10,7 @@
 #include "../../media/MediaSource.h"
 #include "../../media/VideoDecoder.h"
 #include "../../media/AudioDecoder.h"
+#include "../../media/VideoRenderer.h"
 
 namespace freee {
 
@@ -40,6 +41,7 @@ namespace freee {
         MediaSource *m_pMediaSource = nullptr;
         VideoDecoder *m_pVideoDeocder = nullptr;
         AudioDecoder *m_pAudioDecoder = nullptr;
+        VideoRenderer *m_pVideoRenderer = nullptr;
     };
 
 

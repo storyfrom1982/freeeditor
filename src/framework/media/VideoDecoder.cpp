@@ -29,6 +29,7 @@ void VideoDecoder::onMsgOpen(Message msg)
     m_extraConfig = chain->GetExtraConfig(this);
     LOGD("VideoDecoder::onMsgOpen config: %s\n", m_config.dump().c_str());
     OpenDecoder();
+    MessageChain::onMsgOpen(msg);
     Message event(MsgKey_ProcessEvent);
     event.SetEvent(MsgKey_Open);
     MessageChain::onMsgProcessEvent(event);
@@ -43,10 +44,7 @@ void VideoDecoder::onMsgClose(Message msg)
 
 void VideoDecoder::onMsgProcessData(Message msg)
 {
-    static int i = 0;
-    if (i++ < 200){
-        DecodeVideo(msg);
-    }
+    DecodeVideo(msg);
 }
 
 void VideoDecoder::onMsgProcessEvent(Message msg)

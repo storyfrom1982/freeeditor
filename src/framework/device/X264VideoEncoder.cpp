@@ -86,8 +86,14 @@ int X264VideoEncoder::OpenEncoder() {
         m_param.rc.f_ip_factor = 1.4;
     }
 
+
+    m_param.i_keyint_max = 60;
+    m_param.i_keyint_min = 60;
+
     m_param.i_threads = 2;
     m_handle = x264_encoder_open(&m_param);
+
+
 
 //    m_extraConfig = GenAvc1();
     m_extraConfig = GenH264Config();

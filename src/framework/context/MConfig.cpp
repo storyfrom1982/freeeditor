@@ -94,9 +94,9 @@ void MConfig::buildDefaultConfig(json &config) {
                 {"codecImageFormat", "I420"},
                 {"codecType", "h264"},
                 {"codecName", "x264"},
-                {"codecBitRate", 448},
+                {"codecBitRate", 512},
                 {"codecVBR", true},
-                {"codecKeyFrameInterval", 1},
+                {"codecKeyFrameInterval", 4},
             }},
 
             {"videoEffect", {

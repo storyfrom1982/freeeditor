@@ -193,6 +193,12 @@ namespace freee {
             }
             return nullptr;
         }
+        sr_buffer_data_t* GetBufferPtr(){
+            if (p_buffer){
+                return p_buffer;
+            }
+            return nullptr;
+        }
 
     public:
         struct {

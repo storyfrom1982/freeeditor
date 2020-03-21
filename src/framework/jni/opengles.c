@@ -11,6 +11,7 @@
 #include <GLES2/gl2.h>
 #include <sr_library.h>
 #include <sr_buffer_frame.h>
+#include <GLES3/gl3.h>
 
 const char g_indices[] =
 { 0, 3, 2, 0, 2, 1 };
@@ -198,23 +199,28 @@ static void SetupTextures(opengles_t *gles, const sr_buffer_frame_t *frameToRend
 static void GlTexSubImage2D(GLsizei width, GLsizei height, int stride,
 		const uint8_t* plane)
 {
-	if (stride == width)
-	{
-		// Yay!  We can upload the entire plane in a single GL call.
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_LUMINANCE,
-				GL_UNSIGNED_BYTE, (const GLvoid*) (plane));
-	}
-	else
-	{
-		// Boo!  Since GLES2 doesn't have GL_UNPACK_ROW_LENGTH and Android doesn't
-		// have GL_EXT_unpack_subimage we have to upload a row at a time.  Ick.
-		int row;
-		for (row = 0; row < height; ++row)
-		{
-			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, row, width, 1, GL_LUMINANCE,
-					GL_UNSIGNED_BYTE, (const GLvoid*) (plane + (row * stride)));
-		}
-	}
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
+	// Yay!  We can upload the entire plane in a single GL call.
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_LUMINANCE,
+					GL_UNSIGNED_BYTE, (const GLvoid*) (plane));
+
+//	if (stride == width)
+//	{
+//		// Yay!  We can upload the entire plane in a single GL call.
+//		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_LUMINANCE,
+//				GL_UNSIGNED_BYTE, (const GLvoid*) (plane));
+//	}
+//	else
+//	{
+//		// Boo!  Since GLES2 doesn't have GL_UNPACK_ROW_LENGTH and Android doesn't
+//		// have GL_EXT_unpack_subimage we have to upload a row at a time.  Ick.
+//		int row;
+//		for (row = 0; row < height; ++row)
+//		{
+//			glTexSubImage2D(GL_TEXTURE_2D, 0, 0, row, width, 1, GL_LUMINANCE,
+//					GL_UNSIGNED_BYTE, (const GLvoid*) (plane + (row * stride)));
+//		}
+//	}
 }
 
 static void UpdateTextures(opengles_t *gles, const sr_buffer_frame_t *frameToRender)
