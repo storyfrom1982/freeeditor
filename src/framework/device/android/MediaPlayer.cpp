@@ -33,6 +33,7 @@ void MediaPlayer::onMsgOpen(Message msg)
     m_pMediaSource->SetEventListener(this);
     m_pMediaSource->Open(this);
     m_pVideoRenderer = new VideoRenderer();
+    m_pAudioPlayer = new AudioPlayer();
 }
 
 void MediaPlayer::onMsgClose(Message pkt)
@@ -56,6 +57,11 @@ void MediaPlayer::onMsgClose(Message pkt)
         m_pVideoRenderer->Close(this);
         delete m_pVideoRenderer;
         m_pVideoRenderer = nullptr;
+    }
+    if (m_pAudioPlayer){
+        m_pAudioPlayer->Close(this);
+        delete m_pAudioPlayer;
+        m_pAudioPlayer = nullptr;
     }
 }
 
@@ -98,6 +104,7 @@ void MediaPlayer::onMsgProcessEvent(Message pkt)
         }else if (cfg["codecType"] == AVMEDIA_TYPE_AUDIO){
             m_pAudioDecoder = AudioDecoder::Create(cfg["codecTag"]);
             m_pAudioDecoder->SetStreamId(cfg["streamId"]);
+            m_pAudioDecoder->AddOutput(m_pAudioPlayer);
             m_pMediaSource->AddOutput(m_pAudioDecoder);
         }
     }

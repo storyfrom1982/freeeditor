@@ -109,6 +109,7 @@ int FFmpegVideoDecoder::DecodeVideo(Message msg)
     avpkt.dts =  msg.frame.timestamp;
     avpkt.pts  = msg.frame.timestamp;
     avpkt.flags = 0;
+    avpkt.buf = nullptr;
 
     AVFrame              picture;
     int                  got_picture = 0;
@@ -179,7 +180,7 @@ int FFmpegVideoDecoder::get_buffer2(struct AVCodecContext *s, AVFrame *frame, in
 
 void FFmpegVideoDecoder::GetVideoBuffer(AVFrame *frame)
 {
-    int64_t startTime = sr_time_begin();
+//    int64_t startTime = sr_time_begin();
     CreateBufferPool(frame);
 
     Message msg = m_pBufferPool->NewFrameMessage(MsgKey_ProcessData);
@@ -209,7 +210,7 @@ void FFmpegVideoDecoder::GetVideoBuffer(AVFrame *frame)
     frame->opaque = msg.GetBufferPtr();
 
     frameMap[frame->opaque] = msg;
-    LOGD("FFmpegVideoDecoder::get_buffer2 time %lld\n", sr_time_passed(startTime));
+//    LOGD("FFmpegVideoDecoder::get_buffer2 time %lld\n", sr_time_passed(startTime));
 }
 
 void FFmpegVideoDecoder::CreateBufferPool(AVFrame *frame)

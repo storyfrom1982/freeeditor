@@ -13,11 +13,13 @@ using namespace freee;
 enum {
     SendMsg_DisconnectCamera = 1,
     SendMsg_DisconnectMicrophone = 2,
+    SendMsg_DisconnectSpeaker = 3,
 };
 
 enum {
     ReqMsg_ConnectCamera = 1,
     ReqMsg_ConnectMicrophone = 2,
+    ReqMsg_ConnectSpeaker = 3,
 };
 
 enum {
@@ -95,12 +97,25 @@ MessageContext *MediaContext::ConnectMicrophone() {
     return static_cast<MessageContext *>(pkt.GetPtr());
 }
 
+MessageContext *MediaContext::ConnectSpeaker()
+{
+    Message pkt = MessageContext::RequestMessage(ReqMsg_ConnectSpeaker);
+    assert(pkt.GetPtr());
+    assert(pkt.GetKey() == ReqMsg_ConnectSpeaker);
+    return static_cast<MessageContext *>(pkt.GetPtr());
+}
+
 void MediaContext::DisconnectCamera() {
     SendMessage(Message(SendMsg_DisconnectCamera));
 }
 
 void MediaContext::DisconnectMicrophone() {
     SendMessage(Message(SendMsg_DisconnectMicrophone));
+}
+
+void MediaContext::DisconnectSpeaker()
+{
+    SendMessage(Message(SendMsg_DisconnectSpeaker));
 }
 
 Message MediaContext::GetStringPkt(int key, std::string str) {

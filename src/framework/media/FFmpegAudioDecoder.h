@@ -8,6 +8,16 @@
 
 #include "AudioDecoder.h"
 
+extern "C"{
+
+#include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
+#include <libavutil/avutil.h>
+#include <libavutil/imgutils.h>
+
+}
+
+
 namespace freee {
 
 
@@ -16,6 +26,7 @@ namespace freee {
     public:
         FFmpegAudioDecoder();
         ~FFmpegAudioDecoder();
+        static int get_buffer2(struct AVCodecContext *s, AVFrame *frame, int flags);
 
     protected:
         int OpenDecoder() override;
@@ -23,6 +34,14 @@ namespace freee {
         void CloseDecoder() override;
 
         int DecodeAudio(Message msg) override;
+
+    private:
+        size_t  m_bufferSize = 0;
+        BufferPool *m_pBufferPool = nullptr;
+        int m_planeCount = 0;
+        int m_planeSize[4] = {0};
+        std::map<void*, Message> frameMap;
+        AVCodecContext *m_pCodecContext = nullptr;
     };
 
 }

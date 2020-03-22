@@ -11,6 +11,7 @@
 #include "../../media/VideoDecoder.h"
 #include "../../media/AudioDecoder.h"
 #include "../../media/VideoRenderer.h"
+#include "../../media/AudioPlayer.h"
 
 namespace freee {
 
@@ -42,6 +43,7 @@ namespace freee {
         VideoDecoder *m_pVideoDeocder = nullptr;
         AudioDecoder *m_pAudioDecoder = nullptr;
         VideoRenderer *m_pVideoRenderer = nullptr;
+        AudioPlayer *m_pAudioPlayer = nullptr;
     };
 
 

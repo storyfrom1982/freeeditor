@@ -120,10 +120,10 @@ void VideoRenderer::CloseModule() {
 int VideoRenderer::ProcessMediaByModule(Message pkt) {
     AutoLock lock(mLock);
     if (!isSurfaceDestroyed){
-        int64_t startTime = sr_time_begin();
+//        int64_t startTime = sr_time_begin();
         opengles_render(opengles, &pkt.frame);
         gl_renderer_swap_buffers(renderer);
-        LOGD("FFmpegVideoDecoder::ProcessMediaByModule time %lld\n", sr_time_passed(startTime));
+//        LOGD("FFmpegVideoDecoder::ProcessMediaByModule time %lld\n", sr_time_passed(startTime));
     }
     MessageChain::onMsgProcessData(pkt);
     return 0;

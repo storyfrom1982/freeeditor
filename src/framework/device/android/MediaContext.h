@@ -30,9 +30,11 @@ namespace freee {
 
         MessageContext* ConnectCamera();
         MessageContext* ConnectMicrophone();
+        MessageContext* ConnectSpeaker();
 
         void DisconnectCamera();
         void DisconnectMicrophone();
+        void DisconnectSpeaker();
 
     private:
 

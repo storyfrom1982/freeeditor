@@ -101,8 +101,9 @@ int FFmpegMediaSource::OpenSource(Message msg)
         else if (codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
             cfg["codecChannelCount"] = codecpar->channels;
             cfg["codecSampleRate"] = codecpar->sample_rate;
-            cfg["codecBitPerSample"] = codecpar->bits_per_raw_sample;
+            cfg["codecBytePerSample"] = av_get_bytes_per_sample((AVSampleFormat)codecpar->format);
             cfg["codecBitRate"] = codecpar->bit_rate;
+            cfg["codecSamplePerFrame"] = codecpar->frame_size;
             cfg["codecBlockAlign"] = codecpar->block_align;
             if (codecpar->extradata_size > 0){
                 m_extraConfigMap[stream->index] = std::string((char*)codecpar->extradata, codecpar->extradata_size);

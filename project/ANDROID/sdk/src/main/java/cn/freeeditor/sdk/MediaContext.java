@@ -23,14 +23,17 @@ public class MediaContext extends JNIContext {
 
     private static final int OnReqMsg_ConnectCamera = 1;
     private static final int OnReqMsg_ConnectMicrophone = 2;
+    private static final int OnReqMsg_ConnectSpeaker = 3;
 
     private static final int OnRecvMsg_DisconnectCamera = 1;
     private static final int OnRecvMsg_DisconnectMicrophone = 2;
+    private static final int OnRecvMsg_DisconnectSpeaker = 3;
 
     private int currentOrientation;
 
     private VideoSource videoSource;
     private AudioSource audioSource;
+    private AudioPlayer audioPlayer;
 
     private static MediaContext sMediaContext = null;
 
@@ -198,6 +201,8 @@ public class MediaContext extends JNIContext {
                 return new JNIMessage(key, createCamera());
             case OnReqMsg_ConnectMicrophone:
                 return new JNIMessage(key, createMicrophone());
+            case OnReqMsg_ConnectSpeaker:
+                return new JNIMessage(key, createSpeaker());
             default:
                 break;
         }
@@ -219,6 +224,12 @@ public class MediaContext extends JNIContext {
                     audioSource = null;
                 }
                 break;
+            case OnRecvMsg_DisconnectSpeaker:
+                if (audioPlayer != null){
+                    audioPlayer.release();
+                    audioPlayer = null;
+                }
+                break;
             default:
                 break;
         }
@@ -236,6 +247,13 @@ public class MediaContext extends JNIContext {
             audioSource = new AudioSource();
         }
         return audioSource.getContextPointer();
+    }
+
+    private long createSpeaker(){
+        if (audioPlayer == null){
+            audioPlayer = new AudioPlayer();
+        }
+        return audioPlayer.getContextPointer();
     }
 
     private MediaContext(){
