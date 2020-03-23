@@ -10,7 +10,7 @@
 #include <vector>
 #include <AutoLock.h>
 
-#include "BufferPool.h"
+#include "MessagePool.h"
 
 
 namespace freee {

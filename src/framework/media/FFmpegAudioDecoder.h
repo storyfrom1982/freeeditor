@@ -37,7 +37,7 @@ namespace freee {
 
     private:
         size_t  m_bufferSize = 0;
-        BufferPool *m_pBufferPool = nullptr;
+        MessagePool *m_pBufferPool = nullptr;
         int m_planeCount = 0;
         int m_planeSize[4] = {0};
         std::map<void*, Message> frameMap;

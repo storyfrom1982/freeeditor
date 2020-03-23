@@ -3,7 +3,7 @@
 //
 
 #include <MConfig.h>
-#include <BufferPool.h>
+#include <MessagePool.h>
 #include "MediaContext.h"
 #include "MediaRecorder.h"
 #include "MediaPlayer.h"

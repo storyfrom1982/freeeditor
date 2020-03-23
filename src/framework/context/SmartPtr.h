@@ -35,7 +35,7 @@ namespace freee{
             if (--(*reference_count) == 0){
 //                delete ptr;
 //                ptr = nullptr;
-                sr_buffer_pool_put(ptr);
+                sr_buffer_pool_recycle(ptr);
                 delete reference_count;
                 reference_count = nullptr;
             }

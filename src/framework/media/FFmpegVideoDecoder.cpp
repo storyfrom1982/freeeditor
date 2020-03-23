@@ -249,6 +249,6 @@ void FFmpegVideoDecoder::CreateBufferPool(AVFrame *frame)
     m_planeCount = i;
 
     if (!m_pBufferPool){
-        m_pBufferPool = new BufferPool(10, m_bufferSize, 10, 0);
+        m_pBufferPool = new MessagePool(m_bufferSize, 1, 64, 0, 16, "VideoDecoder");
     }
 }

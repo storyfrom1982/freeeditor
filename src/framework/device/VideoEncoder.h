@@ -10,7 +10,7 @@
 #include <MessageContext.h>
 #include <SmartPtr.h>
 #include <MConfig.h>
-#include <BufferPool.h>
+#include <MessagePool.h>
 #include <MessageChainImpl.h>
 #include <MediaModule.h>
 
@@ -50,7 +50,7 @@ namespace freee{
         int64_t m_startFrameId = 0;
 
         size_t m_bufferSize = 0;
-        BufferPool *p_bufferPool = nullptr;
+        MessagePool *p_bufferPool = nullptr;
 
     };
 

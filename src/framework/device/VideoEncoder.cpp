@@ -2,7 +2,7 @@
 // Created by yongge on 20-2-5.
 //
 
-#include <BufferPool.h>
+#include <MessagePool.h>
 #include "VideoEncoder.h"
 #include "X264VideoEncoder.h"
 
@@ -48,8 +48,7 @@ void VideoEncoder::onMsgOpen(Message pkt) {
         m_frameRate = m_config["codecFPS"];
         uint32_t w = m_config["codecWidth"];
         uint32_t h = m_config["codecHeight"];
-        p_bufferPool = new BufferPool(4, w*h, 256, 16);
-        p_bufferPool->SetName(GetName());
+        p_bufferPool = new MessagePool(w*h, 1, 64, 16, 0, "VideoEncoder");
         pkt.frame.type = MediaType_Video;
         MessageChain::onMsgOpen(pkt);
         m_status = Status_Opened;
@@ -101,7 +100,7 @@ void VideoEncoder::onMsgControl(Message pkt) {
 }
 
 void VideoEncoder::onMsgProcessEvent(Message pkt) {
-    switch (pkt.GetEvent()){
+    switch (pkt.GetSubKey()){
         case MsgKey_Open:
             m_outputChainStatus = Status_Opened;
             break;

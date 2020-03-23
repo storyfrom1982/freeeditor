@@ -145,8 +145,7 @@ void VideoSource::UpdateMediaConfig(Message pkt) {
     m_codecImageFormat = fourcctoint.format;
 //    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", m_srcImageFormat, libyuv::FOURCC_NV21);
     m_bufferSize = m_codecWidth * m_codecHeight / 2 * 3U;
-    p_bufferPool = new BufferPool(2, m_bufferSize, 10);
-    p_bufferPool->SetName("VideoSource");
+    p_bufferPool = new MessagePool(m_bufferSize, 10, 64 ,0, 0, "VideoSource");
 
     MessageChain::onMsgOpen(pkt);
 }

@@ -7,7 +7,7 @@
 #include "MediaContext.h"
 
 #include <android/log.h>
-#include <BufferPool.h>
+#include <MessagePool.h>
 
 static void log_debug(int level, const char *debug_log, const char *pure_log)
 {

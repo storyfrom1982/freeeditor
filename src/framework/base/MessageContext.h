@@ -7,7 +7,7 @@
 
 
 #include <string>
-#include <BufferPool.h>
+#include <MessagePool.h>
 #include <AutoLock.h>
 
 
@@ -20,13 +20,11 @@ namespace freee{
         MessageContext(std::string name)
         {
             m_name = name;
-            p_bufferPool = new BufferPool(2, 4096);
-            p_bufferPool->SetName(m_name);
+            p_bufferPool = new MessagePool(10240, 10, 64, 0, 0, m_name);
         }
 
         virtual ~MessageContext()
         {
-//            LOGD("[DELETE]<MessageContext>[%s]\n", m_name.c_str());
             delete p_bufferPool;
         };
 
@@ -98,7 +96,7 @@ namespace freee{
     private:
         Lock m_lock;
         std::string m_name;
-        BufferPool *p_bufferPool = nullptr;
+        MessagePool *p_bufferPool = nullptr;
         MessageContext *p_messageContext = nullptr;
     };
 

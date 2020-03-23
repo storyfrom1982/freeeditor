@@ -41,8 +41,7 @@ int AudioFilter::OpenModule() {
     m_codecSamplePerFrame = m_config["codecSamplePerFrame"];
 
     m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplePerFrame;
-    p_bufferPool = new BufferPool(2, m_bufferSize, 10);
-    p_bufferPool->SetName(GetName());
+    p_bufferPool = new MessagePool(m_bufferSize, 10, 64, 0, 0, "AudioFilter");
 
     return 0;
 }

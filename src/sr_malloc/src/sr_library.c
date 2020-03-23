@@ -1044,10 +1044,11 @@ typedef struct sr_buffer_node_t{
 }sr_buffer_node_t;
 
 struct sr_buffer_pool {
+    size_t align;
     size_t head_size;
     size_t data_size;
     size_t buffer_count;
-    size_t buffer_max_count;
+    size_t max_buffer_count;
     bool destroyed;
     sr_queue_t *queue;
     char *name;
@@ -1060,22 +1061,28 @@ static void release_buffer_node(sr_node_t *node){
 }
 
 sr_buffer_pool_t* sr_buffer_pool_create(
+        size_t buffer_size,
         size_t buffer_count,
-        size_t data_size,
-        size_t buffer_max_count,
-        size_t head_size)
+        size_t max_buffer_count,
+        size_t head_size,
+        size_t align)
 {
     sr_buffer_pool_t *pool = (sr_buffer_pool_t*) calloc(1, sizeof(sr_buffer_pool_t));
+    pool->data_size = buffer_size;
     pool->buffer_count = buffer_count;
-    pool->buffer_max_count = buffer_max_count;
-    pool->data_size = data_size;
+    pool->max_buffer_count = max_buffer_count;
     pool->head_size = head_size;
+    pool->align = align;
     pool->queue = sr_queue_create(release_buffer_node);
     for (int i = 0; i < pool->buffer_count; ++i){
         sr_buffer_node_t *node = malloc(sizeof(sr_buffer_node_t));
-        node->buffer.data_size = data_size;
-//        node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
-        node->buffer.head = (uint8_t*)aligned_alloc(16, pool->data_size + pool->head_size);
+        node->buffer.data_size = pool->data_size;
+        node->buffer.head_size = pool->head_size;
+        if (pool->align > 0){
+            node->buffer.head = (uint8_t*)aligned_alloc(pool->align, pool->data_size + pool->head_size);
+        }else {
+            node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
+        }
         node->buffer.data = node->buffer.head + pool->head_size;
         node->pool = pool;
         __sr_queue_push_back(pool->queue, node);
@@ -1104,7 +1111,7 @@ void sr_buffer_pool_set_name(sr_buffer_pool_t *pool, const char *name)
     pool->name = strdup(name);
 }
 
-sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool)
+sr_buffer_data_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool)
 {
     assert(pool != NULL);
     if (sr_queue_length(pool->queue) > 0){
@@ -1112,11 +1119,16 @@ sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool)
         __sr_queue_block_pop_front(pool->queue, node);
         return &node->buffer;
     }
-    if (pool->buffer_count < pool->buffer_max_count){
+    if (pool->buffer_count < pool->max_buffer_count){
         __sr_atom_add(pool->buffer_count, 1);
         sr_buffer_node_t *node = malloc(sizeof(sr_buffer_node_t));
         node->buffer.data_size = pool->data_size;
-        node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
+        node->buffer.head_size = pool->head_size;
+        if (pool->align > 0){
+            node->buffer.head = (uint8_t*)aligned_alloc(pool->align, pool->data_size + pool->head_size);
+        }else {
+            node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
+        }
         node->buffer.data = node->buffer.head + pool->head_size;
         node->pool = pool;
         return &node->buffer;
@@ -1126,7 +1138,23 @@ sr_buffer_data_t* sr_buffer_pool_get(sr_buffer_pool_t *pool)
     return &node->buffer;
 }
 
-void sr_buffer_pool_put(sr_buffer_data_t *buffer)
+sr_buffer_data_t* sr_buffer_pool_realloc(sr_buffer_data_t *buffer, size_t size)
+{
+    assert(buffer != NULL);
+    if (buffer->head){
+        free(buffer->head);
+    }
+    sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)buffer - sizeof(sr_node_t));
+    node->buffer.data_size = size;
+    if (node->pool->align > 0){
+        node->buffer.head = (uint8_t*)aligned_alloc(node->pool->align, buffer->data_size + buffer->head_size);
+    }else {
+        node->buffer.head = (uint8_t*)malloc(buffer->data_size + buffer->head_size);
+    }
+    node->buffer.data = node->buffer.head + buffer->head_size;
+}
+
+void sr_buffer_pool_recycle(sr_buffer_data_t *buffer)
 {
     assert(buffer != NULL);
     sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)buffer - sizeof(sr_node_t));

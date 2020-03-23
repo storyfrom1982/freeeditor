@@ -20,7 +20,6 @@ FFmpegMediaSource::~FFmpegMediaSource()
 
 int FFmpegMediaSource::OpenSource(Message msg)
 {
-    av_register_all();
     int result;
     AVInputFormat *iformat = NULL;
     m_pContext = avformat_alloc_context();

@@ -46,31 +46,30 @@ namespace freee {
     static int global_reference_count = -(INT32_MAX);
 
     class Message {
-
     public:
         Message(int key = 0)
         {
-            msg.key = key;
+            m.key = key;
         }
         Message(int key, int event)
         {
-            msg.key = key;
-            msg.subKey = event;
+            m.key = key;
+            m.subKey = event;
         }
         Message(int key, void *ptr)
         {
-            msg.key = key;
-            msg.ptr = ptr;
+            m.key = key;
+            m.ptr = ptr;
         }
         Message(int key, int64_t number)
         {
-            msg.key = key;
-            msg.number = number;
+            m.key = key;
+            m.number = number;
         }
         Message(int key, sr_buffer_data_t *buffer)
         {
             if (buffer){
-                msg.key = key;
+                m.key = key;
                 p_buffer = buffer;
                 p_reference_count = new int(1);
             }
@@ -78,16 +77,14 @@ namespace freee {
         Message(int key, unsigned char *data, size_t size, sr_buffer_data_t *buffer)
         {
             if (buffer){
-                msg.key = key;
-                msg.msgLength = size;
+                m.key = key;
+                m.msgLength = size;
                 p_buffer = buffer;
-                if (p_buffer->data_size < msg.msgLength){
-                    free(p_buffer->head);
-                    p_buffer->data_size = msg.msgLength << 2;
-                    p_buffer->data = p_buffer->head = (unsigned char*)malloc(p_buffer->data_size);
+                if (p_buffer->data_size < m.msgLength){
+                    sr_buffer_pool_realloc(p_buffer, m.msgLength << 1);
                 }
                 if (data){
-                    memcpy(p_buffer->data, data, msg.msgLength);
+                    memcpy(p_buffer->data, data, m.msgLength);
                 }
                 p_reference_count = new int(1);
             }
@@ -95,22 +92,20 @@ namespace freee {
         Message(int key, std::string str, sr_buffer_data_t *buffer)
         {
             if (buffer){
+                m.key = key;
                 p_buffer = buffer;
-                msg.key = key;
-                msg.msgLength = str.size() + 1;
-                if (p_buffer->data_size < msg.msgLength){
-                    free(p_buffer->head);
-                    p_buffer->data_size = msg.msgLength << 2;
-                    p_buffer->data = p_buffer->head = (unsigned char*)malloc(p_buffer->data_size);
+                m.msgLength = str.size() + 1;
+                if (p_buffer->data_size < m.msgLength){
+                    sr_buffer_pool_realloc(p_buffer, m.msgLength << 1);
                 }
-                memcpy(p_buffer->data, str.c_str(), msg.msgLength);
+                memcpy(p_buffer->data, str.c_str(), m.msgLength);
                 p_reference_count = new int(1);
             }
         }
         Message(const Message &pkt)
         {
             if (this != &pkt){
-                this->msg = pkt.msg;
+                this->m = pkt.m;
                 this->frame = pkt.frame;
                 this->p_buffer = pkt.p_buffer;
                 this->p_reference_count = pkt.p_reference_count;
@@ -121,7 +116,7 @@ namespace freee {
         {
             if (__sr_atom_sub(*p_reference_count, 1) == 0){
                 if (p_buffer){
-                    sr_buffer_pool_put(p_buffer);
+                    sr_buffer_pool_recycle(p_buffer);
                     delete p_reference_count;
                 }
             }
@@ -131,11 +126,11 @@ namespace freee {
             if (this != &pkt){
                 if (__sr_atom_sub(*p_reference_count, 1) == 0){
                     if (p_buffer){
-                        sr_buffer_pool_put(p_buffer);
+                        sr_buffer_pool_recycle(p_buffer);
                         delete p_reference_count;
                     }
                 }
-                this->msg = pkt.msg;
+                this->m = pkt.m;
                 this->frame = pkt.frame;
                 this->p_buffer = pkt.p_buffer;
                 this->p_reference_count = pkt.p_reference_count;
@@ -146,32 +141,32 @@ namespace freee {
 
     public:
         void SetKey(int key){
-            msg.key = key;
-        }
-        void SetPtr(void *ptr){
-            msg.ptr = ptr;
-        }
-        void SetEvent(int event){
-            msg.subKey = event;
+            m.key = key;
         }
         int GetKey(){
-            return msg.key;
+            return m.key;
         }
-        int GetEvent(){
-            return msg.subKey;
+        void SetSubKey(int event){
+            m.subKey = event;
+        }
+        int GetSubKey(){
+            return m.subKey;
+        }
+        void SetPtr(void *ptr){
+            m.ptr = ptr;
         }
         void* GetPtr(){
-            return msg.ptr;
+            return m.ptr;
         }
         size_t GetMsgLength(){
-            return msg.msgLength;
+            return m.msgLength;
         }
         int64_t GetNumber(){
-            return msg.number;
+            return m.number;
         }
         std::string GetString(){
             if (p_buffer && p_buffer->data){
-                return std::string((char*)p_buffer->data, msg.msgLength);
+                return std::string((char*)p_buffer->data, m.msgLength);
             }
             return std::string();
         }
@@ -209,7 +204,7 @@ namespace freee {
                 void *ptr;
                 int64_t number;
             };
-        }msg = {0};
+        }m = {0};
         sr_buffer_frame_t frame = {0};
 
     private:
@@ -217,42 +212,41 @@ namespace freee {
         int *p_reference_count = &global_reference_count;
     };
 
-    class BufferPool {
 
+
+
+    class MessagePool {
     public:
-        BufferPool(size_t buffer_count,
-                size_t data_size,
-                size_t buffer_max_count = 64,
-                size_t head_size = 0)
+        MessagePool(size_t messageLength,
+                size_t messageCount,
+                size_t maxMessageCount,
+                size_t headSize,
+                size_t align,
+                std::string name)
         {
-            p_pool = sr_buffer_pool_create(buffer_count, data_size, buffer_max_count, head_size);
+            p_pool = sr_buffer_pool_create(messageLength, messageCount, maxMessageCount, headSize, align);
             assert(p_pool);
+            sr_buffer_pool_set_name(p_pool, name.c_str());
         }
-        ~BufferPool()
+        ~MessagePool()
         {
-            LOGD("[DELETE]<BufferPool>[%s]\n", m_name.c_str());
             sr_buffer_pool_release(&p_pool);
-        }
-        void SetName(std::string name){
-            m_name = name;
-            sr_buffer_pool_set_name(p_pool, m_name.c_str());
         }
         Message NewFrameMessage(int key)
         {
-            return Message(key, sr_buffer_pool_get(p_pool));
+            return Message(key, sr_buffer_pool_alloc(p_pool));
         }
         Message NewStringMessage(int key, std::string str)
         {
-            return Message(key, str, sr_buffer_pool_get(p_pool));
+            return Message(key, str, sr_buffer_pool_alloc(p_pool));
         }
-        Message NewDataMessage(int key, unsigned char *data, size_t data_size)
+        Message NewDataMessage(int key, unsigned char *data, size_t size)
         {
-            return Message(key, data, data_size, sr_buffer_pool_get(p_pool));
+            return Message(key, data, size, sr_buffer_pool_alloc(p_pool));
         }
 
     private:
-        std::string m_name;
-        sr_buffer_pool_t *p_pool;
+        sr_buffer_pool_t *p_pool = nullptr;
     };
 
 

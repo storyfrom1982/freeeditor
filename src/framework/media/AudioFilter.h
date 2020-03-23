@@ -42,7 +42,7 @@ namespace freee {
         uint32_t m_srcVideoFormat, m_codecVideoFormat;
 
         size_t m_bufferSize;
-        BufferPool *p_bufferPool = nullptr;
+        MessagePool *p_bufferPool = nullptr;
     };
 
 }

@@ -70,7 +70,7 @@ void MediaSource::onMsgProcessData(Message msg)
 
 void MediaSource::onMsgProcessEvent(Message pkt)
 {
-    switch (pkt.GetEvent()){
+    switch (pkt.GetSubKey()){
         case MsgKey_Open:
             m_openedStream ++;
             if (m_openedStream == m_streamCount){

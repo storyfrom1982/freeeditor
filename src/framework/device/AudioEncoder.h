@@ -37,7 +37,7 @@ namespace freee {
     protected:
         int64_t m_startTimestamp = -1;
         size_t m_bufferSize = 0;
-        BufferPool *p_bufferPool = nullptr;
+        MessagePool *p_bufferPool = nullptr;
     };
 
 }

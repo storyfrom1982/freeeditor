@@ -4,7 +4,7 @@
 
 #include <MConfig.h>
 #include <VideoEncoder.h>
-#include <BufferPool.h>
+#include <MessagePool.h>
 #include "MediaRecorder.h"
 #include "MediaContext.h"
 
@@ -228,7 +228,7 @@ void MediaRecorder::onMsgStop(Message pkt) {
 void MediaRecorder::onMsgProcessEvent(Message pkt) {
     auto chain = pkt.GetPtr();
     if (chain == m_mediaStream){
-        if (pkt.GetEvent() == MsgKey_Open){
+        if (pkt.GetSubKey() == MsgKey_Open){
             LOGD("MediaStream Opened\n");
             if (is_recording){
                 m_videoEncoder->AddOutput(m_mediaStream);

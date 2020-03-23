@@ -26,7 +26,7 @@ void AudioDecoder::onMsgOpen(Message msg)
     OpenDecoder();
     MessageChain::onMsgOpen(msg);
     Message event(MsgKey_ProcessEvent);
-    event.SetEvent(MsgKey_Open);
+    event.SetSubKey(MsgKey_Open);
     MessageChain::onMsgProcessEvent(event);
 }
 

@@ -124,7 +124,6 @@ void AudioSource::UpdateConfig(Message ptk) {
     m_codecSamplePerFrame = m_config["codecSamplePerFrame"];
 
     m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplePerFrame;
-    p_bufferPool = new BufferPool(2, m_bufferSize, 10);
-    p_bufferPool->SetName("AudioSource");
+    p_bufferPool = new MessagePool(m_bufferSize, 10, 64, 0, 0, "AudioSource");
 }
 

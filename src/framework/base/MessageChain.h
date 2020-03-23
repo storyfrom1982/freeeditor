@@ -7,7 +7,7 @@
 
 
 #include <MConfig.h>
-#include <BufferPool.h>
+#include <MessagePool.h>
 #include "MessageProcessor.h"
 
 namespace freee {

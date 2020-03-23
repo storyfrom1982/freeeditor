@@ -43,7 +43,7 @@ namespace freee {
         uint32_t m_srcImageFormat, m_codecImageFormat;
 
         size_t m_bufferSize;
-        BufferPool *p_bufferPool = nullptr;
+        MessagePool *p_bufferPool = nullptr;
     };
 
 }

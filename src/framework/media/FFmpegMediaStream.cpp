@@ -18,8 +18,6 @@ FFmpegMediaStream::~FFmpegMediaStream() {
 }
 
 void FFmpegMediaStream::onMsgConnectStream(Message pkt) {
-    av_register_all();
-    avcodec_register_all();
     std::string url = pkt.GetString();
     if (avformat_alloc_output_context2(&m_pContext, NULL, NULL, url.c_str()) < 0) {
         LOGD("[FileMediaStream] ConnectStream failed to %s\n", url.c_str());
@@ -75,7 +73,7 @@ void FFmpegMediaStream::onMsgOpen(Message pkt) {
             m_status = Status_Opened;
             usleep(200000);
             Message event(MsgKey_ProcessEvent);
-            event.SetEvent(MsgKey_Open);
+            event.SetSubKey(MsgKey_Open);
             MessageChain::onMsgProcessEvent(event);
         }
     }
