@@ -31,7 +31,13 @@ void MessageProcessor::StopProcessor() {
     if (tid){
         pthread_join(tid, nullptr);
     }
-    m_messageQueue.clear();
+//    m_messageQueue.clear();
+//    std::vector<Message> tmp;
+//    m_messageQueue.swap((tmp));
+//    std::vector<Message>().swap(m_messageQueue);
+    for (int i = 0; i < m_length; ++i){
+        m_messageQueue[i] = Message();
+    }
 }
 
 void MessageProcessor::ProcessMessage(Message msg) {

@@ -102,7 +102,7 @@ int FFmpegAudioDecoder::DecodeAudio(Message msg)
     ::av_init_packet( &avpkt );
     avpkt.stream_index = msg.GetFramePtr()->index;
     avpkt.data = msg.GetDataPtr();
-    avpkt.size = msg.GetMsgLength();
+    avpkt.size = msg.GetLength();
     avpkt.dts =  msg.GetFramePtr()->timestamp;
     avpkt.pts  = msg.GetFramePtr()->timestamp;
     avpkt.flags = 0;

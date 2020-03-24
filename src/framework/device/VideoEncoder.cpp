@@ -40,7 +40,7 @@ void VideoEncoder::FinalClear() {
 
 void VideoEncoder::onMsgOpen(Message pkt) {
     if (m_status == Status_Closed){
-        MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
+        MessageChain *chain = static_cast<MessageChain *>(pkt.GetObject());
         m_config = chain->GetConfig(this);
         OpenEncoder();
         m_frameId = 0;

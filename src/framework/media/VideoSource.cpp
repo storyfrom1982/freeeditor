@@ -75,7 +75,7 @@ void VideoSource::ProcessData(MessageChain *chain, Message pkt) {
         || m_srcWidth != m_codecWidth
         || m_srcHeight != m_codecHeight){
         if (p_bufferPool){
-            Message y420 = p_bufferPool->NewFrameMessage(MsgKey_ProcessData);
+            Message y420 = p_bufferPool->NewMessage(MsgKey_ProcessData);
             if (y420.GetDataPtr()){
                 sr_buffer_frame_set_image_format(y420.GetFramePtr(), y420.GetDataPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
                 sr_buffer_frame_convert_to_yuv420p(pkt.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);

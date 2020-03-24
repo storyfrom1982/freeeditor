@@ -16,7 +16,7 @@ freee::AudioEncoder::~AudioEncoder() {
 }
 
 void freee::AudioEncoder::onMsgOpen(freee::Message pkt) {
-    MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
+    MessageChain *chain = static_cast<MessageChain *>(pkt.GetObject());
     m_config = chain->GetConfig(this);
     size_t bytePerSample = m_config["codecBytePerSample"];
     size_t samplePerFrame = m_config["codecSamplePerFrame"];

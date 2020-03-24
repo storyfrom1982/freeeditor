@@ -121,7 +121,7 @@ int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
     in_buf.bufElSizes = &in_elem_size;
 
 
-    Message opkt = p_bufferPool->NewFrameMessage(MsgKey_ProcessData);
+    Message opkt = p_bufferPool->NewMessage(MsgKey_ProcessData);
     opkt.SetPtr(this);
 
     out_ptr = opkt.GetDataPtr();

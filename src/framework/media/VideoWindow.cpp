@@ -81,7 +81,7 @@ void VideoWindow::onRecvMessage(Message pkt) {
         JniEnv env;
         AutoLock lock(mLock);
 //        mWindowHolder = pkt.GetPtr();
-        mWindowHolder = env->NewGlobalRef(static_cast<jobject>(pkt.GetPtr()));
+        mWindowHolder = env->NewGlobalRef(static_cast<jobject>(pkt.GetObject()));
         mNativeWindow = ANativeWindow_fromSurface(env.m_pEnv, (jobject)mWindowHolder);
         if (mCallback){
             mCallback->onSurfaceCreated(mNativeWindow);

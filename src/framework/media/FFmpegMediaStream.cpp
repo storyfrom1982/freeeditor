@@ -51,7 +51,7 @@ void FFmpegMediaStream::onMsgDisconnectStream() {
 }
 
 void FFmpegMediaStream::onMsgOpen(Message pkt) {
-    MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
+    MessageChain *chain = static_cast<MessageChain *>(pkt.GetObject());
     if (m_chainToStream[chain] == nullptr){
         LOGD("FileMediaStream::onMsgOpen type[%s] extraConfig %lu\n", chain->GetName().c_str(), chain->GetExtraConfig(this).size());
         if (chain->GetType(this) == MediaType_Audio){
@@ -82,7 +82,7 @@ void FFmpegMediaStream::onMsgClose(Message pkt) {
 }
 
 void FFmpegMediaStream::onMsgProcessData(Message pkt) {
-    MessageChain *chain = static_cast<MessageChain *>(pkt.GetPtr());
+    MessageChain *chain = static_cast<MessageChain *>(pkt.GetObject());
 
     AVStream* pStream = nullptr;
     {

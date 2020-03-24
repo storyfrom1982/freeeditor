@@ -100,7 +100,7 @@ void AudioSource::Stop(MessageChain *chain) {
 }
 
 void AudioSource::ProcessData(MessageChain *chain, Message pkt) {
-    Message resample = p_bufferPool->NewFrameMessage(MsgKey_ProcessData);
+    Message resample = p_bufferPool->NewMessage(MsgKey_ProcessData);
     memcpy(resample.GetDataPtr(), pkt.GetFramePtr()->data, resample.GetDataSize());
     resample.GetFramePtr()->timestamp = pkt.GetFramePtr()->timestamp;
     MessageChain::onMsgProcessData(resample);

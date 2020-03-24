@@ -20,7 +20,7 @@ AudioDecoder::~AudioDecoder()
 
 void AudioDecoder::onMsgOpen(Message msg)
 {
-    MessageChain *chain = static_cast<MessageChain *>(msg.GetPtr());
+    MessageChain *chain = static_cast<MessageChain *>(msg.GetObject());
     m_config = chain->GetConfig(this);
     LOGD("VideoDecoder::onMsgOpen config: %s\n", m_config.dump().c_str());
     OpenDecoder();

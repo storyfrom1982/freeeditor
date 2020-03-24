@@ -154,7 +154,7 @@ int X264VideoEncoder::EncoderEncode(Message pkt) {
         frameLen += nal_len;
     }
 
-    Message opkt = p_bufferPool->NewFrameMessage(MsgKey_ProcessData);
+    Message opkt = p_bufferPool->NewMessage(MsgKey_ProcessData);
     opkt.SetPtr(this);
     opkt.GetFramePtr()->flag = PktFlag_PFrame;
 

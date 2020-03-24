@@ -103,7 +103,7 @@ void MediaRecorder::onMsgStartPreview(Message pkt) {
         }
         if (m_status == Status_Started){
             m_videoFilter->AddOutput(m_videoRenderer);
-            m_videoRenderer->SetVideoWindow(pkt.GetPtr());
+            m_videoRenderer->SetVideoWindow(pkt.GetObject());
             is_previewing = true;
         }
     }
@@ -226,7 +226,7 @@ void MediaRecorder::onMsgStop(Message pkt) {
 }
 
 void MediaRecorder::onMsgProcessEvent(Message pkt) {
-    auto chain = pkt.GetPtr();
+    auto chain = pkt.GetObject();
     if (chain == m_mediaStream){
         if (pkt.GetSubKey() == MsgKey_Open){
             LOGD("MediaStream Opened\n");

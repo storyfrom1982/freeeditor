@@ -105,7 +105,7 @@ int FFmpegVideoDecoder::DecodeVideo(Message msg)
     ::av_init_packet( &avpkt );
     avpkt.stream_index = msg.GetFramePtr()->index;
     avpkt.data = msg.GetDataPtr();
-    avpkt.size = msg.GetMsgLength();
+    avpkt.size = msg.GetLength();
     avpkt.dts =  msg.GetFramePtr()->timestamp;
     avpkt.pts  = msg.GetFramePtr()->timestamp;
     avpkt.flags = 0;
@@ -183,7 +183,7 @@ void FFmpegVideoDecoder::GetVideoBuffer(AVFrame *frame)
 //    int64_t startTime = sr_time_begin();
     CreateBufferPool(frame);
 
-    Message msg = m_pBufferPool->NewFrameMessage(MsgKey_ProcessData);
+    Message msg = m_pBufferPool->NewMessage(MsgKey_ProcessData);
     int pos = 0;
     for (int i = 0; i < m_planeCount; i++) {
         msg.GetFramePtr()->channel[i].data = msg.GetDataPtr() + pos;

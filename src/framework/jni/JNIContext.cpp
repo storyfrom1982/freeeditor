@@ -92,7 +92,7 @@ public:
         if (!pkt.GetString().empty()){
             str = env->NewStringUTF(pkt.GetString().c_str());
         }
-        jobject msg = env->NewObject(m_msgCls, m_newJniMessage, pkt.GetKey(), pkt.GetNumber(), str);
+        jobject msg = env->NewObject(m_msgCls, m_newJniMessage, pkt.GetKey(), pkt.GetAddress(), str);
         if (str != nullptr){
             env->DeleteLocalRef(str);
         }
@@ -105,7 +105,7 @@ public:
         if (!pkt.GetString().empty()){
             str = env->NewStringUTF(pkt.GetString().c_str());
         }
-        jobject msg = env->NewObject(m_msgCls, m_newJniMessage, pkt.GetKey(), pkt.GetNumber(), str);
+        jobject msg = env->NewObject(m_msgCls, m_newJniMessage, pkt.GetKey(), pkt.GetAddress(), str);
         if (str != nullptr){
             env->DeleteLocalRef(str);
         }

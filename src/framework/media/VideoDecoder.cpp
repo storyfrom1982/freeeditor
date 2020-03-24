@@ -24,7 +24,7 @@ void VideoDecoder::onMsgOpen(Message msg)
     if (m_status == Status_Opened){
         return;
     }
-    MessageChain *chain = static_cast<MessageChain *>(msg.GetPtr());
+    MessageChain *chain = static_cast<MessageChain *>(msg.GetObject());
     m_config = chain->GetConfig(this);
     m_extraConfig = chain->GetExtraConfig(this);
     LOGD("VideoDecoder::onMsgOpen config: %s\n", m_config.dump().c_str());

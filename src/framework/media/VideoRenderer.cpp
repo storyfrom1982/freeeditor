@@ -49,7 +49,7 @@ void VideoRenderer::FinalClear() {
 }
 
 void VideoRenderer::onMsgOpen(Message pkt) {
-    m_config = static_cast<MessageChain *>(pkt.GetPtr())->GetConfig(this);
+    m_config = static_cast<MessageChain *>(pkt.GetObject())->GetConfig(this);
     if (m_status == Status_Closed){
         if (OpenModule() != 0){
             return;
@@ -134,7 +134,7 @@ void VideoRenderer::SetVideoWindow(void *ptr) {
 }
 
 void VideoRenderer::MessageSetVideoWindow(Message pkt) {
-    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.GetPtr()));
+    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.GetObject()));
     if (m_status == Status_Opened){
         mVideoWindow->SetCallback(this);
     }
@@ -163,7 +163,7 @@ void VideoRenderer::MessageWindowCreated(Message pkt) {
     isSurfaceCreated = true;
     isSurfaceDestroyed = false;
     if (renderer){
-        gl_renderer_set_window(renderer, pkt.GetPtr());
+        gl_renderer_set_window(renderer, pkt.GetObject());
     }
 }
 

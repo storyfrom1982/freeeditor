@@ -79,7 +79,7 @@ void MediaPlayer::onMsgControl(Message pkt)
 {
     switch (pkt.GetKey()){
         case MsgKey_Control_SetWindow:
-            m_pVideoRenderer->SetVideoWindow(pkt.GetPtr());
+            m_pVideoRenderer->SetVideoWindow(pkt.GetObject());
             break;
         default:
             break;
@@ -93,7 +93,7 @@ void MediaPlayer::onRecvMessage(Message msg)
 
 void MediaPlayer::onMsgProcessEvent(Message pkt)
 {
-    if (pkt.GetPtr() == m_pMediaSource){
+    if (pkt.GetObject() == m_pMediaSource){
 //        LOGD("Open stream config: %s\n", pkt.GetString().c_str());
         json cfg = json::parse(pkt.GetString());
         if (cfg["codecType"] == AVMEDIA_TYPE_VIDEO){

@@ -84,25 +84,25 @@ namespace freee{
 
         Message NewFrameMessage(int key)
         {
-            return p_bufferPool->NewFrameMessage(key);
+            return p_bufferPool->NewMessage(key);
         }
 
         Message NewFrameMessage(int key, int event)
         {
-            return p_bufferPool->NewFrameMessage(key, event);
+            return p_bufferPool->NewMessage(key, event);
         }
         Message NewFrameMessage(int key, void *object)
         {
-            return p_bufferPool->NewFrameMessage(key, object);
+            return p_bufferPool->NewMessage(key, object);
         }
         Message NewJsonMessage(int key, std::string str)
         {
-            return p_bufferPool->NewStringMessage(key, str);
+            return p_bufferPool->NewMessage(key, str);
         }
 
         Message NewDataMessage(int key, unsigned char *data, size_t data_size)
         {
-            return p_bufferPool->NewDataMessage(key, data, data_size);
+            return p_bufferPool->NewMessage(key, data, data_size);
         }
 
 

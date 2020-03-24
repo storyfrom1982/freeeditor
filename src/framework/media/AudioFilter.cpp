@@ -17,7 +17,7 @@ AudioFilter::~AudioFilter() {
 }
 
 void AudioFilter::onMsgOpen(Message pkt) {
-    m_config = static_cast<MessageChain *>(pkt.GetPtr())->GetConfig(this);
+    m_config = static_cast<MessageChain *>(pkt.GetObject())->GetConfig(this);
     OpenModule();
     MessageChain::onMsgOpen(pkt);
 //    OpenNext();

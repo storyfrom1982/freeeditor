@@ -66,7 +66,7 @@ void AudioPlayer::ProcessData(MessageChain *chain, Message msg)
 void AudioPlayer::onRecvMessage(Message msg)
 {
 //    LOGD("AudioPlayer::onRecvMessage %lld\n", msg.frame.timestamp);
-    if (sr_pipe_readable(pipe) < msg.GetMsgLength()){
+    if (sr_pipe_readable(pipe) < msg.GetLength()){
         return;
     }
     sr_pipe_block_read(pipe, (char*)msg.GetFramePtr()->data, msg.GetFramePtr()->timestamp);
