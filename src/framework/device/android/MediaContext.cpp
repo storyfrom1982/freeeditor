@@ -55,14 +55,14 @@ MediaContext* MediaContext::Instance() {
 
 Message MediaContext::onRequestMessage(int key) {
     if (key == OnReqMsg_CreateRecorder){
-        return Message(key, new MediaRecorder());
+        return NewFrameMessage(key, new MediaRecorder());
     }else if (key == OnReqMsg_CreatePlayer){
-        return Message(key, new MediaPlayer());
+        return NewFrameMessage(key, new MediaPlayer());
     }else if (key == OnReqMsg_GetRecorderConfig){
         json js = MConfig::load();
         return NewJsonMessage(key, js.dump());
     }
-    return Message();
+    return NewFrameMessage(0);
 }
 
 void MediaContext::onRecvMessage(Message pkt) {
@@ -106,16 +106,16 @@ MessageContext *MediaContext::ConnectSpeaker()
 }
 
 void MediaContext::DisconnectCamera() {
-    SendMessage(Message(SendMsg_DisconnectCamera));
+    SendMessage(NewFrameMessage(SendMsg_DisconnectCamera));
 }
 
 void MediaContext::DisconnectMicrophone() {
-    SendMessage(Message(SendMsg_DisconnectMicrophone));
+    SendMessage(NewFrameMessage(SendMsg_DisconnectMicrophone));
 }
 
 void MediaContext::DisconnectSpeaker()
 {
-    SendMessage(Message(SendMsg_DisconnectSpeaker));
+    SendMessage(NewFrameMessage(SendMsg_DisconnectSpeaker));
 }
 
 Message MediaContext::GetStringPkt(int key, std::string str) {

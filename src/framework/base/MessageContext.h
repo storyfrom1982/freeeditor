@@ -60,7 +60,7 @@ namespace freee{
 
         virtual Message onRequestMessage(int key)
         {
-            return Message();
+            return NewFrameMessage(0);
         }
 
         virtual void SendMessage(Message msg)
@@ -79,9 +79,22 @@ namespace freee{
             {
                 return p_messageContext->onRequestMessage(key);
             }
-            return Message();
+            return NewFrameMessage(0);
         }
 
+        Message NewFrameMessage(int key)
+        {
+            return p_bufferPool->NewFrameMessage(key);
+        }
+
+        Message NewFrameMessage(int key, int event)
+        {
+            return p_bufferPool->NewFrameMessage(key, event);
+        }
+        Message NewFrameMessage(int key, void *object)
+        {
+            return p_bufferPool->NewFrameMessage(key, object);
+        }
         Message NewJsonMessage(int key, std::string str)
         {
             return p_bufferPool->NewStringMessage(key, str);

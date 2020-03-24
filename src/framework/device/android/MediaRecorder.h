@@ -30,7 +30,7 @@ namespace freee{
         void FinalClear() override;
 
     private:
-        void onRecvMessage(Message pkt) override;
+        void onRecvMessage(Message msg) override;
 
     private:
         void onMsgStartPreview(Message pkt);

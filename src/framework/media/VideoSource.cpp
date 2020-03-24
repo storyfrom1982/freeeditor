@@ -51,25 +51,25 @@ void VideoSource::Open(MessageChain *chain) {
 
 void VideoSource::Close(MessageChain *chain) {
     LOGD("VideoSource::Close enter\n");
-    SendMessage(Message(SendMsg_Close));
+    SendMessage(NewFrameMessage(SendMsg_Close));
     LOGD("VideoSource::Close exit\n");
 }
 
 void VideoSource::Start(MessageChain *chain) {
     LOGD("VideoSource::Start enter\n");
-    SendMessage(Message(SendMsg_Start));
+    SendMessage(NewFrameMessage(SendMsg_Start));
     LOGD("VideoSource::Start exit\n");
 }
 
 void VideoSource::Stop(MessageChain *chain) {
     LOGD("VideoSource::Stop enter\n");
-    SendMessage(Message(SendMsg_Stop));
+    SendMessage(NewFrameMessage(SendMsg_Stop));
     LOGD("VideoSource::Stop exit\n");
 }
 
 void VideoSource::ProcessData(MessageChain *chain, Message pkt) {
     sr_buffer_frame_set_image_format(
-            &pkt.frame, pkt.frame.data,
+            pkt.GetFramePtr(), pkt.GetFramePtr()->data,
             m_srcWidth, m_srcHeight, m_srcImageFormat);
     if (m_srcImageFormat != m_codecImageFormat
         || m_srcWidth != m_codecWidth
@@ -77,9 +77,9 @@ void VideoSource::ProcessData(MessageChain *chain, Message pkt) {
         if (p_bufferPool){
             Message y420 = p_bufferPool->NewFrameMessage(MsgKey_ProcessData);
             if (y420.GetDataPtr()){
-                sr_buffer_frame_set_image_format(&y420.frame, y420.GetDataPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
-                sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, m_srcRotation);
-                y420.frame.timestamp = pkt.frame.timestamp;
+                sr_buffer_frame_set_image_format(y420.GetFramePtr(), y420.GetDataPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
+                sr_buffer_frame_convert_to_yuv420p(pkt.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);
+                y420.GetFramePtr()->timestamp = pkt.GetFramePtr()->timestamp;
                 MessageChain::onMsgProcessData(y420);
             }else {
                 LOGD("[WARNING] missed a video frame\n");

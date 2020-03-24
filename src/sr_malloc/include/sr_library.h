@@ -355,6 +355,15 @@ extern unsigned int sr_message_queue_putable(sr_message_queue_t *queue);
 extern int sr_message_queue_put(sr_message_queue_t *queue, sr_message_t msg);
 
 
+typedef struct sr_buffer_message_t {
+    int key;
+    int subKey;
+    size_t msgLength;
+    union {
+        void *ptr;
+        int64_t number;
+    };
+}sr_buffer_message_t;
 
 typedef struct sr_buffer_frame_t {
 
@@ -394,7 +403,8 @@ typedef struct sr_buffer_data_t {
 	size_t data_size;
 	unsigned char *head;
 	unsigned char *data;
-//    sr_buffer_frame_t frame;
+    sr_buffer_frame_t frame;
+    sr_buffer_message_t msg;
 }sr_buffer_data_t;
 
 typedef struct sr_buffer_pool sr_buffer_pool_t;

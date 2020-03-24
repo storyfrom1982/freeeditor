@@ -1075,7 +1075,7 @@ sr_buffer_pool_t* sr_buffer_pool_create(
     pool->align = align;
     pool->queue = sr_queue_create(release_buffer_node);
     for (int i = 0; i < pool->buffer_count; ++i){
-        sr_buffer_node_t *node = malloc(sizeof(sr_buffer_node_t));
+        sr_buffer_node_t *node = calloc(1, sizeof(sr_buffer_node_t));
         node->buffer.data_size = pool->data_size;
         node->buffer.head_size = pool->head_size;
         if (pool->align > 0){
@@ -1121,14 +1121,14 @@ sr_buffer_data_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool)
     }
     if (pool->buffer_count < pool->max_buffer_count){
         __sr_atom_add(pool->buffer_count, 1);
-        sr_buffer_node_t *node = malloc(sizeof(sr_buffer_node_t));
-        node->buffer.data_size = pool->data_size;
-        node->buffer.head_size = pool->head_size;
+        sr_buffer_node_t *node = calloc(1, sizeof(sr_buffer_node_t));
         if (pool->align > 0){
             node->buffer.head = (uint8_t*)aligned_alloc(pool->align, pool->data_size + pool->head_size);
         }else {
             node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
         }
+        node->buffer.frame = (sr_buffer_frame_t){0};
+        node->buffer.msg = (sr_buffer_message_t){0};
         node->buffer.data = node->buffer.head + pool->head_size;
         node->pool = pool;
         return &node->buffer;
@@ -1152,12 +1152,15 @@ sr_buffer_data_t* sr_buffer_pool_realloc(sr_buffer_data_t *buffer, size_t size)
         node->buffer.head = (uint8_t*)malloc(buffer->data_size + buffer->head_size);
     }
     node->buffer.data = node->buffer.head + buffer->head_size;
+    return &node->buffer;
 }
 
 void sr_buffer_pool_recycle(sr_buffer_data_t *buffer)
 {
     assert(buffer != NULL);
     sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)buffer - sizeof(sr_node_t));
+    node->buffer.frame = (sr_buffer_frame_t){0};
+    node->buffer.msg = (sr_buffer_message_t){0};
     __sr_queue_block_push_back(node->pool->queue, node);
     if (__is_true(node->pool->destroyed)){
         sr_buffer_pool_t *pool = node->pool;

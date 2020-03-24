@@ -23,7 +23,7 @@ void freee::AudioEncoder::onMsgOpen(freee::Message pkt) {
     m_bufferSize = bytePerSample * samplePerFrame;
     p_bufferPool = new MessagePool(m_bufferSize, 1, 64, 16, 0, "AudioEncoder");
     OpenModule();
-    pkt.frame.type = MediaType_Audio;
+    pkt.GetFramePtr()->type = MediaType_Audio;
     MessageChain::onMsgOpen(pkt);
 }
 
@@ -39,9 +39,9 @@ void freee::AudioEncoder::onMsgClose(freee::Message pkt) {
 void freee::AudioEncoder::onMsgProcessData(freee::Message pkt) {
     if (m_outputChainStatus == Status_Opened){
         if (m_startTimestamp == -1){
-            m_startTimestamp = pkt.frame.timestamp;
+            m_startTimestamp = pkt.GetFramePtr()->timestamp;
         }
-        pkt.frame.timestamp -= m_startTimestamp;
+        pkt.GetFramePtr()->timestamp -= m_startTimestamp;
         ProcessMediaByModule(pkt);
     }
 }

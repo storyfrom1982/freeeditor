@@ -141,11 +141,11 @@ int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
 
 //    LOGD("[FaacAudioEncoder] EncodeVideo out_size=%d  out_elem_size=%d\n", out_args.numOutBytes, out_elem_size);
 
-    opkt.frame.type = MediaType_Audio;
-    opkt.frame.size = out_args.numOutBytes;
-    opkt.frame.data = opkt.GetDataPtr();
-    opkt.frame.timestamp = pkt.frame.timestamp / 1000;
-    opkt.frame.flag = PktFlag_PFrame;
+    opkt.GetFramePtr()->type = MediaType_Audio;
+    opkt.GetFramePtr()->size = out_args.numOutBytes;
+    opkt.GetFramePtr()->data = opkt.GetDataPtr();
+    opkt.GetFramePtr()->timestamp = pkt.GetFramePtr()->timestamp / 1000;
+    opkt.GetFramePtr()->flag = PktFlag_PFrame;
 
     MessageChain::onMsgProcessData(opkt);
 

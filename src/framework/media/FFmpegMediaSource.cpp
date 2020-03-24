@@ -146,7 +146,7 @@ int FFmpegMediaSource::ReadSource()
     int result = av_read_frame(m_pContext, &pkt);
     if (result < 0  ){
         if (result == AVERROR(EAGAIN) && m_isRunning){
-            onReadSource(Message(1001));
+            onReadSource(NewFrameMessage(1001));
             return 0;
         }
         char buffer[1024];
@@ -157,8 +157,8 @@ int FFmpegMediaSource::ReadSource()
 //    LOGD("[FFmpegMediaSource] av_read_frame() stream id %d\n", pkt.stream_index);
 
     Message msg = NewDataMessage(MsgKey_ProcessData, pkt.data, pkt.size);
-    msg.frame.index = pkt.stream_index;
-    msg.frame.timestamp = 0;
+    msg.GetFramePtr()->index = pkt.stream_index;
+    msg.GetFramePtr()->timestamp = 0;
     ProcessMessage(msg);
 
     av_packet_unref(&pkt);

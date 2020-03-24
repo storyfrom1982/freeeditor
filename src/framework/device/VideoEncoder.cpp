@@ -49,7 +49,7 @@ void VideoEncoder::onMsgOpen(Message pkt) {
         uint32_t w = m_config["codecWidth"];
         uint32_t h = m_config["codecHeight"];
         p_bufferPool = new MessagePool(w*h, 1, 64, 16, 0, "VideoEncoder");
-        pkt.frame.type = MediaType_Video;
+        pkt.GetFramePtr()->type = MediaType_Video;
         MessageChain::onMsgOpen(pkt);
         m_status = Status_Opened;
     }
@@ -66,7 +66,7 @@ void VideoEncoder::onMsgProcessData(Message pkt) {
 
     if ( m_outputChainStatus == Status_Opened) {
 //        LOGD("m_framerate ================  delay[%f]\n", m_frameRate);
-        long long timeStamp = pkt.frame.timestamp;
+        long long timeStamp = pkt.GetFramePtr()->timestamp;
         double frameIdScope = (double) timeStamp * (m_frameRate / 1000000.0f);
         if (m_startFrameId == -1) {
             m_startFrameId = frameIdScope;

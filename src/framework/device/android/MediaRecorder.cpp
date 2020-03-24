@@ -36,7 +36,7 @@ MediaRecorder::MediaRecorder()
 }
 
 MediaRecorder::~MediaRecorder() {
-    ProcessMessage(Message(MsgKey_Close));
+    ProcessMessage(NewFrameMessage(MsgKey_Close));
     StopProcessor();
 //    FinalClear();
 }
@@ -64,8 +64,8 @@ void MediaRecorder::FinalClear() {
     }
 }
 
-void MediaRecorder::onRecvMessage(Message pkt) {
-    ProcessMessage(Message(pkt));
+void MediaRecorder::onRecvMessage(Message msg) {
+    ProcessMessage(msg);
 }
 
 void MediaRecorder::onMsgStartRecord(Message pkt) {
@@ -235,7 +235,7 @@ void MediaRecorder::onMsgProcessEvent(Message pkt) {
                 m_audioEncoder->AddOutput(m_mediaStream);
                 m_videoFilter->AddOutput(m_videoEncoder);
                 m_audioFilter->AddOutput(m_audioEncoder);
-                SendMessage(Message(MsgKey_ProcessEvent, MsgKey_Open));
+                SendMessage(NewFrameMessage(MsgKey_ProcessEvent, MsgKey_Open));
             }
         }
     }

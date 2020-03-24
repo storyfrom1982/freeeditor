@@ -121,7 +121,7 @@ int VideoRenderer::ProcessMediaByModule(Message pkt) {
     AutoLock lock(mLock);
     if (!isSurfaceDestroyed){
 //        int64_t startTime = sr_time_begin();
-        opengles_render(opengles, &pkt.frame);
+        opengles_render(opengles, pkt.GetFramePtr());
         gl_renderer_swap_buffers(renderer);
 //        LOGD("FFmpegVideoDecoder::ProcessMediaByModule time %lld\n", sr_time_passed(startTime));
     }
@@ -130,7 +130,7 @@ int VideoRenderer::ProcessMediaByModule(Message pkt) {
 }
 
 void VideoRenderer::SetVideoWindow(void *ptr) {
-    ProcessMessage(Message(RecvMsg_SetVideoWindow, ptr));
+    ProcessMessage(NewFrameMessage(RecvMsg_SetVideoWindow, ptr));
 }
 
 void VideoRenderer::MessageSetVideoWindow(Message pkt) {
@@ -142,21 +142,21 @@ void VideoRenderer::MessageSetVideoWindow(Message pkt) {
 
 void VideoRenderer::onSurfaceCreated(void *ptr) {
     AutoLock lock(mLock);
-    ProcessMessage(Message(RecvMsg_SurfaceCreated, ptr));
+    ProcessMessage(NewFrameMessage(RecvMsg_SurfaceCreated, ptr));
 }
 
 void VideoRenderer::onSurfaceChanged(int width, int height) {
 //    assert(width != 0 && height != 0);
-    Message pkt(RecvMsg_SurfaceChanged);
-    pkt.frame.width = width;
-    pkt.frame.height = height;
+    Message pkt = NewFrameMessage(RecvMsg_SurfaceChanged);
+    pkt.GetFramePtr()->width = width;
+    pkt.GetFramePtr()->height = height;
     ProcessMessage(pkt);
 }
 
 void VideoRenderer::onSurfaceDestroyed() {
     AutoLock lock(mLock);
     isSurfaceDestroyed = true;
-    ProcessMessage(Message(RecvMsg_SurfaceDestroyed));
+    ProcessMessage(NewFrameMessage(RecvMsg_SurfaceDestroyed));
 }
 
 void VideoRenderer::MessageWindowCreated(Message pkt) {
@@ -178,7 +178,7 @@ void VideoRenderer::MessageWindowDestroyed(Message pkt) {
 
 void VideoRenderer::MessageWindowChanged(Message pkt) {
     if (mVideoWindow){
-        UpdateViewport(pkt.frame.width, pkt.frame.height);
+        UpdateViewport(pkt.GetFramePtr()->width, pkt.GetFramePtr()->height);
     }
 }
 

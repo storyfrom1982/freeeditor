@@ -63,9 +63,9 @@ void MediaSource::onMsgStop(Message pkt)
 
 void MediaSource::onMsgProcessData(Message msg)
 {
-    MessageChain *chain = m_streamMap[msg.frame.index];
+    MessageChain *chain = m_streamMap[msg.GetFramePtr()->index];
     chain->ProcessData(this, msg);
-    ProcessMessage(Message(MsgKey_ReadSource));
+    ProcessMessage(NewFrameMessage(MsgKey_ReadSource));
 }
 
 void MediaSource::onMsgProcessEvent(Message pkt)

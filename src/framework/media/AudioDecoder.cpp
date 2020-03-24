@@ -25,9 +25,7 @@ void AudioDecoder::onMsgOpen(Message msg)
     LOGD("VideoDecoder::onMsgOpen config: %s\n", m_config.dump().c_str());
     OpenDecoder();
     MessageChain::onMsgOpen(msg);
-    Message event(MsgKey_ProcessEvent);
-    event.SetSubKey(MsgKey_Open);
-    MessageChain::onMsgProcessEvent(event);
+    MessageChain::onMsgProcessEvent(NewFrameMessage(MsgKey_ProcessEvent, MsgKey_Open));
 }
 
 void AudioDecoder::onMsgClose(Message msg)

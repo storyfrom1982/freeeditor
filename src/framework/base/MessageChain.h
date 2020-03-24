@@ -44,19 +44,19 @@ namespace freee {
         virtual void FinalClear() {};
 
         virtual void Open(MessageChain *chain) {
-            ProcessMessage(Message(MsgKey_Open, chain));
+            ProcessMessage(NewFrameMessage(MsgKey_Open, chain));
         }
 
         virtual void Close(MessageChain *chain) {
-            ProcessMessage(Message(MsgKey_Close, chain));
+            ProcessMessage(NewFrameMessage(MsgKey_Close, chain));
         }
 
         virtual void Start(MessageChain *chain) {
-            ProcessMessage(Message(MsgKey_Start, chain));
+            ProcessMessage(NewFrameMessage(MsgKey_Start, chain));
         }
 
         virtual void Stop(MessageChain *chain) {
-            ProcessMessage(Message(MsgKey_Stop, chain));
+            ProcessMessage(NewFrameMessage(MsgKey_Stop, chain));
         }
 
         virtual void ProcessData(MessageChain *chain, Message msg) {

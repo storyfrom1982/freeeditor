@@ -59,5 +59,5 @@ void MediaStream::ConnectStream(std::string url) {
 }
 
 void MediaStream::DisconnectStream() {
-    ProcessMessage(Message(OnRecvMsg_DisconnectStream));
+    ProcessMessage(NewFrameMessage(OnRecvMsg_DisconnectStream));
 }

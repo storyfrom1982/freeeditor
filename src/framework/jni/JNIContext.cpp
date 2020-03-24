@@ -65,13 +65,11 @@ public:
     }
 
     void SendMessage(int key, jlong ptr){
-        Message pkt(key, (void*)ptr);
-        MessageContext::SendMessage(pkt);
+        MessageContext::SendMessage(NewFrameMessage(key, (void*)ptr));
     }
 
     void SendMessage(int key, jobject obj){
-        Message pkt(key, obj);
-        MessageContext::SendMessage(pkt);
+        MessageContext::SendMessage(NewFrameMessage(key, obj));
     }
 
     void SendMessage(int key, jstring json, JNIEnv *env){
@@ -82,9 +80,9 @@ public:
     }
 
     void SendMessage(int key, jbyte *buffer, jlong timestamp){
-        Message pkt(key);
-        pkt.frame.data = (uint8_t*)buffer;
-        pkt.frame.timestamp = timestamp;
+        Message pkt = NewFrameMessage(key);
+        pkt.GetFramePtr()->data = (uint8_t*)buffer;
+        pkt.GetFramePtr()->timestamp = timestamp;
         MessageContext::SendMessage(pkt);
     }
 
@@ -124,10 +122,10 @@ public:
                 return NewJsonMessage(key, std::string(env->GetStringUTFChars(str, 0),
                                                        env->GetStringUTFLength(str)));
             }else {
-                return Message(key, (void*)env->GetLongField(msg, m_ptrField));
+                return NewFrameMessage(key, (void*)env->GetLongField(msg, m_ptrField));
             }
         }
-        return Message();
+        return NewFrameMessage(0);
     }
 
 private:

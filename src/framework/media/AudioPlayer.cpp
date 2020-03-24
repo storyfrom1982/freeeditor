@@ -27,24 +27,24 @@ void AudioPlayer::Open(MessageChain *chain)
     pipe = sr_pipe_create(1 << 18);
     Message msg = NewJsonMessage(MsgKey_Open, m_config.dump());
     SendMessage(msg);
-    SendMessage(Message(MsgKey_Start));
+    SendMessage(NewFrameMessage(MsgKey_Start));
 }
 
 void AudioPlayer::Close(MessageChain *chain)
 {
     sr_pipe_stop(pipe);
-    SendMessage(Message(MsgKey_Stop));
-    SendMessage(Message(MsgKey_Close));
+    SendMessage(NewFrameMessage(MsgKey_Stop));
+    SendMessage(NewFrameMessage(MsgKey_Close));
 }
 
 void AudioPlayer::Start(MessageChain *chain)
 {
-    SendMessage(Message(MsgKey_Start));
+    SendMessage(NewFrameMessage(MsgKey_Start));
 }
 
 void AudioPlayer::Stop(MessageChain *chain)
 {
-    SendMessage(Message(MsgKey_Stop));
+    SendMessage(NewFrameMessage(MsgKey_Stop));
 }
 
 void AudioPlayer::ProcessData(MessageChain *chain, Message msg)
@@ -69,6 +69,6 @@ void AudioPlayer::onRecvMessage(Message msg)
     if (sr_pipe_readable(pipe) < msg.GetMsgLength()){
         return;
     }
-    sr_pipe_block_read(pipe, (char*)msg.frame.data, msg.frame.timestamp);
+    sr_pipe_block_read(pipe, (char*)msg.GetFramePtr()->data, msg.GetFramePtr()->timestamp);
 //    LOGD("AudioPlayer::onRecvMessage exit\n");
 }

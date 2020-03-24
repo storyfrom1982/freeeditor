@@ -23,7 +23,7 @@ void MessageProcessor::StartProcessor() {
 }
 
 void MessageProcessor::StopProcessor() {
-    ProcessMessage(Message(MsgKey_Exit));
+    ProcessMessage(NewFrameMessage(MsgKey_Exit));
     m_lock.lock();
     pthread_t tid = m_threadId;
     m_threadId = 0;
@@ -36,6 +36,10 @@ void MessageProcessor::StopProcessor() {
 
 void MessageProcessor::ProcessMessage(Message msg) {
     m_lock.lock();
+    if (m_threadId == 0){
+        m_lock.unlock();
+        return;
+    }
     while (0 == (m_length - m_putIndex + m_getIndex)){
         m_lock.wait();
     }

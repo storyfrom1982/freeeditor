@@ -6,11 +6,11 @@
 #define ANDROID_MEDIAPROCESSOR_H
 
 
-#include <MessagePool.h>
 #include "AutoLock.h"
 #include "MessageContext.h"
 #include <string>
 #include <vector>
+
 
 namespace freee {
 

@@ -88,24 +88,21 @@ void AudioSource::Open(MessageChain *chain) {
 }
 
 void AudioSource::Close(MessageChain *chain) {
-    Message pkt(SendMsg_Close);
-    SendMessage(pkt);
+    SendMessage(NewFrameMessage(SendMsg_Close));
 }
 
 void AudioSource::Start(MessageChain *chain) {
-    Message pkt(SendMsg_Start);
-    SendMessage(pkt);
+    SendMessage(NewFrameMessage(SendMsg_Start));
 }
 
 void AudioSource::Stop(MessageChain *chain) {
-    Message pkt(SendMsg_Stop);
-    SendMessage(pkt);
+    SendMessage(NewFrameMessage(SendMsg_Stop));
 }
 
 void AudioSource::ProcessData(MessageChain *chain, Message pkt) {
     Message resample = p_bufferPool->NewFrameMessage(MsgKey_ProcessData);
-    memcpy(resample.GetDataPtr(), pkt.frame.data, resample.GetDataSize());
-    resample.frame.timestamp = pkt.frame.timestamp;
+    memcpy(resample.GetDataPtr(), pkt.GetFramePtr()->data, resample.GetDataSize());
+    resample.GetFramePtr()->timestamp = pkt.GetFramePtr()->timestamp;
     MessageChain::onMsgProcessData(resample);
 }
 

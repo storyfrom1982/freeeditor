@@ -117,8 +117,8 @@ void VideoWindow::SetCallback(VideoWindow::VideoWindowCallback *callback) {
     AutoLock lock(mLock);
     mCallback = callback;
     if (mCallback){
-        SendMessage(Message(SendMsg_WindowCreated));
+        SendMessage(NewFrameMessage(SendMsg_WindowCreated));
     }else {
-        SendMessage(Message(SendMsg_WindowDestroyed));
+        SendMessage(NewFrameMessage(SendMsg_WindowDestroyed));
     }
 }

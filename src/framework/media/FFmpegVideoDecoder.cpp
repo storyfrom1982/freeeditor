@@ -103,11 +103,11 @@ int FFmpegVideoDecoder::DecodeVideo(Message msg)
 {
     AVPacket             avpkt;
     ::av_init_packet( &avpkt );
-    avpkt.stream_index = msg.frame.index;
+    avpkt.stream_index = msg.GetFramePtr()->index;
     avpkt.data = msg.GetDataPtr();
     avpkt.size = msg.GetMsgLength();
-    avpkt.dts =  msg.frame.timestamp;
-    avpkt.pts  = msg.frame.timestamp;
+    avpkt.dts =  msg.GetFramePtr()->timestamp;
+    avpkt.pts  = msg.GetFramePtr()->timestamp;
     avpkt.flags = 0;
     avpkt.buf = nullptr;
 
@@ -186,8 +186,8 @@ void FFmpegVideoDecoder::GetVideoBuffer(AVFrame *frame)
     Message msg = m_pBufferPool->NewFrameMessage(MsgKey_ProcessData);
     int pos = 0;
     for (int i = 0; i < m_planeCount; i++) {
-        msg.frame.channel[i].data = msg.GetDataPtr() + pos;
-        msg.frame.channel[i].size = m_planeSize[i];
+        msg.GetFramePtr()->channel[i].data = msg.GetDataPtr() + pos;
+        msg.GetFramePtr()->channel[i].size = m_planeSize[i];
         pos += m_planeSize[i];
     }
     struct op {
@@ -197,16 +197,16 @@ void FFmpegVideoDecoder::GetVideoBuffer(AVFrame *frame)
     };
 
     for (int i = 0; i < this->m_planeCount; i++) {
-        frame->buf[i] = av_buffer_create(msg.frame.channel[i].data, msg.frame.channel[i].size,
+        frame->buf[i] = av_buffer_create(msg.GetFramePtr()->channel[i].data, msg.GetFramePtr()->channel[i].size,
                                          &op::cb,
                                          this, 0);
-        frame->data[i] = msg.frame.channel[i].data;
-        msg.frame.channel[i].stride = frame->linesize[i];
+        frame->data[i] = msg.GetFramePtr()->channel[i].data;
+        msg.GetFramePtr()->channel[i].stride = frame->linesize[i];
     }
 
 //    msg.frame.width = frame->linesize[0];
-    msg.frame.width = frame->width;
-    msg.frame.height = frame->height;
+    msg.GetFramePtr()->width = frame->width;
+    msg.GetFramePtr()->height = frame->height;
     frame->opaque = msg.GetBufferPtr();
 
     frameMap[frame->opaque] = msg;
