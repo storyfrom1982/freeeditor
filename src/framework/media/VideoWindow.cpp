@@ -5,8 +5,8 @@
 #include <android/native_window.h>
 #include <JNIContext.h>
 #include <android/native_window_jni.h>
-#include <MessagePool.h>
-#include <MConfig.h>
+#include "../message/MessagePool.h"
+#include <MediaConfig.h>
 #include "VideoWindow.h"
 
 

@@ -2,7 +2,7 @@
 // Created by yongge on 20-3-22.
 //
 
-#include <android/MediaContext.h>
+#include <MediaContext.h>
 #include "AudioPlayer.h"
 
 

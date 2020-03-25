@@ -3,11 +3,11 @@
 //
 
 #include "JNIContext.h"
-#include "MessageContext.h"
+#include "../message/MessageContext.h"
 #include "MediaContext.h"
 
 #include <android/log.h>
-#include <MessagePool.h>
+#include "../message/MessagePool.h"
 
 static void log_debug(int level, const char *debug_log, const char *pure_log)
 {

@@ -6,9 +6,9 @@
 #define ANDROID_VIDEORENDERER_H
 
 
-#include <MediaModule.h>
-#include <MessageProcessor.h>
+#include "../message/MessageProcessor.h"
 #include "VideoWindow.h"
+#include "../message/MessageChain.h"
 
 
 #ifdef __cplusplus

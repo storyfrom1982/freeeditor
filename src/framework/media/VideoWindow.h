@@ -6,7 +6,7 @@
 #define ANDROID_VIDEOSURFACE_H
 
 
-#include <MessageContext.h>
+#include "../message/MessageContext.h"
 
 
 namespace freee {

@@ -2,9 +2,9 @@
 // Created by yongge on 20-3-5.
 //
 
-#include <android/MediaContext.h>
+#include <MediaContext.h>
 #include "MediaStream.h"
-#include "FFmpegMediaStream.h"
+#include "ffmpeg/FFmpegMediaStream.h"
 
 
 using namespace freee;

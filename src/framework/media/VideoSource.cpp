@@ -2,7 +2,7 @@
 // Created by yongge on 20-2-20.
 //
 
-#include <android/MediaContext.h>
+#include <MediaContext.h>
 #include "VideoSource.h"
 
 using namespace std;
@@ -68,7 +68,7 @@ void VideoSource::Stop(MessageChain *chain) {
 }
 
 void VideoSource::ProcessData(MessageChain *chain, Message pkt) {
-    sr_buffer_frame_set_image_format(
+    libyuv_set_format(
             pkt.GetFramePtr(), pkt.GetFramePtr()->data,
             m_srcWidth, m_srcHeight, m_srcImageFormat);
     if (m_srcImageFormat != m_codecImageFormat
@@ -77,8 +77,9 @@ void VideoSource::ProcessData(MessageChain *chain, Message pkt) {
         if (p_bufferPool){
             Message y420 = p_bufferPool->NewMessage(MsgKey_ProcessData);
             if (y420.GetBufferPtr()){
-                sr_buffer_frame_set_image_format(y420.GetFramePtr(), y420.GetBufferPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
-                sr_buffer_frame_convert_to_yuv420p(pkt.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);
+                libyuv_set_format(y420.GetFramePtr(), y420.GetBufferPtr(), m_codecWidth,
+                                  m_codecHeight, m_codecImageFormat);
+                libyuv_convert_to_yuv420p(pkt.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);
                 y420.GetFramePtr()->timestamp = pkt.GetFramePtr()->timestamp;
                 MessageChain::onMsgProcessData(y420);
             }else {

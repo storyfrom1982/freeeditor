@@ -6,9 +6,9 @@
 #define ANDROID_VIDEOFILTER_H
 
 
-#include <MessageChainImpl.h>
-#include <MessageProcessor.h>
-#include <MediaModule.h>
+#include "../message/MessageProcessor.h"
+#include "../message/MessageChain.h"
+
 
 namespace freee {
 

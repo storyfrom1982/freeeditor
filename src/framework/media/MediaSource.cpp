@@ -3,7 +3,7 @@
 //
 
 #include "MediaSource.h"
-#include "FFmpegMediaSource.h"
+#include "ffmpeg/FFmpegMediaSource.h"
 
 extern "C"{
 

@@ -312,48 +312,6 @@ extern unsigned int sr_pipe_block_write(sr_pipe_t *pipe, char *data, unsigned in
 ////缓冲区
 ///////////////////////////////////////////////////////////////
 
-enum {
-	MessageType_Native = -2,
-	MessageType_Pointer = -1,
-	MessageType_None = 0,
-	MessageType_Json
-};
-
-typedef struct sr_message_t{
-	int32_t key;
-	int32_t type;
-	union {
-        void *ptr;
-        char *str;
-		int64_t i64;
-	};
-}sr_message_t;
-
-#define __sr_null_msg       ((sr_message_t){0})
-
-#define __sr_msg_is_json(msg)    (msg.type > MessageType_None)
-#define __sr_msg_is_none(msg)    (msg.type == MessageType_None)
-#define __sr_msg_is_pointer(msg)    (msg.type == MessageType_Pointer)
-#define __sr_msg_is_native(msg)    (msg.type == MessageType_Native)
-
-#define __sr_msg_clear(msg) \
-    if (__sr_msg_is_json(msg) && msg.str) free(msg.str)
-
-typedef struct sr_msg_processor_t{
-	void *handler;
-	void (*process)(struct sr_msg_processor_t *processor, sr_message_t msg);
-}sr_message_processor_t;
-
-typedef struct sr_message_queue sr_message_queue_t;
-
-extern sr_message_queue_t* sr_message_queue_create(unsigned int size, const char *name);
-extern void sr_message_queue_release(sr_message_queue_t **pp_queue);
-extern int sr_message_queue_start_processor(sr_message_queue_t *queue, sr_message_processor_t *processor);
-extern void sr_message_queue_stop_processor(sr_message_queue_t *queue);
-
-extern unsigned int sr_message_queue_putable(sr_message_queue_t *queue);
-extern int sr_message_queue_put(sr_message_queue_t *queue, sr_message_t msg);
-
 
 typedef struct sr_buffer_message_t {
     int key;

@@ -6,7 +6,7 @@
 #define ANDROID_AUDIOFILTER_H
 
 
-#include <MediaModule.h>
+#include "../message/MessageChain.h"
 
 namespace freee {
 

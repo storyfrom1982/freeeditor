@@ -52,69 +52,63 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DSR_LOG_DEBUG -std=c++14")
 
 
 file(GLOB sdk_sources
-    sr_malloc/src/*.c
-    sr_malloc/src/*.cpp
-    framework/*.c
-    framework/jni/*.cpp
-    framework/jni/*.c
-    framework/base/*.cpp
-    framework/context/*.c
-    framework/context/*.cpp
-    framework/editor/*.cpp
-    framework/player/*.cpp
-    framework/opengles/*.cpp
-    framework/opengles/android/*.cpp
-    framework/opengles/globjects/*.cpp
-    framework/opengles/glshapes/*.cpp
-    framework/device/*.cpp
-    framework/device/android/*.cpp
-    framework/media/*.c
-    framework/media/*.cpp
+        sr_malloc/src/*.c
+        sr_malloc/src/*.cpp
+        framework/*.c
+        framework/jni/*.c
+        framework/jni/*.cpp
+        framework/base/*.c
+        framework/base/*.cpp
+        framework/message/*.cpp
+        framework/context/*.c
+        framework/context/*.cpp
+        framework/opengles/*.c
+        framework/opengles/*.cpp
+        framework/media/*.c
+        framework/media/*.cpp
+        framework/media/ffmpeg/*.cpp
+        framework/media/encoder/*.cpp
+        framework/media/resampler/*.c
+        framework/media/resampler/*.cpp
+        framework/program/*.cpp
     )
 
 
 add_library(
-    freeeditor
-    SHARED
-    ${sdk_sources}
+        freeeditor
+        SHARED
+        ${sdk_sources}
     )
 
 
 target_include_directories(
-    freeeditor
-    PRIVATE
-    nlohmann
-    framework/jni
-    framework/base
-    framework/context
-    framework/editor
-    framework/player
-    framework/opengles
-    framework/opengles/android
-    framework/opengles/globjects
-    framework/opengles/glshapes
-    framework/device
-    framework/device/android
-    sr_malloc/include
-    ${INCLUDE_PATH}/include
-    ${INCLUDE_PATH}/libyuv/include
-    ${INCLUDE_PATH}/glm
-#    ${INCLUDE_PATH}/glm/glm
-#    ${INCLUDE_PATH}/glm/glm/gtx
-#    ${INCLUDE_PATH}/glm/glm/gtc
-#    ${INCLUDE_PATH}/glm/glm/detail
-#    ${INCLUDE_PATH}/glm/glm/simd
-#    ${INCLUDE_PATH}/glm/glm/ext
+        freeeditor
+        PRIVATE
+        nlohmann
+        framework/base
+        framework/message
+        framework/media
+        framework/media/ffmpeg
+        framework/media/encoder
+        framework/media/resampler
+        framework/jni
+        framework/context
+        framework/opengles
+        framework/program
+        sr_malloc/include
+        ${INCLUDE_PATH}/include
+        ${INCLUDE_PATH}/libyuv/include
+        ${INCLUDE_PATH}/glm
     )
 
 
 target_link_libraries(
-    freeeditor
+        freeeditor
 
-    lib_yuv
-    lib_x264
-    lib_opus
-    lib_fdkaac
+        lib_yuv
+        lib_x264
+        lib_opus
+        lib_fdkaac
 
         lib_avformat
         lib_avcodec
@@ -123,9 +117,9 @@ target_link_libraries(
         lib_avutil
 
         z
-    log
-    EGL
-    GLESv1_CM
-    GLESv3
-    android
+        log
+        EGL
+        GLESv1_CM
+        GLESv3
+        android
     )

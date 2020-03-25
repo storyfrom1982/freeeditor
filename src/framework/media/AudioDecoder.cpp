@@ -3,7 +3,7 @@
 //
 
 #include "AudioDecoder.h"
-#include "FFmpegAudioDecoder.h"
+#include "ffmpeg/FFmpegAudioDecoder.h"
 
 
 using namespace freee;

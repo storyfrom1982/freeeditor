@@ -3,7 +3,7 @@
 //
 
 #include "VideoDecoder.h"
-#include "FFmpegVideoDecoder.h"
+#include "ffmpeg/FFmpegVideoDecoder.h"
 
 
 using namespace freee;

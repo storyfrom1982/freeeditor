@@ -6,8 +6,8 @@
 #define ANDROID_VIDEOSOURCE_H
 
 
-#include <MediaModule.h>
-#include <MessageContext.h>
+#include "../message/MessageContext.h"
+#include "../message/MessageChain.h"
 
 namespace freee {
 

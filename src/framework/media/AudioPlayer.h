@@ -5,7 +5,7 @@
 #ifndef ANDROID_AUDIOPLAYER_H
 #define ANDROID_AUDIOPLAYER_H
 
-#include <MessageChain.h>
+#include "../message/MessageChain.h"
 
 namespace freee {
 
