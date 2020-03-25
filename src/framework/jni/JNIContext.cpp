@@ -65,22 +65,22 @@ public:
     }
 
     void SendMessage(int key, jlong ptr){
-        MessageContext::SendMessage(NewFrameMessage(key, (void*)ptr));
+        MessageContext::SendMessage(NewMessage(key, (void *) ptr));
     }
 
     void SendMessage(int key, jobject obj){
-        MessageContext::SendMessage(NewFrameMessage(key, obj));
+        MessageContext::SendMessage(NewMessage(key, obj));
     }
 
     void SendMessage(int key, jstring json, JNIEnv *env){
         const char *js = env->GetStringUTFChars(json, 0);
         MessageContext::SendMessage(
-                NewJsonMessage(key, std::string(js, env->GetStringUTFLength(json))));
+                NewMessage(key, std::string(js, env->GetStringUTFLength(json))));
         env->ReleaseStringUTFChars(json, js);
     }
 
     void SendMessage(int key, jbyte *buffer, jlong timestamp){
-        Message pkt = NewFrameMessage(key);
+        Message pkt = NewMessage(key);
         pkt.GetFramePtr()->data = (uint8_t*)buffer;
         pkt.GetFramePtr()->timestamp = timestamp;
         MessageContext::SendMessage(pkt);
@@ -92,7 +92,7 @@ public:
         if (!pkt.GetString().empty()){
             str = env->NewStringUTF(pkt.GetString().c_str());
         }
-        jobject msg = env->NewObject(m_msgCls, m_newJniMessage, pkt.GetKey(), pkt.GetAddress(), str);
+        jobject msg = env->NewObject(m_msgCls, m_newJniMessage, pkt.key(), pkt.GetNumber(), str);
         if (str != nullptr){
             env->DeleteLocalRef(str);
         }
@@ -105,7 +105,7 @@ public:
         if (!pkt.GetString().empty()){
             str = env->NewStringUTF(pkt.GetString().c_str());
         }
-        jobject msg = env->NewObject(m_msgCls, m_newJniMessage, pkt.GetKey(), pkt.GetAddress(), str);
+        jobject msg = env->NewObject(m_msgCls, m_newJniMessage, pkt.key(), pkt.GetNumber(), str);
         if (str != nullptr){
             env->DeleteLocalRef(str);
         }
@@ -119,13 +119,13 @@ public:
         if (env->GetIntField(msg, m_keyField) == key){
             jstring str = static_cast<jstring>(env->GetObjectField(msg, m_stringField));
             if (str != nullptr){
-                return NewJsonMessage(key, std::string(env->GetStringUTFChars(str, 0),
-                                                       env->GetStringUTFLength(str)));
+                return NewMessage(key, std::string(env->GetStringUTFChars(str, 0),
+                                                   env->GetStringUTFLength(str)));
             }else {
-                return NewFrameMessage(key, (void*)env->GetLongField(msg, m_ptrField));
+                return NewMessage(key, (void *) env->GetLongField(msg, m_ptrField));
             }
         }
-        return NewFrameMessage(0);
+        return NewMessage(0);
     }
 
 private:

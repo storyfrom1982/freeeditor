@@ -35,7 +35,7 @@ void FFmpegMediaStream::onMsgConnectStream(Message pkt) {
         LOGD("[FileMediaStream] open %s failed ret = %d error=%s\n",
              url.c_str(), ret, buffer);
     }
-    SendEvent(NewFrameMessage(MsgKey_ProcessEvent, MsgKey_Open));
+    SendEvent(NewMessage(MsgKey_ProcessEvent, MsgKey_Open));
     LOGD("[FileMediaStream] ConnectStream url %s\n", url.c_str());
 }
 
@@ -51,7 +51,7 @@ void FFmpegMediaStream::onMsgDisconnectStream() {
 }
 
 void FFmpegMediaStream::onMsgOpen(Message pkt) {
-    MessageChain *chain = static_cast<MessageChain *>(pkt.GetObject());
+    MessageChain *chain = static_cast<MessageChain *>(pkt.GetObjectPtr());
     if (m_chainToStream[chain] == nullptr){
         LOGD("FileMediaStream::onMsgOpen type[%s] extraConfig %lu\n", chain->GetName().c_str(), chain->GetExtraConfig(this).size());
         if (chain->GetType(this) == MediaType_Audio){
@@ -72,7 +72,7 @@ void FFmpegMediaStream::onMsgOpen(Message pkt) {
 
             m_status = Status_Opened;
             usleep(200000);
-            MessageChain::onMsgProcessEvent(NewFrameMessage(MsgKey_ProcessEvent, MsgKey_Open));
+            MessageChain::onMsgProcessEvent(NewMessage(MsgKey_ProcessEvent, MsgKey_Open));
         }
     }
 }
@@ -82,7 +82,7 @@ void FFmpegMediaStream::onMsgClose(Message pkt) {
 }
 
 void FFmpegMediaStream::onMsgProcessData(Message pkt) {
-    MessageChain *chain = static_cast<MessageChain *>(pkt.GetObject());
+    MessageChain *chain = static_cast<MessageChain *>(pkt.GetObjectPtr());
 
     AVStream* pStream = nullptr;
     {

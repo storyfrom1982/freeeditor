@@ -76,25 +76,25 @@ int VideoWindow::height() {
 }
 
 void VideoWindow::onRecvMessage(Message pkt) {
-    if (pkt.GetKey() == RecvMsg_SurfaceCreated){
+    if (pkt.key() == RecvMsg_SurfaceCreated){
 #ifdef __ANDROID__
         JniEnv env;
         AutoLock lock(mLock);
 //        mWindowHolder = pkt.GetPtr();
-        mWindowHolder = env->NewGlobalRef(static_cast<jobject>(pkt.GetObject()));
+        mWindowHolder = env->NewGlobalRef(static_cast<jobject>(pkt.GetObjectPtr()));
         mNativeWindow = ANativeWindow_fromSurface(env.m_pEnv, (jobject)mWindowHolder);
         if (mCallback){
             mCallback->onSurfaceCreated(mNativeWindow);
         }
 #endif
-    }else if (pkt.GetKey() == RecvMsg_SurfaceChanged){
+    }else if (pkt.key() == RecvMsg_SurfaceChanged){
         AutoLock lock(mLock);
         if (mCallback){
             LOGD("RecvMsg_SurfaceChanged[%s]\n", pkt.GetString().c_str());
             json js = json::parse(pkt.GetString());
             mCallback->onSurfaceChanged(js["width"], js["height"]);
         }
-    }else if (pkt.GetKey() == RecvMsg_SurfaceDestroyed){
+    }else if (pkt.key() == RecvMsg_SurfaceDestroyed){
         AutoLock lock(mLock);
         if (mCallback){
             mCallback->onSurfaceDestroyed();
@@ -117,8 +117,8 @@ void VideoWindow::SetCallback(VideoWindow::VideoWindowCallback *callback) {
     AutoLock lock(mLock);
     mCallback = callback;
     if (mCallback){
-        SendMessage(NewFrameMessage(SendMsg_WindowCreated));
+        SendMessage(NewMessage(SendMsg_WindowCreated));
     }else {
-        SendMessage(NewFrameMessage(SendMsg_WindowDestroyed));
+        SendMessage(NewMessage(SendMsg_WindowDestroyed));
     }
 }

@@ -17,7 +17,7 @@ AudioFilter::~AudioFilter() {
 }
 
 void AudioFilter::onMsgOpen(Message pkt) {
-    m_config = static_cast<MessageChain *>(pkt.GetObject())->GetConfig(this);
+    m_config = static_cast<MessageChain *>(pkt.GetObjectPtr())->GetConfig(this);
     OpenModule();
     MessageChain::onMsgOpen(pkt);
 //    OpenNext();
@@ -41,7 +41,7 @@ int AudioFilter::OpenModule() {
     m_codecSamplePerFrame = m_config["codecSamplePerFrame"];
 
     m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplePerFrame;
-    p_bufferPool = new MessagePool(m_bufferSize, 10, 64, 0, 0, "AudioFilter");
+    p_bufferPool = new MessagePool(GetName() + "FramePool", m_bufferSize, 10, 64, 0, 0);
 
     return 0;
 }

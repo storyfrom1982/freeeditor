@@ -49,7 +49,7 @@ void VideoRenderer::FinalClear() {
 }
 
 void VideoRenderer::onMsgOpen(Message pkt) {
-    m_config = static_cast<MessageChain *>(pkt.GetObject())->GetConfig(this);
+    m_config = static_cast<MessageChain *>(pkt.GetObjectPtr())->GetConfig(this);
     if (m_status == Status_Closed){
         if (OpenModule() != 0){
             return;
@@ -72,7 +72,7 @@ void VideoRenderer::onMsgProcessData(Message pkt) {
 }
 
 void VideoRenderer::onMsgControl(Message pkt) {
-    switch (pkt.GetKey()){
+    switch (pkt.key()){
         case RecvMsg_SetVideoWindow:
             MessageSetVideoWindow(pkt);
             break;
@@ -130,11 +130,11 @@ int VideoRenderer::ProcessMediaByModule(Message pkt) {
 }
 
 void VideoRenderer::SetVideoWindow(void *ptr) {
-    ProcessMessage(NewFrameMessage(RecvMsg_SetVideoWindow, ptr));
+    ProcessMessage(NewMessage(RecvMsg_SetVideoWindow, ptr));
 }
 
 void VideoRenderer::MessageSetVideoWindow(Message pkt) {
-    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.GetObject()));
+    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.GetObjectPtr()));
     if (m_status == Status_Opened){
         mVideoWindow->SetCallback(this);
     }
@@ -142,12 +142,12 @@ void VideoRenderer::MessageSetVideoWindow(Message pkt) {
 
 void VideoRenderer::onSurfaceCreated(void *ptr) {
     AutoLock lock(mLock);
-    ProcessMessage(NewFrameMessage(RecvMsg_SurfaceCreated, ptr));
+    ProcessMessage(NewMessage(RecvMsg_SurfaceCreated, ptr));
 }
 
 void VideoRenderer::onSurfaceChanged(int width, int height) {
 //    assert(width != 0 && height != 0);
-    Message pkt = NewFrameMessage(RecvMsg_SurfaceChanged);
+    Message pkt = NewMessage(RecvMsg_SurfaceChanged);
     pkt.GetFramePtr()->width = width;
     pkt.GetFramePtr()->height = height;
     ProcessMessage(pkt);
@@ -156,14 +156,14 @@ void VideoRenderer::onSurfaceChanged(int width, int height) {
 void VideoRenderer::onSurfaceDestroyed() {
     AutoLock lock(mLock);
     isSurfaceDestroyed = true;
-    ProcessMessage(NewFrameMessage(RecvMsg_SurfaceDestroyed));
+    ProcessMessage(NewMessage(RecvMsg_SurfaceDestroyed));
 }
 
 void VideoRenderer::MessageWindowCreated(Message pkt) {
     isSurfaceCreated = true;
     isSurfaceDestroyed = false;
     if (renderer){
-        gl_renderer_set_window(renderer, pkt.GetObject());
+        gl_renderer_set_window(renderer, pkt.GetObjectPtr());
     }
 }
 

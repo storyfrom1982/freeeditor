@@ -36,7 +36,7 @@ MediaRecorder::MediaRecorder()
 }
 
 MediaRecorder::~MediaRecorder() {
-    ProcessMessage(NewFrameMessage(MsgKey_Close));
+    ProcessMessage(NewMessage(MsgKey_Close));
     StopProcessor();
 //    FinalClear();
 }
@@ -103,7 +103,7 @@ void MediaRecorder::onMsgStartPreview(Message pkt) {
         }
         if (m_status == Status_Started){
             m_videoFilter->AddOutput(m_videoRenderer);
-            m_videoRenderer->SetVideoWindow(pkt.GetObject());
+            m_videoRenderer->SetVideoWindow(pkt.GetObjectPtr());
             is_previewing = true;
         }
     }
@@ -226,23 +226,23 @@ void MediaRecorder::onMsgStop(Message pkt) {
 }
 
 void MediaRecorder::onMsgProcessEvent(Message pkt) {
-    auto chain = pkt.GetObject();
+    auto chain = pkt.GetObjectPtr();
     if (chain == m_mediaStream){
-        if (pkt.GetSubKey() == MsgKey_Open){
+        if (pkt.event() == MsgKey_Open){
             LOGD("MediaStream Opened\n");
             if (is_recording){
                 m_videoEncoder->AddOutput(m_mediaStream);
                 m_audioEncoder->AddOutput(m_mediaStream);
                 m_videoFilter->AddOutput(m_videoEncoder);
                 m_audioFilter->AddOutput(m_audioEncoder);
-                SendMessage(NewFrameMessage(MsgKey_ProcessEvent, MsgKey_Open));
+                SendMessage(NewMessage(MsgKey_ProcessEvent, MsgKey_Open));
             }
         }
     }
 }
 
 void MediaRecorder::onMsgControl(Message pkt) {
-    switch (pkt.GetKey()){
+    switch (pkt.key()){
         case MsgKey_StartRecord:
             onMsgStartRecord(pkt);
             break;

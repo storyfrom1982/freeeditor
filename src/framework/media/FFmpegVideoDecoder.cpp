@@ -104,8 +104,8 @@ int FFmpegVideoDecoder::DecodeVideo(Message msg)
     AVPacket             avpkt;
     ::av_init_packet( &avpkt );
     avpkt.stream_index = msg.GetFramePtr()->index;
-    avpkt.data = msg.GetDataPtr();
-    avpkt.size = msg.GetLength();
+    avpkt.data = msg.GetBufferPtr();
+    avpkt.size = msg.length();
     avpkt.dts =  msg.GetFramePtr()->timestamp;
     avpkt.pts  = msg.GetFramePtr()->timestamp;
     avpkt.flags = 0;
@@ -186,7 +186,7 @@ void FFmpegVideoDecoder::GetVideoBuffer(AVFrame *frame)
     Message msg = m_pBufferPool->NewMessage(MsgKey_ProcessData);
     int pos = 0;
     for (int i = 0; i < m_planeCount; i++) {
-        msg.GetFramePtr()->channel[i].data = msg.GetDataPtr() + pos;
+        msg.GetFramePtr()->channel[i].data = msg.GetBufferPtr() + pos;
         msg.GetFramePtr()->channel[i].size = m_planeSize[i];
         pos += m_planeSize[i];
     }
@@ -249,6 +249,6 @@ void FFmpegVideoDecoder::CreateBufferPool(AVFrame *frame)
     m_planeCount = i;
 
     if (!m_pBufferPool){
-        m_pBufferPool = new MessagePool(m_bufferSize, 1, 64, 0, 16, "VideoDecoder");
+        m_pBufferPool = new MessagePool(GetName() + "FramePool", m_bufferSize, 1, 64, 0, 16);
     }
 }

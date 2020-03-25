@@ -45,25 +45,25 @@ VideoSource::~VideoSource() {
 void VideoSource::Open(MessageChain *chain) {
     LOGD("VideoSource::Open enter\n");
     m_config = chain->GetConfig(this);
-    SendMessage(NewJsonMessage(SendMsg_Open, m_config.dump()));
+    SendMessage(NewMessage(SendMsg_Open, m_config.dump()));
     LOGD("VideoSource::Open exit\n");
 }
 
 void VideoSource::Close(MessageChain *chain) {
     LOGD("VideoSource::Close enter\n");
-    SendMessage(NewFrameMessage(SendMsg_Close));
+    SendMessage(NewMessage(SendMsg_Close));
     LOGD("VideoSource::Close exit\n");
 }
 
 void VideoSource::Start(MessageChain *chain) {
     LOGD("VideoSource::Start enter\n");
-    SendMessage(NewFrameMessage(SendMsg_Start));
+    SendMessage(NewMessage(SendMsg_Start));
     LOGD("VideoSource::Start exit\n");
 }
 
 void VideoSource::Stop(MessageChain *chain) {
     LOGD("VideoSource::Stop enter\n");
-    SendMessage(NewFrameMessage(SendMsg_Stop));
+    SendMessage(NewMessage(SendMsg_Stop));
     LOGD("VideoSource::Stop exit\n");
 }
 
@@ -76,8 +76,8 @@ void VideoSource::ProcessData(MessageChain *chain, Message pkt) {
         || m_srcHeight != m_codecHeight){
         if (p_bufferPool){
             Message y420 = p_bufferPool->NewMessage(MsgKey_ProcessData);
-            if (y420.GetDataPtr()){
-                sr_buffer_frame_set_image_format(y420.GetFramePtr(), y420.GetDataPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
+            if (y420.GetBufferPtr()){
+                sr_buffer_frame_set_image_format(y420.GetFramePtr(), y420.GetBufferPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
                 sr_buffer_frame_convert_to_yuv420p(pkt.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);
                 y420.GetFramePtr()->timestamp = pkt.GetFramePtr()->timestamp;
                 MessageChain::onMsgProcessData(y420);
@@ -91,20 +91,20 @@ void VideoSource::ProcessData(MessageChain *chain, Message pkt) {
 }
 
 void VideoSource::onRecvMessage(Message pkt) {
-    switch (pkt.GetKey()){
+    switch (pkt.key()){
         case OnRecvMsg_ProcessPicture:
             ProcessData(this, pkt);
             break;
         case OnRecvMsg_Opened:
             m_status = Status_Opened;
             LOGD("VideoSource Opened\n");
-            pkt.SetKey(MsgKey_Open);
+            pkt.GetMessagePtr()->key = MsgKey_Open;
             UpdateMediaConfig(pkt);
 //            ReportEvent(SmartPkt(Status_Opened + m_number));
             break;
         case OnRecvMsg_Closed:
             m_status = Status_Closed;
-            pkt.SetKey(MsgKey_Close);
+            pkt.GetMessagePtr()->key = MsgKey_Close;
             MessageChain::onMsgClose(pkt);
             FinalClear();
 //            ReportEvent(SmartPkt(Status_Closed + m_number));
@@ -145,7 +145,7 @@ void VideoSource::UpdateMediaConfig(Message pkt) {
     m_codecImageFormat = fourcctoint.format;
 //    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", m_srcImageFormat, libyuv::FOURCC_NV21);
     m_bufferSize = m_codecWidth * m_codecHeight / 2 * 3U;
-    p_bufferPool = new MessagePool(m_bufferSize, 10, 64 ,0, 0, "VideoSource");
+    p_bufferPool = new MessagePool(GetName() + "FramePool", m_bufferSize, 10, 64 ,0, 0);
 
     MessageChain::onMsgOpen(pkt);
 }

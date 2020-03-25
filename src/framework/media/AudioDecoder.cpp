@@ -20,12 +20,12 @@ AudioDecoder::~AudioDecoder()
 
 void AudioDecoder::onMsgOpen(Message msg)
 {
-    MessageChain *chain = static_cast<MessageChain *>(msg.GetObject());
+    MessageChain *chain = static_cast<MessageChain *>(msg.GetObjectPtr());
     m_config = chain->GetConfig(this);
     LOGD("VideoDecoder::onMsgOpen config: %s\n", m_config.dump().c_str());
     OpenDecoder();
     MessageChain::onMsgOpen(msg);
-    MessageChain::onMsgProcessEvent(NewFrameMessage(MsgKey_ProcessEvent, MsgKey_Open));
+    MessageChain::onMsgProcessEvent(NewMessage(MsgKey_ProcessEvent, MsgKey_Open));
 }
 
 void AudioDecoder::onMsgClose(Message msg)

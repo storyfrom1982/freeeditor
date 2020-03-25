@@ -29,7 +29,7 @@ void MediaStream::FinalClear() {
 }
 
 void MediaStream::onMsgControl(Message pkt) {
-    switch (pkt.GetKey()){
+    switch (pkt.key()){
         case OnRecvMsg_ConnectStream:
             onMsgConnectStream(pkt);
             break;
@@ -59,5 +59,5 @@ void MediaStream::ConnectStream(std::string url) {
 }
 
 void MediaStream::DisconnectStream() {
-    ProcessMessage(NewFrameMessage(OnRecvMsg_DisconnectStream));
+    ProcessMessage(NewMessage(OnRecvMsg_DisconnectStream));
 }

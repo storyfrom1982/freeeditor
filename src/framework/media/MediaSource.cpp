@@ -65,12 +65,12 @@ void MediaSource::onMsgProcessData(Message msg)
 {
     MessageChain *chain = m_streamMap[msg.GetFramePtr()->index];
     chain->ProcessData(this, msg);
-    ProcessMessage(NewFrameMessage(MsgKey_ReadSource));
+    ProcessMessage(NewMessage(MsgKey_ReadSource));
 }
 
 void MediaSource::onMsgProcessEvent(Message pkt)
 {
-    switch (pkt.GetSubKey()){
+    switch (pkt.event()){
         case MsgKey_Open:
             m_openedStream ++;
             if (m_openedStream == m_streamCount){
@@ -90,7 +90,7 @@ void MediaSource::onMsgProcessEvent(Message pkt)
 
 void MediaSource::onMsgControl(Message pkt)
 {
-    switch (pkt.GetKey()){
+    switch (pkt.key()){
         case MsgKey_ReadSource:
             onMsgReadSource(pkt);
             break;

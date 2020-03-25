@@ -49,7 +49,7 @@ void VideoFilter::FinalClear() {
 //}
 
 void VideoFilter::onMsgOpen(Message pkt) {
-    m_config = static_cast<MessageChain *>(pkt.GetObject())->GetConfig(this);
+    m_config = static_cast<MessageChain *>(pkt.GetObjectPtr())->GetConfig(this);
     if (m_status == Status_Closed){
         OpenModule();
         MessageChain::onMsgOpen(pkt);
@@ -88,7 +88,7 @@ int VideoFilter::OpenModule() {
     m_codecImageFormat = fourcctoint.format;
 //    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", m_srcImageFormat, libyuv::FOURCC_NV21);
     m_bufferSize = m_codecWidth * m_codecHeight / 2 * 3U;
-    p_bufferPool = new MessagePool(m_bufferSize, 10, 64, 0, 0, "VideoFilter");
+    p_bufferPool = new MessagePool(GetName() + "FramePool", m_bufferSize, 10, 64, 0, 0);
     return 0;
 }
 

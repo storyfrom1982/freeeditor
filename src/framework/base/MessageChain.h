@@ -44,30 +44,30 @@ namespace freee {
         virtual void FinalClear() {};
 
         virtual void Open(MessageChain *chain) {
-            ProcessMessage(NewFrameMessage(MsgKey_Open, chain));
+            ProcessMessage(NewMessage(MsgKey_Open, chain));
         }
 
         virtual void Close(MessageChain *chain) {
-            ProcessMessage(NewFrameMessage(MsgKey_Close, chain));
+            ProcessMessage(NewMessage(MsgKey_Close, chain));
         }
 
         virtual void Start(MessageChain *chain) {
-            ProcessMessage(NewFrameMessage(MsgKey_Start, chain));
+            ProcessMessage(NewMessage(MsgKey_Start, chain));
         }
 
         virtual void Stop(MessageChain *chain) {
-            ProcessMessage(NewFrameMessage(MsgKey_Stop, chain));
+            ProcessMessage(NewMessage(MsgKey_Stop, chain));
         }
 
         virtual void ProcessData(MessageChain *chain, Message msg) {
-            msg.SetKey(MsgKey_ProcessData);
-            msg.SetPtr(chain);
+            msg.GetMessagePtr()->key = MsgKey_ProcessData;
+            msg.GetMessagePtr()->objectPtr = chain;
             ProcessMessage(msg);
         }
 
         virtual void ProcessEvent(MessageChain *chain, Message msg) {
-            msg.SetKey(MsgKey_ProcessEvent);
-            msg.SetPtr(chain);
+            msg.GetMessagePtr()->key = MsgKey_ProcessEvent;
+            msg.GetMessagePtr()->objectPtr = chain;
             ProcessMessage(msg);
         }
 
@@ -191,7 +191,7 @@ namespace freee {
 
         //Async
         void MessageProcess(Message msg) override {
-            switch (msg.GetKey()){
+            switch (msg.key()){
                 case MsgKey_Open:
                     onMsgOpen(msg);
                     break;

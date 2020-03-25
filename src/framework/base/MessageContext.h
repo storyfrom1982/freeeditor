@@ -6,27 +6,22 @@
 #define ANDROID_DEVICEINTERFACE_H
 
 
-#include <string>
-#include <MessagePool.h>
 #include <AutoLock.h>
+#include <MessagePool.h>
 
 
 namespace freee{
 
-    class MessageContext {
+    class MessageContext : public MessagePool{
 
     public:
 
-        MessageContext(std::string name)
+        MessageContext(std::string name) : MessagePool(name)
         {
             m_name = name;
-            p_bufferPool = new MessagePool(10240, 10, 64, 0, 0, m_name);
         }
 
-        virtual ~MessageContext()
-        {
-            delete p_bufferPool;
-        };
+        virtual ~MessageContext(){};
 
         virtual void ConnectContext(MessageContext *pMessageContext)
         {
@@ -60,7 +55,7 @@ namespace freee{
 
         virtual Message onRequestMessage(int key)
         {
-            return NewFrameMessage(0);
+            return Message();
         }
 
         virtual void SendMessage(Message msg)
@@ -79,37 +74,12 @@ namespace freee{
             {
                 return p_messageContext->onRequestMessage(key);
             }
-            return NewFrameMessage(0);
+            return Message();
         }
-
-        Message NewFrameMessage(int key)
-        {
-            return p_bufferPool->NewMessage(key);
-        }
-
-        Message NewFrameMessage(int key, int event)
-        {
-            return p_bufferPool->NewMessage(key, event);
-        }
-        Message NewFrameMessage(int key, void *object)
-        {
-            return p_bufferPool->NewMessage(key, object);
-        }
-        Message NewJsonMessage(int key, std::string str)
-        {
-            return p_bufferPool->NewMessage(key, str);
-        }
-
-        Message NewDataMessage(int key, unsigned char *data, size_t data_size)
-        {
-            return p_bufferPool->NewMessage(key, data, data_size);
-        }
-
 
     private:
         Lock m_lock;
         std::string m_name;
-        MessagePool *p_bufferPool = nullptr;
         MessageContext *p_messageContext = nullptr;
     };
 

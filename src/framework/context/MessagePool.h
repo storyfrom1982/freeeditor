@@ -20,9 +20,6 @@ extern "C" {
 #endif
 
 
-//using namespace std;
-
-
 namespace freee {
 
     enum {
@@ -45,6 +42,8 @@ namespace freee {
 
     static int static_reference_count = -(INT32_MAX);
     static sr_buffer_data_t static_buffer_data = {0};
+
+
 
     class Message {
     public:
@@ -101,7 +100,7 @@ namespace freee {
             if (buffer){
                 p_buffer = buffer;
                 p_buffer->msg.key = key;
-                p_buffer->msg.subKey = event;
+                p_buffer->msg.event = event;
                 p_reference_count = new int(1);
             }
         }
@@ -110,7 +109,7 @@ namespace freee {
             if (buffer){
                 p_buffer = buffer;
                 p_buffer->msg.key = key;
-                p_buffer->msg.ptr = object;
+                p_buffer->msg.objectPtr = object;
                 p_reference_count = new int(1);
             }
         }
@@ -119,11 +118,11 @@ namespace freee {
             if (buffer){
                 p_buffer = buffer;
                 p_buffer->msg.key = key;
-                p_buffer->msg.msgLength = str.size() + 1;
-                if (p_buffer->data_size < p_buffer->msg.msgLength){
-                    sr_buffer_pool_realloc(p_buffer, p_buffer->msg.msgLength << 1);
+                p_buffer->msg.length = str.size() + 1;
+                if (p_buffer->data_size < p_buffer->msg.length){
+                    sr_buffer_pool_realloc(p_buffer, p_buffer->msg.length << 1);
                 }
-                memcpy(p_buffer->data, str.c_str(), p_buffer->msg.msgLength);
+                memcpy(p_buffer->data, str.c_str(), p_buffer->msg.length);
                 p_reference_count = new int(1);
             }
         }
@@ -132,65 +131,59 @@ namespace freee {
             if (buffer){
                 p_buffer = buffer;
                 p_buffer->msg.key = key;
-                p_buffer->msg.msgLength = size;
-                if (p_buffer->data_size < p_buffer->msg.msgLength){
-                    sr_buffer_pool_realloc(p_buffer, p_buffer->msg.msgLength << 1);
+                p_buffer->msg.length = size;
+                if (p_buffer->data_size < p_buffer->msg.length){
+                    sr_buffer_pool_realloc(p_buffer, p_buffer->msg.length << 1);
                 }
                 if (data){
-                    memcpy(p_buffer->data, data, p_buffer->msg.msgLength);
+                    memcpy(p_buffer->data, data, p_buffer->msg.length);
                 }
                 p_reference_count = new int(1);
             }
         }
 
     public:
-        void SetKey(int key){
-            p_buffer->msg.key = key;
-        }
-        int GetKey(){
+        int key(){
             return p_buffer->msg.key;
         }
-        void SetSubKey(int event){
-            p_buffer->msg.subKey = event;
+        int event(){
+            return p_buffer->msg.event;
         }
-        int GetSubKey(){
-            return p_buffer->msg.subKey;
+        size_t length(){
+            return p_buffer->msg.length;
         }
-        void SetPtr(void *ptr){
-            p_buffer->msg.ptr = ptr;
-        }
-        void* GetObject(){
-            return p_buffer->msg.ptr;
-        }
-        size_t GetLength(){
-            return p_buffer->msg.msgLength;
-        }
-        int64_t GetAddress(){
+        int64_t GetNumber(){
             return p_buffer->msg.number;
         }
-        std::string GetString(){
-            if (p_buffer->data && p_buffer->msg.msgLength){
-                return std::string((char*)p_buffer->data, p_buffer->msg.msgLength);
-            }
-            return std::string();
+        void* GetObjectPtr(){
+            return p_buffer->msg.objectPtr;
         }
-        size_t GetDataSize(){
-            return p_buffer->data_size;
+        void* GetSharePtr(){
+            return p_buffer->msg.sharePtr;
         }
-        unsigned char* GetDataPtr(){
-            return p_buffer->data;
+        size_t GetHeadSize(){
+            return p_buffer->head_size;
         }
         unsigned char* GetHeadPtr(){
             return p_buffer->head;
         }
-        sr_buffer_data_t* GetBufferPtr(){
-            return p_buffer;
+        size_t GetBufferSize(){
+            return p_buffer->data_size;
+        }
+        unsigned char* GetBufferPtr(){
+            return p_buffer->data;
         }
         sr_buffer_frame_t* GetFramePtr(){
             return &p_buffer->frame;
         }
         sr_buffer_message_t* GetMessagePtr(){
             return &p_buffer->msg;
+        }
+        std::string GetString(){
+            if (p_buffer->data && p_buffer->msg.length){
+                return std::string((char*)p_buffer->data, p_buffer->msg.length);
+            }
+            return std::string();
         }
 
     private:
@@ -203,12 +196,12 @@ namespace freee {
 
     class MessagePool {
     public:
-        MessagePool(size_t messageLength,
-                size_t messageCount,
-                size_t maxMessageCount,
-                size_t headSize,
-                size_t align,
-                std::string name)
+        MessagePool(std::string name = "MessagePool",
+                size_t messageLength = 10240,
+                size_t messageCount = 10,
+                size_t maxMessageCount = 64,
+                size_t headSize = 0,
+                size_t align = 0)
         {
             p_pool = sr_buffer_pool_create(messageLength, messageCount, maxMessageCount, headSize, align);
             sr_buffer_pool_set_name(p_pool, name.c_str());

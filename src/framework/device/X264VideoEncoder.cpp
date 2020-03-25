@@ -154,11 +154,10 @@ int X264VideoEncoder::EncoderEncode(Message pkt) {
         frameLen += nal_len;
     }
 
-    Message opkt = p_bufferPool->NewMessage(MsgKey_ProcessData);
-    opkt.SetPtr(this);
+    Message opkt = p_bufferPool->NewMessage(MsgKey_ProcessData, this);
     opkt.GetFramePtr()->flag = PktFlag_PFrame;
 
-    uint8_t *dst = opkt.GetDataPtr();
+    uint8_t *dst = opkt.GetBufferPtr();
     int offset = 0;
 
     x264_nal_t *p_spspps;
@@ -215,7 +214,7 @@ int X264VideoEncoder::EncoderEncode(Message pkt) {
     long long tmStamp = (long long)(m_frameId*1000LL/m_frameRate);
     opkt.GetFramePtr()->timestamp = tmStamp;
     opkt.GetFramePtr()->size = frameLen;
-    opkt.GetFramePtr()->data = opkt.GetDataPtr();
+    opkt.GetFramePtr()->data = opkt.GetBufferPtr();
     opkt.GetFramePtr()->type = MediaType_Video;
 
 //    long long tmStamp = pkt.frame.timestamp / 1000;

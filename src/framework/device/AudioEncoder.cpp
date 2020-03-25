@@ -16,12 +16,12 @@ freee::AudioEncoder::~AudioEncoder() {
 }
 
 void freee::AudioEncoder::onMsgOpen(freee::Message pkt) {
-    MessageChain *chain = static_cast<MessageChain *>(pkt.GetObject());
+    MessageChain *chain = static_cast<MessageChain *>(pkt.GetObjectPtr());
     m_config = chain->GetConfig(this);
     size_t bytePerSample = m_config["codecBytePerSample"];
     size_t samplePerFrame = m_config["codecSamplePerFrame"];
     m_bufferSize = bytePerSample * samplePerFrame;
-    p_bufferPool = new MessagePool(m_bufferSize, 1, 64, 16, 0, "AudioEncoder");
+    p_bufferPool = new MessagePool("AudioEncoderFramePool", m_bufferSize, 1, 64, 16, 0);
     OpenModule();
     pkt.GetFramePtr()->type = MediaType_Audio;
     MessageChain::onMsgOpen(pkt);
@@ -62,7 +62,7 @@ void freee::AudioEncoder::FinalClear() {
 }
 
 void freee::AudioEncoder::onMsgProcessEvent(freee::Message pkt) {
-    switch (pkt.GetSubKey()){
+    switch (pkt.event()){
         case MsgKey_Open:
             m_outputChainStatus = Status_Opened;
             break;

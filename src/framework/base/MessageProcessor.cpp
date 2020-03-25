@@ -23,7 +23,7 @@ void MessageProcessor::StartProcessor() {
 }
 
 void MessageProcessor::StopProcessor() {
-    ProcessMessage(NewFrameMessage(MsgKey_Exit));
+    ProcessMessage(NewMessage(MsgKey_Exit));
     m_lock.lock();
     pthread_t tid = m_threadId;
     m_threadId = 0;
@@ -74,7 +74,7 @@ void MessageProcessor::MessageProcessorLoop() {
         m_lock.signal();
         m_lock.unlock();
 
-        if (pkt.GetKey() == MsgKey_Exit){
+        if (pkt.key() == MsgKey_Exit){
             break;
         }
 

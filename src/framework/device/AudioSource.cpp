@@ -42,7 +42,7 @@ AudioSource::~AudioSource() {
 }
 
 void AudioSource::onRecvMessage(Message pkt) {
-    switch (pkt.GetKey()){
+    switch (pkt.key()){
         case OnRecvMsg_ProcessSound:
             ProcessData(this, pkt);
             break;
@@ -50,14 +50,14 @@ void AudioSource::onRecvMessage(Message pkt) {
             m_status = Status_Opened;
             LOGD("AudioSource Opened\n");
             UpdateConfig(pkt);
-            pkt.SetKey(MsgKey_Open);
+            pkt.GetMessagePtr()->key = MsgKey_Open;
             MessageChain::onMsgOpen(pkt);
 //            ReportEvent(SmartPkt(Status_Opened + m_number));
             break;
         case OnRecvMsg_Closed:
             m_status = Status_Closed;
 //            CloseNext();
-            pkt.SetKey(MsgKey_Close);
+            pkt.GetMessagePtr()->key = MsgKey_Close;
             MessageChain::onMsgClose(pkt);
 //            ReportEvent(SmartPkt(Status_Closed + m_number));
             FinalClear();
@@ -84,24 +84,24 @@ Message AudioSource::onRequestMessage(int key) {
 
 void AudioSource::Open(MessageChain *chain) {
     m_config = chain->GetConfig(this);
-    SendMessage(NewJsonMessage(SendMsg_Open, m_config.dump()));
+    SendMessage(NewMessage(SendMsg_Open, m_config.dump()));
 }
 
 void AudioSource::Close(MessageChain *chain) {
-    SendMessage(NewFrameMessage(SendMsg_Close));
+    SendMessage(NewMessage(SendMsg_Close));
 }
 
 void AudioSource::Start(MessageChain *chain) {
-    SendMessage(NewFrameMessage(SendMsg_Start));
+    SendMessage(NewMessage(SendMsg_Start));
 }
 
 void AudioSource::Stop(MessageChain *chain) {
-    SendMessage(NewFrameMessage(SendMsg_Stop));
+    SendMessage(NewMessage(SendMsg_Stop));
 }
 
 void AudioSource::ProcessData(MessageChain *chain, Message pkt) {
     Message resample = p_bufferPool->NewMessage(MsgKey_ProcessData);
-    memcpy(resample.GetDataPtr(), pkt.GetFramePtr()->data, resample.GetDataSize());
+    memcpy(resample.GetBufferPtr(), pkt.GetFramePtr()->data, resample.GetBufferSize());
     resample.GetFramePtr()->timestamp = pkt.GetFramePtr()->timestamp;
     MessageChain::onMsgProcessData(resample);
 }
@@ -121,6 +121,6 @@ void AudioSource::UpdateConfig(Message ptk) {
     m_codecSamplePerFrame = m_config["codecSamplePerFrame"];
 
     m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplePerFrame;
-    p_bufferPool = new MessagePool(m_bufferSize, 10, 64, 0, 0, "AudioSource");
+    p_bufferPool = new MessagePool("AudioSourceFramePool", m_bufferSize, 10, 64, 0, 0);
 }
 

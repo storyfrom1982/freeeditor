@@ -40,7 +40,7 @@ void VideoEncoder::FinalClear() {
 
 void VideoEncoder::onMsgOpen(Message pkt) {
     if (m_status == Status_Closed){
-        MessageChain *chain = static_cast<MessageChain *>(pkt.GetObject());
+        MessageChain *chain = static_cast<MessageChain *>(pkt.GetObjectPtr());
         m_config = chain->GetConfig(this);
         OpenEncoder();
         m_frameId = 0;
@@ -48,7 +48,7 @@ void VideoEncoder::onMsgOpen(Message pkt) {
         m_frameRate = m_config["codecFPS"];
         uint32_t w = m_config["codecWidth"];
         uint32_t h = m_config["codecHeight"];
-        p_bufferPool = new MessagePool(w*h, 1, 64, 16, 0, "VideoEncoder");
+        p_bufferPool = new MessagePool("VideoEncoderFramePool", w*h, 1, 64, 16, 0);
         pkt.GetFramePtr()->type = MediaType_Video;
         MessageChain::onMsgOpen(pkt);
         m_status = Status_Opened;
@@ -100,7 +100,7 @@ void VideoEncoder::onMsgControl(Message pkt) {
 }
 
 void VideoEncoder::onMsgProcessEvent(Message pkt) {
-    switch (pkt.GetSubKey()){
+    switch (pkt.event()){
         case MsgKey_Open:
             m_outputChainStatus = Status_Opened;
             break;

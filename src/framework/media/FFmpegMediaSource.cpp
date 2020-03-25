@@ -121,12 +121,12 @@ int FFmpegMediaSource::OpenSource(Message msg)
         AVCodecParameters *codecpar  = m_pContext->streams[i]->codecpar;
         if (codecpar->codec_type == AVMEDIA_TYPE_VIDEO){
             m_streamCount ++;
-            Message streamConfig = NewJsonMessage(MsgKey_ProcessEvent, m_config[std::to_string(
+            Message streamConfig = NewMessage(MsgKey_ProcessEvent, m_config[std::to_string(
                     m_pContext->streams[i]->index)].dump());
             SendEvent(streamConfig);
         }else if (codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
             m_streamCount ++;
-            Message streamConfig = NewJsonMessage(MsgKey_ProcessEvent, m_config[std::to_string(
+            Message streamConfig = NewMessage(MsgKey_ProcessEvent, m_config[std::to_string(
                     m_pContext->streams[i]->index)].dump());
             SendEvent(streamConfig);
         }
@@ -146,7 +146,7 @@ int FFmpegMediaSource::ReadSource()
     int result = av_read_frame(m_pContext, &pkt);
     if (result < 0  ){
         if (result == AVERROR(EAGAIN) && m_isRunning){
-            onReadSource(NewFrameMessage(1001));
+            onReadSource(NewMessage(1001));
             return 0;
         }
         char buffer[1024];
@@ -156,7 +156,7 @@ int FFmpegMediaSource::ReadSource()
     }
 //    LOGD("[FFmpegMediaSource] av_read_frame() stream id %d\n", pkt.stream_index);
 
-    Message msg = NewDataMessage(MsgKey_ProcessData, pkt.data, pkt.size);
+    Message msg = NewMessage(MsgKey_ProcessData, pkt.data, pkt.size);
     msg.GetFramePtr()->index = pkt.stream_index;
     msg.GetFramePtr()->timestamp = 0;
     ProcessMessage(msg);

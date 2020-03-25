@@ -101,8 +101,8 @@ int FFmpegAudioDecoder::DecodeAudio(Message msg)
     AVPacket             avpkt;
     ::av_init_packet( &avpkt );
     avpkt.stream_index = msg.GetFramePtr()->index;
-    avpkt.data = msg.GetDataPtr();
-    avpkt.size = msg.GetLength();
+    avpkt.data = msg.GetBufferPtr();
+    avpkt.size = msg.length();
     avpkt.dts =  msg.GetFramePtr()->timestamp;
     avpkt.pts  = msg.GetFramePtr()->timestamp;
     avpkt.flags = 0;
@@ -135,7 +135,7 @@ int FFmpegAudioDecoder::DecodeAudio(Message msg)
 //                MessageChain::onMsgProcessData(message);
 //            }
 //            LOGD("FFmpegVideoDecoder::DecodeAudio data size %d\n", picture.linesize[0]);
-            Message message = NewDataMessage(MsgKey_ProcessData, picture.data[0], picture.linesize[0]);
+            Message message = NewMessage(MsgKey_ProcessData, picture.data[0], picture.linesize[0]);
             MessageChain::onMsgProcessData(message);
             av_frame_unref(&picture);
         }
