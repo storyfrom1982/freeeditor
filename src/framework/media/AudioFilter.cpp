@@ -35,10 +35,10 @@ void AudioFilter::onMsgProcessData(Message pkt) {
 }
 
 int AudioFilter::OpenModule() {
-    m_codecSampleRate = m_config["codecSampleRate"];
-    m_codecChannelCount = m_config["codecChannelCount"];
-    m_codecBytePerSample = m_config["codecBytePerSample"];
-    m_codecSamplePerFrame = m_config["codecSamplePerFrame"];
+    m_codecSampleRate = m_config[CFG_CODEC_SAMPLE_RATE];
+    m_codecChannelCount = m_config[CFG_CODEC_CHANNEL_COUNT];
+    m_codecBytePerSample = m_config[CFG_CODEC_BYTE_PER_SAMPLE];
+    m_codecSamplePerFrame = m_config[CFG_CODEC_SAMPLE_PER_FRAME];
 
     m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplePerFrame;
     p_bufferPool = new MessagePool(GetName() + "FramePool", m_bufferSize, 10, 64, 0, 0);

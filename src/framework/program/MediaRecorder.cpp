@@ -121,9 +121,9 @@ void MediaRecorder::onMsgStopPreview(Message msg) {
 
 json &MediaRecorder::GetConfig(MessageChain *chain) {
     if (chain->GetType(this) == MediaType_Video){
-        return m_config["video"];
+        return m_config[CFG_VIDEO];
     }else if (chain->GetType(this) == MediaType_Audio){
-        return m_config["audio"];
+        return m_config[CFG_AUDIO];
     }
     return MessageChain::GetConfig(chain);
 }
@@ -141,14 +141,14 @@ void MediaRecorder::onMsgOpen(Message pkt) {
         m_videoSource = new VideoSource();
         m_videoFilter = new VideoFilter();
         m_videoRenderer = new VideoRenderer();
-        m_videoEncoder = VideoEncoder::Create(m_config["video"]["codecName"]);
+        m_videoEncoder = VideoEncoder::Create(m_config[CFG_VIDEO][CFG_CODEC_NAME]);
 
         m_videoSource->AddOutput(m_videoFilter);
         m_videoSource->Open(this);
 
         m_audioSource = new AudioSource();
         m_audioFilter = new AudioFilter();
-        m_audioEncoder = AudioEncoder::Create(m_config["audio"]["codecName"]);
+        m_audioEncoder = AudioEncoder::Create(m_config[CFG_AUDIO][CFG_CODEC_NAME]);
 
         m_audioSource->AddOutput(m_audioFilter);
         m_audioSource->Open(this);

@@ -45,9 +45,9 @@ void VideoEncoder::onMsgOpen(Message pkt) {
         OpenEncoder();
         m_frameId = 0;
         m_startFrameId = -1;
-        m_frameRate = m_config["codecFPS"];
-        uint32_t w = m_config["codecWidth"];
-        uint32_t h = m_config["codecHeight"];
+        uint32_t w = m_config[CFG_CODEC_WIDTH];
+        uint32_t h = m_config[CFG_CODEC_HEIGHT];
+        m_frameRate = m_config[CFG_CODEC_FRAME_RATE];
         p_bufferPool = new MessagePool("VideoEncoderFramePool", w*h, 1, 64, 16, 0);
         pkt.GetFramePtr()->type = MediaType_Video;
         MessageChain::onMsgOpen(pkt);

@@ -23,6 +23,15 @@ public class VideoSource extends JNIContext
 
     private static final String TAG = "VideoSource";
 
+    private static final String CFG_SRC_WIDTH                  = "srcWidth";
+    private static final String CFG_SRC_HEIGHT                 = "srcHeight";
+    private static final String CFG_SRC_IMAGE_FORMAT           = "srcImageFormat";
+    private static final String CFG_SRC_VIDEO_DEVICE           = "srcVideoDevice";
+    private static final String CFG_SRC_ROTATION               = "srcRotation";
+    private static final String CFG_CODEC_WIDTH                = "codecWidth";
+    private static final String CFG_CODEC_HEIGHT               = "codecHeight";
+    private static final String CFG_CODEC_FRAME_RATE           = "codecFrameRate";
+
     private static final int Status_Closed = 0;
     private static final int Status_Opened = 1;
     private static final int Status_Started = 2;
@@ -37,10 +46,10 @@ public class VideoSource extends JNIContext
     private int mFinalWidth;
     private int mFinalHeight;
 
-    private int mCodecFPS;
+    private int mCodecFrameRate;
     private int mCodecWidth;
     private int mCodecHeight;
-    private String mSrcPosition;
+    private String mSrcVideoDevice;
     private JSONObject mConfig;
 
     private Camera mCamera;
@@ -68,12 +77,12 @@ public class VideoSource extends JNIContext
         }
 
         mConfig = JSON.parseObject(msg.string);
-        mCodecFPS = mConfig.getIntValue("codecFPS");
-        mCodecWidth = mConfig.getIntValue("codecWidth");
-        mCodecHeight = mConfig.getIntValue("codecHeight");
-        mSrcPosition = mConfig.getString("srcPosition");
+        mCodecWidth = mConfig.getIntValue(CFG_CODEC_WIDTH);
+        mCodecHeight = mConfig.getIntValue(CFG_CODEC_HEIGHT);
+        mCodecFrameRate = mConfig.getIntValue(CFG_CODEC_FRAME_RATE);
+        mSrcVideoDevice = mConfig.getString(CFG_SRC_VIDEO_DEVICE);
 
-        if (mSrcPosition.equals("front")){
+        if (mSrcVideoDevice.equals("front")){
             mDeviceId = Camera.CameraInfo.CAMERA_FACING_FRONT;
         }else {
             mDeviceId = Camera.CameraInfo.CAMERA_FACING_BACK;
@@ -136,24 +145,24 @@ public class VideoSource extends JNIContext
             mBufferList.add(new byte[(mSrcWidth * mSrcHeight * 3) >> 1]);
         }
 
-        mConfig.put("srcWidth", mSrcWidth);
-        mConfig.put("srcHeight", mSrcHeight);
+        mConfig.put(CFG_SRC_WIDTH, mSrcWidth);
+        mConfig.put(CFG_SRC_HEIGHT, mSrcHeight);
 
         int orientation = MediaContext.Instance().getScreenOrientation();
         if (orientation == SCREEN_ORIENTATION_PORTRAIT || orientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT){
-            mConfig.put("codecWidth", mFinalHeight);
-            mConfig.put("codecHeight", mFinalWidth);
+            mConfig.put(CFG_CODEC_WIDTH, mFinalHeight);
+            mConfig.put(CFG_CODEC_HEIGHT, mFinalWidth);
         }else {
-            mConfig.put("codecWidth", mFinalWidth);
-            mConfig.put("codecHeight", mFinalHeight);
+            mConfig.put(CFG_CODEC_WIDTH, mFinalWidth);
+            mConfig.put(CFG_CODEC_HEIGHT, mFinalHeight);
         }
         if (mDeviceId == Camera.CameraInfo.CAMERA_FACING_FRONT){
-            mConfig.put("srcPosition", "front");
+            mConfig.put(CFG_SRC_VIDEO_DEVICE, "front");
         }else {
-            mConfig.put("srcPosition", "back");
+            mConfig.put(CFG_SRC_VIDEO_DEVICE, "back");
         }
-        mConfig.put("srcRotation", mRotation);
-        mConfig.put("srcImageFormat", "NV21");
+        mConfig.put(CFG_SRC_ROTATION, mRotation);
+        mConfig.put(CFG_SRC_IMAGE_FORMAT, "NV21");
         sendMessage(SendMsg_Opened, mConfig.toString());
 
         mStartTime = 0;

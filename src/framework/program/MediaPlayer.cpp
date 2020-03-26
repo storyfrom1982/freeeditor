@@ -95,14 +95,14 @@ void MediaPlayer::onMsgProcessEvent(Message pkt)
     if (pkt.GetObjectPtr() == m_pMediaSource){
 //        LOGD("Open stream config: %s\n", pkt.GetString().c_str());
         json cfg = json::parse(pkt.GetString());
-        if (cfg["codecType"] == AVMEDIA_TYPE_VIDEO){
-            m_pVideoDeocder = VideoDecoder::Create(cfg["codecTag"]);
-            m_pVideoDeocder->SetStreamId(cfg["streamId"]);
+        if (cfg[CFG_TYPE] == CFG_VIDEO){
+            m_pVideoDeocder = VideoDecoder::Create(cfg[CFG_CODEC_NAME]);
+            m_pVideoDeocder->SetStreamId(cfg[CFG_CODEC_STREAM_ID]);
             m_pVideoDeocder->AddOutput(m_pVideoRenderer);
             m_pMediaSource->AddOutput(m_pVideoDeocder);
-        }else if (cfg["codecType"] == AVMEDIA_TYPE_AUDIO){
-            m_pAudioDecoder = AudioDecoder::Create(cfg["codecTag"]);
-            m_pAudioDecoder->SetStreamId(cfg["streamId"]);
+        }else if (cfg[CFG_TYPE] == CFG_AUDIO){
+            m_pAudioDecoder = AudioDecoder::Create(cfg[CFG_CODEC_NAME]);
+            m_pAudioDecoder->SetStreamId(cfg[CFG_CODEC_STREAM_ID]);
             m_pAudioDecoder->AddOutput(m_pAudioPlayer);
             m_pMediaSource->AddOutput(m_pAudioDecoder);
         }

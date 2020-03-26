@@ -19,7 +19,7 @@ FFmpegAudioDecoder::~FFmpegAudioDecoder()
 
 int FFmpegAudioDecoder::OpenDecoder()
 {
-    AVCodecID codecId = m_config["codecId"];
+    AVCodecID codecId = m_config[CFG_CODEC_ID];
     AVCodec *codec = avcodec_find_decoder(codecId);
     if (codec == nullptr){
         LOGD("avcodec_find_decoder(%s) failed\n", avcodec_get_name(codecId));
@@ -42,10 +42,9 @@ int FFmpegAudioDecoder::OpenDecoder()
 //    m_pCodecContext->get_buffer2 = get_buffer2;
     m_pCodecContext->thread_count = 1;
     m_pCodecContext->active_thread_type = FF_THREAD_SLICE;
-    m_pCodecContext->block_align = m_config["codecBlockAlign"];
-    m_pCodecContext->sample_rate = m_config["codecSampleRate"];
-    m_pCodecContext->channels = m_config["codecChannelCount"];
-    m_pCodecContext->bit_rate = m_config["codecBitRate"];
+    m_pCodecContext->sample_rate = m_config[CFG_CODEC_SAMPLE_RATE];
+    m_pCodecContext->channels = m_config[CFG_CODEC_CHANNEL_COUNT];
+    m_pCodecContext->bit_rate = m_config[CFG_CODEC_BITRATE];
 
     if ( avcodec_open2( m_pCodecContext, codec, NULL)){
         LOGD("avcodec_open2(%s) failed\n", avcodec_get_name(codecId));

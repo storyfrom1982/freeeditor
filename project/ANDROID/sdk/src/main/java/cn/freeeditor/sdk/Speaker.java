@@ -81,8 +81,7 @@ public class Speaker implements Runnable {
 
         int frameSize = mChannelCount * mBytePerSample;
         int channelConfig = mChannelCount == 2 ? AudioFormat.CHANNEL_OUT_STEREO : AudioFormat.CHANNEL_OUT_MONO;
-        int audioFormat = mBytePerSample == 2 ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
-//        audioFormat = AudioFormat.ENCODING_PCM_FLOAT;
+        int audioFormat = mBytePerSample == 1 ? AudioFormat.ENCODING_PCM_8BIT : AudioFormat.ENCODING_PCM_16BIT;
 
         int minBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
 
@@ -114,7 +113,7 @@ public class Speaker implements Runnable {
         }
 
         Log.d(TAG, "Audio record: got " + ((mAudioTrack.getChannelCount() >= 2) ? "stereo" : "mono")
-                + " " + ((mAudioTrack.getAudioFormat() == AudioFormat.ENCODING_PCM_FLOAT) ? "32-bit" : "8-bit")
+                + " " + ((mAudioTrack.getAudioFormat() == AudioFormat.ENCODING_PCM_16BIT) ? "16-bit" : "8-bit")
                 + " " + (mAudioTrack.getSampleRate() / 1000f) + "kHz, " + mSamplePerFrame + " frames buffer");
 
         Log.d(TAG,"open ========== exit");

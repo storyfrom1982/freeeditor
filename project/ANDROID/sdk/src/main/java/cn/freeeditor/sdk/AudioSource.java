@@ -11,11 +11,18 @@ public class AudioSource extends JNIContext
 
     protected static final String TAG = "AudioSource";
 
+    protected static final String CFG_SRC_AUDIO_DEVICE           = "srcAudioDevice";
+    protected static final String CFG_SRC_SAMPLE_RATE            = "srcSampleRate";
+    protected static final String CFG_SRC_CHANNEL_COUNT          = "srcChannelCount";
+    protected static final String CFG_CODEC_BYTE_PER_SAMPLE      = "codecBytePerSample";
+    protected static final String CFG_CODEC_SAMPLE_PER_FRAME     = "codecSamplePerFrame";
+
     private static final int Status_Closed = 0;
     private static final int Status_Opened = 1;
     private static final int Status_Started = 2;
     private static final int Status_Stopped = 3;
 
+    private String mAudioDevice;
     private int mSampleRate;
     private int mChannelCount;
     private int mBytesPerSample;
@@ -43,10 +50,11 @@ public class AudioSource extends JNIContext
         }
         mConfig = JSON.parseObject(cfgStr);
         Log.d(TAG, "AudioSource config: " + mConfig.toJSONString());
-        mSampleRate = mConfig.getIntValue("srcSampleRate");
-        mChannelCount = mConfig.getIntValue("srcChannelCount");
-        mBytesPerSample = mConfig.getIntValue("srcBytePerSample");
-        mSamplesPerFrame = mConfig.getIntValue("codecSamplePerFrame");
+        mAudioDevice = mConfig.getString(CFG_SRC_AUDIO_DEVICE);
+        mSampleRate = mConfig.getIntValue(CFG_SRC_SAMPLE_RATE);
+        mChannelCount = mConfig.getIntValue(CFG_SRC_CHANNEL_COUNT);
+        mBytesPerSample = mConfig.getIntValue(CFG_CODEC_BYTE_PER_SAMPLE);
+        mSamplesPerFrame = mConfig.getIntValue(CFG_CODEC_SAMPLE_PER_FRAME);
         microphone.open(mSampleRate, mChannelCount, mBytesPerSample, mSamplesPerFrame);
 
         mStatus = Status_Opened;

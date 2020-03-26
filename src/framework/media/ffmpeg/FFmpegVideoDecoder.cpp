@@ -20,7 +20,7 @@ FFmpegVideoDecoder::~FFmpegVideoDecoder()
 
 int FFmpegVideoDecoder::OpenDecoder()
 {
-    AVCodecID codecId = m_config["codecId"];
+    AVCodecID codecId = m_config[CFG_CODEC_ID];
     AVCodec *codec = avcodec_find_decoder(codecId);
     if (codec == nullptr){
         LOGD("avcodec_find_decoder(%s) failed\n", avcodec_get_name(codecId));
@@ -43,12 +43,12 @@ int FFmpegVideoDecoder::OpenDecoder()
 
     m_pCodecContext->opaque = this;
     m_pCodecContext->get_buffer2 = get_buffer2;
-    m_pCodecContext->width = m_config["codecWidth"];
-    m_pCodecContext->height = m_config["codecHeight"];
-    m_pCodecContext->bit_rate = m_config["codecBitRate"];
-    m_pCodecContext->profile = m_config["codecProfile"];
-    m_pCodecContext->level = m_config["codecLevel"];
-    m_pCodecContext->pix_fmt = m_config["codecFormat"];
+    m_pCodecContext->width = m_config[CFG_CODEC_WIDTH];
+    m_pCodecContext->height = m_config[CFG_CODEC_HEIGHT];
+    m_pCodecContext->bit_rate = m_config[CFG_CODEC_BITRATE];
+    m_pCodecContext->profile = m_config[CFG_CODEC_PROFILE];
+    m_pCodecContext->level = m_config[CFG_CODEC_LEVEL];
+    m_pCodecContext->pix_fmt = m_config[CFG_CODEC_IMAGE_FORMAT_ID];
 
     if ( avcodec_open2( m_pCodecContext, codec, NULL)){
         LOGD("avcodec_open2(%s) failed\n", avcodec_get_name(codecId));

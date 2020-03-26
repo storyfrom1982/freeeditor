@@ -149,13 +149,13 @@ AVStream *FFmpegMediaStream::addAudioStream(MessageChain *chain) {
 #endif
 
     m_pContext->video_codec_id = codecpar->codec_id;
-    int sampleRate = cfg["codecBitRate"];
-    codecpar->sample_rate = cfg["codecSampleRate"];
-    codecpar->channels = cfg["codecChannelCount"];
-    codecpar->bit_rate = cfg["codecBitRate"];
+//    int sampleRate = cfg["codecBitRate"];
+    codecpar->sample_rate = cfg[CFG_CODEC_SAMPLE_RATE];
+    codecpar->channels = cfg[CFG_CODEC_CHANNEL_COUNT];
+    codecpar->bit_rate = cfg[CFG_CODEC_BITRATE];
 //    avStream->time_base.den = 1;
 //    avStream->time_base.num = 1;
-    avStream->time_base = (AVRational){ 1, sampleRate };
+    avStream->time_base = (AVRational){ 1, codecpar->sample_rate };
 
     std::string extraConfig = chain->GetExtraConfig(this);
     if (extraConfig.size() > 0){
@@ -187,13 +187,13 @@ AVStream *FFmpegMediaStream::addVideoStream(MessageChain *chain) {
 #endif
 
     m_pContext->video_codec_id = codecpar->codec_id;
-    int fps = (int)((float)cfg["codecFPS"]);
-    codecpar->width = cfg["codecWidth"];
-    codecpar->height = cfg["codecHeight"];
+    int fps = (int)((float)cfg[CFG_CODEC_FRAME_RATE]);
+    codecpar->width = cfg[CFG_CODEC_WIDTH];
+    codecpar->height = cfg[CFG_CODEC_HEIGHT];
 //    avStream->avg_frame_rate.num = 1;
 //    avStream->avg_frame_rate.den = 1000;
     avStream->avg_frame_rate = (AVRational){ 1000, fps * 1000 };
-    codecpar->bit_rate = cfg["codecBitRate"];
+    codecpar->bit_rate = cfg[CFG_CODEC_BITRATE];
     avStream->time_base = (AVRational){ 1, 1 };
 //    avStream->time_base.den = 1;
 //    avStream->time_base.num = 1;

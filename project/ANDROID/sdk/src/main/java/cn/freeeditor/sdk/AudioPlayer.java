@@ -14,6 +14,11 @@ public class AudioPlayer extends JNIContext implements Speaker.SpeakerCallback, 
     private static final int Status_Started = 2;
     private static final int Status_Stopped = 3;
 
+    protected static final String CFG_CODEC_SAMPLE_RATE          = "codecSampleRate";
+    protected static final String CFG_CODEC_CHANNEL_COUNT        = "codecChannelCount";
+    protected static final String CFG_CODEC_BYTE_PER_SAMPLE      = "codecBytePerSample";
+    protected static final String CFG_CODEC_SAMPLE_PER_FRAME     = "codecSamplePerFrame";
+
     private int mSampleRate;
     private int mChannelCount;
     private int mBytesPerSample;
@@ -46,11 +51,11 @@ public class AudioPlayer extends JNIContext implements Speaker.SpeakerCallback, 
             return ;
         }
         mConfig = JSON.parseObject(cfgStr);
-        Log.d(TAG, "AudioSource config: " + mConfig.toJSONString());
-        mSampleRate = mConfig.getIntValue("codecSampleRate");
-        mChannelCount = mConfig.getIntValue("codecChannelCount");
-        mBytesPerSample = mConfig.getIntValue("codecBytePerSample");
-        mSamplesPerFrame = mConfig.getIntValue("codecSamplePerFrame");
+        Log.d(TAG, "AudioPlayer config: " + mConfig.toJSONString());
+        mSampleRate = mConfig.getIntValue(CFG_CODEC_SAMPLE_RATE);
+        mChannelCount = mConfig.getIntValue(CFG_CODEC_CHANNEL_COUNT);
+        mBytesPerSample = mConfig.getIntValue(CFG_CODEC_BYTE_PER_SAMPLE);
+        mSamplesPerFrame = mConfig.getIntValue(CFG_CODEC_SAMPLE_PER_FRAME);
         speaker.open(mSampleRate, mChannelCount, mBytesPerSample, mSamplesPerFrame, 0);
 
         mStatus = Status_Opened;

@@ -73,23 +73,24 @@ int FFmpegMediaSource::OpenSource(Message msg)
         }
 
         json cfg;
-        cfg["streamId"] = stream->index;
-        cfg["codecId"] = codecpar->codec_id;
-        cfg["codecType"] = codecpar->codec_type;
-        cfg["codecFormat"] = codecpar->format;
-        cfg["codecProfile"] = codecpar->profile;
-        cfg["codecLevel"] = codecpar->level;
-        cfg["codecTag"] = std::string((char*)&codecpar->codec_tag, 4);
-
+        cfg[CFG_CODEC_ID] = codecpar->codec_id;
+        cfg[CFG_CODEC_NAME] = std::string((char*)&codecpar->codec_tag, 4);
+        cfg[CFG_CODEC_STREAM_ID] = stream->index;
+        cfg[CFG_CODEC_TYPE] = codecpar->codec_type;
+        cfg[CFG_CODEC_IMAGE_FORMAT] = codecpar->format;
+        cfg[CFG_CODEC_PROFILE] = codecpar->profile;
+        cfg[CFG_CODEC_LEVEL] = codecpar->level;
 
         if (codecpar->codec_type == AVMEDIA_TYPE_VIDEO){
-            cfg["codecWidth"] = codecpar->width;
-            cfg["codecHeight"] = codecpar->height;
-            cfg["codecPixelWidth"] = codecpar->sample_aspect_ratio.num;
-            cfg["codecPixelHeight"] = codecpar->sample_aspect_ratio.den;
-            cfg["codecBitRate"] = codecpar->bit_rate;
+            cfg[CFG_TYPE] = CFG_VIDEO;
+            cfg[CFG_CODEC_WIDTH] = codecpar->width;
+            cfg[CFG_CODEC_HEIGHT] = codecpar->height;
+            cfg[CFG_CODEC_IMAGE_FORMAT_ID] = codecpar->format;
+            cfg[CFG_CODEC_PIXEL_WIDTH] = codecpar->sample_aspect_ratio.num;
+            cfg[CFG_CODEC_PIXEL_HEIGHT] = codecpar->sample_aspect_ratio.den;
+            cfg[CFG_CODEC_BITRATE] = codecpar->bit_rate;
             if (stream->avg_frame_rate.den != 0) {
-                cfg["codecFrameRate"] = stream->avg_frame_rate.num / stream->avg_frame_rate.den;
+                cfg[CFG_CODEC_FRAME_RATE] = stream->avg_frame_rate.num / stream->avg_frame_rate.den;
             }
             if (codecpar->extradata_size > 0){
                 //todo paser avc1
@@ -98,12 +99,13 @@ int FFmpegMediaSource::OpenSource(Message msg)
             m_config[std::to_string(stream->index)] = cfg;
         }
         else if (codecpar->codec_type == AVMEDIA_TYPE_AUDIO){
-            cfg["codecChannelCount"] = codecpar->channels;
-            cfg["codecSampleRate"] = codecpar->sample_rate;
-            cfg["codecBytePerSample"] = av_get_bytes_per_sample((AVSampleFormat)codecpar->format);
-            cfg["codecBitRate"] = codecpar->bit_rate;
-            cfg["codecSamplePerFrame"] = codecpar->frame_size;
-            cfg["codecBlockAlign"] = codecpar->block_align;
+            cfg[CFG_TYPE] = CFG_AUDIO;
+            cfg[CFG_CODEC_BITRATE] = codecpar->bit_rate;
+            cfg[CFG_CODEC_CHANNEL_COUNT] = codecpar->channels;
+            cfg[CFG_CODEC_SAMPLE_FORMAT_ID] = codecpar->format;
+            cfg[CFG_CODEC_SAMPLE_RATE] = codecpar->sample_rate;
+            cfg[CFG_CODEC_BYTE_PER_SAMPLE] = av_get_bytes_per_sample((AVSampleFormat)codecpar->format);
+            cfg[CFG_CODEC_SAMPLE_PER_FRAME] = codecpar->frame_size;
             if (codecpar->extradata_size > 0){
                 m_extraConfigMap[stream->index] = std::string((char*)codecpar->extradata, codecpar->extradata_size);
             }

@@ -68,62 +68,71 @@ void MediaConfig::save(json &config, std::string configPath) {
 //    return m_cfg;
 //}
 
+
+
 void MediaConfig::buildDefaultConfig(json &config) {
 
     config = {
 
-            {"video", {
+            {CFG_VIDEO, {
 
-                {"type", "video"},
+                {CFG_TYPE,                          "video"},
 
-                {"srcWidth", 640},
-                {"srcHeight", 360},
-                {"srcImageFormat", "NV21"},
-                {"srcPosition", "front"},
-                {"srcRotation", 0},
-                {"srcMirror", false},
+                {CFG_SRC_WIDTH,                     640},
+                {CFG_SRC_HEIGHT,                    360},
+                {CFG_SRC_IMAGE_FORMAT,              "NV21"},
+                {CFG_SRC_VIDEO_DEVICE,              "front"},
+                {CFG_SRC_ROTATION,                  0},
 
-                {"previewMode", "default"},
-                {"previewMirror", false},
-                {"previewRotation", 0},
+                {CFG_CODEC_TYPE,                    "h264"},
+                {CFG_CODEC_NAME,                    "x264"},
 
-                {"codecFPS", 20.0},
-                {"codecWidth", 640},
-                {"codecHeight", 360},
-                {"codecImageFormat", "I420"},
-                {"codecType", "h264"},
-                {"codecName", "x264"},
-                {"codecBitRate", 512},
-                {"codecVBR", true},
-                {"codecKeyFrameInterval", 4},
-            }},
+                {CFG_CODEC_WIDTH,                   640},
+                {CFG_CODEC_HEIGHT,                  360},
+                {CFG_CODEC_FRAME_RATE,              20.0},
+                {CFG_CODEC_IMAGE_FORMAT,            "I420"},
 
-            {"videoEffect", {
-                {"applyList", {"none"}},
+                {CFG_CODEC_BITRATE,                 512},
+                {CFG_CODEC_RATE_CONTROL_MODE,       "VBR"},
+                {CFG_CODEC_KEY_FRAME_INTERVAL,      4},
+
+                {CFG_RENDER_MODE,                   "default"},
+                {CFG_RENDER_MIRROR,                 false},
+                {CFG_RENDER_ROTATION,               0},
             }},
 
 
-            {"audio", {
-                {"type", "audio"},
+            {CFG_AUDIO, {
 
-                {"srcSampleRate", 48000},
-                {"srcChannelCount", 1},
-                {"srcBytePerSample", 2},
-                {"srcPosition", "center"},
-                {"srcAEC", false},
+                {CFG_TYPE,                          "audio"},
 
-                {"codecType", "aac"},
-                {"codecName", "faac"},
-                {"codecBitRate", 64},
-                {"codecSampleRate", 48000},
-                {"codecChannelCount", 1},
-                {"codecBytePerSample", 2},
-                {"codecSamplePerFrame", 1024},
+                {CFG_SRC_SAMPLE_RATE,               48000},
+                {CFG_SRC_CHANNEL_COUNT,             1},
+                {CFG_SRC_SAMPLE_FORMAT,             "S16"},
+                {CFG_SRC_BYTE_PER_SAMPLE,           2},
+                {CFG_SRC_AUDIO_DEVICE,              "microphone"},
+
+                {CFG_CODEC_TYPE,                    "aac"},
+                {CFG_CODEC_NAME,                    "faac"},
+                {CFG_CODEC_BITRATE,                 64},
+                {CFG_CODEC_SAMPLE_RATE,             48000},
+                {CFG_CODEC_CHANNEL_COUNT,           1},
+                {CFG_CODEC_SAMPLE_FORMAT,           "S16"},
+                {CFG_CODEC_BYTE_PER_SAMPLE,         2},
+                {CFG_CODEC_SAMPLE_PER_FRAME,        1024},
+
+                {CFG_SPEAKER_SAMPLE_RATE,           48000},
+                {CFG_SPEAKER_SAMPLE_FORMAT,         "S16"},
+                {CFG_SPEAKER_CHANNEL_COUNT,         1},
             }},
+    };
 
-            {"audioEffect", {
-                {"applyList", {"none"}},
-            }},
+    json sampleFormat {
+            {"U8", "S16", "F32"},
+    };
+
+    json imageFormat {
+            {"I420", "NV12", "NV21"},
     };
 }
 

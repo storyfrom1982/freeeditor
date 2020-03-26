@@ -33,12 +33,12 @@ int X264VideoEncoder::OpenEncoder() {
 
     m_param.i_csp = X264_CSP_I420;
     m_param.i_log_level = X264_LOG_NONE;
-    m_param.i_width = m_config["codecWidth"];
-    m_param.i_height = m_config["codecHeight"];
+    m_param.i_width = m_config[CFG_CODEC_WIDTH];
+    m_param.i_height = m_config[CFG_CODEC_HEIGHT];
 
-    bool vbr = m_config["codecVBR"];
-    uint32_t fr = m_config["codecFPS"];
-    uint32_t bitrate = m_config["codecBitRate"];
+    bool vbr = m_config[CFG_CODEC_RATE_CONTROL_MODE] == "VBR";
+    uint32_t fr = m_config[CFG_CODEC_FRAME_RATE];
+    uint32_t bitrate = m_config[CFG_CODEC_BITRATE];
 
     // if input buffer rate is reliable, use the buffer rate for calc bitrate
     if ( fr > 0){

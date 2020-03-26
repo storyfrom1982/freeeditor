@@ -130,13 +130,13 @@ void VideoSource::onRecvMessage(Message pkt) {
 void VideoSource::UpdateMediaConfig(Message pkt) {
 //    LOGD("VideoSource::UpdateMediaConfig >> %s\n", pkt.msg.json);
     m_config = json::parse(pkt.GetString());
-    m_srcWidth = m_config["srcWidth"];
-    m_srcHeight = m_config["srcHeight"];
-    m_srcRotation = m_config["srcRotation"];
-    m_codecWidth = m_config["codecWidth"];
-    m_codecHeight = m_config["codecHeight"];
-    std::string srcFormat = m_config["srcImageFormat"];
-    std::string codecFormat = m_config["codecImageFormat"];
+    m_srcWidth = m_config[CFG_SRC_WIDTH];
+    m_srcHeight = m_config[CFG_SRC_HEIGHT];
+    m_srcRotation = m_config[CFG_SRC_ROTATION];
+    m_codecWidth = m_config[CFG_CODEC_WIDTH];
+    m_codecHeight = m_config[CFG_CODEC_HEIGHT];
+    std::string srcFormat = m_config[CFG_SRC_IMAGE_FORMAT];
+    std::string codecFormat = m_config[CFG_CODEC_IMAGE_FORMAT];
     union {
         uint32_t format;
         unsigned char fourcc[4];

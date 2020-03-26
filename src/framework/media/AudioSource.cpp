@@ -115,10 +115,11 @@ void AudioSource::FinalClear() {
 
 void AudioSource::UpdateConfig(Message ptk) {
     m_config = json::parse(ptk.GetString());
-    m_codecSampleRate = m_config["codecSampleRate"];
-    m_codecChannelCount = m_config["codecChannelCount"];
-    m_codecBytePerSample = m_config["codecBytePerSample"];
-    m_codecSamplePerFrame = m_config["codecSamplePerFrame"];
+    LOGD("AudioSource::UpdateConfig %s\n", ptk.GetString().c_str());
+    m_codecSampleRate = m_config[CFG_CODEC_SAMPLE_RATE];
+    m_codecChannelCount = m_config[CFG_CODEC_CHANNEL_COUNT];
+    m_codecBytePerSample = m_config[CFG_CODEC_BYTE_PER_SAMPLE];
+    m_codecSamplePerFrame = m_config[CFG_CODEC_SAMPLE_PER_FRAME];
 
     m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplePerFrame;
     p_bufferPool = new MessagePool("AudioSourceFramePool", m_bufferSize, 10, 64, 0, 0);
