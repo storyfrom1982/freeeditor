@@ -1,0 +1,66 @@
+//
+// Created by yongge on 20-3-2.
+//
+
+#include "AudioFilter.h"
+
+using namespace freee;
+
+AudioFilter::AudioFilter(const std::string &mediaName, int mediaType)
+        : MessageChain(mediaName, mediaType) {
+    StartProcessor();
+}
+
+AudioFilter::~AudioFilter() {
+    StopProcessor();
+    FinalClear();
+}
+
+void AudioFilter::onMsgOpen(Message pkt) {
+    m_config = static_cast<MessageChain *>(pkt.GetObjectPtr())->GetConfig(this);
+    OpenModule();
+    MessageChain::onMsgOpen(pkt);
+//    OpenNext();
+}
+
+void AudioFilter::onMsgClose(Message pkt) {
+    CloseModule();
+    MessageChain::onMsgClose(pkt);
+//    CloseNext();
+}
+
+void AudioFilter::onMsgProcessData(Message pkt) {
+//    LOGD("AudioFilter::onMsgProcessMedia data %d\n", pkt.GetKey());
+    ProcessMediaByModule(pkt);
+}
+
+int AudioFilter::OpenModule() {
+    m_codecSampleRate = m_config["codecSampleRate"];
+    m_codecChannelCount = m_config["codecChannelCount"];
+    m_codecBytePerSample = m_config["codecBytePerSample"];
+    m_codecSamplePerFrame = m_config["codecSamplePerFrame"];
+
+    m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplePerFrame;
+    p_bufferPool = new MessagePool(GetName() + "FramePool", m_bufferSize, 10, 64, 0, 0);
+
+    return 0;
+}
+
+void AudioFilter::CloseModule() {
+    if (p_bufferPool){
+        delete p_bufferPool;
+        p_bufferPool = nullptr;
+    }
+}
+
+int AudioFilter::ProcessMediaByModule(Message pkt) {
+    MessageChain::onMsgProcessData(pkt);
+    return 0;
+}
+
+void AudioFilter::FinalClear() {
+    if (p_bufferPool){
+        delete p_bufferPool;
+        p_bufferPool = nullptr;
+    }
+}

@@ -1,0 +1,11 @@
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/package.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/yuv.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/yuv_shared.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/yuvconvert.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/install/local.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/install.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/install/strip.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/list_install_components.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/rebuild_cache.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/edit_cache.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/x86_64/CMakeFiles/package_source.dir

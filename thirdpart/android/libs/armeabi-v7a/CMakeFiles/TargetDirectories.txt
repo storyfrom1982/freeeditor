@@ -1,0 +1,11 @@
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/package.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/yuv.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/yuv_shared.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/yuvconvert.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/install/local.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/install.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/install/strip.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/list_install_components.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/rebuild_cache.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/edit_cache.dir
+/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/armeabi-v7a/CMakeFiles/package_source.dir

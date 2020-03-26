@@ -1,0 +1,638 @@
+
+{
+	"buildFiles" : [ "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/CMakeLists.txt" ],
+	"cleanCommands" : 
+	[
+		"/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a --target clean"
+	],
+	"cppFileExtensions" : [ "cc" ],
+	"libraries" : 
+	{
+		"yuv-Debug-arm64-v8a" : 
+		{
+			"abi" : "arm64-v8a",
+			"artifactName" : "yuv",
+			"buildCommand" : "/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a --target yuv",
+			"buildType" : "debug",
+			"files" : 
+			[
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_common.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_gcc.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_mmi.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_msa.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_neon.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_neon64.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_win.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_argb.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_from.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_from_argb.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_jpeg.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_to_argb.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_to_i420.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/cpu_id.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/mjpeg_decoder.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/mjpeg_validate.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/planar_functions.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_any.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_argb.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_common.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_gcc.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_mmi.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_msa.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_neon.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_neon64.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_win.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_any.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_common.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_gcc.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_mmi.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_msa.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_neon.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_neon64.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_win.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_any.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_argb.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_common.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_gcc.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_mmi.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_msa.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_neon.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_neon64.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_win.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/video_common.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				}
+			],
+			"output" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a/libyuv.a",
+			"toolchain" : "13303982338069127809"
+		},
+		"yuv_shared-Debug-arm64-v8a" : 
+		{
+			"abi" : "arm64-v8a",
+			"artifactName" : "yuv_shared",
+			"buildCommand" : "/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a --target yuv_shared",
+			"buildType" : "debug",
+			"files" : 
+			[
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_common.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_gcc.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_mmi.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_msa.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_neon.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_neon64.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/compare_win.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_argb.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_from.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_from_argb.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_jpeg.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_to_argb.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/convert_to_i420.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/cpu_id.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/mjpeg_decoder.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/mjpeg_validate.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/planar_functions.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_any.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_argb.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_common.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_gcc.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_mmi.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_msa.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_neon.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_neon64.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/rotate_win.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_any.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_common.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_gcc.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_mmi.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_msa.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_neon.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_neon64.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/row_win.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_any.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_argb.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_common.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_gcc.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_mmi.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_msa.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_neon.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_neon64.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/scale_win.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				},
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot  -Dyuv_shared_EXPORTS -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIC    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/source/video_common.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				}
+			],
+			"output" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/build/intermediates/cmake/debug/obj/arm64-v8a/libyuv.so",
+			"toolchain" : "13303982338069127809"
+		},
+		"yuvconvert-Debug-arm64-v8a" : 
+		{
+			"abi" : "arm64-v8a",
+			"artifactName" : "yuvconvert",
+			"buildCommand" : "/home/yongge/Android/Sdk/cmake/3.6.4111459/bin/cmake --build /home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a --target yuvconvert",
+			"buildType" : "debug",
+			"files" : 
+			[
+				
+				{
+					"flags" : "  --target=aarch64-none-linux-android21 --gcc-toolchain=/home/yongge/Android/Sdk/ndk-bundle/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64 --sysroot=/home/yongge/Android/Sdk/ndk-bundle/sysroot   -I/home/yongge/kly/freeeditor/thirdpart/src/libyuv/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++/include -isystem /home/yongge/Android/Sdk/ndk-bundle/sources/cxx-stl/llvm-libc++abi/include  -isystem /home/yongge/Android/Sdk/ndk-bundle/sysroot/usr/include/aarch64-linux-android -g -DANDROID -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -Wa,--noexecstack -Wformat -Werror=format-security -std=c++11  -O0 -fno-limit-debug-info  -fPIE    -c ",
+					"src" : "/home/yongge/kly/freeeditor/thirdpart/src/libyuv/util/yuvconvert.cc",
+					"workingDirectory" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a"
+				}
+			],
+			"output" : "/home/yongge/kly/freeeditor/thirdpart/android/CompileProject/libyuv/.externalNativeBuild/cmake/debug/arm64-v8a/yuvconvert",
+			"toolchain" : "13303982338069127809"
+		}
+	},
+	"toolchains" : 
+	{
+		"13303982338069127809" : 
+		{
+			"cCompilerExecutable" : "/home/yongge/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/clang",
+			"cppCompilerExecutable" : "/home/yongge/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
+		}
+	}
+}
