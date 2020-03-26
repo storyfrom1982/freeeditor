@@ -6,4 +6,5 @@ public class Log {
     }
     public static native void d(String tag, String msg);
     public static native void e(String tag, String msg);
+    public static native void dumpThread(String tag, String name, String status);
 }

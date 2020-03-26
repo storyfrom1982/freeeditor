@@ -29,7 +29,7 @@ public class AudioSource extends JNIContext
         mStatus = Status_Closed;
         microphone = new Microphone();
         microphone.setErrorCallback(this);
-        startHandler("AudioSource");
+        startHandler(getClass().getName());
     }
 
     public void release(){

@@ -33,7 +33,7 @@ public class MediaRecorder extends JNIContext {
     private JSONObject mConfig;
 
     public MediaRecorder(){
-        startHandler("MediaRecorder");
+        startHandler(getClass().getName());
         videoView = new VideoWindow();
         recorderContext = MediaContext.Instance().connectRecorder();
         connectContext(recorderContext);

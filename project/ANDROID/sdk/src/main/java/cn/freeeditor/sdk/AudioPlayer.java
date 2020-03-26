@@ -28,7 +28,7 @@ public class AudioPlayer extends JNIContext implements Speaker.SpeakerCallback, 
         mStatus = Status_Closed;
         speaker = new Speaker();
         speaker.setErrorCallback(this);
-        startHandler("AudioPlayer");
+        startHandler(getClass().getName());
     }
 
     public void release(){

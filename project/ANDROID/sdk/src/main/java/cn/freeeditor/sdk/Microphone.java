@@ -142,7 +142,7 @@ public class Microphone implements Runnable {
             return;
         }
 
-        Log.d(TAG, "[THREAD]<START>[JAVA-Microphone] [" + Thread.currentThread().getId() + "]");
+        Log.dumpThread("MessageProcessor", getClass().getName(), "thread start");
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
 
@@ -210,7 +210,7 @@ public class Microphone implements Runnable {
             }
         }
 
-        Log.d(TAG, "[THREAD]<STOPPED>[JAVA-Microphone] [" + Thread.currentThread().getId() + "]");
+        Log.dumpThread("MessageProcessor", getClass().getName(), "thread stop");
 
         synchronized (isStopped){
             isStopped.set(true);

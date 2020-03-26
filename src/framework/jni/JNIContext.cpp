@@ -289,3 +289,19 @@ Java_cn_freeeditor_sdk_Log_e(JNIEnv *env, jclass type, jstring tag_, jstring msg
     env->ReleaseStringUTFChars(tag_, tag);
     env->ReleaseStringUTFChars(msg_, msg);
 }
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_cn_freeeditor_sdk_Log_dumpThread__Ljava_lang_String_2Ljava_lang_String_2Ljava_lang_String_2(
+        JNIEnv *env, jclass type, jstring tag_, jstring name_, jstring status_)
+{
+    const char *tag = env->GetStringUTFChars(tag_, 0);
+    const char *name = env->GetStringUTFChars(name_, 0);
+    const char *status = env->GetStringUTFChars(status_, 0);
+
+    LOGD("%s[%p] %40s %s\n", tag, pthread_self(), name, status);
+
+    env->ReleaseStringUTFChars(tag_, tag);
+    env->ReleaseStringUTFChars(name_, name);
+    env->ReleaseStringUTFChars(status_, status);
+}

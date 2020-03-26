@@ -49,7 +49,7 @@ public class MessageProcessor implements Runnable {
 
     @Override
     public void run() {
-        Log.d(TAG, "[THREAD]<START>[JAVA-" + mName + "] [" + Thread.currentThread().getId() + "]");
+        Log.dumpThread(TAG, mName, "thread start");
         Looper.prepare();
         msgHandler = new MessageHandler(this);
         synchronized (isRunning){
@@ -57,7 +57,7 @@ public class MessageProcessor implements Runnable {
             isRunning.notifyAll();
         }
         Looper.loop();
-        Log.d(TAG, "[THREAD]<STOPPED>[JAVA-" + mName + "] [" + Thread.currentThread().getId() + "]");
+        Log.dumpThread(TAG, mName, "thread stop");
     }
 
     MessageHandler msgHandler;

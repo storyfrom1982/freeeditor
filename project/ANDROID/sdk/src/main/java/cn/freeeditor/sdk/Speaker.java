@@ -6,7 +6,6 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.os.Process;
-import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -171,6 +170,8 @@ public class Speaker implements Runnable {
 
     @Override
     public void run() {
+        Log.dumpThread("MessageProcessor", getClass().getName(), "thread start");
+
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
 
         AudioManager am = (AudioManager) MediaContext.Instance().getAppContext().getSystemService(Context.AUDIO_SERVICE);
@@ -223,13 +224,13 @@ public class Speaker implements Runnable {
                         i += result;
                     } else if (result == 0) {
                         try {
-                            Log.w(TAG, "AudioTrack.write sleep");
+                            Log.e(TAG, "AudioTrack.write sleep");
                             Thread.sleep(1);
                         } catch (InterruptedException e) {
                             // Nom nom
                         }
                     } else {
-                        Log.w(TAG, "AudioTrack.write failed " + result);
+                        Log.e(TAG, "AudioTrack.write failed " + result);
                         break;
                     }
                 }
@@ -247,7 +248,7 @@ public class Speaker implements Runnable {
         am.abandonAudioFocus(audioFocusChangeListener);
 
 
-        Log.d(TAG, "CloudAudioRender ============>>>>>>>>>>>>>> exit");
+        Log.dumpThread("MessageProcessor", getClass().getName(), "thread stop");
 
         if (mAudioTrack != null) {
             mAudioTrack.stop();

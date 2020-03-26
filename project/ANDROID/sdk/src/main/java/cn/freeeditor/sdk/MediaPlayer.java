@@ -23,7 +23,7 @@ public class MediaPlayer extends JNIContext {
     private String mUrl;
 
     public MediaPlayer(){
-        startHandler("MediaPlayer");
+        startHandler(getClass().getName());
         videoView = new VideoWindow();
         playerContext = MediaContext.Instance().connectPlayer();
         connectContext(playerContext);
