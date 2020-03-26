@@ -14,9 +14,9 @@ namespace freee {
     {
     public:
 
-        AudioPlayer(const std::string &name = "AudioPlayer", int type = MediaType_All);
+        AudioPlayer(const std::string name = "AudioPlayer");
 
-        ~AudioPlayer();
+        virtual ~AudioPlayer();
 
         void Open(MessageChain *chain) override;
 

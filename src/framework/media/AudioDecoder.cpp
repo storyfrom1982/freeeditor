@@ -8,8 +8,9 @@
 
 using namespace freee;
 
-AudioDecoder::AudioDecoder(const std::string &name, int type) : MessageChain(name, type)
+AudioDecoder::AudioDecoder(const std::string name) : MessageChain(name)
 {
+    m_type = MediaType_Audio;
     StartProcessor();
 }
 

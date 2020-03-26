@@ -14,8 +14,8 @@ namespace freee {
     {
     public:
         static AudioDecoder* Create(std::string name);
-        AudioDecoder(const std::string &name = "AudioDecoder", int type = MediaType_Audio);
-        ~AudioDecoder();
+        AudioDecoder(const std::string name);
+        virtual ~AudioDecoder();
 
     protected:
         void onMsgOpen(Message msg) override;

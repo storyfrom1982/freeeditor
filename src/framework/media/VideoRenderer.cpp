@@ -16,8 +16,8 @@ enum {
     RecvMsg_SurfaceDestroyed,
 };
 
-VideoRenderer::VideoRenderer(const std::string &mediaName, int mediaType)
-        : MessageChain(mediaName, mediaType) {
+VideoRenderer::VideoRenderer(const std::string name) : MessageChain(name) {
+    m_type = MediaType_Video;
     m_status = Status_Closed;
     isSurfaceCreated = false;
     isSurfaceDestroyed = true;

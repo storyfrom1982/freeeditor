@@ -5,8 +5,8 @@
 #include "AudioEncoder.h"
 #include "encoder/FaacAudioEncoder.h"
 
-freee::AudioEncoder::AudioEncoder(const std::string &mediaName, int mediaType)
-        : MessageChain(mediaName, mediaType) {
+freee::AudioEncoder::AudioEncoder(const std::string name) : MessageChain(name) {
+    m_type = MediaType_Audio;
     StartProcessor();
 }
 
@@ -37,7 +37,7 @@ void freee::AudioEncoder::onMsgClose(freee::Message pkt) {
 }
 
 void freee::AudioEncoder::onMsgProcessData(freee::Message pkt) {
-    if (m_outputChainStatus == Status_Opened){
+    if (m_chainStatus == Status_Opened){
         if (m_startTimestamp == -1){
             m_startTimestamp = pkt.GetFramePtr()->timestamp;
         }
@@ -64,10 +64,10 @@ void freee::AudioEncoder::FinalClear() {
 void freee::AudioEncoder::onMsgProcessEvent(freee::Message pkt) {
     switch (pkt.event()){
         case MsgKey_Open:
-            m_outputChainStatus = Status_Opened;
+            m_chainStatus = Status_Opened;
             break;
         case MsgKey_Close:
-            m_outputChainStatus = Status_Closed;
+            m_chainStatus = Status_Closed;
             break;
         default:
             break;

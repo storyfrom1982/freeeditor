@@ -13,10 +13,10 @@
 namespace freee {
 
     enum {
-        MediaType_All = 0,
+        MediaType_Mix = 0,
+        MediaType_Text,
         MediaType_Audio,
         MediaType_Video,
-        MediaType_Text
     };
 
     enum {
@@ -29,11 +29,12 @@ namespace freee {
     class MessageChain : public MessageProcessor {
 
     public:
-        MessageChain(std::string name, int type)
-        : MessageProcessor(name), m_type(type){}
+        MessageChain(std::string name) : MessageProcessor(name){}
+
+        MessageChain(std::string name, size_t msgLength, size_t msgCount, size_t maxMsgCount)
+            : MessageProcessor(name, msgLength, msgCount, maxMsgCount){}
 
         virtual ~MessageChain(){
-//            LOGD("[DELETE]<MediaChainImpl>[%s]\n", m_name.c_str());
             AutoLock lockOutput(m_lockOutputChain);
             m_outputChain.clear();
             AutoLock lockInput(m_lockInputChain);
@@ -93,16 +94,20 @@ namespace freee {
         }
 
     public:
+        void SetType(int type){
+            m_type = type;
+        }
+
         void SetStreamId(int streamId){
             m_streamId = streamId;
         }
 
-        virtual int GetType(MessageChain *chain) {
-            return m_type;
-        }
-
         virtual int GetStreamId(MessageChain *chain){
             return m_streamId;
+        }
+
+        virtual int GetType(MessageChain *chain) {
+            return m_type;
         }
 
         virtual json &GetConfig(MessageChain *chain) {
@@ -225,11 +230,11 @@ namespace freee {
 
 
     protected:
-        int m_status = Status_Closed;
-        int m_outputChainStatus = Status_Closed;
+        int m_type = 0;
+        int m_status = 0;
+        int m_chainStatus = 0;
+        int m_streamId = 0;
 
-        int m_type;
-        int m_streamId;
         json m_config;
         std::string m_extraConfig;
 

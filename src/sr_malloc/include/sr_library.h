@@ -329,7 +329,7 @@ typedef struct sr_buffer_frame_t {
 
     int type;
     int flag;
-    int index;
+    int stream_id;
 
     int x;
     int y;

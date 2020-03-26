@@ -9,8 +9,8 @@
 using namespace freee;
 
 
-VideoFilter::VideoFilter(const std::string &mediaName, int mediaType)
-        : MessageChain(mediaName, mediaType) {
+VideoFilter::VideoFilter(const std::string name) : MessageChain(name) {
+    m_type = MediaType_Video;
     m_status = Status_Closed;
     p_bufferPool = nullptr;
     StartProcessor();

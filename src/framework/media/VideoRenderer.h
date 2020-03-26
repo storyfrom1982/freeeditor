@@ -29,8 +29,8 @@ namespace freee {
     class VideoRenderer : public MessageChain, VideoWindow::VideoWindowCallback {
 
     public:
-        VideoRenderer(const std::string &mediaName = "VideoRenderer", int mediaType = MediaType_Video);
-        ~VideoRenderer();
+        VideoRenderer(const std::string name = "VideoRenderer");
+        virtual ~VideoRenderer();
 
 
     public:

@@ -5,13 +5,6 @@
 #include "MediaSource.h"
 #include "ffmpeg/FFmpegMediaSource.h"
 
-extern "C"{
-
-#include <libavutil/avutil.h>
-#include <libavformat/avformat.h>
-
-}
-
 
 using namespace freee;
 
@@ -21,8 +14,9 @@ enum {
 };
 
 
-MediaSource::MediaSource(const std::string &name, int type) : MessageChain(name, type)
+MediaSource::MediaSource(const std::string name) : MessageChain(name)
 {
+    m_type = MediaType_Mix;
     StartProcessor();
 }
 
@@ -50,7 +44,7 @@ void MediaSource::onMsgClose(Message pkt)
 void MediaSource::onMsgStart(Message pkt)
 {
     if (__set_true(m_isRunning)){
-        if (m_outputChainStatus == Status_Opened){
+        if (m_chainStatus == Status_Opened){
             ReadSource();
         }
     }
@@ -63,7 +57,7 @@ void MediaSource::onMsgStop(Message pkt)
 
 void MediaSource::onMsgProcessData(Message msg)
 {
-    MessageChain *chain = m_streamMap[msg.GetFramePtr()->index];
+    MessageChain *chain = m_streamMap[msg.GetFramePtr()->stream_id];
     chain->ProcessData(this, msg);
     ProcessMessage(NewMessage(MsgKey_ReadSource));
 }
@@ -74,14 +68,14 @@ void MediaSource::onMsgProcessEvent(Message pkt)
         case MsgKey_Open:
             m_openedStream ++;
             if (m_openedStream == m_streamCount){
-                m_outputChainStatus = Status_Opened;
+                m_chainStatus = Status_Opened;
                 if (m_isRunning){
                     ReadSource();
                 }
             }
             break;
         case MsgKey_Close:
-            m_outputChainStatus = Status_Closed;
+            m_chainStatus = Status_Closed;
             break;
         default:
             break;

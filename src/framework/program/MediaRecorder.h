@@ -22,7 +22,7 @@ namespace freee{
     class MediaRecorder : public MessageChain {
 
     public:
-        MediaRecorder();
+        MediaRecorder(std::string name = "MediaRecorder");
         ~MediaRecorder();
 
     private:

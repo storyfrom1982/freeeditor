@@ -9,7 +9,7 @@
 using namespace freee;
 
 
-X264VideoEncoder::X264VideoEncoder() {
+X264VideoEncoder::X264VideoEncoder() : VideoEncoder("X264VideoEncoder") {
     m_handle = nullptr;
 }
 

@@ -26,9 +26,9 @@ enum {
 };
 
 
-AudioSource::AudioSource(std::string mediaName, int mediaType)
-        : MessageChain(mediaName, mediaType) {
+AudioSource::AudioSource(std::string name) : MessageChain(name) {
 //    MessageContext *context = MediaContext::Instance().ConnectMicrophone();
+    m_type = MediaType_Audio;
     MessageContext *context = MediaContext::Instance()->ConnectMicrophone();
     ConnectContext(context);
 }

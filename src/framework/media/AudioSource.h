@@ -19,9 +19,9 @@ namespace freee {
 
     public:
 
-        AudioSource(const std::string mediaName = "AudioSource", int mediaType = MediaType_Audio);
+        AudioSource(const std::string name = "AudioSource");
 
-        ~AudioSource();
+        virtual ~AudioSource();
 
         void Open(MessageChain *chain) override;
 

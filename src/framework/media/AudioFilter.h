@@ -12,11 +12,11 @@ namespace freee {
 
     class AudioFilter : public MessageChain {
     public:
-        AudioFilter(const std::string &mediaName = "AudioFilter", int mediaType = MediaType_Audio);
+        AudioFilter(const std::string &name = "AudioFilter");
 
         void FinalClear() override;
 
-        ~AudioFilter();
+        virtual ~AudioFilter();
 
     protected:
         void onMsgOpen(Message pkt) override;

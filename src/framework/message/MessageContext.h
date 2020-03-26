@@ -16,7 +16,11 @@ namespace freee{
 
     public:
 
-        MessageContext(std::string name) : MessagePool(name)
+        MessageContext(std::string name,
+                size_t msgLength = 10240,
+                size_t msgCount = 10,
+                size_t maxMsgCount = 64)
+                : MessagePool(name, msgLength, msgCount, maxMsgCount)
         {
             m_name = name;
         }

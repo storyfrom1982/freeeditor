@@ -15,9 +15,9 @@ namespace freee {
     class VideoFilter : public MessageChain {
 
     public:
-        VideoFilter(const std::string &mediaName = "VideoFilter", int mediaType = MediaType_Video);
+        VideoFilter(const std::string name = "VideoFilter");
 
-        ~VideoFilter();
+        virtual ~VideoFilter();
 
 //        void ProcessMedia(MediaChain *chain, SmartPkt pkt) override;
 

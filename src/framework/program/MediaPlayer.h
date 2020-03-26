@@ -19,7 +19,7 @@ namespace freee {
     class MediaPlayer : public MessageChain
     {
     public:
-        MediaPlayer(const std::string &name = "MediaPlayer", int type = MediaType_All);
+        MediaPlayer(std::string name = "MediaPlayer");
         ~MediaPlayer();
 
     protected:

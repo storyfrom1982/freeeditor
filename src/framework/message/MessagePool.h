@@ -196,14 +196,22 @@ namespace freee {
 
     class MessagePool {
     public:
-        MessagePool(std::string name = "MessagePool",
-                size_t maxMessageLength = 10240,
-                size_t allocMessageCount = 10,
-                size_t maxMessageCount = 64,
-                size_t headSize = 0,
-                size_t align = 0)
+        MessagePool(std::string name,
+                    size_t maxMessageLength,
+                    size_t allocateMessageCount,
+                    size_t maxAllocateMessageCount)
         {
-            p_pool = sr_buffer_pool_create(maxMessageLength, allocMessageCount, maxMessageCount, headSize, align);
+            p_pool = sr_buffer_pool_create(maxMessageLength, allocateMessageCount, maxAllocateMessageCount, 0, 0);
+            sr_buffer_pool_set_name(p_pool, name.c_str());
+        }
+        MessagePool(std::string name,
+                size_t maxMessageLength,
+                size_t allocateMessageCount,
+                size_t maxAllocateMessageCount,
+                size_t headSize,
+                size_t align)
+        {
+            p_pool = sr_buffer_pool_create(maxMessageLength, allocateMessageCount, maxAllocateMessageCount, headSize, align);
             sr_buffer_pool_set_name(p_pool, name.c_str());
         }
         ~MessagePool()

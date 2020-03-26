@@ -901,7 +901,7 @@ void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool){
         if (sr_queue_length(pool->queue) == pool->buffer_count){
             sr_queue_release(&pool->queue);
             if (pool->name){
-                LOGD("sr_buffer_pool_release() %30s [%lu]\n", pool->name, pool->buffer_count);
+                LOGD("sr_buffer_pool_release() %s [%lu]\n", pool->name, pool->buffer_count);
                 free(pool->name);
             }
             free(pool);
@@ -971,7 +971,7 @@ void sr_buffer_pool_recycle(sr_buffer_data_t *buffer)
         if (sr_queue_length(pool->queue) == pool->buffer_count){
             sr_queue_release(&pool->queue);
             if (pool->name){
-                LOGD("sr_buffer_pool_release_delayed() %30s [%lu]\n", pool->name, pool->buffer_count);
+                LOGD("sr_buffer_pool_release_delayed() %s [%lu]\n", pool->name, pool->buffer_count);
                 free(pool->name);
             }
             free(pool);

@@ -6,7 +6,7 @@
 #define ANDROID_MEDIASOURCE_H
 
 
-#include "../message/MessageChain.h"
+#include "MessageChain.h"
 
 
 namespace freee {
@@ -16,8 +16,8 @@ namespace freee {
     {
     public:
         static MediaSource* Create(std::string url);
-        MediaSource(const std::string &name = "MediaSource", int type = MediaType_All);
-        ~MediaSource();
+        MediaSource(const std::string name);
+        virtual ~MediaSource();
 
         json &GetConfig(MessageChain *chain) override;
 

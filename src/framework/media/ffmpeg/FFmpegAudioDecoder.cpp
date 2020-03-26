@@ -7,7 +7,7 @@
 
 using namespace freee;
 
-FFmpegAudioDecoder::FFmpegAudioDecoder()
+FFmpegAudioDecoder::FFmpegAudioDecoder() : AudioDecoder("FFmpegAudioDecoder")
 {
 
 }
@@ -100,7 +100,7 @@ int FFmpegAudioDecoder::DecodeAudio(Message msg)
 {
     AVPacket             avpkt;
     ::av_init_packet( &avpkt );
-    avpkt.stream_index = msg.GetFramePtr()->index;
+    avpkt.stream_index = msg.GetFramePtr()->stream_id;
     avpkt.data = msg.GetBufferPtr();
     avpkt.size = msg.length();
     avpkt.dts =  msg.GetFramePtr()->timestamp;

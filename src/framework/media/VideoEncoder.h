@@ -19,9 +19,8 @@ namespace freee{
 
     public:
         static VideoEncoder* Create(std::string name);
+        VideoEncoder(const std::string name);
         virtual ~VideoEncoder();
-        VideoEncoder(const std::string &mediaName = "VideoEncoder",
-                     int mediaType = MediaType_Video);
 
         virtual int OpenEncoder() = 0;
         virtual void CloseEncoder(){};

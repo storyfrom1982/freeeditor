@@ -8,7 +8,7 @@
 
 using namespace freee;
 
-FFmpegVideoDecoder::FFmpegVideoDecoder()
+FFmpegVideoDecoder::FFmpegVideoDecoder() : VideoDecoder("FFmpegVideoDecoder")
 {
 
 }
@@ -103,7 +103,7 @@ int FFmpegVideoDecoder::DecodeVideo(Message msg)
 {
     AVPacket             avpkt;
     ::av_init_packet( &avpkt );
-    avpkt.stream_index = msg.GetFramePtr()->index;
+    avpkt.stream_index = msg.GetFramePtr()->stream_id;
     avpkt.data = msg.GetBufferPtr();
     avpkt.size = msg.length();
     avpkt.dts =  msg.GetFramePtr()->timestamp;

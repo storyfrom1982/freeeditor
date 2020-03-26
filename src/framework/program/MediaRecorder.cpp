@@ -21,8 +21,7 @@ enum {
 };
 
 
-MediaRecorder::MediaRecorder()
-        : MessageChain("MediaRecorder", MediaType_All),
+MediaRecorder::MediaRecorder(std::string name) : MessageChain(name),
         m_audioSource(nullptr),
         m_audioFilter(nullptr),
         m_audioEncoder(nullptr),
@@ -146,7 +145,6 @@ void MediaRecorder::onMsgOpen(Message pkt) {
 
         m_videoSource->AddOutput(m_videoFilter);
         m_videoSource->Open(this);
-
 
         m_audioSource = new AudioSource();
         m_audioFilter = new AudioFilter();

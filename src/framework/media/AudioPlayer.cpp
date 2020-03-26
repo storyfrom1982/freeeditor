@@ -8,8 +8,9 @@
 
 using namespace freee;
 
-AudioPlayer::AudioPlayer(const std::string &name, int type) : MessageChain(name, type)
+AudioPlayer::AudioPlayer(const std::string name) : MessageChain(name)
 {
+    m_type = MediaType_Audio;
     MessageContext *context = MediaContext::Instance()->ConnectSpeaker();
     ConnectContext(context);
 }

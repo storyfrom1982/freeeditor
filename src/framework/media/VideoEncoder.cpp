@@ -14,8 +14,8 @@ VideoEncoder *VideoEncoder::Create(std::string name) {
     return new X264VideoEncoder;
 }
 
-VideoEncoder::VideoEncoder(const std::string &mediaName, int mediaType)
-        : MessageChain(mediaName, mediaType) {
+VideoEncoder::VideoEncoder(const std::string name) : MessageChain(name) {
+    m_type = MediaType_Video;
     p_bufferPool = nullptr;
     StartProcessor();
 }
@@ -64,7 +64,7 @@ void VideoEncoder::onMsgClose(Message pkt) {
 
 void VideoEncoder::onMsgProcessData(Message pkt) {
 
-    if ( m_outputChainStatus == Status_Opened) {
+    if ( m_chainStatus == Status_Opened) {
 //        LOGD("m_framerate ================  delay[%f]\n", m_frameRate);
         long long timeStamp = pkt.GetFramePtr()->timestamp;
         double frameIdScope = (double) timeStamp * (m_frameRate / 1000000.0f);
@@ -102,10 +102,10 @@ void VideoEncoder::onMsgControl(Message pkt) {
 void VideoEncoder::onMsgProcessEvent(Message pkt) {
     switch (pkt.event()){
         case MsgKey_Open:
-            m_outputChainStatus = Status_Opened;
+            m_chainStatus = Status_Opened;
             break;
         case MsgKey_Close:
-            m_outputChainStatus = Status_Closed;
+            m_chainStatus = Status_Closed;
             break;
         default:
             break;

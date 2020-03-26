@@ -15,8 +15,7 @@ enum {
 
 using namespace freee;
 
-MediaPlayer::MediaPlayer(const std::string &name, int type)
-    : MessageChain(name, type)
+MediaPlayer::MediaPlayer(std::string name) : MessageChain(name)
 {
     StartProcessor();
 }

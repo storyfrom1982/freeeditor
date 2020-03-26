@@ -7,7 +7,7 @@
 
 using namespace freee;
 
-FFmpegMediaSource::FFmpegMediaSource()
+FFmpegMediaSource::FFmpegMediaSource() : MediaSource("FFmpegMediaSource")
 {
 
 }
@@ -142,6 +142,9 @@ void FFmpegMediaSource::CloseSource()
 
 int FFmpegMediaSource::ReadSource()
 {
+    if (!m_pContext){
+        return 0;
+    }
     AVPacket pkt = {0};
     int result = av_read_frame(m_pContext, &pkt);
     if (result < 0  ){
@@ -157,7 +160,7 @@ int FFmpegMediaSource::ReadSource()
 //    LOGD("[FFmpegMediaSource] av_read_frame() stream id %d\n", pkt.stream_index);
 
     Message msg = NewMessage(MsgKey_ProcessData, pkt.data, pkt.size);
-    msg.GetFramePtr()->index = pkt.stream_index;
+    msg.GetFramePtr()->stream_id = pkt.stream_index;
     msg.GetFramePtr()->timestamp = 0;
     ProcessMessage(msg);
 

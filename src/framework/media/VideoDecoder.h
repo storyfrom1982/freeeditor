@@ -15,8 +15,8 @@ namespace freee {
     {
     public:
         static VideoDecoder* Create(std::string name);
-        VideoDecoder(const std::string &name = "VideoDecoder", int type = MediaType_Video);
-        ~VideoDecoder();
+        VideoDecoder(const std::string name);
+        virtual ~VideoDecoder();
 
     protected:
         void onMsgOpen(Message msg) override;

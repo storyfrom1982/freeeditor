@@ -6,8 +6,8 @@
 
 using namespace freee;
 
-AudioFilter::AudioFilter(const std::string &mediaName, int mediaType)
-        : MessageChain(mediaName, mediaType) {
+AudioFilter::AudioFilter(const std::string &name) : MessageChain(name) {
+    m_type = MediaType_Audio;
     StartProcessor();
 }
 

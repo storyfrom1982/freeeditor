@@ -14,7 +14,7 @@ namespace freee {
     class AudioEncoder : public MessageChain {
     public:
         static AudioEncoder* Create(std::string name);
-        ~AudioEncoder();
+        virtual ~AudioEncoder();
 
     protected:
     public:
@@ -32,8 +32,7 @@ namespace freee {
         void onMsgControl(Message pkt) override;
 
     protected:
-        AudioEncoder(const std::string &mediaName = "AudioEncoder",
-                int mediaType = MediaType_Audio);
+        AudioEncoder(const std::string name);
 
     protected:
         int64_t m_startTimestamp = -1;

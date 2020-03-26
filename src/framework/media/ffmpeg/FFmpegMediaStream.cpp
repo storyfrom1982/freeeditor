@@ -8,7 +8,7 @@
 
 using namespace freee;
 
-FFmpegMediaStream::FFmpegMediaStream() {
+FFmpegMediaStream::FFmpegMediaStream() : MediaStream("FFmpegMediaStream"){
     m_pContext = nullptr;
     m_Streams = std::vector<AVStream*>(3);
 }

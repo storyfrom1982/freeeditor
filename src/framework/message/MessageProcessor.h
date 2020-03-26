@@ -18,6 +18,10 @@ namespace freee {
 
     public:
         MessageProcessor(std::string name) : MessageContext(name){}
+
+        MessageProcessor(std::string name, size_t msgLength, size_t msgCount, size_t maxMsgCount)
+                : MessageContext(name, msgLength, msgCount, maxMsgCount){}
+
         virtual ~MessageProcessor(){}
 
     protected:

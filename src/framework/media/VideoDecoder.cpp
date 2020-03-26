@@ -8,8 +8,9 @@
 
 using namespace freee;
 
-VideoDecoder::VideoDecoder(const std::string &name, int type) : MessageChain(name, type)
+VideoDecoder::VideoDecoder(const std::string name) : MessageChain(name)
 {
+    m_type = MediaType_Video;
     StartProcessor();
 }
 
