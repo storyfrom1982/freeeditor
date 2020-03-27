@@ -33,13 +33,14 @@ namespace freee {
 
         void ProcessData(MessageChain *chain, Message pkt) override;
 
-        virtual void onRecvMessage(Message pkt) override;
+        virtual void onRecvMessage(Message msg) override;
 
         virtual Message onRequestMessage(int key) override;
 
 
     private:
-        void UpdateConfig(Message pkt);
+        void onRecvEvent(Message msg);
+        void UpdateConfig(Message msg);
 
 
     private:

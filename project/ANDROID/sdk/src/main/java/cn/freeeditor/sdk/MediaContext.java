@@ -195,7 +195,7 @@ public class MediaContext extends JNIContext {
     }
 
     @Override
-    protected JNIMessage onObtainMessage(int key) {
+    protected JNIMessage onRequestMessage(int key) {
         switch (key){
             case OnReqMsg_ConnectCamera:
                 return new JNIMessage(key, createCamera());

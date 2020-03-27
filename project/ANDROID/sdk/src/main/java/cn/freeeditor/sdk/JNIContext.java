@@ -24,11 +24,15 @@ abstract public class JNIContext extends MessageProcessor {
         disconnectContext(contextPointer);
     }
 
-    protected abstract JNIMessage onObtainMessage(int key);
+    protected abstract JNIMessage onRequestMessage(int key);
     protected abstract void onRecvMessage(JNIMessage msg);
 
     protected void sendMessage(int key){
         sendMessage(key, 0, contextPointer);
+    }
+
+    protected void sendMessage(int key, int event){
+        sendMessage(key, event, contextPointer);
     }
 
     protected void sendMessage(int key, long ptr){
@@ -41,6 +45,10 @@ abstract public class JNIContext extends MessageProcessor {
 
     protected void sendMessage(int key, String json){
         sendMessage(key, json, contextPointer);
+    }
+
+    protected void sendMessage(int key, int event, String json){
+        sendMessage(key, event, json, contextPointer);
     }
 
     protected void sendMessage(int key, byte[] buffer, long timestamp){
@@ -63,11 +71,12 @@ abstract public class JNIContext extends MessageProcessor {
     private native void connectContext(long messageContext, long contextPointer);
     private native void disconnectContext(long contextPointer);
 
-    private native JNIMessage requestMessage(int key, long contextPointer);
-//    private native void sendMessage(int key, long contextPointer);
+    private native void sendMessage(int key, int event, long contextPointer);
+    private native void sendMessage(int key, long ptr, long contextPointer);
     private native void sendMessage(int key, Object obj, long contextPointer);
     private native void sendMessage(int key, String json, long contextPointer);
-    private native void sendMessage(int key, long ptr, long contextPointer);
-    private native void sendMessage(int key, byte[] buffer, long timestamp, long contextPointer);
-//    private native void sendMessage(JNIMessage msg, long contextPointer);
+    private native void sendMessage(int key, int event, String json, long contextPointer);
+    private native void sendMessage(int key, byte[] buffer, long length, long contextPointer);
+
+    private native JNIMessage requestMessage(int key, long contextPointer);
 }

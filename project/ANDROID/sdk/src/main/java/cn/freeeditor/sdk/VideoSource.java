@@ -23,11 +23,6 @@ public class VideoSource extends JNIContext
 
     private static final String TAG = "VideoSource";
 
-    private static final int Status_Closed = 0;
-    private static final int Status_Opened = 1;
-    private static final int Status_Started = 2;
-    private static final int Status_Stopped = 3;
-
     private int mStatus;
 
     private int mDeviceId;
@@ -53,17 +48,17 @@ public class VideoSource extends JNIContext
 
     public VideoSource(){
         startHandler(getClass().getName());
-        mStatus = Status_Closed;
+        mStatus = MediaStatus.Status_Closed;
     }
 
     public void release(){
-        msgHandler.sendMessage(msgHandler.obtainMessage(RecvMsg_Close));
+        msgHandler.sendMessage(msgHandler.obtainMessage(MsgKey.Media_Close));
         stopHandler();
     }
 
     private void openCamera(JNIMessage msg){
 
-        if (mStatus != Status_Closed){
+        if (mStatus != MediaStatus.Status_Closed){
             return;
         }
 
@@ -154,53 +149,55 @@ public class VideoSource extends JNIContext
         }
         mConfig.put(MediaConfig.CFG_SRC_ROTATION, mRotation);
         mConfig.put(MediaConfig.CFG_SRC_IMAGE_FORMAT, "NV21");
-        sendMessage(SendMsg_Opened, mConfig.toString());
+
+        mStatus = MediaStatus.Status_Opened;
+        sendMessage(MsgKey.Media_ProcessEvent, mStatus, mConfig.toString());
 
         mStartTime = 0;
 
-        mStatus = Status_Opened;
     }
 
 
     private void closeCamera(){
-        if (mStatus == Status_Started){
+        if (mStatus == MediaStatus.Status_Started){
             stopCapture();
         }
-        if (mStatus == Status_Opened || mStatus == Status_Stopped){
+        if (mStatus == MediaStatus.Status_Opened || mStatus == MediaStatus.Status_Stopped){
             if (mCamera != null){
                 mCamera.setErrorCallback(null);
                 mCamera.release();
                 mCamera = null;
                 mBufferList.clear();
                 sendMessage(SendMsg_Closed);
-                mStatus = Status_Closed;
+                mStatus = MediaStatus.Status_Closed;
+                sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
         }
     }
 
 
     private void startCapture(){
-        if (mStatus == Status_Opened || mStatus == Status_Stopped){
+        if (mStatus == MediaStatus.Status_Opened || mStatus == MediaStatus.Status_Stopped){
             if (mCamera != null){
                 mCamera.startPreview();
                 mCamera.setPreviewCallbackWithBuffer(this);
                 for (int i = 0; i < mBufferCount; ++i){
                     mCamera.addCallbackBuffer(mBufferList.get(i));
                 }
-                sendMessage(SendMsg_Started);
-                mStatus = Status_Started;
+                mStatus = MediaStatus.Status_Started;
+                sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
         }
     }
 
 
     private void stopCapture(){
-        if (mStatus == Status_Started){
+        if (mStatus == MediaStatus.Status_Started){
             if (mCamera != null){
                 mCamera.setPreviewCallbackWithBuffer(null);
                 mCamera.stopPreview();
-                sendMessage(SendMsg_Stopped);
-                mStatus = Status_Stopped;
+                mStatus = MediaStatus.Status_Stopped;
+                sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
         }
     }
@@ -210,14 +207,15 @@ public class VideoSource extends JNIContext
         if (mStartTime == 0){
             mStartTime = System.currentTimeMillis() * 1000L;
         }
-        sendMessage(SendMsg_ProcessPicture, data, System.currentTimeMillis() * 1000L - mStartTime);
+        sendMessage(MsgKey.Media_ProcessData, data, System.currentTimeMillis() * 1000L - mStartTime);
         mCamera.addCallbackBuffer(data);
     }
 
     @Override
     public void onError(int error, Camera camera) {
         Log.d(TAG, "onError: " + error);
-        sendMessage(-1);
+        mStatus = MediaStatus.Status_Error;
+        sendMessage(MsgKey.Media_ProcessEvent, mStatus);
     }
 
     @Override
@@ -229,26 +227,26 @@ public class VideoSource extends JNIContext
     private static final int SendMsg_Started = 2;
     private static final int SendMsg_Stopped = 3;
     private static final int SendMsg_Closed = 4;
-    private static final int SendMsg_ProcessPicture = 5;
 
-    private static final int RecvMsg_Open = 1;
-    private static final int RecvMsg_Start = 2;
-    private static final int RecvMsg_Stop = 3;
-    private static final int RecvMsg_Close = 4;
+//    private static final int MsgKey_Open = 1;
+//    private static final int MsgKey_Start = 2;
+//    private static final int MsgKey_Stop = 3;
+//    private static final int MsgKey_Close = 4;
+//    private static final int MsgKey_ProcessData = 5;
 
     @Override
     void onMessageProcessor(Message msg) {
         switch (msg.what){
-            case RecvMsg_Open:
+            case MsgKey.Media_Open:
                 openCamera((JNIMessage) msg.obj);
                 break;
-            case RecvMsg_Start:
+            case MsgKey.Media_Start:
                 startCapture();
                 break;
-            case RecvMsg_Stop:
+            case MsgKey.Media_Stop:
                 stopCapture();
                 break;
-            case RecvMsg_Close:
+            case MsgKey.Media_Close:
                 closeCamera();
                 break;
             default:
@@ -257,7 +255,7 @@ public class VideoSource extends JNIContext
     }
 
     @Override
-    protected JNIMessage onObtainMessage(int key) {
+    protected JNIMessage onRequestMessage(int key) {
         return new JNIMessage();
     }
 

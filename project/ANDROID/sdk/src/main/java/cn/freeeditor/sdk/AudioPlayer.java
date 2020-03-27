@@ -9,11 +9,6 @@ public class AudioPlayer extends JNIContext implements Speaker.SpeakerCallback, 
 
     protected static final String TAG = "AudioPlayer";
 
-    private static final int Status_Closed = 0;
-    private static final int Status_Opened = 1;
-    private static final int Status_Started = 2;
-    private static final int Status_Stopped = 3;
-
     private int mSampleRate;
     private int mChannelCount;
     private int mBytesPerSample;
@@ -25,14 +20,14 @@ public class AudioPlayer extends JNIContext implements Speaker.SpeakerCallback, 
 
 
     public AudioPlayer(){
-        mStatus = Status_Closed;
+        mStatus = MediaStatus.Status_Closed;
         speaker = new Speaker();
         speaker.setErrorCallback(this);
         startHandler(getClass().getName());
     }
 
     public void release(){
-        msgHandler.sendEmptyMessage(OnRecvMsg_CloseRecord);
+        msgHandler.sendEmptyMessage(MsgKey.Media_Close);
         stopHandler();
     }
 
@@ -42,7 +37,7 @@ public class AudioPlayer extends JNIContext implements Speaker.SpeakerCallback, 
     }
 
     public void open(String cfgStr){
-        if (mStatus != Status_Closed){
+        if (mStatus != MediaStatus.Status_Closed){
             return ;
         }
         mConfig = JSON.parseObject(cfgStr);
@@ -53,77 +48,65 @@ public class AudioPlayer extends JNIContext implements Speaker.SpeakerCallback, 
         mSamplesPerFrame = mConfig.getIntValue(MediaConfig.CFG_CODEC_SAMPLE_PER_FRAME);
         speaker.open(mSampleRate, mChannelCount, mBytesPerSample, mSamplesPerFrame, 0);
 
-        mStatus = Status_Opened;
-        sendMessage(SendMsg_Opened, this.mConfig.toString());
+        mStatus = MediaStatus.Status_Opened;
+        sendMessage(MsgKey.Media_ProcessEvent, mStatus, mConfig.toString());
     }
 
 
     public void start(){
-        if (mStatus == Status_Opened || mStatus == Status_Stopped){
+        if (mStatus == MediaStatus.Status_Opened || mStatus == MediaStatus.Status_Stopped){
             if (speaker != null){
                 speaker.start();
                 speaker.setSpeakerCallback(this);
-                sendMessage(SendMsg_Started);
-                mStatus = Status_Started;
+                mStatus = MediaStatus.Status_Started;
+                sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
         }
     }
 
 
     public void stop(){
-        if (mStatus == Status_Started){
+        if (mStatus == MediaStatus.Status_Started){
             if (speaker != null){
                 speaker.stop();
-                sendMessage(SendMsg_Stopped);
-                mStatus = Status_Stopped;
+                mStatus = MediaStatus.Status_Stopped;
+                sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
         }
     }
 
 
     public void close() {
-        if (mStatus == Status_Started){
+        if (mStatus == MediaStatus.Status_Started){
             stop();
         }
-        if (mStatus == Status_Opened || mStatus == Status_Stopped){
+        if (mStatus == MediaStatus.Status_Opened || mStatus == MediaStatus.Status_Stopped){
             if (speaker != null){
                 speaker.close();
-                mStatus = Status_Closed;
-                sendMessage(SendMsg_Closed);
+                mStatus = MediaStatus.Status_Closed;
+                sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
         }
     }
-
-    private static final int OnRecvMsg_OpenRecord = 1;
-    private static final int OnRecvMsg_StartRecord = 2;
-    private static final int OnRecvMsg_StopRecord = 3;
-    private static final int OnRecvMsg_CloseRecord = 4;
-
-
-    private static final int SendMsg_Opened = 1;
-    private static final int SendMsg_Started = 2;
-    private static final int SendMsg_Stopped = 3;
-    private static final int SendMsg_Closed = 4;
-    private static final int SendMsg_ProcessSound = 5;
 
     @Override
     void onMessageProcessor(Message msg) {
         JNIMessage jmsg = (JNIMessage) msg.obj;
         switch (msg.what){
 
-            case OnRecvMsg_OpenRecord:
+            case MsgKey.Media_Open:
                 open(jmsg.string);
                 break;
 
-            case OnRecvMsg_StartRecord:
+            case MsgKey.Media_Start:
                 start();
                 break;
 
-            case OnRecvMsg_StopRecord:
+            case MsgKey.Media_Stop:
                 stop();
                 break;
 
-            case OnRecvMsg_CloseRecord:
+            case MsgKey.Media_Close:
                 close();
                 break;
 
@@ -134,7 +117,7 @@ public class AudioPlayer extends JNIContext implements Speaker.SpeakerCallback, 
     }
 
     @Override
-    protected JNIMessage onObtainMessage(int key) {
+    protected JNIMessage onRequestMessage(int key) {
         return new JNIMessage();
     }
 
@@ -145,7 +128,7 @@ public class AudioPlayer extends JNIContext implements Speaker.SpeakerCallback, 
 
     @Override
     public void onPlaySample(byte[] data, long timestamp) {
-        sendMessage(SendMsg_ProcessSound, data, timestamp);
+        sendMessage(MsgKey.Media_ProcessData, data, timestamp);
     }
 
     @Override

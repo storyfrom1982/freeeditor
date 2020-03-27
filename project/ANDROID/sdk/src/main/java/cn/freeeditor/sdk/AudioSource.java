@@ -11,11 +11,6 @@ public class AudioSource extends JNIContext
 
     protected static final String TAG = "AudioSource";
 
-    private static final int Status_Closed = 0;
-    private static final int Status_Opened = 1;
-    private static final int Status_Started = 2;
-    private static final int Status_Stopped = 3;
-
     private String mAudioDevice;
     private int mSampleRate;
     private int mChannelCount;
@@ -27,19 +22,19 @@ public class AudioSource extends JNIContext
     private Microphone microphone;
 
     public AudioSource(){
-        mStatus = Status_Closed;
+        mStatus = MediaStatus.Status_Closed;
         microphone = new Microphone();
         microphone.setErrorCallback(this);
         startHandler(getClass().getName());
     }
 
     public void release(){
-        msgHandler.sendEmptyMessage(OnRecvMsg_CloseRecord);
+        msgHandler.sendEmptyMessage(MsgKey.Media_Close);
         stopHandler();
     }
 
     public void open(String cfgStr){
-        if (mStatus != Status_Closed){
+        if (mStatus != MediaStatus.Status_Closed){
             return ;
         }
         mConfig = JSON.parseObject(cfgStr);
@@ -51,43 +46,43 @@ public class AudioSource extends JNIContext
         mSamplesPerFrame = mConfig.getIntValue(MediaConfig.CFG_CODEC_SAMPLE_PER_FRAME);
         microphone.open(mSampleRate, mChannelCount, mBytesPerSample, mSamplesPerFrame);
 
-        mStatus = Status_Opened;
-        sendMessage(SendMsg_Opened, this.mConfig.toString());
+        mStatus = MediaStatus.Status_Opened;
+        sendMessage(MsgKey.Media_ProcessEvent, mStatus, mConfig.toString());
     }
 
 
     public void start(){
-        if (mStatus == Status_Opened || mStatus == Status_Stopped){
+        if (mStatus == MediaStatus.Status_Opened || mStatus == MediaStatus.Status_Stopped){
             if (microphone != null){
                 microphone.start();
                 microphone.setRecordCallback(this);
-                sendMessage(SendMsg_Started);
-                mStatus = Status_Started;
+                mStatus = MediaStatus.Status_Started;
+                sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
         }
     }
 
 
     public void stop(){
-        if (mStatus == Status_Started){
+        if (mStatus == MediaStatus.Status_Started){
             if (microphone != null){
                 microphone.stop();
-                sendMessage(SendMsg_Stopped);
-                mStatus = Status_Stopped;
+                mStatus = MediaStatus.Status_Stopped;
+                sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
         }
     }
 
 
     public void close() {
-        if (mStatus == Status_Started){
+        if (mStatus == MediaStatus.Status_Started){
             stop();
         }
-        if (mStatus == Status_Opened || mStatus == Status_Stopped){
+        if (mStatus == MediaStatus.Status_Opened || mStatus == MediaStatus.Status_Stopped){
             if (microphone != null){
                 microphone.close();
-                mStatus = Status_Closed;
-                sendMessage(SendMsg_Closed);
+                mStatus = MediaStatus.Status_Closed;
+                sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
         }
     }
@@ -97,36 +92,24 @@ public class AudioSource extends JNIContext
         super.release();
     }
 
-    private static final int OnRecvMsg_OpenRecord = 1;
-    private static final int OnRecvMsg_CloseRecord = 2;
-    private static final int OnRecvMsg_StartRecord = 3;
-    private static final int OnRecvMsg_StopRecord = 4;
-
-
-    private static final int SendMsg_Opened = 1;
-    private static final int SendMsg_Started = 2;
-    private static final int SendMsg_Stopped = 3;
-    private static final int SendMsg_Closed = 4;
-    private static final int SendMsg_ProcessSound = 5;
-
     @Override
     void onMessageProcessor(Message msg) {
         JNIMessage jmsg = (JNIMessage) msg.obj;
         switch (msg.what){
 
-            case OnRecvMsg_OpenRecord:
+            case MsgKey.Media_Open:
                 open(jmsg.string);
                 break;
 
-            case OnRecvMsg_StartRecord:
+            case MsgKey.Media_Start:
                 start();
                 break;
 
-            case OnRecvMsg_StopRecord:
+            case MsgKey.Media_Stop:
                 stop();
                 break;
 
-            case OnRecvMsg_CloseRecord:
+            case MsgKey.Media_Close:
                 close();
                 break;
 
@@ -137,7 +120,7 @@ public class AudioSource extends JNIContext
     }
 
     @Override
-    protected JNIMessage onObtainMessage(int key) {
+    protected JNIMessage onRequestMessage(int key) {
         return new JNIMessage();
     }
 
@@ -148,7 +131,7 @@ public class AudioSource extends JNIContext
 
     @Override
     public void onRecordFrame(byte[] data, long timestamp) {
-        sendMessage(SendMsg_ProcessSound, data, timestamp);
+        sendMessage(MsgKey.Media_ProcessData, data, timestamp);
     }
 
     @Override

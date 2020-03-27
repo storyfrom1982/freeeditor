@@ -10,22 +10,6 @@
 using namespace freee;
 
 
-enum {
-    SendMsg_Open = 1,
-    SendMsg_Close = 2,
-    SendMsg_Start = 3,
-    SendMsg_Stop = 4,
-};
-
-enum {
-    OnRecvMsg_Opened = 1,
-    OnRecvMsg_Started = 2,
-    OnRecvMsg_Stopped = 3,
-    OnRecvMsg_Closed = 4,
-    OnRecvMsg_ProcessSound = 5
-};
-
-
 AudioSource::AudioSource(std::string name) : MessageChain(name) {
 //    MessageContext *context = MediaContext::Instance().ConnectMicrophone();
     m_type = MediaType_Audio;
@@ -41,37 +25,13 @@ AudioSource::~AudioSource() {
     FinalClear();
 }
 
-void AudioSource::onRecvMessage(Message pkt) {
-    switch (pkt.key()){
-        case OnRecvMsg_ProcessSound:
-            ProcessData(this, pkt);
+void AudioSource::onRecvMessage(Message msg) {
+    switch (msg.key()){
+        case MsgKey_ProcessData:
+            ProcessData(this, msg);
             break;
-        case OnRecvMsg_Opened:
-            m_status = Status_Opened;
-            LOGD("AudioSource Opened\n");
-            UpdateConfig(pkt);
-            pkt.GetMessagePtr()->key = MsgKey_Open;
-            MessageChain::onMsgOpen(pkt);
-//            ReportEvent(SmartPkt(Status_Opened + m_number));
-            break;
-        case OnRecvMsg_Closed:
-            m_status = Status_Closed;
-//            CloseNext();
-            pkt.GetMessagePtr()->key = MsgKey_Close;
-            MessageChain::onMsgClose(pkt);
-//            ReportEvent(SmartPkt(Status_Closed + m_number));
-            FinalClear();
-            LOGD("AudioSource Closed\n");
-            break;
-        case OnRecvMsg_Started:
-            m_status = Status_Started;
-//            ReportEvent(SmartPkt(Status_Started + m_number));
-            LOGD("AudioSource Started\n");
-            break;
-        case OnRecvMsg_Stopped:
-//            ReportEvent(SmartPkt(Status_Stopped + m_number));
-            m_status = Status_Stopped;
-            LOGD("AudioSource Stopped\n");
+        case MsgKey_ProcessEvent:
+            onRecvEvent(msg);
             break;
         default:
             break;
@@ -84,19 +44,19 @@ Message AudioSource::onRequestMessage(int key) {
 
 void AudioSource::Open(MessageChain *chain) {
     m_config = chain->GetConfig(this);
-    SendMessage(NewMessage(SendMsg_Open, m_config.dump()));
+    SendMessage(NewMessage(MsgKey_Open, m_config.dump()));
 }
 
 void AudioSource::Close(MessageChain *chain) {
-    SendMessage(NewMessage(SendMsg_Close));
+    SendMessage(NewMessage(MsgKey_Close));
 }
 
 void AudioSource::Start(MessageChain *chain) {
-    SendMessage(NewMessage(SendMsg_Start));
+    SendMessage(NewMessage(MsgKey_Start));
 }
 
 void AudioSource::Stop(MessageChain *chain) {
-    SendMessage(NewMessage(SendMsg_Stop));
+    SendMessage(NewMessage(MsgKey_Stop));
 }
 
 void AudioSource::ProcessData(MessageChain *chain, Message pkt) {
@@ -113,9 +73,9 @@ void AudioSource::FinalClear() {
     }
 }
 
-void AudioSource::UpdateConfig(Message ptk) {
-    m_config = json::parse(ptk.GetString());
-    LOGD("AudioSource::UpdateConfig %s\n", ptk.GetString().c_str());
+void AudioSource::UpdateConfig(Message msg) {
+    m_config = json::parse(msg.GetString());
+    LOGD("AudioSource::UpdateConfig %s\n", msg.GetString().c_str());
     m_codecSampleRate = m_config[CFG_CODEC_SAMPLE_RATE];
     m_codecChannelCount = m_config[CFG_CODEC_CHANNEL_COUNT];
     m_codecBytePerSample = m_config[CFG_CODEC_BYTE_PER_SAMPLE];
@@ -123,5 +83,40 @@ void AudioSource::UpdateConfig(Message ptk) {
 
     m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplePerFrame;
     p_bufferPool = new MessagePool("AudioSourceFramePool", m_bufferSize, 10, 64, 0, 0);
+}
+
+void AudioSource::onRecvEvent(Message msg)
+{
+    switch (msg.event()){
+        case Status_Opened:
+            m_status = Status_Opened;
+            LOGD("AudioSource Opened\n");
+            UpdateConfig(msg);
+            msg.GetMessagePtr()->key = MsgKey_Open;
+            MessageChain::onMsgOpen(msg);
+//            ReportEvent(SmartPkt(Status_Opened + m_number));
+            break;
+        case Status_Closed:
+            m_status = Status_Closed;
+//            CloseNext();
+            msg.GetMessagePtr()->key = MsgKey_Close;
+            MessageChain::onMsgClose(msg);
+//            ReportEvent(SmartPkt(Status_Closed + m_number));
+            FinalClear();
+            LOGD("AudioSource Closed\n");
+            break;
+        case Status_Started:
+            m_status = Status_Started;
+//            ReportEvent(SmartPkt(Status_Started + m_number));
+            LOGD("AudioSource Started\n");
+            break;
+        case Status_Stopped:
+//            ReportEvent(SmartPkt(Status_Stopped + m_number));
+            m_status = Status_Stopped;
+            LOGD("AudioSource Stopped\n");
+            break;
+        default:
+            break;
+    }
 }
 

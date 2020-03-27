@@ -43,7 +43,7 @@ public class VideoWindow extends JNIContext implements SurfaceHolder.Callback {
     }
 
     @Override
-    protected JNIMessage onObtainMessage(int key) {
+    protected JNIMessage onRequestMessage(int key) {
         return new JNIMessage();
     }
 

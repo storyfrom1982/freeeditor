@@ -28,13 +28,15 @@ namespace freee {
 
         void Stop(MessageChain *chain) override;
 
-        void ProcessData(MessageChain *chain, Message pkt) override;
+        void ProcessData(MessageChain *chain, Message msg) override;
 
 
     private:
-        void onRecvMessage(Message pkt) override;
+        void onRecvMessage(Message msg) override;
 
-        void UpdateMediaConfig(Message pkt);
+        void onRecvEvent(Message msg);
+
+        void UpdateMediaConfig(Message msg);
 
     private:
         int m_srcRotation;

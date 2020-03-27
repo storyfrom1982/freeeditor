@@ -11,15 +11,6 @@ public class MediaRecorder extends JNIContext {
 
     private static final String TAG = "MediaRecorder";
 
-    private static final int MsgKey_Exit = 0;
-    private static final int MsgKey_Open = 1;
-    private static final int MsgKey_Start = 2;
-    private static final int MsgKey_Stop = 3;
-    private static final int MsgKey_Close = 4;
-    private static final int MsgKey_ProcessData = 5;
-    private static final int MsgKey_ProcessEvent = 6;
-    private static final int MsgKey_ProcessControl = 10;
-
     private static final int MsgKey_UpdateConfig = 11;
     private static final int MsgKey_StartPreview = 12;
     private static final int MsgKey_StopPreview = 13;
@@ -40,11 +31,11 @@ public class MediaRecorder extends JNIContext {
         String config = MediaContext.Instance().getRecorderConfig();
         mConfig = JSON.parseObject(config);
         Log.d(TAG, "encoder config: " + JSON.toJSONString(mConfig));
-        sendMessage(MsgKey_Open, mConfig.toJSONString());
+        sendMessage(MsgKey.Media_Open, mConfig.toJSONString());
     }
 
     public void release(){
-        sendMessage(MsgKey_Close);
+        sendMessage(MsgKey.Media_Close);
         disconnectContext();
         super.release();
         MediaContext.Instance().disconnectRecorder(recorderContext);
@@ -64,11 +55,11 @@ public class MediaRecorder extends JNIContext {
     }
 
     public void startCapture(){
-        sendMessage(MsgKey_Start);
+        sendMessage(MsgKey.Media_Start);
     }
 
     public void stopCapture(){
-        sendMessage(MsgKey_Stop);
+        sendMessage(MsgKey.Media_Stop);
     }
 
     public void startRecord(String url){
@@ -94,7 +85,7 @@ public class MediaRecorder extends JNIContext {
     }
 
     @Override
-    protected JNIMessage onObtainMessage(int key) {
+    protected JNIMessage onRequestMessage(int key) {
         return new JNIMessage();
     }
 
@@ -103,16 +94,16 @@ public class MediaRecorder extends JNIContext {
         msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
     }
 
-    private void ProcessEvent(JNIMessage msg){
-        Log.d(TAG, "ProcessEvent>>>>: " + msg.key);
+    private void processEvent(JNIMessage msg){
+        Log.d(TAG, "processEvent >>>>: " + msg.key);
     }
 
     @Override
     void onMessageProcessor(Message msg) {
         JNIMessage jmsg = (JNIMessage) msg.obj;
         switch (msg.what){
-            case MsgKey_ProcessEvent:
-                ProcessEvent(jmsg);
+            case MsgKey.Media_ProcessEvent:
+                processEvent(jmsg);
                 break;
             default:
                 break;
