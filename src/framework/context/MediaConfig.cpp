@@ -78,8 +78,8 @@ void MediaConfig::buildDefaultConfig(json &config) {
 
                 {CFG_TYPE,                          "video"},
 
-                {CFG_SRC_WIDTH,                     640},
-                {CFG_SRC_HEIGHT,                    360},
+                {CFG_SRC_WIDTH,                     1280},
+                {CFG_SRC_HEIGHT,                    720},
                 {CFG_SRC_IMAGE_FORMAT,              "NV21"},
                 {CFG_SRC_VIDEO_DEVICE,              "front"},
                 {CFG_SRC_ROTATION,                  0},
@@ -87,9 +87,9 @@ void MediaConfig::buildDefaultConfig(json &config) {
                 {CFG_CODEC_TYPE,                    "h264"},
                 {CFG_CODEC_NAME,                    "x264"},
 
-                {CFG_CODEC_WIDTH,                   640},
-                {CFG_CODEC_HEIGHT,                  360},
-                {CFG_CODEC_FRAME_RATE,              20.0},
+                {CFG_CODEC_WIDTH,                   1280},
+                {CFG_CODEC_HEIGHT,                  720},
+                {CFG_CODEC_FRAME_RATE,              15.0},
                 {CFG_CODEC_IMAGE_FORMAT,            "I420"},
 
                 {CFG_CODEC_BITRATE,                 512},

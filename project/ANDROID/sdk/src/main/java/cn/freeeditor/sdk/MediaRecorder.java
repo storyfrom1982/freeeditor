@@ -30,7 +30,7 @@ public class MediaRecorder extends JNIContext {
         connectContext(recorderContext);
         String config = MediaContext.Instance().getRecorderConfig();
         mConfig = JSON.parseObject(config);
-        Log.d(TAG, "encoder config: " + JSON.toJSONString(mConfig));
+//        Log.d(TAG, "encoder config: " + JSON.toJSONString(mConfig));
         sendMessage(MsgKey.Media_Open, mConfig.toJSONString());
     }
 

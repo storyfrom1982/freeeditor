@@ -883,7 +883,7 @@ sr_buffer_pool_t* sr_buffer_pool_create(
         node->buffer.data_size = pool->data_size;
         node->buffer.head_size = pool->head_size;
         if (pool->align > 0){
-            node->buffer.head = (uint8_t*)aligned_alloc(pool->align, pool->data_size + pool->head_size);
+            node->buffer.head = (uint8_t*)memalign(pool->align, pool->data_size + pool->head_size);
         }else {
             node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
         }
@@ -927,7 +927,7 @@ sr_buffer_data_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool)
         __sr_atom_add(pool->buffer_count, 1);
         sr_buffer_node_t *node = calloc(1, sizeof(sr_buffer_node_t));
         if (pool->align > 0){
-            node->buffer.head = (uint8_t*)aligned_alloc(pool->align, pool->data_size + pool->head_size);
+            node->buffer.head = (uint8_t*)memalign(pool->align, pool->data_size + pool->head_size);
         }else {
             node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
         }
@@ -951,7 +951,7 @@ sr_buffer_data_t* sr_buffer_pool_realloc(sr_buffer_data_t *buffer, size_t size)
     sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)buffer - sizeof(sr_node_t));
     node->buffer.data_size = size;
     if (node->pool->align > 0){
-        node->buffer.head = (uint8_t*)aligned_alloc(node->pool->align, buffer->data_size + buffer->head_size);
+        node->buffer.head = (uint8_t*)memalign(node->pool->align, buffer->data_size + buffer->head_size);
     }else {
         node->buffer.head = (uint8_t*)malloc(buffer->data_size + buffer->head_size);
     }

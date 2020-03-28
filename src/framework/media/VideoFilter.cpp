@@ -70,7 +70,7 @@ void VideoFilter::onMsgProcessData(Message pkt) {
 }
 
 int VideoFilter::OpenModule() {
-    LOGD("[MediaConfig] VideoFilter::ModuleOpen >>> %s\n", m_config.dump().c_str());
+    LOGD("[MediaConfig] VideoFilter::ModuleOpen >>> %s\n", m_config.dump(4).c_str());
     m_srcWidth = m_config["srcWidth"];
     m_srcHeight = m_config["srcHeight"];
     m_srcRotation = m_config["srcRotation"];

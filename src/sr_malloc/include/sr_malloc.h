@@ -25,8 +25,11 @@
 #ifndef INCLUDE_SR_MEMORY_H_
 #define INCLUDE_SR_MEMORY_H_
 
+#ifdef __SR_MALLOC__
+
 #include <stddef.h>
 
+#undef sr_malloc_debug
 extern void sr_malloc_debug(void (*cb)(const char *fmt, ...));
 
 extern void* malloc(size_t size);
@@ -39,5 +42,14 @@ extern void free(void *address);
 extern char* strdup(const char *s);
 extern char* strndup(const char *s, size_t n);
 extern int posix_memalign(void **ptr, size_t align, size_t size);
+
+#else
+
+#include <stdlib.h>
+#include <malloc.h>
+
+#define sr_malloc_debug(x)	do {} while(0)
+
+#endif //__SR_MALLOC__
 
 #endif /* INCLUDE_SR_MEMORY_H_ */

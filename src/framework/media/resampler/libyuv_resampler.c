@@ -89,8 +89,12 @@ int libyuv_convert_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *yuv420p
         rotation = kRotate180;
     }
 
-    src->x = (src->width - width + 1) >> 1;
-    src->y = (src->height - height + 1) >> 1;
+    if ((float)src->width / src->height != (float)width / height){
+        src->x = ((src->width - width) + 1) >> 1;
+        src->y = ((src->height - height) + 1) >> 1;
+    }else {
+        src->x = src->y = 0;
+    }
 
     return ConvertToI420(
             src->data, src->size,
