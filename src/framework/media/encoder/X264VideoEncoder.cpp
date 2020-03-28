@@ -115,7 +115,8 @@ void X264VideoEncoder::CloseEncoder() {
 }
 
 int X264VideoEncoder::EncoderEncode(Message pkt) {
-    //    LOGD("X264VideoEncoder::OnOpenEncoder: enter\n");
+    int64_t startTime = sr_time_begin();
+//    LOGD("X264VideoEncoder::OnOpenEncoder: enter\n");
 
     sr_buffer_frame_t *frame = pkt.GetFramePtr();
 
@@ -220,6 +221,8 @@ int X264VideoEncoder::EncoderEncode(Message pkt) {
 //    long long tmStamp = pkt.frame.timestamp / 1000;
 
     MessageChain::onMsgProcessData(opkt);
+
+//    LOGD("x264_encoder_encode time %lld\n", sr_time_passed(startTime));
 
 //    LOGD("X264VideoEncoder::OnOpenEncoder: size=%d  i64=%ld\n", frameLen, tmStamp);
     return  0;
