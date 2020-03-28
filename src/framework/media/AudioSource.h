@@ -31,7 +31,7 @@ namespace freee {
 
         void Stop(MessageChain *chain) override;
 
-        void ProcessData(MessageChain *chain, Message pkt) override;
+        void ProcessData(MessageChain *chain, Message msg) override;
 
         virtual void onRecvMessage(Message msg) override;
 
@@ -44,6 +44,7 @@ namespace freee {
 
 
     private:
+        int64_t m_startTIme = 0;
         int m_srcSampleRate;
         int m_srcChannelCount;
         int m_srcBytePerSample;

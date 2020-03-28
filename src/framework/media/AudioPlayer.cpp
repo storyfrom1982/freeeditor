@@ -70,6 +70,6 @@ void AudioPlayer::onRecvMessage(Message msg)
     if (sr_pipe_readable(pipe) < msg.length()){
         return;
     }
-    sr_pipe_block_read(pipe, (char*)msg.GetFramePtr()->data, msg.GetFramePtr()->timestamp);
+    sr_pipe_block_read(pipe, (char*)msg.GetMessagePtr()->sharePtr, msg.GetMessagePtr()->length);
 //    LOGD("AudioPlayer::onRecvMessage exit\n");
 }

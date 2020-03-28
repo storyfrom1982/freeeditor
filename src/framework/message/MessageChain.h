@@ -20,6 +20,7 @@ namespace freee {
     };
 
     enum {
+        Status_Error = -1,
         Status_Closed = 0,
         Status_Opened = 1,
         Status_Started = 2,

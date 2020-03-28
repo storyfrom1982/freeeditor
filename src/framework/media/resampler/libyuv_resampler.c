@@ -7,6 +7,17 @@
 
 #include <libyuv.h>
 
+uint32_t libyuv_convert_fourcc(const char *p_fourcc)
+{
+    union {
+        uint32_t format;
+        unsigned char fourcc[4];
+    }fourcctoint = {.fourcc[0] = p_fourcc[0],
+                    .fourcc[1] = p_fourcc[1],
+                    .fourcc[2] = p_fourcc[2],
+                    .fourcc[3] = p_fourcc[3]};
+    return fourcctoint.format;
+}
 
 int libyuv_set_format(sr_buffer_frame_t *frame, const uint8_t *data, int width, int height, uint32_t fourcc)
 {

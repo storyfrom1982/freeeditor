@@ -32,13 +32,8 @@ public class VideoSource extends JNIContext
     private int mFinalWidth;
     private int mFinalHeight;
 
-    private int mCodecFrameRate;
-    private int mCodecWidth;
-    private int mCodecHeight;
-    private String mSrcVideoDevice;
-    private JSONObject mConfig;
-
     private Camera mCamera;
+    private JSONObject mConfig;
     protected long mStartTime;
 
     private int mBufferCount = 4;
@@ -59,16 +54,17 @@ public class VideoSource extends JNIContext
     private void openCamera(JNIMessage msg){
 
         if (mStatus != MediaStatus.Status_Closed){
+            Log.e(TAG, "[VideoSource openCamera] error status: " + mStatus);
             return;
         }
 
         mConfig = JSON.parseObject(msg.string);
-        mCodecWidth = mConfig.getIntValue(MediaConfig.CFG_CODEC_WIDTH);
-        mCodecHeight = mConfig.getIntValue(MediaConfig.CFG_CODEC_HEIGHT);
-        mCodecFrameRate = mConfig.getIntValue(MediaConfig.CFG_CODEC_FRAME_RATE);
-        mSrcVideoDevice = mConfig.getString(MediaConfig.CFG_SRC_VIDEO_DEVICE);
+        int videoWidth = mConfig.getIntValue(MediaConfig.VIDEO_WIDTH);
+        int videoHeight = mConfig.getIntValue(MediaConfig.VIDEO_HEIGHT);
+        int videoFrameRate = mConfig.getIntValue(MediaConfig.VIDEO_FRAME_RATE);
+        String videoDevice = mConfig.getString(MediaConfig.VIDEO_DEVICE);
 
-        if (mSrcVideoDevice.equals("front")){
+        if (videoDevice.equals(MediaConfig.VIDEO_DEVICE_FRONT)){
             mDeviceId = Camera.CameraInfo.CAMERA_FACING_FRONT;
         }else {
             mDeviceId = Camera.CameraInfo.CAMERA_FACING_BACK;
@@ -90,29 +86,34 @@ public class VideoSource extends JNIContext
                 mCamera = Camera.open(mDeviceId);
             } catch (Exception e) {
                 e.printStackTrace();
+                mStatus = MediaStatus.Status_Error;
+                JSONObject js = new JSONObject();
+                js.put("error", "camera open failed");
+                sendMessage(MsgKey.Media_ProcessEvent, mStatus, js.toJSONString());
                 return;
             }
         }
 
         mCamera.setErrorCallback(this);
 
-        fixedOutputRotation(MediaContext.Instance().getScreenRotation());
+        fixedRotation(MediaContext.Instance().getScreenRotation());
 
-        if (mCodecWidth >= mCodecHeight){
-            fixedOutputSize(mCamera.getParameters(), mCodecWidth, mCodecHeight);
+        if (videoWidth >= videoHeight){
+            fixedVideoSize(mCamera.getParameters(), videoWidth, videoHeight);
         }else {
-            fixedOutputSize(mCamera.getParameters(), mCodecHeight, mCodecWidth);
+            fixedVideoSize(mCamera.getParameters(), videoHeight, videoWidth);
         }
 
         Camera.Parameters parameters = mCamera.getParameters();
         int minValue = parameters.getMinExposureCompensation();
         int maxValue = parameters.getMaxExposureCompensation();
-        Log.d(TAG, "openCamera: ExposureCompensation: " + minValue + "<-->" + maxValue);
+        Log.d(TAG, "[VideoSource openCamera] ExposureCompensation: "
+                + minValue + "<-->" + maxValue);
 
         List<String> modes = parameters.getSupportedFocusModes();
         for( int i=0; i<modes.size(); i++){
             String s = modes.get(i);
-            Log.d(TAG, "openCamera: SupportedFocusModes: " + s);
+            Log.d(TAG, "[VideoSource openCamera] SupportedFocusModes: " + s);
             if (s.equals(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)){
                 parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
             }
@@ -125,30 +126,57 @@ public class VideoSource extends JNIContext
             mCamera.setPreviewTexture(mSurfaceTexture);
         } catch (IOException e) {
             e.printStackTrace();
+            mCamera.release();
+            mCamera = null;
+            mStatus = MediaStatus.Status_Error;
+            JSONObject js = new JSONObject();
+            js.put("error", "camera setPreviewTexture failed");
+            sendMessage(MsgKey.Media_ProcessEvent, mStatus, js.toJSONString());
+            return;
+        }
+
+        int imageFormat = mCamera.getParameters().getPreviewFormat();
+        if (imageFormat != ImageFormat.NV21 && imageFormat != ImageFormat.YV12){
+            mCamera.release();
+            mCamera = null;
+            mStatus = MediaStatus.Status_Error;
+            JSONObject js = new JSONObject();
+            js.put("error", "camera unsupported image format: " + imageFormat);
+            sendMessage(MsgKey.Media_ProcessEvent, mStatus, js.toJSONString());
+            return;
         }
 
         for (int i = 0; i < mBufferCount; ++i){
-            mBufferList.add(new byte[(mSrcWidth * mSrcHeight * 3) >> 1]);
+            mBufferList.add(new byte[((mSrcWidth * mSrcHeight) >> 1) * 3]);
         }
 
-        mConfig.put(MediaConfig.CFG_SRC_WIDTH, mSrcWidth);
-        mConfig.put(MediaConfig.CFG_SRC_HEIGHT, mSrcHeight);
+        if (imageFormat == ImageFormat.NV21){
+            mConfig.put(MediaConfig.VIDEO_SRC_IMAGE_FORMAT, MediaConfig.VIDEO_IMAGE_FORMAT_NV21);
+        }else {
+            mConfig.put(MediaConfig.VIDEO_SRC_IMAGE_FORMAT, MediaConfig.VIDEO_IMAGE_FORMAT_I420);
+        }
+
+        mConfig.put(MediaConfig.VIDEO_SRC_WIDTH, mSrcWidth);
+        mConfig.put(MediaConfig.VIDEO_SRC_HEIGHT, mSrcHeight);
 
         int orientation = MediaContext.Instance().getScreenOrientation();
-        if (orientation == SCREEN_ORIENTATION_PORTRAIT || orientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT){
-            mConfig.put(MediaConfig.CFG_CODEC_WIDTH, mFinalHeight);
-            mConfig.put(MediaConfig.CFG_CODEC_HEIGHT, mFinalWidth);
+
+        if (orientation == SCREEN_ORIENTATION_PORTRAIT
+                || orientation == SCREEN_ORIENTATION_REVERSE_PORTRAIT){
+            mConfig.put(MediaConfig.VIDEO_WIDTH, mFinalHeight);
+            mConfig.put(MediaConfig.VIDEO_HEIGHT, mFinalWidth);
         }else {
-            mConfig.put(MediaConfig.CFG_CODEC_WIDTH, mFinalWidth);
-            mConfig.put(MediaConfig.CFG_CODEC_HEIGHT, mFinalHeight);
+            mConfig.put(MediaConfig.VIDEO_WIDTH, mFinalWidth);
+            mConfig.put(MediaConfig.VIDEO_HEIGHT, mFinalHeight);
         }
+
         if (mDeviceId == Camera.CameraInfo.CAMERA_FACING_FRONT){
-            mConfig.put(MediaConfig.CFG_SRC_VIDEO_DEVICE, "front");
+            mConfig.put(MediaConfig.VIDEO_DEVICE, MediaConfig.VIDEO_DEVICE_FRONT);
         }else {
-            mConfig.put(MediaConfig.CFG_SRC_VIDEO_DEVICE, "back");
+            mConfig.put(MediaConfig.VIDEO_DEVICE, MediaConfig.VIDEO_DEVICE_BACK);
         }
-        mConfig.put(MediaConfig.CFG_SRC_ROTATION, mRotation);
-        mConfig.put(MediaConfig.CFG_SRC_IMAGE_FORMAT, "NV21");
+
+        mConfig.put(MediaConfig.VIDEO_SRC_ROTATION, mRotation);
 
         mStatus = MediaStatus.Status_Opened;
         sendMessage(MsgKey.Media_ProcessEvent, mStatus, mConfig.toString());
@@ -162,13 +190,13 @@ public class VideoSource extends JNIContext
         if (mStatus == MediaStatus.Status_Started){
             stopCapture();
         }
-        if (mStatus == MediaStatus.Status_Opened || mStatus == MediaStatus.Status_Stopped){
+        if (mStatus == MediaStatus.Status_Opened
+                || mStatus == MediaStatus.Status_Stopped){
             if (mCamera != null){
                 mCamera.setErrorCallback(null);
                 mCamera.release();
                 mCamera = null;
                 mBufferList.clear();
-                sendMessage(SendMsg_Closed);
                 mStatus = MediaStatus.Status_Closed;
                 sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
@@ -177,15 +205,16 @@ public class VideoSource extends JNIContext
 
 
     private void startCapture(){
-        if (mStatus == MediaStatus.Status_Opened || mStatus == MediaStatus.Status_Stopped){
+        if (mStatus == MediaStatus.Status_Opened
+                || mStatus == MediaStatus.Status_Stopped){
             if (mCamera != null){
                 mCamera.startPreview();
                 mCamera.setPreviewCallbackWithBuffer(this);
+                mStatus = MediaStatus.Status_Started;
+                sendMessage(MsgKey.Media_ProcessEvent, mStatus);
                 for (int i = 0; i < mBufferCount; ++i){
                     mCamera.addCallbackBuffer(mBufferList.get(i));
                 }
-                mStatus = MediaStatus.Status_Started;
-                sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
         }
     }
@@ -204,35 +233,26 @@ public class VideoSource extends JNIContext
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        if (mStartTime == 0){
-            mStartTime = System.currentTimeMillis() * 1000L;
-        }
-        sendMessage(MsgKey.Media_ProcessData, data, System.currentTimeMillis() * 1000L - mStartTime);
+        sendMessage(MsgKey.Media_ProcessData, data, data.length);
         mCamera.addCallbackBuffer(data);
     }
 
     @Override
     public void onError(int error, Camera camera) {
-        Log.d(TAG, "onError: " + error);
         mStatus = MediaStatus.Status_Error;
-        sendMessage(MsgKey.Media_ProcessEvent, mStatus);
+        JSONObject js = new JSONObject();
+        if (error == android.hardware.Camera.CAMERA_ERROR_SERVER_DIED){
+            js.put("error", "camera server died");
+        }else {
+            js.put("error", "camera error unknown");
+        }
+        sendMessage(MsgKey.Media_ProcessEvent, mStatus, js.toJSONString());
     }
 
     @Override
     void onFinalRelease() {
         super.release();
     }
-
-    private static final int SendMsg_Opened = 1;
-    private static final int SendMsg_Started = 2;
-    private static final int SendMsg_Stopped = 3;
-    private static final int SendMsg_Closed = 4;
-
-//    private static final int MsgKey_Open = 1;
-//    private static final int MsgKey_Start = 2;
-//    private static final int MsgKey_Stop = 3;
-//    private static final int MsgKey_Close = 4;
-//    private static final int MsgKey_ProcessData = 5;
 
     @Override
     void onMessageProcessor(Message msg) {
@@ -264,7 +284,7 @@ public class VideoSource extends JNIContext
         msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
     }
 
-    private void fixedOutputSize(Camera.Parameters parameters, final int width, final int height){
+    private void fixedVideoSize(Camera.Parameters parameters, final int width, final int height){
         int difference = Integer.MAX_VALUE;
         List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
         for (Camera.Size size : sizes) {
@@ -305,7 +325,7 @@ public class VideoSource extends JNIContext
     }
 
 
-    private void fixedOutputRotation(int rotate){
+    private void fixedRotation(int rotate){
         Camera.CameraInfo info = new Camera.CameraInfo();
         try {
             Camera.getCameraInfo(mDeviceId, info);

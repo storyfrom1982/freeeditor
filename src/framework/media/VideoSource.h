@@ -39,6 +39,7 @@ namespace freee {
         void UpdateMediaConfig(Message msg);
 
     private:
+        int64_t m_startTime = 0;
         int m_srcRotation;
         int m_srcWidth, m_srcHeight;
         int m_codecWidth, m_codecHeight;

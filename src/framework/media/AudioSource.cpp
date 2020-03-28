@@ -59,10 +59,15 @@ void AudioSource::Stop(MessageChain *chain) {
     SendMessage(NewMessage(MsgKey_Stop));
 }
 
-void AudioSource::ProcessData(MessageChain *chain, Message pkt) {
-    Message resample = p_bufferPool->NewMessage(MsgKey_ProcessData);
-    memcpy(resample.GetBufferPtr(), pkt.GetFramePtr()->data, resample.GetBufferSize());
-    resample.GetFramePtr()->timestamp = pkt.GetFramePtr()->timestamp;
+void AudioSource::ProcessData(MessageChain *chain, Message msg) {
+    Message resample = p_bufferPool->NewMessage(MsgKey_ProcessData,
+            (uint8_t *)msg.GetMessagePtr()->sharePtr, msg.GetMessagePtr()->length);
+    if (m_startTIme == 0){
+        m_startTIme = sr_time_begin();
+        resample.GetFramePtr()->timestamp = 0;
+    }else {
+        resample.GetFramePtr()->timestamp = sr_time_passed(m_startTIme);
+    }
     MessageChain::onMsgProcessData(resample);
 }
 

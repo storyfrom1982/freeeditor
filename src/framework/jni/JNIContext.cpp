@@ -94,10 +94,10 @@ public:
         }
     }
 
-    void SendMessage(int key, jbyte *buffer, jlong timestamp){
+    void SendMessage(int key, jbyte *buffer, jint length){
         Message msg = NewMessage(key);
-        msg.GetFramePtr()->data = (uint8_t*)buffer;
-        msg.GetFramePtr()->timestamp = timestamp;
+        msg.GetMessagePtr()->sharePtr = buffer;
+        msg.GetMessagePtr()->length = static_cast<size_t>(length);
         MessageContext::SendMessage(msg);
     }
 
@@ -242,13 +242,13 @@ Java_cn_freeeditor_sdk_JNIContext_sendMessage__IJJ(JNIEnv *env, jobject instance
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_cn_freeeditor_sdk_JNIContext_sendMessage__I_3BJJ(JNIEnv *env, jobject instance, jint key,
-                                                      jbyteArray buffer_, jlong timestamp,
+Java_cn_freeeditor_sdk_JNIContext_sendMessage__I_3BIJ(JNIEnv *env, jobject instance, jint key,
+                                                      jbyteArray buffer_, jint length,
                                                       jlong contextPointer) {
     JNIContext *pJNIContext = reinterpret_cast<JNIContext *>(contextPointer);
     if (pJNIContext){
         jbyte *buffer = env->GetByteArrayElements(buffer_, NULL);
-        pJNIContext->SendMessage(key, buffer, timestamp);
+        pJNIContext->SendMessage(key, buffer, length);
         env->ReleaseByteArrayElements(buffer_, buffer, 0);
     }
 }

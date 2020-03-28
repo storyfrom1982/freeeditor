@@ -13,7 +13,6 @@ VideoSource::VideoSource(MessageContext *context)
     m_type = MediaType_Video;
     m_status = Status_Closed;
     if (context == nullptr){
-//        context = MediaContext::Instance().ConnectCamera();
         context = MediaContext::Instance()->ConnectCamera();
     }
     ConnectContext(context);
@@ -21,7 +20,6 @@ VideoSource::VideoSource(MessageContext *context)
 
 VideoSource::~VideoSource() {
     DisconnectContext();
-//    MediaContext::Instance().DisconnectCamera();
     MediaContext::Instance()->DisconnectCamera();
     FinalClear();
 }
@@ -52,8 +50,7 @@ void VideoSource::Stop(MessageChain *chain) {
 }
 
 void VideoSource::ProcessData(MessageChain *chain, Message msg) {
-    libyuv_set_format(
-            msg.GetFramePtr(), msg.GetFramePtr()->data,
+    libyuv_set_format(msg.GetFramePtr(), (uint8_t*) msg.GetMessagePtr()->sharePtr,
             m_srcWidth, m_srcHeight, m_srcImageFormat);
     if (m_srcImageFormat != m_codecImageFormat
         || m_srcWidth != m_codecWidth
@@ -64,7 +61,12 @@ void VideoSource::ProcessData(MessageChain *chain, Message msg) {
                 libyuv_set_format(y420.GetFramePtr(), y420.GetBufferPtr(), m_codecWidth,
                                   m_codecHeight, m_codecImageFormat);
                 libyuv_convert_to_yuv420p(msg.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);
-                y420.GetFramePtr()->timestamp = msg.GetFramePtr()->timestamp;
+                if (m_startTime == 0){
+                    m_startTime = sr_time_begin();
+                    y420.GetFramePtr()->timestamp = 0;
+                }else {
+                    y420.GetFramePtr()->timestamp = sr_time_passed(m_startTime);
+                }
                 MessageChain::onMsgProcessData(y420);
             }else {
                 LOGD("[WARNING] missed a video frame\n");
@@ -98,15 +100,8 @@ void VideoSource::UpdateMediaConfig(Message msg) {
     m_codecHeight = m_config[CFG_CODEC_HEIGHT];
     std::string srcFormat = m_config[CFG_SRC_IMAGE_FORMAT];
     std::string codecFormat = m_config[CFG_CODEC_IMAGE_FORMAT];
-    union {
-        uint32_t format;
-        unsigned char fourcc[4];
-    }fourcctoint;
-    memcpy(&fourcctoint.fourcc[0], srcFormat.c_str(), 4);
-    m_srcImageFormat = fourcctoint.format;
-    memcpy(&fourcctoint.fourcc[0], codecFormat.c_str(), 4);
-    m_codecImageFormat = fourcctoint.format;
-//    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", m_srcImageFormat, libyuv::FOURCC_NV21);
+    m_srcImageFormat = libyuv_convert_fourcc(srcFormat.c_str());
+    m_codecImageFormat = libyuv_convert_fourcc(codecFormat.c_str());
     m_bufferSize = m_codecWidth * m_codecHeight / 2 * 3U;
     p_bufferPool = new MessagePool(GetName() + "FramePool", m_bufferSize, 10, 64 ,0, 0);
 
@@ -125,28 +120,24 @@ void VideoSource::onRecvEvent(Message msg)
     switch (msg.event()){
         case Status_Opened:
             m_status = Status_Opened;
-            LOGD("VideoSource Opened\n");
             msg.GetMessagePtr()->key = MsgKey_Open;
             UpdateMediaConfig(msg);
-//            ReportEvent(SmartPkt(Status_Opened + m_number));
             break;
         case Status_Closed:
             m_status = Status_Closed;
             msg.GetMessagePtr()->key = MsgKey_Close;
             MessageChain::onMsgClose(msg);
             FinalClear();
-//            ReportEvent(SmartPkt(Status_Closed + m_number));
-            LOGD("VideoSource Closed\n");
             break;
         case Status_Started:
             m_status = Status_Started;
-//            ReportEvent(SmartPkt(Status_Started + m_number));
-            LOGD("VideoSource Started\n");
             break;
         case Status_Stopped:
-//            ReportEvent(SmartPkt(Status_Stopped + m_number));
             m_status = Status_Stopped;
-            LOGD("VideoSource Stopped\n");
+            break;
+        case Status_Error:
+            m_status = Status_Stopped;
+            LOGE("VideoSource status error: %s\n", msg.GetString().c_str());
             break;
         default:
             break;

@@ -30,7 +30,7 @@ public class Speaker implements Runnable {
     private AudioTrack mAudioTrack = null;
 
     public interface SpeakerCallback {
-        void onPlaySample(byte[] data, long timestamp);
+        void onPlaySample(byte[] data, int length);
     }
 
     public interface ErrorCallback {

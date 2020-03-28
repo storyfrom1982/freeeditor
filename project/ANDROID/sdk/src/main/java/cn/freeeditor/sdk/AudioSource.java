@@ -39,11 +39,11 @@ public class AudioSource extends JNIContext
         }
         mConfig = JSON.parseObject(cfgStr);
         Log.d(TAG, "AudioSource config: " + mConfig.toJSONString());
-        mAudioDevice = mConfig.getString(MediaConfig.CFG_SRC_AUDIO_DEVICE);
-        mSampleRate = mConfig.getIntValue(MediaConfig.CFG_SRC_SAMPLE_RATE);
-        mChannelCount = mConfig.getIntValue(MediaConfig.CFG_SRC_CHANNEL_COUNT);
-        mBytesPerSample = mConfig.getIntValue(MediaConfig.CFG_CODEC_BYTE_PER_SAMPLE);
-        mSamplesPerFrame = mConfig.getIntValue(MediaConfig.CFG_CODEC_SAMPLE_PER_FRAME);
+        mAudioDevice = mConfig.getString(MediaConfig.AUDIO_DEVICE);
+        mSampleRate = mConfig.getIntValue(MediaConfig.AUDIO_SRC_SAMPLE_RATE);
+        mChannelCount = mConfig.getIntValue(MediaConfig.AUDIO_SRC_CHANNEL_COUNT);
+        mBytesPerSample = mConfig.getIntValue(MediaConfig.AUDIO_BYTE_PER_SAMPLE);
+        mSamplesPerFrame = mConfig.getIntValue(MediaConfig.AUDIO_SAMPLE_PER_FRAME);
         microphone.open(mSampleRate, mChannelCount, mBytesPerSample, mSamplesPerFrame);
 
         mStatus = MediaStatus.Status_Opened;
@@ -130,8 +130,8 @@ public class AudioSource extends JNIContext
     }
 
     @Override
-    public void onRecordFrame(byte[] data, long timestamp) {
-        sendMessage(MsgKey.Media_ProcessData, data, timestamp);
+    public void onRecordFrame(byte[] data, int length) {
+        sendMessage(MsgKey.Media_ProcessData, data, length);
     }
 
     @Override

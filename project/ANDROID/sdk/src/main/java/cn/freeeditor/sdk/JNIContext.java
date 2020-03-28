@@ -51,8 +51,8 @@ abstract public class JNIContext extends MessageProcessor {
         sendMessage(key, event, json, contextPointer);
     }
 
-    protected void sendMessage(int key, byte[] buffer, long timestamp){
-        sendMessage(key, buffer, timestamp, contextPointer);
+    protected void sendMessage(int key, byte[] buffer, int length){
+        sendMessage(key, buffer, length, contextPointer);
     }
 
     protected JNIMessage requestMessage(int key){
@@ -76,7 +76,7 @@ abstract public class JNIContext extends MessageProcessor {
     private native void sendMessage(int key, Object obj, long contextPointer);
     private native void sendMessage(int key, String json, long contextPointer);
     private native void sendMessage(int key, int event, String json, long contextPointer);
-    private native void sendMessage(int key, byte[] buffer, long length, long contextPointer);
+    private native void sendMessage(int key, byte[] buffer, int length, long contextPointer);
 
     private native JNIMessage requestMessage(int key, long contextPointer);
 }
