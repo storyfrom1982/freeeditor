@@ -8,6 +8,9 @@ public class MediaConfig {
     public static final String VIDEO_IMAGE_FORMAT_I420 = "I420";
     public static final String VIDEO_IMAGE_FORMAT_NV21 = "NV21";
 
+    public static final String AUDIO_DEVICE_MIC = "microphone";
+    public static final String AUDIO_DEVICE_SPEAKER = "speaker";
+    public static final String AUDIO_DEVICE_VOICE_CALL = "voiceCall";
 
     public static final String VIDEO_DEVICE = "srcVideoDevice";
     public static final String VIDEO_WIDTH = "codecWidth";
@@ -19,10 +22,6 @@ public class MediaConfig {
     public static final String VIDEO_SRC_IMAGE_FORMAT = "srcImageFormat";
     public static final String VIDEO_SRC_ROTATION = "srcRotation";
 
-
-
-    public static final String AUDIO_SRC_DEVICE_MIC = "microphone";
-    public static final String AUDIO_SRC_DEVICE_SIP = "sip";
 
     public static final String AUDIO_DEVICE = "srcAudioDevice";
     public static final String AUDIO_SAMPLE_RATE = "codecSampleRate";

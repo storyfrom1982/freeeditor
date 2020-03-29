@@ -7,15 +7,9 @@ import com.alibaba.fastjson.JSONObject;
 
 
 public class AudioSource extends JNIContext
-        implements Microphone.RecordCallback, Microphone.ErrorCallback {
+        implements IDeviceCallback {
 
     protected static final String TAG = "AudioSource";
-
-    private String mAudioDevice;
-    private int mSampleRate;
-    private int mChannelCount;
-    private int mBytesPerSample;
-    private int mSamplesPerFrame;
 
     private int mStatus;
     private JSONObject mConfig;
@@ -24,7 +18,7 @@ public class AudioSource extends JNIContext
     public AudioSource(){
         mStatus = MediaStatus.Status_Closed;
         microphone = new Microphone();
-        microphone.setErrorCallback(this);
+        microphone.setCallback(this);
         startHandler(getClass().getName());
     }
 
@@ -33,21 +27,26 @@ public class AudioSource extends JNIContext
         stopHandler();
     }
 
-    public void open(String cfgStr){
+    public void open(String cfg){
         if (mStatus != MediaStatus.Status_Closed){
+            Log.e(TAG, "[AudioSource open] device is on: " + mStatus);
             return ;
         }
-        mConfig = JSON.parseObject(cfgStr);
-        Log.d(TAG, "AudioSource config: " + mConfig.toJSONString());
-        mAudioDevice = mConfig.getString(MediaConfig.AUDIO_DEVICE);
-        mSampleRate = mConfig.getIntValue(MediaConfig.AUDIO_SRC_SAMPLE_RATE);
-        mChannelCount = mConfig.getIntValue(MediaConfig.AUDIO_SRC_CHANNEL_COUNT);
-        mBytesPerSample = mConfig.getIntValue(MediaConfig.AUDIO_BYTE_PER_SAMPLE);
-        mSamplesPerFrame = mConfig.getIntValue(MediaConfig.AUDIO_SAMPLE_PER_FRAME);
-        microphone.open(mSampleRate, mChannelCount, mBytesPerSample, mSamplesPerFrame);
-
-        mStatus = MediaStatus.Status_Opened;
-        sendMessage(MsgKey.Media_ProcessEvent, mStatus, mConfig.toString());
+        mConfig = JSON.parseObject(cfg);
+        int mode = Microphone.MODE_MICROPHONE;
+        String audioDevice = mConfig.getString(MediaConfig.AUDIO_DEVICE);
+        int sampleRate = mConfig.getIntValue(MediaConfig.AUDIO_SRC_SAMPLE_RATE);
+        int channelCount = mConfig.getIntValue(MediaConfig.AUDIO_SRC_CHANNEL_COUNT);
+        int bytesPerSample = mConfig.getIntValue(MediaConfig.AUDIO_BYTE_PER_SAMPLE);
+        int samplesPerFrame = mConfig.getIntValue(MediaConfig.AUDIO_SAMPLE_PER_FRAME);
+        if (audioDevice.endsWith(MediaConfig.AUDIO_DEVICE_VOICE_CALL)){
+            mode = Microphone.MODE_VOICE_CALL;
+        }
+        microphone.open(sampleRate, channelCount, bytesPerSample, samplesPerFrame, mode);
+        if (microphone.isOpened()){
+            mStatus = MediaStatus.Status_Opened;
+            sendMessage(MsgKey.Media_ProcessEvent, mStatus, mConfig.toString());
+        }
     }
 
 
@@ -55,7 +54,7 @@ public class AudioSource extends JNIContext
         if (mStatus == MediaStatus.Status_Opened || mStatus == MediaStatus.Status_Stopped){
             if (microphone != null){
                 microphone.start();
-                microphone.setRecordCallback(this);
+                microphone.setCallback(this);
                 mStatus = MediaStatus.Status_Started;
                 sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
@@ -130,12 +129,15 @@ public class AudioSource extends JNIContext
     }
 
     @Override
-    public void onRecordFrame(byte[] data, int length) {
+    public void onProcessData(byte[] data, int length) {
         sendMessage(MsgKey.Media_ProcessData, data, length);
     }
 
     @Override
-    public void onError(int error) {
-
+    public void onError(String error) {
+        mStatus = MediaStatus.Status_Error;
+        JSONObject js = new JSONObject();
+        js.put("error", error);
+        sendMessage(MsgKey.Media_ProcessEvent, mStatus, js.toJSONString());
     }
 }

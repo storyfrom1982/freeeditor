@@ -11,8 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Microphone implements Runnable {
 
+    private static final String TAG = "Microphone";
 
-    protected static final String TAG = "Microphone";
+    public static int MODE_MICROPHONE = 0;
+    public static int MODE_VOICE_CALL = 1;
 
     private int mMode;
     private int mSampleRate;
@@ -31,39 +33,22 @@ public class Microphone implements Runnable {
     private Thread mRecordThread = null;
     private AudioRecord mAudioRecord = null;
 
-    public interface RecordCallback {
-        void onRecordFrame(byte[] data, int length);
-    }
+    private final Object mLock = new Object();
+    private IDeviceCallback mCallback;
 
-    public interface ErrorCallback {
-        void onError(int error);
-    }
+    public Microphone(){}
 
-    private final Object callbackLock = new Object();
-    private cn.freeeditor.sdk.Microphone.ErrorCallback mErrorCallback;
-    private cn.freeeditor.sdk.Microphone.RecordCallback mRecordCallback;
-
-    public Microphone(){
-        mMode = MediaRecorder.AudioSource.MIC;
-    }
-
-    public void setRecordCallback(cn.freeeditor.sdk.Microphone.RecordCallback callback){
-        synchronized (callbackLock){
-            mRecordCallback = callback;
+    public void setCallback(IDeviceCallback callback){
+        synchronized (mLock){
+            mCallback = callback;
         }
     }
 
-    public void setErrorCallback(cn.freeeditor.sdk.Microphone.ErrorCallback callback){
-        synchronized (callbackLock){
-            mErrorCallback = callback;
-        }
+    public boolean isOpened(){
+        return mAudioRecord != null;
     }
 
-    public void setMode(int mode){
-        mMode = mode;
-    }
-
-    public int open(int sampleRate, int channelCount, int bytesPerSample, int samplesPerFrame){
+    public void open(int sampleRate, int channelCount, int bytesPerSample, int samplesPerFrame, int mode){
         mSampleRate = sampleRate;
         mChannelCount = channelCount;
         mBytesPerSample = bytesPerSample;
@@ -82,16 +67,21 @@ public class Microphone implements Runnable {
             minBufferSize = mRecordBufferSize << 1;
         }
 
+        if (mode == MODE_VOICE_CALL){
+            mMode = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
+        }else {
+            mMode = MediaRecorder.AudioSource.MIC;
+        }
+
         mAudioRecord = new AudioRecord(mMode, mSampleRate, channelConfig, audioFormat, minBufferSize);
 
         if (mAudioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
-            Log.e(TAG, "Failed during initialization of AudioRecord");
             mAudioRecord.release();
             mAudioRecord = null;
-            return -1;
+            if (mCallback != null){
+                mCallback.onError("microphone open failed");
+            }
         }
-
-        return 0;
     }
 
     public void close(){
@@ -136,12 +126,6 @@ public class Microphone implements Runnable {
     @Override
     public void run() {
 
-        if (mAudioRecord == null){
-            Log.e(TAG, "Uninitialized AudioRecord");
-            isStopped.set(true);
-            return;
-        }
-
         Log.dumpThread("MessageProcessor", getClass().getName(), "thread start");
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
@@ -160,9 +144,9 @@ public class Microphone implements Runnable {
         mAudioRecord.startRecording();
         int result = mAudioRecord.getRecordingState();
         if (result != AudioRecord.RECORDSTATE_RECORDING) {
-            synchronized (callbackLock){
-                if (mErrorCallback != null){
-                    mErrorCallback.onError(0);
+            synchronized (mLock){
+                if (mCallback != null){
+                    mCallback.onError("microphone start failed");
                 }
             }
             isRunning.set(false);
@@ -172,9 +156,9 @@ public class Microphone implements Runnable {
 
             result = mAudioRecord.read(cacheBuffer, cacheWritePos, mRecordBufferSize);
             if (result == AudioRecord.ERROR_INVALID_OPERATION || result != mRecordBufferSize){
-                synchronized (callbackLock){
-                    if (mErrorCallback != null){
-                        mErrorCallback.onError(0);
+                synchronized (mLock){
+                    if (mCallback != null){
+                        mCallback.onError("microphone read failed");
                     }
                 }
                 break;
@@ -197,9 +181,9 @@ public class Microphone implements Runnable {
                 if ((cacheReadPos += mCodecBufferSize) >= cacheBufferSize){
                     cacheReadPos -= cacheBufferSize;
                 }
-                synchronized (callbackLock){
-                    if (mRecordCallback != null){
-                        mRecordCallback.onRecordFrame(codecBuffer, codecBuffer.length);
+                synchronized (mLock){
+                    if (mCallback != null){
+                        mCallback.onProcessData(codecBuffer, codecBuffer.length);
                     }
                 }
             }

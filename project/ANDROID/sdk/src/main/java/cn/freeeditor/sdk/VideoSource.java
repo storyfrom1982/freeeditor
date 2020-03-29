@@ -54,7 +54,7 @@ public class VideoSource extends JNIContext
     private void openCamera(JNIMessage msg){
 
         if (mStatus != MediaStatus.Status_Closed){
-            Log.e(TAG, "[VideoSource openCamera] error status: " + mStatus);
+            Log.e(TAG, "[VideoSource openCamera] device is on: " + mStatus);
             return;
         }
 
