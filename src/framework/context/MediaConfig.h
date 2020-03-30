@@ -41,7 +41,8 @@ namespace freee {
 
 #define CFG_SRC_SAMPLE_RATE             "srcSampleRate"
 #define CFG_SRC_SAMPLE_FORMAT           "srcSampleFormat"
-#define CFG_SRC_BYTE_PER_SAMPLE         "srcBytePerSample"
+#define CFG_SRC_BYTES_PER_SAMPLE         "srcBytesPerSample"
+#define CFG_SRC_SAMPLES_PER_FRAME       "srcSamplesPerFrame"
 #define CFG_SRC_CHANNEL_COUNT           "srcChannelCount"
 #define CFG_SRC_AUDIO_DEVICE            "srcAudioDevice"
 
@@ -68,8 +69,8 @@ namespace freee {
 #define CFG_CODEC_SAMPLE_FORMAT         "codecSampleFormat"
 #define CFG_CODEC_SAMPLE_FORMAT_ID      "codecSampleFormatId"
 #define CFG_CODEC_CHANNEL_COUNT         "codecChannelCount"
-#define CFG_CODEC_BYTE_PER_SAMPLE       "codecBytePerSample"
-#define CFG_CODEC_SAMPLE_PER_FRAME      "codecSamplePerFrame"
+#define CFG_CODEC_BYTES_PER_SAMPLE      "codecBytesPerSample"
+#define CFG_CODEC_SAMPLES_PER_FRAME     "codecSamplesPerFrame"
 
 #define CFG_RENDER_MODE                 "RenderMode"
 #define CFG_RENDER_ROTATION             "RenderRotation"

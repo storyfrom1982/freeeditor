@@ -11,7 +11,6 @@ using namespace freee;
 
 
 AudioSource::AudioSource(std::string name) : MessageChain(name) {
-//    MessageContext *context = MediaContext::Instance().ConnectMicrophone();
     m_type = MediaType_Audio;
     MessageContext *context = MediaContext::Instance()->ConnectMicrophone();
     ConnectContext(context);
@@ -20,7 +19,6 @@ AudioSource::AudioSource(std::string name) : MessageChain(name) {
 AudioSource::~AudioSource() {
     Close(this);
     DisconnectContext();
-//    MediaContext::Instance().DisconnectMicrophone();
     MediaContext::Instance()->DisconnectMicrophone();
     FinalClear();
 }
@@ -60,15 +58,22 @@ void AudioSource::Stop(MessageChain *chain) {
 }
 
 void AudioSource::ProcessData(MessageChain *chain, Message msg) {
-    Message resample = p_bufferPool->NewMessage(MsgKey_ProcessData,
-            (uint8_t *)msg.GetMessagePtr()->sharePtr, msg.GetMessagePtr()->length);
-    if (m_startTIme == 0){
-        m_startTIme = sr_time_begin();
-        resample.GetFramePtr()->timestamp = 0;
+    if (p_pipe){
+        sr_pipe_write(p_pipe, (char*)msg.GetMessagePtr()->sharePtr, msg.GetMessagePtr()->length);
+        while (sr_pipe_readable(p_pipe) >= m_bufferSize){
+            Message message = p_bufferPool->NewMessage(MsgKey_ProcessData, nullptr, m_bufferSize);
+            sr_pipe_read(p_pipe, (char*)message.GetBufferPtr(), message.GetMessagePtr()->length);
+            message.GetFramePtr()->timestamp = 1000000L / m_codecSampleRate * m_totalSamples;
+            m_totalSamples += m_codecSamplesPerFrame;
+            MessageChain::onMsgProcessData(message);
+        }
     }else {
-        resample.GetFramePtr()->timestamp = sr_time_passed(m_startTIme);
+        Message message = p_bufferPool->NewMessage(MsgKey_ProcessData,
+                (unsigned  char*)msg.GetMessagePtr()->sharePtr, msg.GetMessagePtr()->length);
+        message.GetFramePtr()->timestamp = 1000000L / m_codecSampleRate * m_totalSamples;
+        m_totalSamples += m_codecSamplesPerFrame;
+        MessageChain::onMsgProcessData(message);
     }
-    MessageChain::onMsgProcessData(resample);
 }
 
 void AudioSource::FinalClear() {
@@ -76,18 +81,25 @@ void AudioSource::FinalClear() {
         delete p_bufferPool;
         p_bufferPool = nullptr;
     }
+    if (p_pipe){
+        sr_pipe_release(&p_pipe);
+    }
 }
 
 void AudioSource::UpdateConfig(Message msg) {
     m_config = json::parse(msg.GetString());
-    LOGD("AudioSource::UpdateConfig %s\n", msg.GetString().c_str());
     m_codecSampleRate = m_config[CFG_CODEC_SAMPLE_RATE];
     m_codecChannelCount = m_config[CFG_CODEC_CHANNEL_COUNT];
-    m_codecBytePerSample = m_config[CFG_CODEC_BYTE_PER_SAMPLE];
-    m_codecSamplePerFrame = m_config[CFG_CODEC_SAMPLE_PER_FRAME];
+    m_codecBytePerSample = m_config[CFG_CODEC_BYTES_PER_SAMPLE];
+    m_codecSamplesPerFrame = m_config[CFG_CODEC_SAMPLES_PER_FRAME];
+    m_srcSamplesPerFrame = m_config[CFG_SRC_SAMPLES_PER_FRAME];
 
-    m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplePerFrame;
-    p_bufferPool = new MessagePool("AudioSourceFramePool", m_bufferSize, 10, 64, 0, 0);
+    if (m_srcSamplesPerFrame != m_codecSamplesPerFrame){
+        p_pipe = sr_pipe_create(1U << 18);
+    }
+
+    m_bufferSize = m_codecChannelCount * m_codecBytePerSample * m_codecSamplesPerFrame;
+    p_bufferPool = new MessagePool(GetName() + "::FramePool", m_bufferSize, 10, 64, 0, 0);
 }
 
 void AudioSource::onRecvEvent(Message msg)
@@ -95,30 +107,19 @@ void AudioSource::onRecvEvent(Message msg)
     switch (msg.event()){
         case Status_Opened:
             m_status = Status_Opened;
-            LOGD("AudioSource Opened\n");
             UpdateConfig(msg);
-            msg.GetMessagePtr()->key = MsgKey_Open;
-            MessageChain::onMsgOpen(msg);
-//            ReportEvent(SmartPkt(Status_Opened + m_number));
+            MessageChain::onMsgOpen(NewMessage(MsgKey_Open));
             break;
         case Status_Closed:
             m_status = Status_Closed;
-//            CloseNext();
-            msg.GetMessagePtr()->key = MsgKey_Close;
-            MessageChain::onMsgClose(msg);
-//            ReportEvent(SmartPkt(Status_Closed + m_number));
+            MessageChain::onMsgClose(NewMessage(MsgKey_Close));
             FinalClear();
-            LOGD("AudioSource Closed\n");
             break;
         case Status_Started:
             m_status = Status_Started;
-//            ReportEvent(SmartPkt(Status_Started + m_number));
-            LOGD("AudioSource Started\n");
             break;
         case Status_Stopped:
-//            ReportEvent(SmartPkt(Status_Stopped + m_number));
             m_status = Status_Stopped;
-            LOGD("AudioSource Stopped\n");
             break;
         default:
             break;

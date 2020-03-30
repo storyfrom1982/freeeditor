@@ -26,10 +26,12 @@ public class MediaConfig {
     public static final String AUDIO_DEVICE = "srcAudioDevice";
     public static final String AUDIO_SAMPLE_RATE = "codecSampleRate";
     public static final String AUDIO_CHANNEL_COUNT = "codecChannelCount";
-    public static final String AUDIO_BYTE_PER_SAMPLE = "codecBytePerSample";
-    public static final String AUDIO_SAMPLE_PER_FRAME = "codecSamplePerFrame";
+    public static final String AUDIO_BYTES_PER_SAMPLE = "codecBytesPerSample";
+    public static final String AUDIO_SAMPLES_PER_FRAME = "codecSamplesPerFrame";
 
     public static final String AUDIO_SRC_SAMPLE_RATE = "srcSampleRate";
     public static final String AUDIO_SRC_CHANNEL_COUNT = "srcChannelCount";
+    public static final String AUDIO_SRC_BYTES_PER_SAMPLE = "srcBytesPerSample";
+    public static final String AUDIO_SRC_SAMPLES_PER_FRAME = "srcSamplesPerFrame";
 
 }

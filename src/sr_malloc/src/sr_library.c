@@ -134,7 +134,7 @@ int sr_log_file_open(const char *log_directory)
         if (pthread_create(&(g_log_writer.tid), NULL, log_file_writer_loop, &g_log_writer) != 0){
             LOGE("pthread_create failed\n");
             free(g_log_writer.dir_name);
-            sr_pipe_remove(&(g_log_writer.pipe));
+            sr_pipe_release(&(g_log_writer.pipe));
             pthread_mutex_unlock(&g_log_writer_mutex);
             return -1;
         }
@@ -158,7 +158,7 @@ void sr_log_file_close()
             free(g_log_writer.dir_name);
             g_log_writer.dir_name = NULL;
         }
-        sr_pipe_remove(&(g_log_writer.pipe));
+        sr_pipe_release(&(g_log_writer.pipe));
     }
     pthread_mutex_unlock(&g_log_writer_mutex);
 }
@@ -609,7 +609,7 @@ sr_pipe_t* sr_pipe_create(unsigned int len)
 }
 
 
-void sr_pipe_remove(sr_pipe_t **pp_pipe)
+void sr_pipe_release(sr_pipe_t **pp_pipe)
 {
 	if (pp_pipe && *pp_pipe){
 		sr_pipe_t *pipe = *pp_pipe;
@@ -872,6 +872,7 @@ sr_buffer_pool_t* sr_buffer_pool_create(
         size_t align)
 {
     sr_buffer_pool_t *pool = (sr_buffer_pool_t*) calloc(1, sizeof(sr_buffer_pool_t));
+    assert(pool != NULL);
     pool->data_size = buffer_size;
     pool->buffer_count = buffer_count;
     pool->max_buffer_count = max_buffer_count;
@@ -880,6 +881,7 @@ sr_buffer_pool_t* sr_buffer_pool_create(
     pool->queue = sr_queue_create(release_buffer_node);
     for (int i = 0; i < pool->buffer_count; ++i){
         sr_buffer_node_t *node = calloc(1, sizeof(sr_buffer_node_t));
+        assert(node != NULL);
         node->buffer.data_size = pool->data_size;
         node->buffer.head_size = pool->head_size;
         if (pool->align > 0){
@@ -887,6 +889,7 @@ sr_buffer_pool_t* sr_buffer_pool_create(
         }else {
             node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
         }
+        assert(node->buffer.head != NULL);
         node->buffer.data = node->buffer.head + pool->head_size;
         node->pool = pool;
         __sr_queue_push_back(pool->queue, node);
@@ -926,11 +929,13 @@ sr_buffer_data_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool)
     if (pool->buffer_count < pool->max_buffer_count){
         __sr_atom_add(pool->buffer_count, 1);
         sr_buffer_node_t *node = calloc(1, sizeof(sr_buffer_node_t));
+        assert(node != NULL);
         if (pool->align > 0){
             node->buffer.head = (uint8_t*)memalign(pool->align, pool->data_size + pool->head_size);
         }else {
             node->buffer.head = (uint8_t*)malloc(pool->data_size + pool->head_size);
         }
+        assert(node->buffer.head != NULL);
         node->buffer.frame = (sr_buffer_frame_t){0};
         node->buffer.msg = (sr_buffer_message_t){0};
         node->buffer.data = node->buffer.head + pool->head_size;
@@ -949,12 +954,14 @@ sr_buffer_data_t* sr_buffer_pool_realloc(sr_buffer_data_t *buffer, size_t size)
         free(buffer->head);
     }
     sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)buffer - sizeof(sr_node_t));
+    assert(node != NULL);
     node->buffer.data_size = size;
     if (node->pool->align > 0){
         node->buffer.head = (uint8_t*)memalign(node->pool->align, buffer->data_size + buffer->head_size);
     }else {
         node->buffer.head = (uint8_t*)malloc(buffer->data_size + buffer->head_size);
     }
+    assert(node->buffer.head != NULL);
     node->buffer.data = node->buffer.head + buffer->head_size;
     return &node->buffer;
 }

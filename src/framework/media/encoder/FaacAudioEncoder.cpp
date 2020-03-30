@@ -21,7 +21,7 @@ int FaacAudioEncoder::OpenModule() {
     int bitRate = m_config[CFG_CODEC_BITRATE];
     int sampleRate = m_config[CFG_CODEC_SAMPLE_RATE];
     int targetCh = m_config[CFG_CODEC_CHANNEL_COUNT];
-    m_intputSamples = m_config[CFG_CODEC_SAMPLE_PER_FRAME];
+    m_intputSamples = m_config[CFG_CODEC_SAMPLES_PER_FRAME];
 
     int aot = AOT_AAC_LC;// AOT_AAC_LC;// AOT_ER_AAC_ELD;
     int afterburner = 1;

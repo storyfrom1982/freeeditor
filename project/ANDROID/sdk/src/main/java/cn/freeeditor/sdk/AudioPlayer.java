@@ -44,8 +44,8 @@ public class AudioPlayer extends JNIContext implements Speaker.SpeakerCallback, 
         Log.d(TAG, "AudioPlayer config: " + mConfig.toJSONString());
         mSampleRate = mConfig.getIntValue(MediaConfig.AUDIO_SAMPLE_RATE);
         mChannelCount = mConfig.getIntValue(MediaConfig.AUDIO_CHANNEL_COUNT);
-        mBytesPerSample = mConfig.getIntValue(MediaConfig.AUDIO_BYTE_PER_SAMPLE);
-        mSamplesPerFrame = mConfig.getIntValue(MediaConfig.AUDIO_SAMPLE_PER_FRAME);
+        mBytesPerSample = mConfig.getIntValue(MediaConfig.AUDIO_BYTES_PER_SAMPLE);
+        mSamplesPerFrame = mConfig.getIntValue(MediaConfig.AUDIO_SAMPLES_PER_FRAME);
         speaker.open(mSampleRate, mChannelCount, mBytesPerSample, mSamplesPerFrame, 0);
 
         mStatus = MediaStatus.Status_Opened;

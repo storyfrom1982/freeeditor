@@ -19,7 +19,7 @@ AudioPlayer::~AudioPlayer()
 {
     DisconnectContext();
     MediaContext::Instance()->DisconnectSpeaker();
-    sr_pipe_remove(&pipe);
+    sr_pipe_release(&pipe);
 }
 
 void AudioPlayer::Open(MessageChain *chain)

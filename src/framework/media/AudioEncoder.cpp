@@ -18,8 +18,8 @@ freee::AudioEncoder::~AudioEncoder() {
 void freee::AudioEncoder::onMsgOpen(freee::Message pkt) {
     MessageChain *chain = static_cast<MessageChain *>(pkt.GetObjectPtr());
     m_config = chain->GetConfig(this);
-    size_t bytePerSample = m_config[CFG_CODEC_BYTE_PER_SAMPLE];
-    size_t samplePerFrame = m_config[CFG_CODEC_SAMPLE_PER_FRAME];
+    size_t bytePerSample = m_config[CFG_CODEC_BYTES_PER_SAMPLE];
+    size_t samplePerFrame = m_config[CFG_CODEC_SAMPLES_PER_FRAME];
     m_bufferSize = bytePerSample * samplePerFrame;
     p_bufferPool = new MessagePool("AudioEncoderFramePool", m_bufferSize, 1, 64, 16, 0);
     OpenModule();

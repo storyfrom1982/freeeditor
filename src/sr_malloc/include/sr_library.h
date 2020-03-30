@@ -289,7 +289,7 @@ extern void sr_queue_block_clear(sr_queue_t *queue);
 typedef struct sr_pipe_t sr_pipe_t;
 
 extern sr_pipe_t* sr_pipe_create(unsigned int size);
-extern void sr_pipe_remove(sr_pipe_t **pp_pipe);
+extern void sr_pipe_release(sr_pipe_t **pp_pipe);
 
 extern void sr_pipe_complete(sr_pipe_t *pipe);
 extern void sr_pipe_stop(sr_pipe_t *pipe);

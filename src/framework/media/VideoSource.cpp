@@ -57,20 +57,16 @@ void VideoSource::ProcessData(MessageChain *chain, Message msg) {
         || m_srcHeight != m_codecHeight){
         if (p_bufferPool){
             Message y420 = p_bufferPool->NewMessage(MsgKey_ProcessData);
-            if (y420.GetBufferPtr()){
-                libyuv_set_format(y420.GetFramePtr(), y420.GetBufferPtr(), m_codecWidth,
-                                  m_codecHeight, m_codecImageFormat);
-                libyuv_convert_to_yuv420p(msg.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);
-                if (m_startTime == 0){
-                    m_startTime = sr_time_begin();
-                    y420.GetFramePtr()->timestamp = 0;
-                }else {
-                    y420.GetFramePtr()->timestamp = sr_time_passed(m_startTime);
-                }
-                MessageChain::onMsgProcessData(y420);
+            if (m_startTime == 0){
+                m_startTime = sr_time_begin();
+                y420.GetFramePtr()->timestamp = 0;
             }else {
-                LOGD("[WARNING] missed a video frame\n");
+                y420.GetFramePtr()->timestamp = sr_time_passed(m_startTime);
             }
+            libyuv_set_format(y420.GetFramePtr(), y420.GetBufferPtr(), m_codecWidth,
+                              m_codecHeight, m_codecImageFormat);
+            libyuv_convert_to_yuv420p(msg.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);
+            MessageChain::onMsgProcessData(y420);
         }
     }else {
         MessageChain::onMsgProcessData(msg);

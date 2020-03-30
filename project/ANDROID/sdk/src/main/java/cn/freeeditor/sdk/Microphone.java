@@ -21,9 +21,6 @@ public class Microphone implements Runnable {
     private int mChannelCount;
     private int mBytesPerSample;
     private int mSamplesPerFrame;
-    private int mCodecBufferSize;
-
-    private int mFramesPerBuffer;
     private int mRecordBufferSize;
 
     private final AtomicBoolean isRunning = new AtomicBoolean(false);
@@ -48,20 +45,21 @@ public class Microphone implements Runnable {
         return mAudioRecord != null;
     }
 
+    public int getSamplesPerFrame(){
+        return mSamplesPerFrame;
+    }
+
     public void open(int sampleRate, int channelCount, int bytesPerSample, int samplesPerFrame, int mode){
         mSampleRate = sampleRate;
         mChannelCount = channelCount;
         mBytesPerSample = bytesPerSample;
         mSamplesPerFrame = samplesPerFrame;
+        mSamplesPerFrame = getPropertyOutputFramesPerBuffer();
+        mRecordBufferSize = mSamplesPerFrame * mChannelCount * mBytesPerSample;
 
-        int sampleSize = mChannelCount * mBytesPerSample;
         int channelConfig = mChannelCount == 2 ? AudioFormat.CHANNEL_IN_STEREO : AudioFormat.CHANNEL_IN_MONO;
         int audioFormat = mBytesPerSample == 2 ? AudioFormat.ENCODING_PCM_16BIT : AudioFormat.ENCODING_PCM_8BIT;
         int minBufferSize = AudioRecord.getMinBufferSize(mSampleRate, channelConfig, audioFormat);
-
-        mFramesPerBuffer = getFramesPerBuffer();
-        mCodecBufferSize = mSamplesPerFrame * sampleSize;
-        mRecordBufferSize = mFramesPerBuffer * sampleSize;
 
         if (minBufferSize < mRecordBufferSize << 1){
             minBufferSize = mRecordBufferSize << 1;
@@ -73,7 +71,8 @@ public class Microphone implements Runnable {
             mMode = MediaRecorder.AudioSource.MIC;
         }
 
-        mAudioRecord = new AudioRecord(mMode, mSampleRate, channelConfig, audioFormat, minBufferSize);
+        mAudioRecord = new AudioRecord(mMode, mSampleRate,
+                channelConfig, audioFormat, minBufferSize);
 
         if (mAudioRecord.getState() != AudioRecord.STATE_INITIALIZED) {
             mAudioRecord.release();
@@ -130,16 +129,7 @@ public class Microphone implements Runnable {
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
 
-        byte[] codecBuffer = new byte[mCodecBufferSize];
-
-        int framePerBuffer = (int)((float) mCodecBufferSize / mRecordBufferSize);
-        ++framePerBuffer;
-        framePerBuffer <<= 1;
-        int cacheBufferSize = mRecordBufferSize * framePerBuffer;
-        int cacheWritePos = 0;
-        int cacheReadPos = 0;
-        int cacheDataSize = 0;
-        byte[] cacheBuffer = new byte[cacheBufferSize];
+        byte[] recordBuffer = new byte[mRecordBufferSize];
 
         mAudioRecord.startRecording();
         int result = mAudioRecord.getRecordingState();
@@ -154,7 +144,7 @@ public class Microphone implements Runnable {
 
         while (isRunning.get()){
 
-            result = mAudioRecord.read(cacheBuffer, cacheWritePos, mRecordBufferSize);
+            result = mAudioRecord.read(recordBuffer, 0, mRecordBufferSize);
             if (result == AudioRecord.ERROR_INVALID_OPERATION || result != mRecordBufferSize){
                 synchronized (mLock){
                     if (mCallback != null){
@@ -163,28 +153,9 @@ public class Microphone implements Runnable {
                 }
                 break;
             }
-
-            cacheDataSize += result;
-            if ((cacheWritePos += result) >= cacheBufferSize){
-                cacheWritePos -= cacheBufferSize;
-            }
-
-            while (cacheDataSize >= mCodecBufferSize){
-                int remain = cacheBufferSize - cacheReadPos;
-                if (remain >= mCodecBufferSize){
-                    System.arraycopy(cacheBuffer, cacheReadPos, codecBuffer, 0, mCodecBufferSize);
-                }else{
-                    System.arraycopy(cacheBuffer, cacheReadPos, codecBuffer, 0, remain);
-                    System.arraycopy(cacheBuffer, 0, codecBuffer, remain, mCodecBufferSize - remain);
-                }
-                cacheDataSize -= mCodecBufferSize;
-                if ((cacheReadPos += mCodecBufferSize) >= cacheBufferSize){
-                    cacheReadPos -= cacheBufferSize;
-                }
-                synchronized (mLock){
-                    if (mCallback != null){
-                        mCallback.onProcessData(codecBuffer, codecBuffer.length);
-                    }
+            synchronized (mLock){
+                if (mCallback != null){
+                    mCallback.onProcessData(recordBuffer, recordBuffer.length);
                 }
             }
         }
@@ -197,7 +168,7 @@ public class Microphone implements Runnable {
         }
     }
 
-    private int getFramesPerBuffer(){
+    private int getPropertyOutputFramesPerBuffer(){
         int framesPerBuffer = 0;
         try {
             AudioManager am = (AudioManager) MediaContext.Instance().getAppContext().
@@ -205,13 +176,14 @@ public class Microphone implements Runnable {
             String str = am.getProperty(AudioManager.PROPERTY_OUTPUT_FRAMES_PER_BUFFER);
             if (str != null){
                 framesPerBuffer = Integer.parseInt(str);
-                android.util.Log.d(TAG,"PROPERTY_OUTPUT_FRAMES_PER_BUFFER[" + framesPerBuffer + "]");
+                if (framesPerBuffer < 64){
+                    framesPerBuffer = mSamplesPerFrame;
+                }
+                Log.d(TAG,"PROPERTY_OUTPUT_FRAMES_PER_BUFFER[" + framesPerBuffer + "]");
             }
         }catch (Exception e){
+            framesPerBuffer = mSamplesPerFrame;
             e.printStackTrace();
-        }
-        if (framesPerBuffer <= 256){
-            framesPerBuffer = 256; // Use default
         }
         return framesPerBuffer;
     }

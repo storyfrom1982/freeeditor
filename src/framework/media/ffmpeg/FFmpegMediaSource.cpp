@@ -104,8 +104,8 @@ int FFmpegMediaSource::OpenSource(Message msg)
             cfg[CFG_CODEC_CHANNEL_COUNT] = codecpar->channels;
             cfg[CFG_CODEC_SAMPLE_FORMAT_ID] = codecpar->format;
             cfg[CFG_CODEC_SAMPLE_RATE] = codecpar->sample_rate;
-            cfg[CFG_CODEC_BYTE_PER_SAMPLE] = av_get_bytes_per_sample((AVSampleFormat)codecpar->format);
-            cfg[CFG_CODEC_SAMPLE_PER_FRAME] = codecpar->frame_size;
+            cfg[CFG_CODEC_BYTES_PER_SAMPLE] = av_get_bytes_per_sample((AVSampleFormat)codecpar->format);
+            cfg[CFG_CODEC_SAMPLES_PER_FRAME] = codecpar->frame_size;
             if (codecpar->extradata_size > 0){
                 m_extraConfigMap[stream->index] = std::string((char*)codecpar->extradata, codecpar->extradata_size);
             }

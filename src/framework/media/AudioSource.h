@@ -45,14 +45,17 @@ namespace freee {
 
     private:
         int64_t m_startTIme = 0;
-        int m_srcSampleRate;
-        int m_srcChannelCount;
-        int m_srcBytePerSample;
-        int m_codecSampleRate;
-        int m_codecChannelCount;
-        int m_codecBytePerSample;
-        int m_codecSamplePerFrame;
-        uint32_t m_srcVideoFormat, m_codecVideoFormat;
+        int64_t m_totalSamples = 0;
+        size_t m_srcSampleRate = 0;
+        size_t m_srcChannelCount = 0;
+        size_t m_srcBytePerSample = 0;
+        size_t m_srcSamplesPerFrame = 0;
+        size_t m_codecSampleRate = 0;
+        size_t m_codecChannelCount = 0;
+        size_t m_codecBytePerSample = 0;
+        size_t m_codecSamplesPerFrame = 0;
+
+        sr_pipe_t *p_pipe = nullptr;
 
         size_t m_bufferSize;
         MessagePool *p_bufferPool = nullptr;

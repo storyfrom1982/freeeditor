@@ -109,7 +109,8 @@ void MediaConfig::buildDefaultConfig(json &config) {
                 {CFG_SRC_SAMPLE_RATE,               48000},
                 {CFG_SRC_CHANNEL_COUNT,             1},
                 {CFG_SRC_SAMPLE_FORMAT,             "S16"},
-                {CFG_SRC_BYTE_PER_SAMPLE,           2},
+                {CFG_SRC_BYTES_PER_SAMPLE,          2},
+                {CFG_SRC_SAMPLES_PER_FRAME,         1024},
                 {CFG_SRC_AUDIO_DEVICE,              "microphone"},
 
                 {CFG_CODEC_TYPE,                    "aac"},
@@ -118,8 +119,8 @@ void MediaConfig::buildDefaultConfig(json &config) {
                 {CFG_CODEC_SAMPLE_RATE,             48000},
                 {CFG_CODEC_CHANNEL_COUNT,           1},
                 {CFG_CODEC_SAMPLE_FORMAT,           "S16"},
-                {CFG_CODEC_BYTE_PER_SAMPLE,         2},
-                {CFG_CODEC_SAMPLE_PER_FRAME,        1024},
+                {CFG_CODEC_BYTES_PER_SAMPLE,        2},
+                {CFG_CODEC_SAMPLES_PER_FRAME,       1024},
 
                 {CFG_SPEAKER_SAMPLE_RATE,           48000},
                 {CFG_SPEAKER_SAMPLE_FORMAT,         "S16"},

@@ -42,7 +42,7 @@ public:
         JniEnv env;
         m_obj = env->NewGlobalRef(obj);
         jclass m_cls = env->GetObjectClass(m_obj);
-        m_onObtainMessage = env->GetMethodID(m_cls, "onRequestMessage", "(I)Lcn/freeeditor/sdk/JNIMessage;");
+        m_onRequestMessage = env->GetMethodID(m_cls, "onRequestMessage", "(I)Lcn/freeeditor/sdk/JNIMessage;");
         m_onReceiveMessage = env->GetMethodID(m_cls, "onRecvMessage", "(Lcn/freeeditor/sdk/JNIMessage;)V");
         env->DeleteLocalRef(m_cls);
 
@@ -130,24 +130,27 @@ public:
 
     Message onRequestMessage(int key) override {
         JniEnv env;
-        jobject msg = env->CallObjectMethod(m_obj, m_onObtainMessage, key);
-        if (env->GetIntField(msg, m_keyField) == key){
-            jstring str = static_cast<jstring>(env->GetObjectField(msg, m_stringField));
-            if (str != nullptr){
-                return NewMessage(key, std::string(env->GetStringUTFChars(str, 0),
-                                                   env->GetStringUTFLength(str)));
-            }else {
-                return NewMessage(key, (void *) env->GetLongField(msg, m_ptrField));
-            }
+        jobject jmsg = env->CallObjectMethod(m_obj, m_onRequestMessage, key);
+        key = env->GetIntField(jmsg, m_keyField);
+        jstring str = static_cast<jstring>(env->GetObjectField(jmsg, m_stringField));
+        if (str != nullptr){
+            char *s = (char*)env->GetStringUTFChars(str, 0);
+            Message msg = NewMessage(key, std::string(s, env->GetStringUTFLength(str)));
+            env->ReleaseStringUTFChars(str, s);
+            env->DeleteLocalRef(str);
+            env->DeleteLocalRef(jmsg);
+            return msg;
         }
-        return NewMessage(0);
+        Message msg = NewMessage(key, (void *) env->GetLongField(jmsg, m_ptrField));
+        env->DeleteLocalRef(jmsg);
+        return msg;
     }
 
 private:
 
     jobject m_obj;
     jmethodID m_onReceiveMessage;
-    jmethodID m_onObtainMessage;
+    jmethodID m_onRequestMessage;
 
     jclass m_msgCls;
     jmethodID m_newJniMessage;

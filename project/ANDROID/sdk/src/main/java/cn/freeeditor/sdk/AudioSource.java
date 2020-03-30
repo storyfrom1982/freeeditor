@@ -37,14 +37,15 @@ public class AudioSource extends JNIContext
         String audioDevice = mConfig.getString(MediaConfig.AUDIO_DEVICE);
         int sampleRate = mConfig.getIntValue(MediaConfig.AUDIO_SRC_SAMPLE_RATE);
         int channelCount = mConfig.getIntValue(MediaConfig.AUDIO_SRC_CHANNEL_COUNT);
-        int bytesPerSample = mConfig.getIntValue(MediaConfig.AUDIO_BYTE_PER_SAMPLE);
-        int samplesPerFrame = mConfig.getIntValue(MediaConfig.AUDIO_SAMPLE_PER_FRAME);
+        int bytesPerSample = mConfig.getIntValue(MediaConfig.AUDIO_BYTES_PER_SAMPLE);
+        int samplesPerFrame = mConfig.getIntValue(MediaConfig.AUDIO_SAMPLES_PER_FRAME);
         if (audioDevice.endsWith(MediaConfig.AUDIO_DEVICE_VOICE_CALL)){
             mode = Microphone.MODE_VOICE_CALL;
         }
         microphone.open(sampleRate, channelCount, bytesPerSample, samplesPerFrame, mode);
         if (microphone.isOpened()){
             mStatus = MediaStatus.Status_Opened;
+            mConfig.put(MediaConfig.AUDIO_SRC_SAMPLES_PER_FRAME, microphone.getSamplesPerFrame());
             sendMessage(MsgKey.Media_ProcessEvent, mStatus, mConfig.toString());
         }
     }
