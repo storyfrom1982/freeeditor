@@ -43,6 +43,8 @@ public class MediaRecorder extends JNIContext {
             videoView.release();
         }
         stopHandler();
+        mConfig.clear();
+        mConfig = null;
     }
 
     public void setVideoSize(int width, int height){

@@ -57,6 +57,7 @@ public class MessageProcessor implements Runnable {
             isRunning.notifyAll();
         }
         Looper.loop();
+        msgHandler.release();
         Log.dumpThread(TAG, mName, "thread stop");
     }
 
@@ -66,6 +67,9 @@ public class MessageProcessor implements Runnable {
         final WeakReference<MessageProcessor> weakReference;
         MessageHandler(MessageProcessor processor){
             weakReference = new WeakReference<>(processor);
+        }
+        public void release(){
+            weakReference.clear();
         }
         @Override
         public void handleMessage(Message msg) {

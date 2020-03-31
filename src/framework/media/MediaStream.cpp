@@ -54,8 +54,8 @@ void MediaStream::onMsgDisconnectStream() {
 }
 
 void MediaStream::ConnectStream(std::string url) {
-    Message pkt = MediaContext::Instance()->GetStringPkt(OnRecvMsg_ConnectStream, url);
-    ProcessMessage(pkt);
+    Message msg = NewMessage(OnRecvMsg_ConnectStream, url);
+    ProcessMessage(msg);
 }
 
 void MediaStream::DisconnectStream() {

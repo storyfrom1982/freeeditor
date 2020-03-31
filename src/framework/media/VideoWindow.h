@@ -31,7 +31,7 @@ namespace freee {
 
         void SetCallback(VideoWindowCallback *callback);
 
-        void onRecvMessage(Message pkt) override;
+        void onRecvMessage(Message msg) override;
 
     private:
         void *mWindowHolder;

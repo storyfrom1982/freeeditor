@@ -25,6 +25,8 @@ public class AudioSource extends JNIContext
     public void release(){
         msgHandler.sendEmptyMessage(MsgKey.Media_Close);
         stopHandler();
+        mConfig.clear();
+        mConfig = null;
     }
 
     public void open(String cfg){

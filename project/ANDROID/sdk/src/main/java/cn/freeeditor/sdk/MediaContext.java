@@ -10,7 +10,7 @@ import android.view.WindowManager;
 
 import java.lang.ref.WeakReference;
 
-public class MediaContext extends JNIContext {
+public class MediaContext extends JNIContext implements ComponentCallbacks {
 
     private static final String TAG = "MediaContext";
 
@@ -49,18 +49,7 @@ public class MediaContext extends JNIContext {
     public void setAppContext(Context context){
         mAppCtxReference = new WeakReference<>(context);
         currentOrientation = mAppCtxReference.get().getResources().getConfiguration().orientation;
-        mAppCtxReference.get().registerComponentCallbacks(new ComponentCallbacks() {
-            @Override
-            public void onConfigurationChanged(Configuration newConfig) {
-                Log.d("MediaContext", "onConfigurationChanged " + newConfig.orientation);
-                currentOrientation = newConfig.orientation;
-            }
-
-            @Override
-            public void onLowMemory() {
-
-            }
-        });
+        mAppCtxReference.get().registerComponentCallbacks(this);
     }
 
     public Context getAppContext(){
@@ -167,8 +156,10 @@ public class MediaContext extends JNIContext {
             audioSource.release();
             audioSource = null;
         }
-        sMediaContext = null;
         disconnectMediaContext();
+        mAppCtxReference.get().unregisterComponentCallbacks(this);
+        mAppCtxReference.clear();
+        sMediaContext = null;
     }
 
     public long connectRecorder(){
@@ -265,4 +256,14 @@ public class MediaContext extends JNIContext {
     private native void connectMediaContext(long contextPointer);
     private native void disconnectMediaContext();
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        Log.d("MediaContext", "onConfigurationChanged " + newConfig.orientation);
+        currentOrientation = newConfig.orientation;
+    }
+
+    @Override
+    public void onLowMemory() {
+
+    }
 }

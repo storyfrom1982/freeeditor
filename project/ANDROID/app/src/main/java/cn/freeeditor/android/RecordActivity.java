@@ -80,8 +80,6 @@ public class RecordActivity extends Activity {
 
         publishHandler.sendEmptyMessage(HANDLER_PERMISSION_GAN);
 
-        MediaContext.Instance().setAppContext(getApplicationContext());
-
         fadeIn();
 
         openRecorder(getUrl());
@@ -124,33 +122,45 @@ public class RecordActivity extends Activity {
 
 
     private void openRecorder(String url){
-        recorder = new MediaRecorder();
-        recorder.startPreview(surfaceView);
-        recorder.startRecord(url);
+        if (recorder == null){
+            Log.d(TAG, "openRecorder ========= enter");
+            MediaContext.Instance().setAppContext(getApplicationContext());
+            recorder = new MediaRecorder();
+            recorder.startPreview(surfaceView);
+            recorder.startRecord(url);
+            Log.d(TAG, "openRecorder ========= exit");
+        }
     }
 
 
     private void closeRecorder(){
-//        recorder.stopPreview();
-//        recorder.stopRecord();
-        recorder.release();
-        MediaContext.Instance().release();
-        MediaContext.debug();
+        if (recorder != null){
+            Log.d(TAG, "closeRecorder ========= enter");
+            recorder.release();
+            recorder = null;
+            MediaContext.Instance().release();
+            MediaContext.debug();
+            Log.d(TAG, "closeRecorder ========= exit");
+        }
     }
 
     private void changeOrientation(){
+        closeRecorder();
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         }else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
-        publishHandler.sendEmptyMessageDelayed(HANDLER_ORENTATION, 500);
     }
 
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//
-//    }
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        surfaceView.setVisibility(View.INVISIBLE);
+        openRecorder(getUrl());
+        surfaceView.setVisibility(View.VISIBLE);
+        super.onConfigurationChanged(newConfig);
+        publishHandler.sendEmptyMessageDelayed(HANDLER_ORENTATION, 1000);
+    }
 
     View.OnClickListener publishClickListener = new View.OnClickListener() {
         @Override
@@ -196,7 +206,7 @@ public class RecordActivity extends Activity {
     View.OnClickListener aspectRatioClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            publishHandler.sendMessageDelayed(publishHandler.obtainMessage(HANDLER_ORENTATION), 1000);
+            publishHandler.sendMessage(publishHandler.obtainMessage(HANDLER_ORENTATION));
 //            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
 //                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 //            }else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
@@ -242,7 +252,7 @@ public class RecordActivity extends Activity {
 
     private static class PublishHandler extends Handler {
 
-        private WeakReference<RecordActivity> publishReference = null;
+        private final WeakReference<RecordActivity> publishReference;
 
         public PublishHandler(RecordActivity activity) {
             publishReference = new WeakReference<RecordActivity>(activity);
@@ -251,8 +261,10 @@ public class RecordActivity extends Activity {
         @Override
         public void handleMessage(Message msg) {
             RecordActivity activity = publishReference.get();
-            if (activity == null)
+            if (activity == null){
+                Log.d(TAG, "changeOrientation ========= 2");
                 return;
+            }
 
             switch (msg.what) {
                 case OVERLAY_FADE_OUT:
@@ -262,6 +274,7 @@ public class RecordActivity extends Activity {
                     activity.requirePermission();
                     break;
                 case HANDLER_ORENTATION:
+                    Log.d(TAG, "changeOrientation ========= 1");
                     activity.changeOrientation();
                     break;
                 default:

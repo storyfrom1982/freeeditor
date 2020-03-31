@@ -117,7 +117,3 @@ void MediaContext::DisconnectSpeaker()
 {
     SendMessage(NewMessage(SendMsg_DisconnectSpeaker));
 }
-
-Message MediaContext::GetStringPkt(int key, std::string str) {
-    return NewMessage(key, str);
-}

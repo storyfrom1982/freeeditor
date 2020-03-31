@@ -49,6 +49,8 @@ public class VideoSource extends JNIContext
     public void release(){
         msgHandler.sendMessage(msgHandler.obtainMessage(MsgKey.Media_Close));
         stopHandler();
+        mConfig.clear();
+        mConfig = null;
     }
 
     private void openCamera(JNIMessage msg){
@@ -252,6 +254,7 @@ public class VideoSource extends JNIContext
     @Override
     void onFinalRelease() {
         super.release();
+        mBufferList.clear();
     }
 
     @Override

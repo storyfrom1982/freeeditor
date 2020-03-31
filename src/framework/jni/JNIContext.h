@@ -22,7 +22,9 @@ public:
     ~JniEnv(){
         if (m_pEnvInternal){
             global_JVM_Instance->DetachCurrentThread();
+            m_pEnvInternal = nullptr;
         }
+        m_pEnv = nullptr;
     }
 
     JNIEnv *operator->(){

@@ -31,6 +31,10 @@ public class VideoWindow extends JNIContext implements SurfaceHolder.Callback {
 
     public void release(){
         stopHandler();
+        if (surfaceView != null){
+            surfaceView.getHolder().removeCallback(this);
+            surfaceView = null;
+        }
     }
 
     public SurfaceView getSurfaceView(){
