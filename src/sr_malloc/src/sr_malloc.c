@@ -395,11 +395,13 @@ inline static void free_pointer(pointer_t *pointer, sr_memory_page_t *page, sr_m
 			pointer->prev->next = pointer->next;
 		}
 
-		if (__mergeable(__next_pointer(__next_pointer(pointer)))){
-			__next_pointer(pointer)->prev->next = __next_pointer(pointer)->next;
-			__next_pointer(pointer)->next->prev = __next_pointer(pointer)->prev;
-			pointer->size += __next_pointer(pointer)->size;
-		}
+        if (__next_pointer(pointer) != page->end){
+            if (__mergeable(__next_pointer(__next_pointer(pointer)))){
+                __next_pointer(pointer)->prev->next = __next_pointer(pointer)->next;
+                __next_pointer(pointer)->next->prev = __next_pointer(pointer)->prev;
+                pointer->size += __next_pointer(pointer)->size;
+            }
+        }
 
 		//设置释放状态
 		__next_pointer(pointer)->flag = pointer->size;
@@ -769,9 +771,9 @@ void* realloc(void *address, size_t size)
 				}else{
 					memcpy(new_address, address, size);
 				}
+				free(address);
 			}
 
-			free(address);
 			return new_address;
 		}
 

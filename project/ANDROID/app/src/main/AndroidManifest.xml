@@ -22,7 +22,11 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".PlayerActivity"></activity>
+        <activity
+            android:name=".PlayerActivity"
+            android:configChanges="screenSize|orientation|keyboardHidden">
+        </activity>
+
         <activity
             android:name=".RecordActivity"
             android:configChanges="screenSize|orientation|keyboardHidden">

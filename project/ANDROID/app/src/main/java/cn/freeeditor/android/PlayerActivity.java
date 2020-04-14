@@ -122,9 +122,11 @@ public class PlayerActivity extends AppCompatActivity {
 
 
     void closePlayer(){
-        player.release();
-        player = null;
-        stateButton.setText("Play");
+        if (player != null){
+            player.release();
+            player = null;
+            stateButton.setText("Play");
+        }
     }
 
 
@@ -153,14 +155,34 @@ public class PlayerActivity extends AppCompatActivity {
     };
 
 
+    private void changeOrientation(){
+        closePlayer();
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+    }
+
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        playSurface.setVisibility(View.INVISIBLE);
+        openPlayer();
+        playSurface.setVisibility(View.VISIBLE);
+        super.onConfigurationChanged(newConfig);
+        playHandler.sendEmptyMessageDelayed(HANDLER_ORENTATION, 3000);
+    }
+
     View.OnClickListener aspectRatioClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-            }else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-            }
+            playHandler.sendMessage(playHandler.obtainMessage(HANDLER_ORENTATION));
+//            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+//            }else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+//                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+//            }
         }
     };
 
@@ -205,6 +227,7 @@ public class PlayerActivity extends AppCompatActivity {
 
 
     private static final int OVERLAY_FADE_OUT = 0;
+    private static final int HANDLER_ORENTATION = 1;
 
 
     private final Handler playHandler = new playerHandler(this);
@@ -227,6 +250,10 @@ public class PlayerActivity extends AppCompatActivity {
             switch (msg.what) {
                 case OVERLAY_FADE_OUT:
                     activity.fadeOut(false);
+                    break;
+                case HANDLER_ORENTATION:
+                    activity.changeOrientation();
+                    break;
                 default:
                     Log.d(TAG, "Message type ==== " + msg.what);
                     break;
