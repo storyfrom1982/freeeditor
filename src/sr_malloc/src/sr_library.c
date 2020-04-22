@@ -864,6 +864,26 @@ static void release_buffer_node(sr_node_t *node){
     free(buffer_node);
 }
 
+static void sr_buffer_pool_recycle(sr_buffer_data_t *buffer)
+{
+    assert(buffer != NULL);
+    sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)buffer - sizeof(sr_node_t));
+    node->buffer.frame = (sr_buffer_frame_t){0};
+    node->buffer.msg = (sr_buffer_message_t){0};
+    __sr_queue_block_push_back(node->pool->queue, node);
+    if (__is_true(node->pool->destroyed)){
+        sr_buffer_pool_t *pool = node->pool;
+        if (sr_queue_length(pool->queue) == pool->buffer_count){
+            sr_queue_release(&pool->queue);
+            if (pool->name){
+                LOGD("sr_buffer_pool_release_delayed() %s [%lu]\n", pool->name, pool->buffer_count);
+                free(pool->name);
+            }
+            free(pool);
+        }
+    }
+}
+
 sr_buffer_pool_t* sr_buffer_pool_create(
         size_t buffer_size,
         size_t buffer_count,
@@ -891,6 +911,7 @@ sr_buffer_pool_t* sr_buffer_pool_create(
         }
         assert(node->buffer.head != NULL);
         node->buffer.data = node->buffer.head + pool->head_size;
+        node->buffer.recycle = sr_buffer_pool_recycle;
         node->pool = pool;
         __sr_queue_push_back(pool->queue, node);
     }
@@ -939,6 +960,7 @@ sr_buffer_data_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool)
         node->buffer.frame = (sr_buffer_frame_t){0};
         node->buffer.msg = (sr_buffer_message_t){0};
         node->buffer.data = node->buffer.head + pool->head_size;
+        node->buffer.recycle = sr_buffer_pool_recycle;
         node->pool = pool;
         return &node->buffer;
     }
@@ -964,24 +986,4 @@ sr_buffer_data_t* sr_buffer_pool_realloc(sr_buffer_data_t *buffer, size_t size)
     assert(node->buffer.head != NULL);
     node->buffer.data = node->buffer.head + buffer->head_size;
     return &node->buffer;
-}
-
-void sr_buffer_pool_recycle(sr_buffer_data_t *buffer)
-{
-    assert(buffer != NULL);
-    sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)buffer - sizeof(sr_node_t));
-    node->buffer.frame = (sr_buffer_frame_t){0};
-    node->buffer.msg = (sr_buffer_message_t){0};
-    __sr_queue_block_push_back(node->pool->queue, node);
-    if (__is_true(node->pool->destroyed)){
-        sr_buffer_pool_t *pool = node->pool;
-        if (sr_queue_length(pool->queue) == pool->buffer_count){
-            sr_queue_release(&pool->queue);
-            if (pool->name){
-                LOGD("sr_buffer_pool_release_delayed() %s [%lu]\n", pool->name, pool->buffer_count);
-                free(pool->name);
-            }
-            free(pool);
-        }
-    }
 }

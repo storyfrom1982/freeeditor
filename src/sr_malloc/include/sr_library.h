@@ -381,6 +381,8 @@ typedef struct sr_buffer_data_t {
 	unsigned char *data;
     sr_buffer_frame_t frame;
     sr_buffer_message_t msg;
+    void *context;
+    void (*recycle)(struct sr_buffer_data_t *buffer);
 }sr_buffer_data_t;
 
 typedef struct sr_buffer_pool sr_buffer_pool_t;
@@ -395,7 +397,7 @@ void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool);
 void sr_buffer_pool_set_name(sr_buffer_pool_t *pool, const char *name);
 sr_buffer_data_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool);
 sr_buffer_data_t* sr_buffer_pool_realloc(sr_buffer_data_t *buffer, size_t size);
-void sr_buffer_pool_recycle(sr_buffer_data_t *buffer);
+//void sr_buffer_pool_recycle(sr_buffer_data_t *buffer);
 
 ///////////////////////////////////////////////////////////////
 ////signal

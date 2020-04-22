@@ -56,7 +56,8 @@ namespace freee {
         {
             if (__sr_atom_sub(*p_reference_count, 1) == 0){
                 if (p_buffer != &static_buffer_data){
-                    sr_buffer_pool_recycle(p_buffer);
+                    p_buffer->recycle(p_buffer);
+//                    sr_buffer_pool_recycle(p_buffer);
                     delete p_reference_count;
                 }
             }
@@ -74,7 +75,8 @@ namespace freee {
             if (this != &pkt){
                 if (__sr_atom_sub(*p_reference_count, 1) == 0){
                     if (p_buffer){
-                        sr_buffer_pool_recycle(p_buffer);
+//                        sr_buffer_pool_recycle(p_buffer);
+                        p_buffer->recycle(p_buffer);
                         delete p_reference_count;
                     }
                 }
