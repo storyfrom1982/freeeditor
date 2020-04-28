@@ -69,6 +69,7 @@ public class MessageProcessor implements Runnable {
             weakReference = new WeakReference<>(processor);
         }
         public void release(){
+            removeCallbacksAndMessages(null);
             weakReference.clear();
         }
         @Override

@@ -240,6 +240,10 @@ namespace freee {
         {
             return Message(key, data, size, sr_buffer_pool_alloc(p_pool));
         }
+        Message NewMessage(int key, sr_buffer_data_t *buffer)
+        {
+            return Message(key, buffer);
+        }
 
     private:
         sr_buffer_pool_t *p_pool = nullptr;
