@@ -53,11 +53,11 @@ public class MediaPlayer extends JNIContext {
 
     @Override
     protected JNIMessage onRequestMessage(int key) {
-        return new JNIMessage();
+        return obtainMessage(0);
     }
 
-    @Override
-    protected void onRecvMessage(JNIMessage msg) {
-
-    }
+//    @Override
+//    protected void onRecvMessage(JNIMessage msg) {
+//
+//    }
 }

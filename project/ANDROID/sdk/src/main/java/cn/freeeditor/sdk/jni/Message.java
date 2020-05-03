@@ -1,15 +1,11 @@
-package cn.freeeditor.sdk;
+package cn.freeeditor.sdk.jni;
 
-
-public class JNIMessage {
+public class Message {
 
     private long nativeMessage;
 
-    public JNIMessage(long nativeMessage){
+    public Message(long nativeMessage){
         this.nativeMessage = nativeMessage;
-        if (this.nativeMessage == 0){
-            System.exit(1);
-        }
     }
 
     public void release(){
@@ -17,10 +13,6 @@ public class JNIMessage {
             release(nativeMessage);
             nativeMessage = 0;
         }
-    }
-
-    public void setKey(int key){
-        setKey(key, nativeMessage);
     }
 
     public void setInt(int i32){
@@ -52,9 +44,6 @@ public class JNIMessage {
     }
 
     public int getKey(){
-        if (nativeMessage == 0){
-            return 0;
-        }
         return getKey(nativeMessage);
     }
 
@@ -112,8 +101,6 @@ public class JNIMessage {
     private native Object getObject(long nativeMessage);
 
     public native String getString(long nativeMessage);
-
-    private native void setKey(int key, long nativeMessage);
 
     private native void setInt(int i32, long nativeMessage);
 

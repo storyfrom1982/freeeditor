@@ -48,13 +48,13 @@ public class VideoWindow extends JNIContext implements SurfaceHolder.Callback {
 
     @Override
     protected JNIMessage onRequestMessage(int key) {
-        return new JNIMessage();
+        return obtainMessage(0);
     }
 
-    @Override
-    protected void onRecvMessage(JNIMessage msg) {
-        msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
-    }
+//    @Override
+//    protected void onRecvMessage(JNIMessage msg) {
+//        msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
+//    }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -116,8 +116,8 @@ public class VideoWindow extends JNIContext implements SurfaceHolder.Callback {
     }
 
     @Override
-    void onMessageProcessor(Message msg) {
-        switch (msg.what){
+    void onMessageProcessor(JNIMessage msg) {
+        switch (msg.getKey()){
             case OnRecvMsg_WindowCreated:
                 onWindowCreated();
                 break;

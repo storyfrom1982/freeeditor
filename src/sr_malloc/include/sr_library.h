@@ -312,12 +312,50 @@ extern unsigned int sr_pipe_block_write(sr_pipe_t *pipe, char *data, unsigned in
 ////缓冲区
 ///////////////////////////////////////////////////////////////
 
+typedef struct sr_message_type_t {
+    int key;
+    float f32;
+    double f64;
+    int32_t i32;
+    int64_t i64;
+    uint32_t u32;
+    uint64_t u64;
+    size_t size;
+    uint8_t *data;
+    void *object;
+}sr_message_type_t;
+
+typedef struct sr_message_frame_t {
+    int type;
+    int flag;
+    int stream_id;
+}sr_message_frame_t;
+
+typedef struct sr_message_buffer_t {
+    size_t capacity;
+    size_t head_size;
+	size_t data_size;
+    unsigned char *data;
+    unsigned char *head;
+	void *buffer_context;
+}sr_message_buffer_t;
+
+typedef struct sr_message_t {
+	sr_message_type_t type;
+	sr_message_frame_t frame;
+	sr_message_buffer_t buffer;
+    int reference_count;
+    void (*realloc)(struct sr_message_t *msg, size_t size);
+    void (*recycle)(struct sr_message_t *msg);
+}sr_message_t;
+
 
 typedef struct sr_buffer_message_t {
     int key;
     int event;
     size_t length;
     void *sharePtr;
+	void *customPtr;
     union {
         void *objectPtr;
         int64_t number;
@@ -362,8 +400,8 @@ typedef struct sr_buffer_frame_t {
     unsigned char *data;
 
     struct {
-        int size;
         int stride;
+        int size;
         unsigned char *data;
     }channel[4];
 
@@ -375,15 +413,34 @@ typedef struct sr_buffer_frame_t {
 
 
 typedef struct sr_buffer_data_t {
-	size_t head_size;
-	size_t data_size;
-	unsigned char *head;
-	unsigned char *data;
-    sr_buffer_frame_t frame;
     sr_buffer_message_t msg;
+    sr_buffer_frame_t frame;
+    size_t head_size;
+    size_t data_size;
+    unsigned char *head;
+    unsigned char *data;
+    int reference_count;
     void *context;
+    void *customPtr;
+    void (*realloc)(struct sr_buffer_data_t *buffer, size_t size);
     void (*recycle)(struct sr_buffer_data_t *buffer);
 }sr_buffer_data_t;
+
+
+static void sr_buffer_data_add_reference(sr_buffer_data_t *buffer_data)
+{
+    __sr_atom_add(buffer_data->reference_count, 1);
+}
+
+static void sr_buffer_data_sub_reference(sr_buffer_data_t *buffer_data)
+{
+    if (__sr_atom_sub(buffer_data->reference_count, 1) == 0){
+        if (buffer_data->recycle){
+            buffer_data->recycle(buffer_data);
+        }
+    }
+}
+
 
 typedef struct sr_buffer_pool sr_buffer_pool_t;
 

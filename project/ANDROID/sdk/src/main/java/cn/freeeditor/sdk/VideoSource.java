@@ -47,7 +47,7 @@ public class VideoSource extends JNIContext
     }
 
     public void release(){
-        msgHandler.sendMessage(msgHandler.obtainMessage(MsgKey.Media_Close));
+//        msgHandler.sendMessage(msgHandler.obtainMessage(MsgKey.Media_Close));
         stopHandler();
         mConfig.clear();
         mConfig = null;
@@ -60,7 +60,7 @@ public class VideoSource extends JNIContext
             return;
         }
 
-        mConfig = JSON.parseObject(msg.string);
+        mConfig = JSON.parseObject(msg.getString());
         int videoWidth = mConfig.getIntValue(MediaConfig.VIDEO_WIDTH);
         int videoHeight = mConfig.getIntValue(MediaConfig.VIDEO_HEIGHT);
         int videoFrameRate = mConfig.getIntValue(MediaConfig.VIDEO_FRAME_RATE);
@@ -258,10 +258,10 @@ public class VideoSource extends JNIContext
     }
 
     @Override
-    void onMessageProcessor(Message msg) {
-        switch (msg.what){
+    void onMessageProcessor(JNIMessage msg) {
+        switch (msg.getKey()){
             case MsgKey.Media_Open:
-                openCamera((JNIMessage) msg.obj);
+                openCamera(msg);
                 break;
             case MsgKey.Media_Start:
                 startCapture();
@@ -279,13 +279,13 @@ public class VideoSource extends JNIContext
 
     @Override
     protected JNIMessage onRequestMessage(int key) {
-        return new JNIMessage();
+        return obtainMessage(0);
     }
 
-    @Override
-    protected void onRecvMessage(JNIMessage msg) {
-        msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
-    }
+//    @Override
+//    protected void onRecvMessage(JNIMessage msg) {
+//        msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
+//    }
 
     private void fixedVideoSize(Camera.Parameters parameters, final int width, final int height){
         int difference = Integer.MAX_VALUE;

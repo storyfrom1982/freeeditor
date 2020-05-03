@@ -164,7 +164,9 @@ public class MediaContext extends JNIContext implements ComponentCallbacks {
 
     public long connectRecorder(){
         JNIMessage msg = requestMessage(ReqMsg_ConnectRecorder);
-        return msg.ptr;
+        long ptr = msg.getLong();
+        msg.release();
+        return ptr;
     }
 
     public void disconnectRecorder(long context){
@@ -173,7 +175,9 @@ public class MediaContext extends JNIContext implements ComponentCallbacks {
 
     public long connectPlayer(){
         JNIMessage msg = requestMessage(ReqMsg_ConnectPlayer);
-        return msg.ptr;
+        long ptr = msg.getLong();
+        msg.release();
+        return ptr;
     }
 
     public void disconnectPlayer(long context){
@@ -182,27 +186,35 @@ public class MediaContext extends JNIContext implements ComponentCallbacks {
 
     public String getRecorderConfig(){
         JNIMessage msg = requestMessage(ReqMsg_GetRecorderConfig);
-        return msg.string;
+        String str = msg.getString();
+        msg.release();
+        return str;
     }
 
     @Override
     protected JNIMessage onRequestMessage(int key) {
+        JNIMessage msg = obtainMessage(key);
         switch (key){
             case OnReqMsg_ConnectCamera:
-                return new JNIMessage(key, createCamera());
+                msg.setLong(createCamera());
+                break;
             case OnReqMsg_ConnectMicrophone:
-                return new JNIMessage(key, createMicrophone());
+                msg.setLong(createMicrophone());
+                break;
             case OnReqMsg_ConnectSpeaker:
-                return new JNIMessage(key, createSpeaker());
+                msg.setLong(createSpeaker());
+                break;
             default:
+                msg.setKey(0);
                 break;
         }
-        return new JNIMessage();
+        return msg;
     }
 
     @Override
-    protected void onRecvMessage(JNIMessage msg) {
-        switch (msg.key){
+    protected void onRecvMessage(long msg) {
+        JNIMessage jmsg = new JNIMessage(msg);
+        switch (jmsg.getKey()){
             case OnRecvMsg_DisconnectCamera:
                 if (videoSource != null){
                     videoSource.release();
@@ -224,6 +236,7 @@ public class MediaContext extends JNIContext implements ComponentCallbacks {
             default:
                 break;
         }
+        jmsg.release();
     }
 
     private long createCamera(){

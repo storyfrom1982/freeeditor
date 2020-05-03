@@ -23,7 +23,7 @@ public class AudioSource extends JNIContext
     }
 
     public void release(){
-        msgHandler.sendEmptyMessage(MsgKey.Media_Close);
+//        msgHandler.sendEmptyMessage(MsgKey.Media_Close);
         stopHandler();
         mConfig.clear();
         mConfig = null;
@@ -95,12 +95,11 @@ public class AudioSource extends JNIContext
     }
 
     @Override
-    void onMessageProcessor(Message msg) {
-        JNIMessage jmsg = (JNIMessage) msg.obj;
-        switch (msg.what){
+    void onMessageProcessor(JNIMessage msg) {
+        switch (msg.getKey()){
 
             case MsgKey.Media_Open:
-                open(jmsg.string);
+                open(msg.getString());
                 break;
 
             case MsgKey.Media_Start:
@@ -123,13 +122,13 @@ public class AudioSource extends JNIContext
 
     @Override
     protected JNIMessage onRequestMessage(int key) {
-        return new JNIMessage();
+        return obtainMessage(0);
     }
 
-    @Override
-    protected void onRecvMessage(JNIMessage msg) {
-        msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
-    }
+//    @Override
+//    protected void onRecvMessage(JNIMessage msg) {
+//        msgHandler.sendMessage(msgHandler.obtainMessage(msg.key, msg));
+//    }
 
     @Override
     public void onProcessData(byte[] data, int length) {
