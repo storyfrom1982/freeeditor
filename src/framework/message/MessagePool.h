@@ -102,7 +102,7 @@ namespace freee {
             if (buffer){
                 p_message = buffer;
                 p_message->data.key = key;
-                p_message->data.event = event;
+                p_message->data.i32 = event;
                 p_reference_count = new int(1);
             }
         }
@@ -111,7 +111,7 @@ namespace freee {
             if (buffer){
                 p_message = buffer;
                 p_message->data.key = key;
-                p_message->data.object_ptr = object;
+                p_message->data.obj_ptr = object;
                 p_reference_count = new int(1);
             }
         }
@@ -149,10 +149,10 @@ namespace freee {
             return p_message->data.key;
         }
         int event(){
-            return p_message->data.event;
+            return p_message->data.i32;
         }
         int64_t GetNumber(){
-            return p_message->data.number;
+            return p_message->data.i64;
         }
         size_t GetDataSize(){
             return p_message->data.data_size;
@@ -161,7 +161,7 @@ namespace freee {
             return p_message->data.data_ptr;
         }
         void* GetObjectPtr(){
-            return p_message->data.object_ptr;
+            return p_message->data.obj_ptr;
         }
         size_t GetHeadSize(){
             return p_message->buffer.head_size;

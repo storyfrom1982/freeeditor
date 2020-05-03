@@ -90,7 +90,7 @@ public:
         if (json != nullptr){
             unsigned char *js = (unsigned char *)env->GetStringUTFChars(json, 0);
             Message msg = NewMessage(key, js, env->GetStringUTFLength(json) + 1);
-            msg.GetMessagePtr()->event = event;
+            msg.GetMessagePtr()->i32 = event;
             MessageContext::SendMessage(msg);
             env->ReleaseStringUTFChars(json, (const char *)js);
         }else {
@@ -112,7 +112,7 @@ public:
         if (!str.empty()){
             jstr = env->NewStringUTF(str.c_str());
         }
-        jobject jmsg = env->NewObject(m_msgCls, m_newJniMessage, msg.key(), msg.event(), msg.GetNumber(), jstr);
+        jobject jmsg = env->NewObject(m_msgCls, m_newJniMessage, msg.key(), msg.event(), (jlong)msg.GetObjectPtr(), jstr);
         if (jstr != nullptr){
             env->DeleteLocalRef(jstr);
         }
@@ -126,7 +126,7 @@ public:
         if (!str.empty()){
             jstr = env->NewStringUTF(str.c_str());
         }
-        jobject jmsg = env->NewObject(m_msgCls, m_newJniMessage, msg.key(), msg.event(), msg.GetNumber(), jstr);
+        jobject jmsg = env->NewObject(m_msgCls, m_newJniMessage, msg.key(), msg.event(), (jlong)msg.GetObjectPtr(), jstr);
         env->CallVoidMethod(m_obj, m_onReceiveMessage, jmsg);
         if (jstr != nullptr){
             env->DeleteLocalRef(jstr);

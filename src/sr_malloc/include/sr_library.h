@@ -315,13 +315,13 @@ extern unsigned int sr_pipe_block_write(sr_pipe_t *pipe, char *data, unsigned in
 
 typedef struct sr_message_data_t {
     int key;
-    int event;
+    float f32;
+    double f64;
+    int32_t i32;
+	int64_t i64;
+    void *obj_ptr;
     size_t data_size;
     unsigned char *data_ptr;
-    union {
-        void *object_ptr;
-        int64_t number;
-    };
 }sr_message_data_t;
 
 
@@ -387,8 +387,23 @@ typedef struct sr_message_t {
     sr_message_data_t data;
     sr_message_frame_t frame;
     sr_message_buffer_t buffer;
+    int reference_count;
     void (*recycle)(struct sr_message_t *msg);
 }sr_message_t;
+
+static inline void sr_message_reference_count_add(sr_message_t *msg){
+    if (msg){
+        __sr_atom_add(msg->reference_count, 1);
+    }
+}
+
+static inline void sr_message_reference_count_sub(sr_message_t *msg){
+    if (msg){
+        if (__sr_atom_sub(msg->reference_count, 1) == 0){
+            msg->recycle(msg);
+        }
+    }
+}
 
 typedef struct sr_buffer_pool sr_buffer_pool_t;
 
