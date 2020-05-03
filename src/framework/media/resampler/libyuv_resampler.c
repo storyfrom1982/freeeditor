@@ -19,7 +19,7 @@ uint32_t libyuv_convert_fourcc(const char *p_fourcc)
     return fourcctoint.format;
 }
 
-int libyuv_set_format(sr_buffer_frame_t *frame, const uint8_t *data, int width, int height, uint32_t fourcc)
+int libyuv_set_format(sr_message_frame_t *frame, const uint8_t *data, int width, int height, uint32_t fourcc)
 {
     if (frame == NULL || data == NULL){
         return -1;
@@ -65,7 +65,7 @@ int libyuv_set_format(sr_buffer_frame_t *frame, const uint8_t *data, int width, 
     return 0;
 }
 
-int libyuv_convert_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *yuv420p, int _rotation)
+int libyuv_convert_to_yuv420p(sr_message_frame_t *src, sr_message_frame_t *yuv420p, int _rotation)
 {
     if (src == NULL || yuv420p == NULL
         || (src->video_format != FOURCC_NV12
@@ -107,7 +107,7 @@ int libyuv_convert_to_yuv420p(sr_buffer_frame_t *src, sr_buffer_frame_t *yuv420p
             rotation, src->video_format);
 }
 
-int libyuv_convert_from_yuv420p(sr_buffer_frame_t *yuv420p, sr_buffer_frame_t *dst)
+int libyuv_convert_from_yuv420p(sr_message_frame_t *yuv420p, sr_message_frame_t *dst)
 {
     if (yuv420p->video_format != FOURCC_I420){
         return -1;

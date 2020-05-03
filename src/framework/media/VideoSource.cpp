@@ -50,27 +50,42 @@ void VideoSource::Stop(MessageChain *chain) {
 }
 
 void VideoSource::ProcessData(MessageChain *chain, Message msg) {
-    libyuv_set_format(msg.GetFramePtr(), (uint8_t*) msg.GetMessagePtr()->sharePtr,
-            m_srcWidth, m_srcHeight, m_srcImageFormat);
-    if (m_srcImageFormat != m_codecImageFormat
-        || m_srcWidth != m_codecWidth
-        || m_srcHeight != m_codecHeight){
-        if (p_bufferPool){
-            Message y420 = p_bufferPool->NewMessage(MsgKey_ProcessData);
-            if (m_startTime == 0){
-                m_startTime = sr_time_begin();
-                y420.GetFramePtr()->timestamp = 0;
-            }else {
-                y420.GetFramePtr()->timestamp = sr_time_passed(m_startTime);
-            }
-            libyuv_set_format(y420.GetFramePtr(), y420.GetBufferPtr(), m_codecWidth,
-                              m_codecHeight, m_codecImageFormat);
-            libyuv_convert_to_yuv420p(msg.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);
-            MessageChain::onMsgProcessData(y420);
-        }
-    }else {
-        MessageChain::onMsgProcessData(msg);
+
+    if (msg.GetDataPtr() != msg.GetBufferPtr()){
+        msg = NewMessage(MsgKey_ProcessData, msg.GetDataPtr(), msg.GetDataSize());
     }
+
+    if (m_startTime == 0){
+        m_startTime = sr_time_begin();
+        msg.GetFramePtr()->timestamp = 0;
+    }else {
+        msg.GetFramePtr()->timestamp = sr_time_passed(m_startTime);
+    }
+
+    libyuv_set_format(msg.GetFramePtr(), msg.GetDataPtr(),
+                      m_srcWidth, m_srcHeight, m_srcImageFormat);
+
+    MessageChain::onMsgProcessData(msg);
+
+//    if (m_srcImageFormat != m_codecImageFormat
+//        || m_srcWidth != m_codecWidth
+//        || m_srcHeight != m_codecHeight){
+//        if (p_bufferPool){
+//            Message y420 = p_bufferPool->NewMessage(MsgKey_ProcessData);
+//            if (m_startTime == 0){
+//                m_startTime = sr_time_begin();
+//                y420.GetFramePtr()->timestamp = 0;
+//            }else {
+//                y420.GetFramePtr()->timestamp = sr_time_passed(m_startTime);
+//            }
+//            libyuv_set_format(y420.GetFramePtr(), y420.GetDataPtr(), m_codecWidth,
+//                              m_codecHeight, m_codecImageFormat);
+//            libyuv_convert_to_yuv420p(msg.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);
+//            MessageChain::onMsgProcessData(y420);
+//        }
+//    }else {
+//        MessageChain::onMsgProcessData(msg);
+//    }
 }
 
 void VideoSource::onRecvMessage(Message msg) {

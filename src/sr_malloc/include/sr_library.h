@@ -313,19 +313,19 @@ extern unsigned int sr_pipe_block_write(sr_pipe_t *pipe, char *data, unsigned in
 ///////////////////////////////////////////////////////////////
 
 
-typedef struct sr_buffer_message_t {
+typedef struct sr_message_data_t {
     int key;
     int event;
-    size_t length;
-    void *sharePtr;
+    size_t data_size;
+    unsigned char *data_ptr;
     union {
-        void *objectPtr;
+        void *object_ptr;
         int64_t number;
     };
-}sr_buffer_message_t;
+}sr_message_data_t;
 
 
-typedef struct sr_buffer_frame_t {
+typedef struct sr_message_frame_t {
 
     int type;
     int flag;
@@ -371,19 +371,24 @@ typedef struct sr_buffer_frame_t {
 
     int64_t timestamp;
 
-}sr_buffer_frame_t;
+}sr_message_frame_t;
 
 
-typedef struct sr_buffer_data_t {
-	size_t head_size;
-	size_t data_size;
-	unsigned char *head;
-	unsigned char *data;
-    sr_buffer_frame_t frame;
-    sr_buffer_message_t msg;
+typedef struct sr_message_buffer_t {
     void *context;
-    void (*recycle)(struct sr_buffer_data_t *buffer);
-}sr_buffer_data_t;
+    size_t head_size;
+    size_t data_size;
+    unsigned char *head_ptr;
+    unsigned char *data_ptr;
+}sr_message_buffer_t;
+
+
+typedef struct sr_message_t {
+    sr_message_data_t data;
+    sr_message_frame_t frame;
+    sr_message_buffer_t buffer;
+    void (*recycle)(struct sr_message_t *msg);
+}sr_message_t;
 
 typedef struct sr_buffer_pool sr_buffer_pool_t;
 
@@ -395,8 +400,8 @@ sr_buffer_pool_t* sr_buffer_pool_create(
 		size_t align);
 void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool);
 void sr_buffer_pool_set_name(sr_buffer_pool_t *pool, const char *name);
-sr_buffer_data_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool);
-sr_buffer_data_t* sr_buffer_pool_realloc(sr_buffer_data_t *buffer, size_t size);
+sr_message_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool);
+sr_message_t* sr_buffer_pool_realloc(sr_message_t *msg, size_t size);
 //void sr_buffer_pool_recycle(sr_buffer_data_t *buffer);
 
 ///////////////////////////////////////////////////////////////

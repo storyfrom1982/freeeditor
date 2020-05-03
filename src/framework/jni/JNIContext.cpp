@@ -100,8 +100,8 @@ public:
 
     void SendMessage(int key, jbyte *buffer, jint length){
         Message msg = NewMessage(key);
-        msg.GetMessagePtr()->sharePtr = buffer;
-        msg.GetMessagePtr()->length = (size_t)(length);
+        msg.GetMessagePtr()->data_ptr = (unsigned char*)buffer;
+        msg.GetMessagePtr()->data_size = (size_t)(length);
         MessageContext::SendMessage(msg);
     }
 

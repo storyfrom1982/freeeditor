@@ -41,7 +41,7 @@ namespace freee {
     };
 
     static int static_reference_count = -(INT32_MAX);
-    static sr_buffer_data_t static_buffer_data = {0};
+    static sr_message_t static_buffer_data = {0};
 
 
 
@@ -49,14 +49,14 @@ namespace freee {
     public:
         Message()
         {
-            p_buffer = &static_buffer_data;
+            p_message = &static_buffer_data;
             p_reference_count = &static_reference_count;
         }
         ~Message()
         {
             if (__sr_atom_sub(*p_reference_count, 1) == 0){
-                if (p_buffer != &static_buffer_data){
-                    p_buffer->recycle(p_buffer);
+                if (p_message != &static_buffer_data){
+                    p_message->recycle(p_message);
 //                    sr_buffer_pool_recycle(p_buffer);
                     delete p_reference_count;
                 }
@@ -65,7 +65,7 @@ namespace freee {
         Message(const Message &msg)
         {
             if (this != &msg){
-                this->p_buffer = msg.p_buffer;
+                this->p_message = msg.p_message;
                 this->p_reference_count = msg.p_reference_count;
                 __sr_atom_add(*p_reference_count, 1);
             }
@@ -74,13 +74,13 @@ namespace freee {
         {
             if (this != &pkt){
                 if (__sr_atom_sub(*p_reference_count, 1) == 0){
-                    if (p_buffer){
+                    if (p_message){
 //                        sr_buffer_pool_recycle(p_buffer);
-                        p_buffer->recycle(p_buffer);
+                        p_message->recycle(p_message);
                         delete p_reference_count;
                     }
                 }
-                this->p_buffer = pkt.p_buffer;
+                this->p_message = pkt.p_message;
                 this->p_reference_count = pkt.p_reference_count;
                 __sr_atom_add(*p_reference_count, 1);
             }
@@ -89,56 +89,56 @@ namespace freee {
 
     private:
         friend class MessagePool;
-        Message(int key, sr_buffer_data_t *buffer)
+        Message(int key, sr_message_t *buffer)
         {
             if (buffer){
-                p_buffer = buffer;
-                p_buffer->msg.key = key;
+                p_message = buffer;
+                p_message->data.key = key;
                 p_reference_count = new int(1);
             }
         }
-        Message(int key, int event, sr_buffer_data_t *buffer)
+        Message(int key, int event, sr_message_t *buffer)
         {
             if (buffer){
-                p_buffer = buffer;
-                p_buffer->msg.key = key;
-                p_buffer->msg.event = event;
+                p_message = buffer;
+                p_message->data.key = key;
+                p_message->data.event = event;
                 p_reference_count = new int(1);
             }
         }
-        Message(int key, void *object, sr_buffer_data_t *buffer)
+        Message(int key, void *object, sr_message_t *buffer)
         {
             if (buffer){
-                p_buffer = buffer;
-                p_buffer->msg.key = key;
-                p_buffer->msg.objectPtr = object;
+                p_message = buffer;
+                p_message->data.key = key;
+                p_message->data.object_ptr = object;
                 p_reference_count = new int(1);
             }
         }
-        Message(int key, std::string str, sr_buffer_data_t *buffer)
+        Message(int key, std::string str, sr_message_t *buffer)
         {
             if (buffer){
-                p_buffer = buffer;
-                p_buffer->msg.key = key;
-                p_buffer->msg.length = str.size() + 1;
-                if (p_buffer->data_size < p_buffer->msg.length){
-                    sr_buffer_pool_realloc(p_buffer, p_buffer->msg.length << 1);
+                p_message = buffer;
+                p_message->data.key = key;
+                p_message->data.data_size = str.size() + 1;
+                if (p_message->buffer.data_size < p_message->data.data_size){
+                    sr_buffer_pool_realloc(p_message, p_message->data.data_size << 1);
                 }
-                memcpy(p_buffer->data, str.c_str(), p_buffer->msg.length);
+                memcpy(p_message->buffer.data_ptr, str.c_str(), p_message->data.data_size);
                 p_reference_count = new int(1);
             }
         }
-        Message(int key, unsigned char *data, size_t size, sr_buffer_data_t *buffer)
+        Message(int key, unsigned char *data, size_t size, sr_message_t *buffer)
         {
             if (buffer){
-                p_buffer = buffer;
-                p_buffer->msg.key = key;
-                p_buffer->msg.length = size;
-                if (p_buffer->data_size < p_buffer->msg.length){
-                    sr_buffer_pool_realloc(p_buffer, p_buffer->msg.length << 1);
+                p_message = buffer;
+                p_message->data.key = key;
+                p_message->data.data_size = size;
+                if (p_message->buffer.data_size < p_message->data.data_size){
+                    sr_buffer_pool_realloc(p_message, p_message->data.data_size << 1);
                 }
                 if (data){
-                    memcpy(p_buffer->data, data, p_buffer->msg.length);
+                    memcpy(p_message->buffer.data_ptr, data, p_message->data.data_size);
                 }
                 p_reference_count = new int(1);
             }
@@ -146,51 +146,51 @@ namespace freee {
 
     public:
         int key(){
-            return p_buffer->msg.key;
+            return p_message->data.key;
         }
         int event(){
-            return p_buffer->msg.event;
-        }
-        size_t length(){
-            return p_buffer->msg.length;
+            return p_message->data.event;
         }
         int64_t GetNumber(){
-            return p_buffer->msg.number;
+            return p_message->data.number;
+        }
+        size_t GetDataSize(){
+            return p_message->data.data_size;
+        }
+        unsigned char* GetDataPtr(){
+            return p_message->data.data_ptr;
         }
         void* GetObjectPtr(){
-            return p_buffer->msg.objectPtr;
-        }
-        void* GetSharePtr(){
-            return p_buffer->msg.sharePtr;
+            return p_message->data.object_ptr;
         }
         size_t GetHeadSize(){
-            return p_buffer->head_size;
-        }
-        unsigned char* GetHeadPtr(){
-            return p_buffer->head;
+            return p_message->buffer.head_size;
         }
         size_t GetBufferSize(){
-            return p_buffer->data_size;
+            return p_message->buffer.data_size;
+        }
+        unsigned char* GetHeadPtr(){
+            return p_message->buffer.head_ptr;
         }
         unsigned char* GetBufferPtr(){
-            return p_buffer->data;
+            return p_message->buffer.data_ptr;
         }
-        sr_buffer_frame_t* GetFramePtr(){
-            return &p_buffer->frame;
+        sr_message_frame_t* GetFramePtr(){
+            return &p_message->frame;
         }
-        sr_buffer_message_t* GetMessagePtr(){
-            return &p_buffer->msg;
+        sr_message_data_t* GetMessagePtr(){
+            return &p_message->data;
         }
         std::string GetString(){
-            if (p_buffer->data && p_buffer->msg.length){
-                return std::string((char*)p_buffer->data, p_buffer->msg.length);
+            if (p_message->buffer.data_ptr && p_message->data.data_size){
+                return std::string((char*)p_message->buffer.data_ptr, p_message->data.data_size);
             }
             return std::string();
         }
 
     private:
         int *p_reference_count = nullptr;
-        sr_buffer_data_t *p_buffer = nullptr;
+        sr_message_t *p_message = nullptr;
     };
 
 

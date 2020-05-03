@@ -108,7 +108,7 @@ int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
     int out_size, out_elem_size;
     void *in_ptr, *out_ptr;
 
-    in_ptr = pkt.GetBufferPtr();
+    in_ptr = pkt.GetDataPtr();
     in_size = m_intputSamples*2;
     in_elem_size = 2;
 
@@ -121,7 +121,7 @@ int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
 
 
     Message opkt = p_bufferPool->NewMessage(MsgKey_ProcessData, this);
-    out_ptr = opkt.GetBufferPtr();
+    out_ptr = opkt.GetDataPtr();
     out_size = opkt.GetBufferSize();
     out_elem_size = 1;
     out_buf.numBufs = 1;
@@ -140,7 +140,7 @@ int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
 
     opkt.GetFramePtr()->type = MediaType_Audio;
     opkt.GetFramePtr()->size = out_args.numOutBytes;
-    opkt.GetFramePtr()->data = opkt.GetBufferPtr();
+    opkt.GetFramePtr()->data = opkt.GetDataPtr();
     opkt.GetFramePtr()->timestamp = pkt.GetFramePtr()->timestamp / 1000;
     opkt.GetFramePtr()->flag = PktFlag_PFrame;
 

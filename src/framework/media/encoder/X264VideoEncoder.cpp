@@ -118,7 +118,7 @@ int X264VideoEncoder::EncoderEncode(Message pkt) {
     int64_t startTime = sr_time_begin();
 //    LOGD("X264VideoEncoder::OnOpenEncoder: enter\n");
 
-    sr_buffer_frame_t *frame = pkt.GetFramePtr();
+    sr_message_frame_t *frame = pkt.GetFramePtr();
 
     x264_picture_t pic_out;
     x264_picture_t  pic;
@@ -158,7 +158,7 @@ int X264VideoEncoder::EncoderEncode(Message pkt) {
     Message opkt = p_bufferPool->NewMessage(MsgKey_ProcessData, this);
     opkt.GetFramePtr()->flag = PktFlag_PFrame;
 
-    uint8_t *dst = opkt.GetBufferPtr();
+    uint8_t *dst = opkt.GetDataPtr();
     int offset = 0;
 
     x264_nal_t *p_spspps;
@@ -215,7 +215,7 @@ int X264VideoEncoder::EncoderEncode(Message pkt) {
     long long tmStamp = (long long)(m_frameId*1000LL/m_frameRate);
     opkt.GetFramePtr()->timestamp = tmStamp;
     opkt.GetFramePtr()->size = frameLen;
-    opkt.GetFramePtr()->data = opkt.GetBufferPtr();
+    opkt.GetFramePtr()->data = opkt.GetDataPtr();
     opkt.GetFramePtr()->type = MediaType_Video;
 
 //    long long tmStamp = pkt.frame.timestamp / 1000;

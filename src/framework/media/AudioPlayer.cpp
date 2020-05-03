@@ -54,7 +54,7 @@ void AudioPlayer::ProcessData(MessageChain *chain, Message msg)
     short *pcm = (short*)&tmp;
     for (int j=0; j<1024; j++){
         for (int c=0 ;c< 1; c++){
-            float *f = (float *) msg.GetBufferPtr();
+            float *f = (float *) msg.GetDataPtr();
             float t = f[j];
             if (t<-1.0f) t=-1.0f;
             else if (t>1.0f) t=1.0f;
@@ -67,9 +67,9 @@ void AudioPlayer::ProcessData(MessageChain *chain, Message msg)
 void AudioPlayer::onRecvMessage(Message msg)
 {
 //    LOGD("AudioPlayer::onRecvMessage %lld\n", msg.frame.timestamp);
-    if (sr_pipe_readable(pipe) < msg.length()){
+    if (sr_pipe_readable(pipe) < msg.GetDataSize()){
         return;
     }
-    sr_pipe_block_read(pipe, (char*)msg.GetMessagePtr()->sharePtr, msg.GetMessagePtr()->length);
+    sr_pipe_block_read(pipe, (char*)msg.GetDataPtr(), msg.GetDataSize());
 //    LOGD("AudioPlayer::onRecvMessage exit\n");
 }

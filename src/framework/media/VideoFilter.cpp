@@ -28,26 +28,6 @@ void VideoFilter::FinalClear() {
     }
 }
 
-//void VideoFilter::ProcessMedia(MediaChain *chain, SmartPkt pkt) {
-//    if (m_srcImageFormat != m_codecImageFormat
-//        || m_srcWidth != m_codecWidth
-//        || m_srcHeight != m_codecHeight){
-//        if (p_bufferPool){
-//            SmartPkt y420 = p_bufferPool->GetPkt(PktMsgProcessMedia);
-//            if (y420.GetDataPtr()){
-//                sr_buffer_frame_set_image_format(&y420.frame, y420.GetDataPtr(), m_codecWidth, m_codecHeight, m_codecImageFormat);
-//                sr_buffer_frame_convert_to_yuv420p(&pkt.frame, &y420.frame, m_srcRotation);
-//                y420.frame.timestamp = pkt.frame.timestamp;
-//                MediaChainImpl::ProcessMedia(chain, y420);
-//            }else {
-//                LOGD("[WARNING] missed a video frame\n");
-//            }
-//        }
-//    }else {
-//        MediaChainImpl::ProcessMedia(chain, pkt);
-//    }
-//}
-
 void VideoFilter::onMsgOpen(Message pkt) {
     m_config = static_cast<MessageChain *>(pkt.GetObjectPtr())->GetConfig(this);
     if (m_status == Status_Closed){
@@ -71,22 +51,15 @@ void VideoFilter::onMsgProcessData(Message pkt) {
 
 int VideoFilter::OpenModule() {
     LOGD("[MediaConfig] VideoFilter::ModuleOpen >>> %s\n", m_config.dump(4).c_str());
-    m_srcWidth = m_config["srcWidth"];
-    m_srcHeight = m_config["srcHeight"];
-    m_srcRotation = m_config["srcRotation"];
-    m_codecWidth = m_config["codecWidth"];
-    m_codecHeight = m_config["codecHeight"];
-    std::string srcFormat = m_config["srcImageFormat"];
-    std::string codecFormat = m_config["codecImageFormat"];
-    union {
-        uint32_t format;
-        unsigned char fourcc[4];
-    }fourcctoint;
-    memcpy(&fourcctoint.fourcc[0], srcFormat.c_str(), 4);
-    m_srcImageFormat = fourcctoint.format;
-    memcpy(&fourcctoint.fourcc[0], codecFormat.c_str(), 4);
-    m_codecImageFormat = fourcctoint.format;
-//    LOGD("VideoSource::UpdateMediaConfig src[%d] codec[%d]\n", m_srcImageFormat, libyuv::FOURCC_NV21);
+    m_srcWidth = m_config[CFG_SRC_WIDTH];
+    m_srcHeight = m_config[CFG_SRC_HEIGHT];
+    m_srcRotation = m_config[CFG_SRC_ROTATION];
+    m_codecWidth = m_config[CFG_CODEC_WIDTH];
+    m_codecHeight = m_config[CFG_CODEC_HEIGHT];
+    std::string srcFormat = m_config[CFG_SRC_IMAGE_FORMAT];
+    std::string codecFormat = m_config[CFG_CODEC_IMAGE_FORMAT];
+    m_srcImageFormat = libyuv_convert_fourcc(srcFormat.c_str());
+    m_codecImageFormat = libyuv_convert_fourcc(codecFormat.c_str());
     m_bufferSize = m_codecWidth * m_codecHeight / 2 * 3U;
     p_bufferPool = new MessagePool(GetName() + "FramePool", m_bufferSize, 10, 64, 0, 0);
     return 0;
@@ -99,7 +72,22 @@ void VideoFilter::CloseModule() {
     }
 }
 
-int VideoFilter::ProcessMediaByModule(Message pkt) {
-    MessageChain::onMsgProcessData(pkt);
+int VideoFilter::ProcessMediaByModule(Message msg) {
+
+    if (m_srcImageFormat != m_codecImageFormat
+        || m_srcWidth != m_codecWidth
+        || m_srcHeight != m_codecHeight){
+        if (p_bufferPool){
+            Message y420 = p_bufferPool->NewMessage(MsgKey_ProcessData);
+            libyuv_set_format(y420.GetFramePtr(), y420.GetDataPtr(), m_codecWidth,
+                              m_codecHeight, m_codecImageFormat);
+            libyuv_convert_to_yuv420p(msg.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);
+            y420.GetFramePtr()->timestamp = msg.GetFramePtr()->timestamp;
+            MessageChain::onMsgProcessData(y420);
+        }
+    }else {
+        MessageChain::onMsgProcessData(msg);
+    }
+
     return 0;
 }
