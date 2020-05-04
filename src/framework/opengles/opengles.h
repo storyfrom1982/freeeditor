@@ -15,6 +15,6 @@ typedef struct opengles_t opengles_t;
 int opengles_open(opengles_t **pp_gles);
 void opengles_close(opengles_t **pp_gles);
 
-int opengles_render(opengles_t *gles, const sr_message_frame_t *frame);
+int opengles_render(opengles_t *gles, const sr_msg_frame_t *frame);
 
 #endif /* OPENGLES_H_ */

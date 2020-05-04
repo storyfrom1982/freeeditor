@@ -29,7 +29,7 @@ void VideoFilter::FinalClear() {
 }
 
 void VideoFilter::onMsgOpen(Message pkt) {
-    m_config = static_cast<MessageChain *>(pkt.GetObjectPtr())->GetConfig(this);
+    m_config = static_cast<MessageChain *>(pkt.obj())->GetConfig(this);
     if (m_status == Status_Closed){
         OpenModule();
         MessageChain::onMsgOpen(pkt);
@@ -79,10 +79,10 @@ int VideoFilter::ProcessMediaByModule(Message msg) {
         || m_srcHeight != m_codecHeight){
         if (p_bufferPool){
             Message y420 = p_bufferPool->NewMessage(MsgKey_ProcessData);
-            libyuv_set_format(y420.GetFramePtr(), y420.GetDataPtr(), m_codecWidth,
+            libyuv_set_format(y420.msgFrame(), y420.data(), m_codecWidth,
                               m_codecHeight, m_codecImageFormat);
-            libyuv_convert_to_yuv420p(msg.GetFramePtr(), y420.GetFramePtr(), m_srcRotation);
-            y420.GetFramePtr()->timestamp = msg.GetFramePtr()->timestamp;
+            libyuv_convert_to_yuv420p(msg.msgFrame(), y420.msgFrame(), m_srcRotation);
+            y420.msgFrame()->timestamp = msg.msgFrame()->timestamp;
             MessageChain::onMsgProcessData(y420);
         }
     }else {

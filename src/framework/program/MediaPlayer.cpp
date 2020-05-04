@@ -27,7 +27,7 @@ MediaPlayer::~MediaPlayer()
 
 void MediaPlayer::onMsgOpen(Message msg)
 {
-    LOGD("MediaPlayer::onMsgOpen %s\n", msg.GetString().c_str());
+    LOGD("MediaPlayer::onMsgOpen %s\n", msg.getString().c_str());
     m_pMediaSource = MediaSource::Create("ffmpeg");
     m_pMediaSource->SetEventListener(this);
     m_pMediaSource->Open(this);
@@ -78,7 +78,7 @@ void MediaPlayer::onMsgControl(Message pkt)
 {
     switch (pkt.key()){
         case MsgKey_Control_SetWindow:
-            m_pVideoRenderer->SetVideoWindow(pkt.GetObjectPtr());
+            m_pVideoRenderer->SetVideoWindow(pkt.obj());
             break;
         default:
             break;
@@ -92,9 +92,9 @@ void MediaPlayer::onRecvMessage(Message msg)
 
 void MediaPlayer::onMsgProcessEvent(Message pkt)
 {
-    if (pkt.GetObjectPtr() == m_pMediaSource){
-//        LOGD("Open stream config: %s\n", pkt.GetString().c_str());
-        json cfg = json::parse(pkt.GetString());
+    if (pkt.obj() == m_pMediaSource){
+//        LOGD("Open stream config: %s\n", pkt.getString().c_str());
+        json cfg = json::parse(pkt.getString());
         if (cfg[CFG_TYPE] == CFG_VIDEO){
             m_pVideoDeocder = VideoDecoder::Create(cfg[CFG_CODEC_NAME]);
             m_pVideoDeocder->SetStreamId(cfg[CFG_CODEC_STREAM_ID]);

@@ -841,43 +841,42 @@ unsigned int sr_pipe_block_read(sr_pipe_t *pipe, char *buf, unsigned int size)
 ///////////////////////////////////////////////////////////////
 
 
-typedef struct sr_buffer_node_t{
-    sr_node_t node;
-    sr_message_t msg;
-    sr_buffer_pool_t *pool;
-}sr_buffer_node_t;
-
-struct sr_buffer_pool {
-    size_t align;
-    size_t head_size;
-    size_t data_size;
-    size_t buffer_count;
-    size_t max_buffer_count;
-    bool destroyed;
-    sr_queue_t *queue;
+struct sr_msg_buffer_pool {
     char *name;
+    sr_msg_t msg;
+    size_t msg_count;
+    size_t max_count;
+    sr_queue_t *queue;
+    bool destroyed;
 };
 
+typedef struct msg_buffer_node_t{
+    sr_node_t node;
+    sr_msg_t msg;
+    sr_msg_buffer_pool_t *pool;
+}msg_buffer_node_t;
+
+
 static void release_buffer_node(sr_node_t *node){
-    sr_buffer_node_t *buffer_node = (sr_buffer_node_t*)node;
-    free(buffer_node->msg.buffer.head_ptr);
+    msg_buffer_node_t *buffer_node = (msg_buffer_node_t*)node;
+    free(buffer_node->msg.buffer.head);
     free(buffer_node);
 }
 
-static void sr_buffer_pool_recycle(sr_message_t *buffer)
+static void sr_buffer_pool_recycle(sr_msg_t *msg)
 {
-    assert(buffer != NULL);
-    sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)buffer - sizeof(sr_node_t));
-    node->msg.frame = (sr_message_frame_t){0};
-    node->msg.data = (sr_message_data_t){0};
-    node->msg.data.data_ptr = node->msg.buffer.data_ptr;
+    assert(msg != NULL);
+    msg_buffer_node_t *node = (msg_buffer_node_t*)((char *)msg - sizeof(sr_node_t));
+    node->msg.type = (sr_msg_type_t){0};
+    node->msg.frame = (sr_msg_frame_t){0};
+    node->msg.type.data = node->msg.buffer.data;
     __sr_queue_block_push_back(node->pool->queue, node);
     if (__is_true(node->pool->destroyed)){
-        sr_buffer_pool_t *pool = node->pool;
-        if (sr_queue_length(pool->queue) == pool->buffer_count){
+        sr_msg_buffer_pool_t *pool = node->pool;
+        if (sr_queue_length(pool->queue) == pool->msg_count){
             sr_queue_release(&pool->queue);
             if (pool->name){
-                LOGD("sr_buffer_pool_release_delayed() %s [%lu]\n", pool->name, pool->buffer_count);
+                LOGD("sr_buffer_pool_release_delayed() %s [%lu]\n", pool->name, pool->msg_count);
                 free(pool->name);
             }
             free(pool);
@@ -885,49 +884,80 @@ static void sr_buffer_pool_recycle(sr_message_t *buffer)
     }
 }
 
-sr_buffer_pool_t* sr_buffer_pool_create(
-        size_t buffer_size,
-        size_t buffer_count,
-        size_t max_buffer_count,
-        size_t head_size,
-        size_t align)
+static void sr_msg_pool_realloc(sr_msg_t *msg, size_t size)
 {
-    sr_buffer_pool_t *pool = (sr_buffer_pool_t*) calloc(1, sizeof(sr_buffer_pool_t));
+    assert(msg != NULL);
+    if (msg->buffer.head){
+        free(msg->buffer.head);
+    }
+    msg_buffer_node_t *node = (msg_buffer_node_t*)((char *)msg - sizeof(sr_node_t));
+    assert(node != NULL);
+    node->msg.buffer.data_size = size;
+    if (node->msg.buffer.align > 0){
+        node->msg.buffer.head = (uint8_t*)memalign(
+                node->msg.buffer.align,
+                node->msg.buffer.data_size
+                + node->msg.buffer.head_size);
+    }else {
+        node->msg.buffer.head = (uint8_t*)malloc(
+                node->msg.buffer.data_size
+                + node->msg.buffer.head_size);
+    }
+    assert(node->msg.buffer.head != NULL);
+    node->msg.buffer.data = node->msg.buffer.head + msg->buffer.head_size;
+    node->msg.type.data = node->msg.buffer.data;
+}
+
+sr_msg_buffer_pool_t* sr_msg_buffer_pool_create(
+        const char *name,
+        size_t msg_count,
+        size_t max_count,
+        size_t msg_buffer_size,
+        size_t msg_buffer_head_size,
+        size_t msg_buffer_data_align)
+{
+    sr_msg_buffer_pool_t *pool = (sr_msg_buffer_pool_t*) calloc(1, sizeof(sr_msg_buffer_pool_t));
     assert(pool != NULL);
-    pool->data_size = buffer_size;
-    pool->buffer_count = buffer_count;
-    pool->max_buffer_count = max_buffer_count;
-    pool->head_size = head_size;
-    pool->align = align;
+    pool->name = strdup(name);
+    pool->msg_count = msg_count;
+    pool->max_count = max_count;
+    pool->msg.buffer.data_size = msg_buffer_size;
+    pool->msg.buffer.align = msg_buffer_data_align;
+    pool->msg.buffer.head_size = msg_buffer_head_size;
     pool->queue = sr_queue_create(release_buffer_node);
-    for (int i = 0; i < pool->buffer_count; ++i){
-        sr_buffer_node_t *node = calloc(1, sizeof(sr_buffer_node_t));
+    for (int i = 0; i < pool->msg_count; ++i){
+        msg_buffer_node_t *node = calloc(1, sizeof(msg_buffer_node_t));
         assert(node != NULL);
-        node->msg.buffer.data_size = pool->data_size;
-        node->msg.buffer.head_size = pool->head_size;
-        if (pool->align > 0){
-            node->msg.buffer.head_ptr = (uint8_t*)memalign(pool->align, pool->data_size + pool->head_size);
+        node->msg = pool->msg;
+        if (node->msg.buffer.align > 0){
+            node->msg.buffer.head = (uint8_t*)memalign(
+                    node->msg.buffer.align,
+                    node->msg.buffer.data_size
+                    + node->msg.buffer.head_size);
         }else {
-            node->msg.buffer.head_ptr = (uint8_t*)malloc(pool->data_size + pool->head_size);
+            node->msg.buffer.head = (uint8_t*)malloc(
+                    node->msg.buffer.data_size
+                    + node->msg.buffer.head_size);
         }
-        assert(node->msg.buffer.head_ptr != NULL);
-        node->msg.buffer.data_ptr = node->msg.buffer.head_ptr + pool->head_size;
-        node->msg.data.data_ptr = node->msg.buffer.data_ptr;
+        assert(node->msg.buffer.head != NULL);
+        node->msg.buffer.data = node->msg.buffer.head + node->msg.buffer.head_size;
+        node->msg.type.data = node->msg.buffer.data;
         node->msg.recycle = sr_buffer_pool_recycle;
+        node->msg.realloc = sr_msg_pool_realloc;
         node->pool = pool;
         __sr_queue_push_back(pool->queue, node);
     }
     return pool;
 }
 
-void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool){
-    if (pp_buffer_pool && *pp_buffer_pool){
-        sr_buffer_pool_t *pool = *pp_buffer_pool;
+void sr_msg_buffer_pool_release(sr_msg_buffer_pool_t **pp_msg_pool){
+    if (pp_msg_pool && *pp_msg_pool){
+        sr_msg_buffer_pool_t *pool = *pp_msg_pool;
         __set_true(pool->destroyed);
-        if (sr_queue_length(pool->queue) == pool->buffer_count){
+        if (sr_queue_length(pool->queue) == pool->msg_count){
             sr_queue_release(&pool->queue);
             if (pool->name){
-                LOGD("sr_buffer_pool_release() %s [%lu]\n", pool->name, pool->buffer_count);
+                LOGD("sr_buffer_pool_release() %s [%lu]\n", pool->name, pool->msg_count);
                 free(pool->name);
             }
             free(pool);
@@ -935,60 +965,38 @@ void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool){
     }
 }
 
-void sr_buffer_pool_set_name(sr_buffer_pool_t *pool, const char *name)
-{
-    assert(pool != NULL);
-    pool->name = strdup(name);
-}
-
-sr_message_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool)
+sr_msg_t* sr_msg_buffer_pool_alloc(sr_msg_buffer_pool_t *pool)
 {
     assert(pool != NULL);
     if (sr_queue_length(pool->queue) > 0){
-        sr_buffer_node_t *node;
+        msg_buffer_node_t *node;
         __sr_queue_block_pop_front(pool->queue, node);
         return &node->msg;
     }
-    if (pool->buffer_count < pool->max_buffer_count){
-        __sr_atom_add(pool->buffer_count, 1);
-        sr_buffer_node_t *node = calloc(1, sizeof(sr_buffer_node_t));
+    if (pool->msg_count < pool->max_count){
+        __sr_atom_add(pool->msg_count, 1);
+        msg_buffer_node_t *node = calloc(1, sizeof(msg_buffer_node_t));
         assert(node != NULL);
-        if (pool->align > 0){
-            node->msg.buffer.head_ptr = (uint8_t*)memalign(pool->align, pool->data_size + pool->head_size);
+        node->msg = pool->msg;
+        if (node->msg.buffer.align > 0){
+            node->msg.buffer.head = (uint8_t*)memalign(
+                    node->msg.buffer.align,
+                    node->msg.buffer.data_size
+                    + node->msg.buffer.head_size);
         }else {
-            node->msg.buffer.head_ptr = (uint8_t*)malloc(pool->data_size + pool->head_size);
+            node->msg.buffer.head = (uint8_t*)malloc(
+                    node->msg.buffer.data_size
+                    + node->msg.buffer.head_size);
         }
-        assert(node->msg.buffer.head_ptr != NULL);
-        node->msg.frame = (sr_message_frame_t){0};
-        node->msg.data = (sr_message_data_t){0};
-        node->msg.buffer.data_ptr = node->msg.buffer.head_ptr + pool->head_size;
-        node->msg.data.data_ptr = node->msg.buffer.data_ptr;
+        assert(node->msg.buffer.head != NULL);
+        node->msg.buffer.data = node->msg.buffer.head + node->msg.buffer.head_size;
+        node->msg.type.data = node->msg.buffer.data;
         node->msg.recycle = sr_buffer_pool_recycle;
+        node->msg.realloc = sr_msg_pool_realloc;
         node->pool = pool;
         return &node->msg;
     }
-    sr_buffer_node_t *node;
+    msg_buffer_node_t *node;
     __sr_queue_block_pop_front(pool->queue, node);
-    return &node->msg;
-}
-
-sr_message_t* sr_buffer_pool_realloc(sr_message_t *msg, size_t size)
-{
-    assert(msg != NULL);
-    if (msg->buffer.head_ptr){
-        free(msg->buffer.head_ptr);
-    }
-    sr_buffer_node_t *node = (sr_buffer_node_t*)((char *)msg - sizeof(sr_node_t));
-    assert(node != NULL);
-    node->msg.buffer.data_size = size;
-    if (node->pool->align > 0){
-        node->msg.buffer.head_ptr = (uint8_t*)memalign(node->pool->align,
-                msg->buffer.data_size + msg->buffer.head_size);
-    }else {
-        node->msg.buffer.head_ptr = (uint8_t*)malloc(msg->buffer.data_size + msg->buffer.head_size);
-    }
-    assert(node->msg.buffer.head_ptr != NULL);
-    node->msg.buffer.data_ptr = node->msg.buffer.head_ptr + msg->buffer.head_size;
-    node->msg.data.data_ptr = node->msg.buffer.data_ptr;
     return &node->msg;
 }

@@ -17,7 +17,7 @@ namespace freee{
     public:
 
         MessageContext(std::string name,
-                size_t msgLength = 10240,
+                size_t msgLength = SR_MSG_MAX_BUFFER_SIZE,
                 size_t msgCount = 10,
                 size_t maxMsgCount = 64)
                 : MessagePool(name, msgLength, msgCount, maxMsgCount)

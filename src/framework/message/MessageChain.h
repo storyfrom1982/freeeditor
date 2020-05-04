@@ -62,14 +62,14 @@ namespace freee {
         }
 
         virtual void ProcessData(MessageChain *chain, Message msg) {
-            msg.GetMessagePtr()->key = MsgKey_ProcessData;
-            msg.GetMessagePtr()->obj_ptr = chain;
+            msg.msgType()->key = MsgKey_ProcessData;
+            msg.msgType()->obj = chain;
             ProcessMessage(msg);
         }
 
         virtual void ProcessEvent(MessageChain *chain, Message msg) {
-            msg.GetMessagePtr()->key = MsgKey_ProcessEvent;
-            msg.GetMessagePtr()->obj_ptr = chain;
+            msg.msgType()->key = MsgKey_ProcessEvent;
+            msg.msgType()->obj = chain;
             ProcessMessage(msg);
         }
 

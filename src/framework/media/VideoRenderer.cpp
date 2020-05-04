@@ -49,7 +49,7 @@ void VideoRenderer::FinalClear() {
 }
 
 void VideoRenderer::onMsgOpen(Message pkt) {
-    m_config = static_cast<MessageChain *>(pkt.GetObjectPtr())->GetConfig(this);
+    m_config = static_cast<MessageChain *>(pkt.obj())->GetConfig(this);
     if (m_status == Status_Closed){
         if (OpenModule() != 0){
             return;
@@ -121,7 +121,7 @@ int VideoRenderer::ProcessMediaByModule(Message pkt) {
     AutoLock lock(mLock);
     if (!isSurfaceDestroyed){
 //        int64_t startTime = sr_time_begin();
-        opengles_render(opengles, pkt.GetFramePtr());
+        opengles_render(opengles, pkt.msgFrame());
         gl_renderer_swap_buffers(renderer);
 //        LOGD("FFmpegVideoDecoder::ProcessMediaByModule time %lld\n", sr_time_passed(startTime));
     }
@@ -134,7 +134,7 @@ void VideoRenderer::SetVideoWindow(void *ptr) {
 }
 
 void VideoRenderer::MessageSetVideoWindow(Message pkt) {
-    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.GetObjectPtr()));
+    mVideoWindow = new VideoWindow(static_cast<MessageContext *>(pkt.obj()));
     if (m_status == Status_Opened){
         mVideoWindow->SetCallback(this);
     }
@@ -148,8 +148,8 @@ void VideoRenderer::onSurfaceCreated(void *ptr) {
 void VideoRenderer::onSurfaceChanged(int width, int height) {
 //    assert(width != 0 && height != 0);
     Message pkt = NewMessage(RecvMsg_SurfaceChanged);
-    pkt.GetFramePtr()->width = width;
-    pkt.GetFramePtr()->height = height;
+    pkt.msgFrame()->width = width;
+    pkt.msgFrame()->height = height;
     ProcessMessage(pkt);
 }
 
@@ -163,7 +163,7 @@ void VideoRenderer::MessageWindowCreated(Message pkt) {
     isSurfaceCreated = true;
     isSurfaceDestroyed = false;
     if (renderer){
-        gl_renderer_set_window(renderer, pkt.GetObjectPtr());
+        gl_renderer_set_window(renderer, pkt.obj());
     }
 }
 
@@ -178,7 +178,7 @@ void VideoRenderer::MessageWindowDestroyed(Message pkt) {
 
 void VideoRenderer::MessageWindowChanged(Message pkt) {
     if (mVideoWindow){
-        UpdateViewport(pkt.GetFramePtr()->width, pkt.GetFramePtr()->height);
+        UpdateViewport(pkt.msgFrame()->width, pkt.msgFrame()->height);
     }
 }
 

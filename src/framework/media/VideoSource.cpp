@@ -51,18 +51,18 @@ void VideoSource::Stop(MessageChain *chain) {
 
 void VideoSource::ProcessData(MessageChain *chain, Message msg) {
 
-    if (msg.GetDataPtr() != msg.GetBufferPtr()){
-        msg = NewMessage(MsgKey_ProcessData, msg.GetDataPtr(), msg.GetDataSize());
+    if (msg.data() != msg.bufferData()){
+        msg = NewMessage(MsgKey_ProcessData, msg.data(), msg.size());
     }
 
     if (m_startTime == 0){
         m_startTime = sr_time_begin();
-        msg.GetFramePtr()->timestamp = 0;
+        msg.msgFrame()->timestamp = 0;
     }else {
-        msg.GetFramePtr()->timestamp = sr_time_passed(m_startTime);
+        msg.msgFrame()->timestamp = sr_time_passed(m_startTime);
     }
 
-    libyuv_set_format(msg.GetFramePtr(), msg.GetDataPtr(),
+    libyuv_set_format(msg.msgFrame(), msg.data(),
                       m_srcWidth, m_srcHeight, m_srcImageFormat);
 
     MessageChain::onMsgProcessData(msg);
@@ -103,7 +103,7 @@ void VideoSource::onRecvMessage(Message msg) {
 
 void VideoSource::UpdateMediaConfig(Message msg) {
 //    LOGD("VideoSource::UpdateMediaConfig >> %s\n", pkt.msg.json);
-    m_config = json::parse(msg.GetString());
+    m_config = json::parse(msg.getString());
     m_srcWidth = m_config[CFG_SRC_WIDTH];
     m_srcHeight = m_config[CFG_SRC_HEIGHT];
     m_srcRotation = m_config[CFG_SRC_ROTATION];
@@ -128,15 +128,15 @@ void VideoSource::FinalClear() {
 
 void VideoSource::onRecvEvent(Message msg)
 {
-    switch (msg.event()){
+    switch (msg.i32()){
         case Status_Opened:
             m_status = Status_Opened;
-            msg.GetMessagePtr()->key = MsgKey_Open;
+            msg.msgType()->key = MsgKey_Open;
             UpdateMediaConfig(msg);
             break;
         case Status_Closed:
             m_status = Status_Closed;
-            msg.GetMessagePtr()->key = MsgKey_Close;
+            msg.msgType()->key = MsgKey_Close;
             MessageChain::onMsgClose(msg);
             FinalClear();
             break;
@@ -148,7 +148,7 @@ void VideoSource::onRecvEvent(Message msg)
             break;
         case Status_Error:
             m_status = Status_Stopped;
-            LOGE("VideoSource status error: %s\n", msg.GetString().c_str());
+            LOGE("VideoSource status error: %s\n", msg.getString().c_str());
             break;
         default:
             break;

@@ -312,20 +312,21 @@ extern unsigned int sr_pipe_block_write(sr_pipe_t *pipe, char *data, unsigned in
 ////缓冲区
 ///////////////////////////////////////////////////////////////
 
+#define SR_MSG_MAX_BUFFER_SIZE     4096
 
-typedef struct sr_message_data_t {
+typedef struct sr_msg_type_t {
     int key;
     float f32;
     double f64;
     int32_t i32;
 	int64_t i64;
-    void *obj_ptr;
-    size_t data_size;
-    unsigned char *data_ptr;
-}sr_message_data_t;
+    void *obj;
+    size_t size;
+    unsigned char *data;
+}sr_msg_type_t;
 
 
-typedef struct sr_message_frame_t {
+typedef struct sr_msg_frame_t {
 
     int type;
     int flag;
@@ -371,53 +372,54 @@ typedef struct sr_message_frame_t {
 
     int64_t timestamp;
 
-}sr_message_frame_t;
+}sr_msg_frame_t;
 
 
-typedef struct sr_message_buffer_t {
+typedef struct sr_msg_buffer_t {
     void *context;
+    size_t align;
     size_t head_size;
     size_t data_size;
-    unsigned char *head_ptr;
-    unsigned char *data_ptr;
-}sr_message_buffer_t;
+    unsigned char *head;
+    unsigned char *data;
+}sr_msg_buffer_t;
 
 
-typedef struct sr_message_t {
-    sr_message_data_t data;
-    sr_message_frame_t frame;
-    sr_message_buffer_t buffer;
+typedef struct sr_msg_t {
+    sr_msg_type_t type;
+    sr_msg_frame_t frame;
+    sr_msg_buffer_t buffer;
     int reference_count;
-    void (*recycle)(struct sr_message_t *msg);
-}sr_message_t;
+    void (*recycle)(struct sr_msg_t *msg);
+    void (*realloc)(struct sr_msg_t *msg, size_t size);
+}sr_msg_t;
 
-static inline void sr_message_reference_count_add(sr_message_t *msg){
-    if (msg){
-        __sr_atom_add(msg->reference_count, 1);
-    }
+static inline void sr_msg_reference_add(sr_msg_t *msg){
+    assert(msg != NULL);
+    __sr_atom_add(msg->reference_count, 1);
 }
 
-static inline void sr_message_reference_count_sub(sr_message_t *msg){
-    if (msg){
-        if (__sr_atom_sub(msg->reference_count, 1) == 0){
+static inline void sr_msg_reference_sub(sr_msg_t *msg){
+    assert(msg != NULL);
+    if (__sr_atom_sub(msg->reference_count, 1) == 0){
+        if (msg->recycle){
             msg->recycle(msg);
         }
     }
 }
 
-typedef struct sr_buffer_pool sr_buffer_pool_t;
+typedef struct sr_msg_buffer_pool sr_msg_buffer_pool_t;
 
-sr_buffer_pool_t* sr_buffer_pool_create(
-		size_t buffer_size,
-		size_t buffer_count,
-		size_t max_buffer_count,
-		size_t head_size,
-		size_t align);
-void sr_buffer_pool_release(sr_buffer_pool_t **pp_buffer_pool);
-void sr_buffer_pool_set_name(sr_buffer_pool_t *pool, const char *name);
-sr_message_t* sr_buffer_pool_alloc(sr_buffer_pool_t *pool);
-sr_message_t* sr_buffer_pool_realloc(sr_message_t *msg, size_t size);
-//void sr_buffer_pool_recycle(sr_buffer_data_t *buffer);
+sr_msg_buffer_pool_t* sr_msg_buffer_pool_create(
+        const char *name,
+        size_t msg_count,
+        size_t max_count,
+        size_t msg_buffer_size,
+        size_t msg_buffer_head_size,
+        size_t msg_buffer_data_align);
+void sr_msg_buffer_pool_release(sr_msg_buffer_pool_t **pp_msg_pool);
+sr_msg_t* sr_msg_buffer_pool_alloc(sr_msg_buffer_pool_t *pool);
+
 
 ///////////////////////////////////////////////////////////////
 ////signal

@@ -103,11 +103,11 @@ int FFmpegVideoDecoder::DecodeVideo(Message msg)
 {
     AVPacket             avpkt;
     ::av_init_packet( &avpkt );
-    avpkt.stream_index = msg.GetFramePtr()->stream_id;
-    avpkt.data = msg.GetDataPtr();
-    avpkt.size = msg.GetDataSize();
-    avpkt.dts =  msg.GetFramePtr()->timestamp;
-    avpkt.pts  = msg.GetFramePtr()->timestamp;
+    avpkt.stream_index = msg.msgFrame()->stream_id;
+    avpkt.data = msg.data();
+    avpkt.size = msg.size();
+    avpkt.dts = msg.msgFrame()->timestamp;
+    avpkt.pts  = msg.msgFrame()->timestamp;
     avpkt.flags = 0;
     avpkt.buf = nullptr;
 
@@ -186,8 +186,8 @@ void FFmpegVideoDecoder::GetVideoBuffer(AVFrame *frame)
     Message msg = m_pBufferPool->NewMessage(MsgKey_ProcessData);
     int pos = 0;
     for (int i = 0; i < m_planeCount; i++) {
-        msg.GetFramePtr()->channel[i].data = msg.GetDataPtr() + pos;
-        msg.GetFramePtr()->channel[i].size = m_planeSize[i];
+        msg.msgFrame()->channel[i].data = msg.data() + pos;
+        msg.msgFrame()->channel[i].size = m_planeSize[i];
         pos += m_planeSize[i];
     }
     struct op {
@@ -197,17 +197,17 @@ void FFmpegVideoDecoder::GetVideoBuffer(AVFrame *frame)
     };
 
     for (int i = 0; i < this->m_planeCount; i++) {
-        frame->buf[i] = av_buffer_create(msg.GetFramePtr()->channel[i].data, msg.GetFramePtr()->channel[i].size,
+        frame->buf[i] = av_buffer_create(msg.msgFrame()->channel[i].data, msg.msgFrame()->channel[i].size,
                                          &op::cb,
                                          this, 0);
-        frame->data[i] = msg.GetFramePtr()->channel[i].data;
-        msg.GetFramePtr()->channel[i].stride = frame->linesize[i];
+        frame->data[i] = msg.msgFrame()->channel[i].data;
+        msg.msgFrame()->channel[i].stride = frame->linesize[i];
     }
 
 //    msg.frame.width = frame->linesize[0];
-    msg.GetFramePtr()->width = frame->width;
-    msg.GetFramePtr()->height = frame->height;
-    frame->opaque = msg.GetDataPtr();
+    msg.msgFrame()->width = frame->width;
+    msg.msgFrame()->height = frame->height;
+    frame->opaque = msg.data();
 
     frameMap[frame->opaque] = msg;
 //    LOGD("FFmpegVideoDecoder::get_buffer2 time %lld\n", sr_time_passed(startTime));

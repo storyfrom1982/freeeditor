@@ -68,7 +68,7 @@ void MediaRecorder::onRecvMessage(Message msg) {
 }
 
 void MediaRecorder::onMsgStartRecord(Message pkt) {
-    LOGD("MediaRecorder::StartRecord url=%s\n", pkt.GetString().c_str());
+    LOGD("MediaRecorder::StartRecord url=%s\n", pkt.getString().c_str());
     if (!is_recording){
         if (m_status != Status_Started){
             onMsgStart(pkt);
@@ -102,7 +102,7 @@ void MediaRecorder::onMsgStartPreview(Message pkt) {
         }
         if (m_status == Status_Started){
             m_videoFilter->AddOutput(m_videoRenderer);
-            m_videoRenderer->SetVideoWindow(pkt.GetObjectPtr());
+            m_videoRenderer->SetVideoWindow(pkt.obj());
             is_previewing = true;
         }
     }
@@ -131,7 +131,7 @@ json &MediaRecorder::GetConfig(MessageChain *chain) {
 void MediaRecorder::onMsgOpen(Message pkt) {
     if (m_status == Status_Closed){
 
-        m_config = json::parse(pkt.GetString());
+        m_config = json::parse(pkt.getString());
 
         LOGD("MediaRecorder config >> %s\n", m_config.dump(4).c_str());
 
@@ -224,9 +224,9 @@ void MediaRecorder::onMsgStop(Message pkt) {
 }
 
 void MediaRecorder::onMsgProcessEvent(Message pkt) {
-    auto chain = pkt.GetObjectPtr();
+    auto chain = pkt.obj();
     if (chain == m_mediaStream){
-        if (pkt.event() == MsgKey_Open){
+        if (pkt.i32() == MsgKey_Open){
             LOGD("MediaStream Opened\n");
             if (is_recording){
                 m_videoEncoder->AddOutput(m_mediaStream);

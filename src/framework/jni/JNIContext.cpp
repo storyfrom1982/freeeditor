@@ -90,7 +90,7 @@ public:
         if (json != nullptr){
             unsigned char *js = (unsigned char *)env->GetStringUTFChars(json, 0);
             Message msg = NewMessage(key, js, env->GetStringUTFLength(json) + 1);
-            msg.GetMessagePtr()->i32 = event;
+            msg.msgType()->i32 = event;
             MessageContext::SendMessage(msg);
             env->ReleaseStringUTFChars(json, (const char *)js);
         }else {
@@ -100,19 +100,19 @@ public:
 
     void SendMessage(int key, jbyte *buffer, jint length){
         Message msg = NewMessage(key);
-        msg.GetMessagePtr()->data_ptr = (unsigned char*)buffer;
-        msg.GetMessagePtr()->data_size = (size_t)(length);
+        msg.msgType()->data = (unsigned char*)buffer;
+        msg.msgType()->size = (size_t)(length);
         MessageContext::SendMessage(msg);
     }
 
     jobject RequestMessage(JNIEnv *env, int key) {
         jstring jstr = nullptr;
         Message msg = MessageContext::RequestMessage(key);
-        std::string str = msg.GetString();
+        std::string str = msg.getString();
         if (!str.empty()){
             jstr = env->NewStringUTF(str.c_str());
         }
-        jobject jmsg = env->NewObject(m_msgCls, m_newJniMessage, msg.key(), msg.event(), (jlong)msg.GetObjectPtr(), jstr);
+        jobject jmsg = env->NewObject(m_msgCls, m_newJniMessage, msg.key(), msg.i32(), (jlong) msg.obj(), jstr);
         if (jstr != nullptr){
             env->DeleteLocalRef(jstr);
         }
@@ -122,11 +122,11 @@ public:
     void onRecvMessage(Message msg) override {
         JniEnv env;
         jstring jstr = nullptr;
-        std::string str = msg.GetString();
+        std::string str = msg.getString();
         if (!str.empty()){
             jstr = env->NewStringUTF(str.c_str());
         }
-        jobject jmsg = env->NewObject(m_msgCls, m_newJniMessage, msg.key(), msg.event(), (jlong)msg.GetObjectPtr(), jstr);
+        jobject jmsg = env->NewObject(m_msgCls, m_newJniMessage, msg.key(), msg.i32(), (jlong) msg.obj(), jstr);
         env->CallVoidMethod(m_obj, m_onReceiveMessage, jmsg);
         if (jstr != nullptr){
             env->DeleteLocalRef(jstr);

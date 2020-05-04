@@ -18,7 +18,7 @@ FFmpegMediaStream::~FFmpegMediaStream() {
 }
 
 void FFmpegMediaStream::onMsgConnectStream(Message pkt) {
-    std::string url = pkt.GetString();
+    std::string url = pkt.getString();
     if (avformat_alloc_output_context2(&m_pContext, NULL, NULL, url.c_str()) < 0) {
         LOGD("[FileMediaStream] ConnectStream failed to %s\n", url.c_str());
         return;
@@ -51,7 +51,7 @@ void FFmpegMediaStream::onMsgDisconnectStream() {
 }
 
 void FFmpegMediaStream::onMsgOpen(Message pkt) {
-    MessageChain *chain = static_cast<MessageChain *>(pkt.GetObjectPtr());
+    MessageChain *chain = static_cast<MessageChain *>(pkt.obj());
     if (m_chainToStream[chain] == nullptr){
         LOGD("FileMediaStream::onMsgOpen type[%s] extraConfig %lu\n", chain->GetName().c_str(), chain->GetExtraConfig(this).size());
         if (chain->GetType(this) == MediaType_Audio){
@@ -82,7 +82,7 @@ void FFmpegMediaStream::onMsgClose(Message pkt) {
 }
 
 void FFmpegMediaStream::onMsgProcessData(Message pkt) {
-    MessageChain *chain = static_cast<MessageChain *>(pkt.GetObjectPtr());
+    MessageChain *chain = static_cast<MessageChain *>(pkt.obj());
 
     AVStream* pStream = nullptr;
     {
@@ -96,17 +96,17 @@ void FFmpegMediaStream::onMsgProcessData(Message pkt) {
     AVPacket             avpkt;
     ::av_init_packet(&avpkt);
     avpkt.stream_index = pStream->index;
-    avpkt.data = pkt.GetFramePtr()->data;
-    avpkt.size = pkt.GetFramePtr()->size;
-    avpkt.dts = pkt.GetFramePtr()->timestamp*pStream->time_base.den / (1000 * pStream->time_base.num);
+    avpkt.data = pkt.msgFrame()->data;
+    avpkt.size = pkt.msgFrame()->size;
+    avpkt.dts = pkt.msgFrame()->timestamp*pStream->time_base.den / (1000 * pStream->time_base.num);
     avpkt.pts = avpkt.dts;
 
-    avpkt.flags = (pkt.GetFramePtr()->flag & PktFlag_KeyFrame) ? AV_PKT_FLAG_KEY : 0;
+    avpkt.flags = (pkt.msgFrame()->flag & PktFlag_KeyFrame) ? AV_PKT_FLAG_KEY : 0;
 
-    if (pkt.GetFramePtr()->type == MediaType_Audio){
+    if (pkt.msgFrame()->type == MediaType_Audio){
 //        LOGD("FileMediaStream: audio timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
 //             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
-    }else if (pkt.GetFramePtr()->type == MediaType_Video){
+    }else if (pkt.msgFrame()->type == MediaType_Video){
 //        LOGD("FileMediaStream: video flag %d\n", avpkt.flags);
 //        LOGD("FileMediaStream: video timebase[%d/%d] pts=%lld  id=%lld\n", pStream->time_base.den,
 //             pStream->time_base.num, pkt.frame.timestamp, avpkt.pts);
@@ -121,10 +121,10 @@ void FFmpegMediaStream::onMsgProcessData(Message pkt) {
         if (result < 0){
             char buffer[1024];
             av_strerror(result, buffer, sizeof(buffer) - 1);
-            if (pkt.GetFramePtr()->type == MediaType_Audio){
+            if (pkt.msgFrame()->type == MediaType_Audio){
                 LOGD("[FileMediaStream] av_write_frame audio %d, ret=%d error=%s\n",
                      pStream->index, result,buffer);
-            }else if (pkt.GetFramePtr()->type == MediaType_Video){
+            }else if (pkt.msgFrame()->type == MediaType_Video){
                 LOGD("[FileMediaStream] av_write_frame video %d, ret=%d error=%s\n",
                      pStream->index, result,buffer);
             }

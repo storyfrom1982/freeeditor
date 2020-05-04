@@ -67,10 +67,10 @@ Message MediaContext::onRequestMessage(int key) {
 
 void MediaContext::onRecvMessage(Message pkt) {
     if (pkt.key() == OnRecvMsg_DisconnectRecorder){
-        MediaRecorder *pRecorder = static_cast<MediaRecorder *>(pkt.GetObjectPtr());
+        MediaRecorder *pRecorder = static_cast<MediaRecorder *>(pkt.obj());
         delete pRecorder;
     }else if (pkt.key() == OnRecvMsg_DisconnectPlayer){
-        MediaPlayer *pPlayer = static_cast<MediaPlayer *>(pkt.GetObjectPtr());
+        MediaPlayer *pPlayer = static_cast<MediaPlayer *>(pkt.obj());
         delete pPlayer;
     }
 }
@@ -85,24 +85,24 @@ Message MediaContext::RequestMessage(int key) {
 
 MessageContext *MediaContext::ConnectCamera() {
     Message pkt = MessageContext::RequestMessage(ReqMsg_ConnectCamera);
-    assert(pkt.GetObjectPtr());
+    assert(pkt.obj());
     assert(pkt.key() == ReqMsg_ConnectCamera);
-    return static_cast<MessageContext *>(pkt.GetObjectPtr());
+    return static_cast<MessageContext *>(pkt.obj());
 }
 
 MessageContext *MediaContext::ConnectMicrophone() {
     Message pkt = MessageContext::RequestMessage(ReqMsg_ConnectMicrophone);
-    assert(pkt.GetObjectPtr());
+    assert(pkt.obj());
     assert(pkt.key() == ReqMsg_ConnectMicrophone);
-    return static_cast<MessageContext *>(pkt.GetObjectPtr());
+    return static_cast<MessageContext *>(pkt.obj());
 }
 
 MessageContext *MediaContext::ConnectSpeaker()
 {
     Message pkt = MessageContext::RequestMessage(ReqMsg_ConnectSpeaker);
-    assert(pkt.GetObjectPtr());
+    assert(pkt.obj());
     assert(pkt.key() == ReqMsg_ConnectSpeaker);
-    return static_cast<MessageContext *>(pkt.GetObjectPtr());
+    return static_cast<MessageContext *>(pkt.obj());
 }
 
 void MediaContext::DisconnectCamera() {

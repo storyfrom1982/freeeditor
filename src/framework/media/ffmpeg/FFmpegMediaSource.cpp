@@ -162,8 +162,8 @@ int FFmpegMediaSource::ReadSource()
 //    LOGD("[FFmpegMediaSource] av_read_frame() stream id %d\n", pkt.stream_index);
 
     Message msg = NewMessage(MsgKey_ProcessData, pkt.data, pkt.size);
-    msg.GetFramePtr()->stream_id = pkt.stream_index;
-    msg.GetFramePtr()->timestamp = 0;
+    msg.msgFrame()->stream_id = pkt.stream_index;
+    msg.msgFrame()->timestamp = 0;
     ProcessMessage(msg);
 
     av_packet_unref(&pkt);

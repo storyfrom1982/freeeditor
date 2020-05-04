@@ -118,7 +118,7 @@ int X264VideoEncoder::EncoderEncode(Message pkt) {
     int64_t startTime = sr_time_begin();
 //    LOGD("X264VideoEncoder::OnOpenEncoder: enter\n");
 
-    sr_message_frame_t *frame = pkt.GetFramePtr();
+    sr_msg_frame_t *frame = pkt.msgFrame();
 
     x264_picture_t pic_out;
     x264_picture_t  pic;
@@ -156,9 +156,9 @@ int X264VideoEncoder::EncoderEncode(Message pkt) {
     }
 
     Message opkt = p_bufferPool->NewMessage(MsgKey_ProcessData, this);
-    opkt.GetFramePtr()->flag = PktFlag_PFrame;
+    opkt.msgFrame()->flag = PktFlag_PFrame;
 
-    uint8_t *dst = opkt.GetDataPtr();
+    uint8_t *dst = opkt.data();
     int offset = 0;
 
     x264_nal_t *p_spspps;
@@ -175,7 +175,7 @@ int X264VideoEncoder::EncoderEncode(Message pkt) {
 //            offset += p_spspps[0].i_payload;
 //            memcpy(dst + offset, p_spspps[1].p_payload, p_spspps[1].i_payload);
 //            offset += p_spspps[1].i_payload;
-            opkt.GetFramePtr()->flag = PktFlag_KeyFrame;
+            opkt.msgFrame()->flag = PktFlag_KeyFrame;
             break;
         case X264_TYPE_I:
 //            LOGD("x264_encoder_encode nal iframe count %d\n", i_nal);
@@ -213,10 +213,10 @@ int X264VideoEncoder::EncoderEncode(Message pkt) {
 //                        pic_out.i_dts*1000000*m_param.i_fps_den/m_param.i_fps_num;
 
     long long tmStamp = (long long)(m_frameId*1000LL/m_frameRate);
-    opkt.GetFramePtr()->timestamp = tmStamp;
-    opkt.GetFramePtr()->size = frameLen;
-    opkt.GetFramePtr()->data = opkt.GetDataPtr();
-    opkt.GetFramePtr()->type = MediaType_Video;
+    opkt.msgFrame()->timestamp = tmStamp;
+    opkt.msgFrame()->size = frameLen;
+    opkt.msgFrame()->data = opkt.data();
+    opkt.msgFrame()->type = MediaType_Video;
 
 //    long long tmStamp = pkt.frame.timestamp / 1000;
 

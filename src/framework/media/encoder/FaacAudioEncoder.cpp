@@ -108,7 +108,7 @@ int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
     int out_size, out_elem_size;
     void *in_ptr, *out_ptr;
 
-    in_ptr = pkt.GetDataPtr();
+    in_ptr = pkt.data();
     in_size = m_intputSamples*2;
     in_elem_size = 2;
 
@@ -121,8 +121,8 @@ int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
 
 
     Message opkt = p_bufferPool->NewMessage(MsgKey_ProcessData, this);
-    out_ptr = opkt.GetDataPtr();
-    out_size = opkt.GetBufferSize();
+    out_ptr = opkt.data();
+    out_size = opkt.bufferSize();
     out_elem_size = 1;
     out_buf.numBufs = 1;
     out_buf.bufs = &out_ptr;
@@ -138,11 +138,11 @@ int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
 
 //    LOGD("[FaacAudioEncoder] EncodeVideo out_size=%d  out_elem_size=%d\n", out_args.numOutBytes, out_elem_size);
 
-    opkt.GetFramePtr()->type = MediaType_Audio;
-    opkt.GetFramePtr()->size = out_args.numOutBytes;
-    opkt.GetFramePtr()->data = opkt.GetDataPtr();
-    opkt.GetFramePtr()->timestamp = pkt.GetFramePtr()->timestamp / 1000;
-    opkt.GetFramePtr()->flag = PktFlag_PFrame;
+    opkt.msgFrame()->type = MediaType_Audio;
+    opkt.msgFrame()->size = out_args.numOutBytes;
+    opkt.msgFrame()->data = opkt.data();
+    opkt.msgFrame()->timestamp = pkt.msgFrame()->timestamp / 1000;
+    opkt.msgFrame()->flag = PktFlag_PFrame;
 
     MessageChain::onMsgProcessData(opkt);
 

@@ -59,18 +59,18 @@ void AudioSource::Stop(MessageChain *chain) {
 
 void AudioSource::ProcessData(MessageChain *chain, Message msg) {
     if (p_pipe){
-        sr_pipe_write(p_pipe, (char*)msg.GetDataPtr(), msg.GetDataSize());
+        sr_pipe_write(p_pipe, (char*) msg.data(), msg.size());
         while (sr_pipe_readable(p_pipe) >= m_bufferSize){
             Message message = p_bufferPool->NewMessage(MsgKey_ProcessData, nullptr, m_bufferSize);
-            sr_pipe_read(p_pipe, (char*) message.GetDataPtr(), message.GetDataSize());
-            message.GetFramePtr()->timestamp = 1000000L / m_codecSampleRate * m_totalSamples;
+            sr_pipe_read(p_pipe, (char*) message.data(), message.size());
+            message.msgFrame()->timestamp = 1000000L / m_codecSampleRate * m_totalSamples;
             m_totalSamples += m_codecSamplesPerFrame;
             MessageChain::onMsgProcessData(message);
         }
     }else {
         Message message = p_bufferPool->NewMessage(MsgKey_ProcessData,
-                msg.GetDataPtr(), msg.GetDataSize());
-        message.GetFramePtr()->timestamp = 1000000L / m_codecSampleRate * m_totalSamples;
+                                                   msg.data(), msg.size());
+        message.msgFrame()->timestamp = 1000000L / m_codecSampleRate * m_totalSamples;
         m_totalSamples += m_codecSamplesPerFrame;
         MessageChain::onMsgProcessData(message);
     }
@@ -87,7 +87,7 @@ void AudioSource::FinalClear() {
 }
 
 void AudioSource::UpdateConfig(Message msg) {
-    m_config = json::parse(msg.GetString());
+    m_config = json::parse(msg.getString());
     m_codecSampleRate = m_config[CFG_CODEC_SAMPLE_RATE];
     m_codecChannelCount = m_config[CFG_CODEC_CHANNEL_COUNT];
     m_codecBytePerSample = m_config[CFG_CODEC_BYTES_PER_SAMPLE];
@@ -104,7 +104,7 @@ void AudioSource::UpdateConfig(Message msg) {
 
 void AudioSource::onRecvEvent(Message msg)
 {
-    switch (msg.event()){
+    switch (msg.i32()){
         case Status_Opened:
             m_status = Status_Opened;
             UpdateConfig(msg);

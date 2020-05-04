@@ -80,7 +80,7 @@ void VideoWindow::onRecvMessage(Message msg) {
 #ifdef __ANDROID__
         JniEnv env;
         AutoLock lock(mLock);
-        jobject obj = (jobject)(msg.GetObjectPtr());
+        jobject obj = (jobject)(msg.obj());
         mWindowHolder = env->NewGlobalRef(obj);
         mNativeWindow = ANativeWindow_fromSurface(env.m_pEnv, (jobject)mWindowHolder);
         if (mCallback){
@@ -90,8 +90,8 @@ void VideoWindow::onRecvMessage(Message msg) {
     }else if (msg.key() == RecvMsg_SurfaceChanged){
         AutoLock lock(mLock);
         if (mCallback){
-            LOGD("RecvMsg_SurfaceChanged[%s]\n", msg.GetString().c_str());
-            json js = json::parse(msg.GetString());
+            LOGD("RecvMsg_SurfaceChanged[%s]\n", msg.getString().c_str());
+            json js = json::parse(msg.getString());
             mCallback->onSurfaceChanged(js["width"], js["height"]);
         }
     }else if (msg.key() == RecvMsg_SurfaceDestroyed){

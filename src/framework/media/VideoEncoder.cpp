@@ -40,7 +40,7 @@ void VideoEncoder::FinalClear() {
 
 void VideoEncoder::onMsgOpen(Message pkt) {
     if (m_status == Status_Closed){
-        MessageChain *chain = static_cast<MessageChain *>(pkt.GetObjectPtr());
+        MessageChain *chain = static_cast<MessageChain *>(pkt.obj());
         m_config = chain->GetConfig(this);
         OpenEncoder();
         m_frameId = 0;
@@ -49,7 +49,7 @@ void VideoEncoder::onMsgOpen(Message pkt) {
         uint32_t h = m_config[CFG_CODEC_HEIGHT];
         m_frameRate = m_config[CFG_CODEC_FRAME_RATE];
         p_bufferPool = new MessagePool("VideoEncoderFramePool", w*h, 1, 64, 16, 0);
-        pkt.GetFramePtr()->type = MediaType_Video;
+        pkt.msgFrame()->type = MediaType_Video;
         MessageChain::onMsgOpen(pkt);
         m_status = Status_Opened;
     }
@@ -66,7 +66,7 @@ void VideoEncoder::onMsgProcessData(Message pkt) {
 
     if ( m_chainStatus == Status_Opened) {
 //        LOGD("m_framerate ================  delay[%f]\n", m_frameRate);
-        long long timeStamp = pkt.GetFramePtr()->timestamp;
+        long long timeStamp = pkt.msgFrame()->timestamp;
         double frameIdScope = (double) timeStamp * (m_frameRate / 1000000.0f);
         if (m_startFrameId == -1) {
             m_startFrameId = frameIdScope;
@@ -100,7 +100,7 @@ void VideoEncoder::onMsgControl(Message pkt) {
 }
 
 void VideoEncoder::onMsgProcessEvent(Message pkt) {
-    switch (pkt.event()){
+    switch (pkt.i32()){
         case MsgKey_Open:
             m_chainStatus = Status_Opened;
             break;
