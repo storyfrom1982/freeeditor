@@ -50,6 +50,11 @@ namespace freee {
         {
             p_msg = &static_msg;
         }
+        Message(sr_msg_t *msg)
+        {
+            p_msg = msg;
+            sr_msg_reference_add(p_msg);
+        }
         ~Message()
         {
             sr_msg_reference_sub(p_msg);

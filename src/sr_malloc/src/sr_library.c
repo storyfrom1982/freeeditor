@@ -893,9 +893,9 @@ static void sr_msg_pool_realloc(sr_msg_t *msg, size_t size)
     msg_buffer_node_t *node = (msg_buffer_node_t*)((char *)msg - sizeof(sr_node_t));
     assert(node != NULL);
     node->msg.buffer.data_size = size;
-    if (node->msg.buffer.align > 0){
+    if (node->msg.buffer.align_size > 0){
         node->msg.buffer.head = (uint8_t*)memalign(
-                node->msg.buffer.align,
+                node->msg.buffer.align_size,
                 node->msg.buffer.data_size
                 + node->msg.buffer.head_size);
     }else {
@@ -914,7 +914,7 @@ sr_msg_buffer_pool_t* sr_msg_buffer_pool_create(
         size_t max_count,
         size_t msg_buffer_size,
         size_t msg_buffer_head_size,
-        size_t msg_buffer_data_align)
+        size_t msg_buffer_data_align_size)
 {
     sr_msg_buffer_pool_t *pool = (sr_msg_buffer_pool_t*) calloc(1, sizeof(sr_msg_buffer_pool_t));
     assert(pool != NULL);
@@ -922,16 +922,16 @@ sr_msg_buffer_pool_t* sr_msg_buffer_pool_create(
     pool->msg_count = msg_count;
     pool->max_count = max_count;
     pool->msg.buffer.data_size = msg_buffer_size;
-    pool->msg.buffer.align = msg_buffer_data_align;
     pool->msg.buffer.head_size = msg_buffer_head_size;
+    pool->msg.buffer.align_size = msg_buffer_data_align_size;
     pool->queue = sr_queue_create(release_buffer_node);
     for (int i = 0; i < pool->msg_count; ++i){
         msg_buffer_node_t *node = calloc(1, sizeof(msg_buffer_node_t));
         assert(node != NULL);
         node->msg = pool->msg;
-        if (node->msg.buffer.align > 0){
+        if (node->msg.buffer.align_size > 0){
             node->msg.buffer.head = (uint8_t*)memalign(
-                    node->msg.buffer.align,
+                    node->msg.buffer.align_size,
                     node->msg.buffer.data_size
                     + node->msg.buffer.head_size);
         }else {
@@ -978,9 +978,9 @@ sr_msg_t* sr_msg_buffer_pool_alloc(sr_msg_buffer_pool_t *pool)
         msg_buffer_node_t *node = calloc(1, sizeof(msg_buffer_node_t));
         assert(node != NULL);
         node->msg = pool->msg;
-        if (node->msg.buffer.align > 0){
+        if (node->msg.buffer.align_size > 0){
             node->msg.buffer.head = (uint8_t*)memalign(
-                    node->msg.buffer.align,
+                    node->msg.buffer.align_size,
                     node->msg.buffer.data_size
                     + node->msg.buffer.head_size);
         }else {

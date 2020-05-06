@@ -12,6 +12,8 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -36,9 +38,11 @@ public class VideoSource extends JNIContext
     private JSONObject mConfig;
     protected long mStartTime;
 
-    private int mBufferCount = 4;
-    private ArrayList<byte[]> mBufferList = new ArrayList<>();
+    private int mBufferCount = 3;
     private final SurfaceTexture mSurfaceTexture = new SurfaceTexture(buildTexture());
+
+    private NativeMessagePool nativeMessagePool;
+    private HashMap<byte[], NativeMessage> messageMap = new HashMap<>();
 
 
     public VideoSource(){
@@ -148,9 +152,15 @@ public class VideoSource extends JNIContext
             return;
         }
 
-        for (int i = 0; i < mBufferCount; ++i){
-            mBufferList.add(new byte[((mSrcWidth * mSrcHeight) >> 1) * 3]);
-        }
+        nativeMessagePool = new NativeMessagePool(getClass().getName(), 3, 6,
+                ((mSrcWidth * mSrcHeight) >> 1) * 3);
+
+//        for (int i = 0; i < mBufferCount; ++i){
+//            NativeMessage nmsg = nativeMessagePool.newNativeMessage(0);
+//            byte[] buffer = nmsg.getBuffer();
+//            messageMap.put(buffer, nmsg);
+////            mBufferList.add(new byte[((mSrcWidth * mSrcHeight) >> 1) * 3]);
+//        }
 
         if (imageFormat == ImageFormat.NV21){
             mConfig.put(MediaConfig.VIDEO_SRC_IMAGE_FORMAT, MediaConfig.VIDEO_IMAGE_FORMAT_NV21);
@@ -198,7 +208,13 @@ public class VideoSource extends JNIContext
                 mCamera.setErrorCallback(null);
                 mCamera.release();
                 mCamera = null;
-                mBufferList.clear();
+                Object[] msgs = messageMap.values().toArray();
+                for (int i = 0; i < msgs.length; ++i){
+                    NativeMessage msg = (NativeMessage) msgs[i];
+                    msg.release();
+                }
+                messageMap.clear();
+                nativeMessagePool.release();
                 mStatus = MediaStatus.Status_Closed;
                 sendMessage(MsgKey.Media_ProcessEvent, mStatus);
             }
@@ -215,7 +231,10 @@ public class VideoSource extends JNIContext
                 mStatus = MediaStatus.Status_Started;
                 sendMessage(MsgKey.Media_ProcessEvent, mStatus);
                 for (int i = 0; i < mBufferCount; ++i){
-                    mCamera.addCallbackBuffer(mBufferList.get(i));
+                    NativeMessage msg = nativeMessagePool.newNativeMessage(MsgKey.Media_ProcessData);
+                    byte[] buffer = msg.getBuffer();
+                    messageMap.put(buffer, msg);
+                    mCamera.addCallbackBuffer(buffer);
                 }
             }
         }
@@ -235,8 +254,16 @@ public class VideoSource extends JNIContext
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
-        sendMessage(MsgKey.Media_ProcessData, data, data.length);
-        mCamera.addCallbackBuffer(data);
+        NativeMessage bufferMessage = nativeMessagePool.newNativeMessage(MsgKey.Media_ProcessData);
+        byte[] buffer = bufferMessage.getBuffer();
+        if (buffer != null){
+            NativeMessage dataMessage = messageMap.remove(data);
+            sendNativeMessage(dataMessage);
+            messageMap.put(buffer, bufferMessage);
+            mCamera.addCallbackBuffer(buffer);
+        }else {
+            mCamera.addCallbackBuffer(data);
+        }
     }
 
     @Override
@@ -254,7 +281,6 @@ public class VideoSource extends JNIContext
     @Override
     void onFinalRelease() {
         super.release();
-        mBufferList.clear();
     }
 
     @Override

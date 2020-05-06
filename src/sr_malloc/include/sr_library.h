@@ -377,9 +377,9 @@ typedef struct sr_msg_frame_t {
 
 typedef struct sr_msg_buffer_t {
     void *context;
-    size_t align;
     size_t head_size;
     size_t data_size;
+    size_t align_size;
     unsigned char *head;
     unsigned char *data;
 }sr_msg_buffer_t;
@@ -416,7 +416,7 @@ sr_msg_buffer_pool_t* sr_msg_buffer_pool_create(
         size_t max_count,
         size_t msg_buffer_size,
         size_t msg_buffer_head_size,
-        size_t msg_buffer_data_align);
+        size_t msg_buffer_data_align_size);
 void sr_msg_buffer_pool_release(sr_msg_buffer_pool_t **pp_msg_pool);
 sr_msg_t* sr_msg_buffer_pool_alloc(sr_msg_buffer_pool_t *pool);
 

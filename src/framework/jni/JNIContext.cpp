@@ -68,6 +68,10 @@ public:
         }
     }
 
+    void SendMessage(jlong msg){
+        MessageContext::SendMessage(Message((sr_msg_t*)msg));
+    }
+
     void SendMessage(int key, jint event){
         MessageContext::SendMessage(NewMessage(key, event));
     }
@@ -276,6 +280,18 @@ Java_cn_freeeditor_sdk_JNIContext_sendMessage__IILjava_lang_String_2J(JNIEnv *en
 }
 
 extern "C"
+JNIEXPORT void JNICALL
+Java_cn_freeeditor_sdk_JNIContext_sendNativeMessage__JJ(JNIEnv *env, jobject instance,
+                                                        jlong nativeMessage, jlong contextPointer)
+{
+
+    JNIContext *pJNIContext = (JNIContext *)(contextPointer);
+    if (pJNIContext){
+        pJNIContext->SendMessage(nativeMessage);
+    }
+}
+
+extern "C"
 JNIEXPORT jobject JNICALL
 Java_cn_freeeditor_sdk_JNIContext_requestMessage__IJ(JNIEnv *env, jobject instance, jint key,
                                                  jlong contextPointer) {
@@ -348,4 +364,217 @@ Java_cn_freeeditor_sdk_Log_dumpThread__Ljava_lang_String_2Ljava_lang_String_2Lja
     env->ReleaseStringUTFChars(tag_, tag);
     env->ReleaseStringUTFChars(name_, name);
     env->ReleaseStringUTFChars(status_, status);
+}
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+typedef struct jni_msg_buffer_pool {
+    char *name;
+    sr_msg_t msg;
+    size_t msg_count;
+    size_t max_count;
+    sr_queue_t *queue;
+    bool destroyed;
+}jni_msg_buffer_pool_t;
+
+typedef struct jni_msg_buffer_node_t{
+    sr_node_t node;
+    sr_msg_t msg;
+    jni_msg_buffer_pool_t *pool;
+}jni_msg_buffer_node_t;
+
+
+static void jni_release_buffer_node(sr_node_t *node){
+    JniEnv env;
+    jni_msg_buffer_node_t *buffer_node = (jni_msg_buffer_node_t*)node;
+    env->ReleaseByteArrayElements((jbyteArray)buffer_node->msg.buffer.context,
+                                  (jbyte*)buffer_node->msg.buffer.head, 0);
+    env->DeleteGlobalRef((jbyteArray)buffer_node->msg.buffer.context);
+    free(buffer_node);
+}
+
+static void jni_buffer_pool_recycle(sr_msg_t *msg)
+{
+    assert(msg != NULL);
+    jni_msg_buffer_node_t *node = (jni_msg_buffer_node_t*)((char *)msg - sizeof(sr_node_t));
+    node->msg.type = (sr_msg_type_t){0};
+    node->msg.frame = (sr_msg_frame_t){0};
+    node->msg.type.data = node->msg.buffer.data;
+    __sr_queue_block_push_back(node->pool->queue, node);
+    if (__is_true(node->pool->destroyed)){
+        jni_msg_buffer_pool_t *pool = node->pool;
+        if (sr_queue_length(pool->queue) == pool->msg_count){
+            sr_queue_release(&pool->queue);
+            if (pool->name){
+                LOGD("sr_buffer_pool_release_delayed() %s [%lu]\n", pool->name, pool->msg_count);
+                free(pool->name);
+            }
+            free(pool);
+        }
+    }
+}
+
+static void jni_msg_pool_realloc(sr_msg_t *msg, size_t size)
+{
+    assert(msg != NULL);
+    JniEnv env;
+    if (msg->buffer.context){
+        env->ReleaseByteArrayElements((jbyteArray)msg->buffer.context,
+                                      (jbyte*)msg->buffer.head, 0);
+        env->DeleteGlobalRef((jbyteArray)msg->buffer.context);
+    }
+    jni_msg_buffer_node_t *node = (jni_msg_buffer_node_t*)((char *)msg - sizeof(sr_node_t));
+    assert(node != NULL);
+    node->msg.buffer.data_size = size;
+    jbyteArray pBuffer = env->NewByteArray(node->msg.buffer.data_size);
+    node->msg.buffer.context = env->NewGlobalRef(pBuffer);
+    env->DeleteLocalRef(pBuffer);
+    node->msg.buffer.head = (unsigned char *)env->GetByteArrayElements(
+            (jbyteArray)node->msg.buffer.context, 0);
+    assert(node->msg.buffer.head != NULL);
+    node->msg.buffer.data = node->msg.buffer.head + msg->buffer.head_size;
+    node->msg.type.data = node->msg.buffer.data;
+}
+
+jni_msg_buffer_pool_t* jni_msg_buffer_pool_create(JNIEnv *env,
+        const char *name,
+        size_t msg_count,
+        size_t max_count,
+        size_t msg_buffer_size,
+        size_t msg_buffer_head_size,
+        size_t msg_buffer_data_align_size)
+{
+    jni_msg_buffer_pool_t *pool = (jni_msg_buffer_pool_t*)
+            calloc(1, sizeof(jni_msg_buffer_pool_t));
+    assert(pool != NULL);
+    pool->name = strdup(name);
+    pool->msg_count = msg_count;
+    pool->max_count = max_count;
+    pool->msg.buffer.data_size = msg_buffer_size;
+    pool->msg.buffer.head_size = msg_buffer_head_size;
+    pool->msg.buffer.align_size = msg_buffer_data_align_size;
+    pool->queue = sr_queue_create(jni_release_buffer_node);
+    for (int i = 0; i < pool->msg_count; ++i){
+        jni_msg_buffer_node_t *node = (jni_msg_buffer_node_t *)calloc(1, sizeof(jni_msg_buffer_node_t));
+        assert(node != NULL);
+        node->msg = pool->msg;
+        jbyteArray pBuffer = env->NewByteArray(node->msg.buffer.data_size);
+        node->msg.buffer.context = env->NewGlobalRef(pBuffer);
+        env->DeleteLocalRef(pBuffer);
+        node->msg.buffer.head = (unsigned char *)env->GetByteArrayElements(
+                (jbyteArray)node->msg.buffer.context, 0);
+        assert(node->msg.buffer.head != NULL);
+        node->msg.buffer.data = node->msg.buffer.head + node->msg.buffer.head_size;
+        node->msg.type.data = node->msg.buffer.data;
+        node->msg.recycle = jni_buffer_pool_recycle;
+        node->msg.realloc = jni_msg_pool_realloc;
+        node->pool = pool;
+        __sr_queue_push_back(pool->queue, node);
+    }
+    return pool;
+}
+
+void jni_msg_buffer_pool_release(jni_msg_buffer_pool_t **pp_msg_pool){
+    if (pp_msg_pool && *pp_msg_pool){
+        jni_msg_buffer_pool_t *pool = *pp_msg_pool;
+        __set_true(pool->destroyed);
+        if (sr_queue_length(pool->queue) == pool->msg_count){
+            sr_queue_release(&pool->queue);
+            if (pool->name){
+                LOGD("sr_buffer_pool_release() %s [%lu]\n", pool->name, pool->msg_count);
+                free(pool->name);
+            }
+            free(pool);
+        }
+    }
+}
+
+sr_msg_t* jni_msg_buffer_pool_alloc(JNIEnv *env, jni_msg_buffer_pool_t *pool)
+{
+    assert(pool != NULL);
+    if (sr_queue_length(pool->queue) > 0){
+        jni_msg_buffer_node_t *node;
+        __sr_queue_block_pop_front(pool->queue, node);
+        return &node->msg;
+    }
+    if (pool->msg_count < pool->max_count){
+        __sr_atom_add(pool->msg_count, 1);
+        jni_msg_buffer_node_t *node = (jni_msg_buffer_node_t *)calloc(1, sizeof(jni_msg_buffer_node_t));
+        assert(node != NULL);
+        node->msg = pool->msg;
+        jbyteArray pBuffer = env->NewByteArray(node->msg.buffer.data_size);
+        node->msg.buffer.context = env->NewGlobalRef(pBuffer);
+        env->DeleteLocalRef(pBuffer);
+        node->msg.buffer.head = (unsigned char *)env->GetByteArrayElements(
+                (jbyteArray)node->msg.buffer.context, 0);
+        assert(node->msg.buffer.head != NULL);
+        node->msg.buffer.data = node->msg.buffer.head + node->msg.buffer.head_size;
+        node->msg.type.data = node->msg.buffer.data;
+        node->msg.recycle = jni_buffer_pool_recycle;
+        node->msg.realloc = jni_msg_pool_realloc;
+        node->pool = pool;
+        return &node->msg;
+    }
+    jni_msg_buffer_node_t *node;
+    __sr_queue_block_pop_front(pool->queue, node);
+    return &node->msg;
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_cn_freeeditor_sdk_NativeMessagePool_createNativeHandler(JNIEnv *env, jobject instance,
+                                                             jstring name_, jint messageCount,
+                                                             jint maxMessageCount, jint messageSize)
+{
+    const char *name = env->GetStringUTFChars(name_, 0);
+    jni_msg_buffer_pool_t *pool = jni_msg_buffer_pool_create(env,
+            name, messageCount, maxMessageCount, messageSize, 0, 0);
+    env->ReleaseStringUTFChars(name_, name);
+    return (jlong)pool;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_cn_freeeditor_sdk_NativeMessagePool_releaseNativeHandler(JNIEnv *env, jobject instance,
+                                                              jlong nativeHandler)
+{
+    jni_msg_buffer_pool_t *pool = (jni_msg_buffer_pool_t *)nativeHandler;
+    jni_msg_buffer_pool_release(&pool);
+}
+
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_cn_freeeditor_sdk_NativeMessagePool_newNativeMessage__IJ(JNIEnv *env, jobject instance,
+                                                              jint key, jlong nativeHandler)
+{
+    jni_msg_buffer_pool_t *pool = (jni_msg_buffer_pool_t *)nativeHandler;
+    sr_msg_t *msg = jni_msg_buffer_pool_alloc(env, pool);
+    if (msg){
+        msg->type.key = key;
+    }
+    return (jlong)msg;
+}
+
+extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_cn_freeeditor_sdk_NativeMessage_getBuffer__J(JNIEnv *env, jobject instance,
+                                                  jlong nativeMessage)
+{
+    sr_msg_t *msg = (sr_msg_t *)nativeMessage;
+    if (msg == nullptr){
+        return nullptr;
+    }
+    return (jbyteArray)msg->buffer.context;
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_cn_freeeditor_sdk_NativeMessage_releaseMessage(JNIEnv *env, jobject instance,
+                                                    jlong nativeMessage)
+{
+    sr_msg_t *msg = (sr_msg_t *)nativeMessage;
+    if (msg != nullptr){
+        Message release = Message(msg);
+    }
 }

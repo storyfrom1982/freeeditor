@@ -59,6 +59,10 @@ abstract public class JNIContext extends MessageProcessor {
         return requestMessage(key, contextPointer);
     }
 
+    protected void sendNativeMessage(NativeMessage message){
+        sendNativeMessage(message.getNativeMessage(), contextPointer);
+    }
+
 
     static {
         System.loadLibrary("freeeditor");
@@ -77,6 +81,7 @@ abstract public class JNIContext extends MessageProcessor {
     private native void sendMessage(int key, String json, long contextPointer);
     private native void sendMessage(int key, int event, String json, long contextPointer);
     private native void sendMessage(int key, byte[] buffer, int length, long contextPointer);
+    private native void sendNativeMessage(long nativeMessage, long contextPointer);
 
     private native JNIMessage requestMessage(int key, long contextPointer);
 }
