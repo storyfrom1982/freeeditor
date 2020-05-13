@@ -145,7 +145,7 @@ int FaacAudioEncoder::ProcessMedia(MediaPlugin *plugin, Message msg) {
     opkt.msgFrame()->flag = PktFlag_PFrame;
 
 //    MessageChain::onMsgProcessData(opkt);
-    onProcessMedia(this, opkt);
+    onProcessedMedia(this, opkt);
 
     return 0;
 }

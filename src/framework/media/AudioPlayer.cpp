@@ -5,6 +5,16 @@
 #include <MediaContext.h>
 #include "AudioPlayer.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+# include <samplerate.h>
+
+#ifdef __cplusplus
+}
+#endif
+
 
 using namespace freee;
 
@@ -51,16 +61,17 @@ void AudioPlayer::Stop(MessageChain *chain)
 void AudioPlayer::ProcessData(MessageChain *chain, Message msg)
 {
     char tmp[2048];
-    short *pcm = (short*)&tmp;
-    for (int j=0; j<1024; j++){
-        for (int c=0 ;c< 1; c++){
-            float *f = (float *) msg.data();
-            float t = f[j];
-            if (t<-1.0f) t=-1.0f;
-            else if (t>1.0f) t=1.0f;
-            *pcm++ = t*32767.0f;
-        }
-    }
+//    short *pcm = (short*)&tmp;
+//    for (int j=0; j<1024; j++){
+//        for (int c=0 ;c< 1; c++){
+//            float *f = (float *) msg.data();
+//            float t = f[j];
+//            if (t<-1.0f) t=-1.0f;
+//            else if (t>1.0f) t=1.0f;
+//            *pcm++ = t*32767.0f;
+//        }
+//    }
+    src_float_to_short_array((float *) msg.data(), (short *) tmp, 1024);
     sr_pipe_block_write(pipe, tmp, 2048);
 }
 

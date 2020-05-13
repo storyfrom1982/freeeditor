@@ -5,6 +5,10 @@ cmake_minimum_required(VERSION 3.4.1)
 set(LIBS_PATH ${CMAKE_SOURCE_DIR}/../thirdpart/android/libs)
 set(INCLUDE_PATH ${CMAKE_SOURCE_DIR}/../thirdpart/src)
 
+add_library(lib_samplerate STATIC IMPORTED)
+set_target_properties(lib_samplerate PROPERTIES IMPORTED_LOCATION
+        ${LIBS_PATH}/${ANDROID_ABI}/libsamplerate.a)
+
 add_library(lib_fdkaac STATIC IMPORTED)
 set_target_properties(lib_fdkaac PROPERTIES IMPORTED_LOCATION
         ${LIBS_PATH}/${ANDROID_ABI}/libFraunhoferAAC.a)
@@ -101,6 +105,7 @@ target_include_directories(
         sr_malloc/include
         ${INCLUDE_PATH}/include
         ${INCLUDE_PATH}/libyuv/include
+        ${INCLUDE_PATH}/libsamplerate-0.1.9/src
         ${INCLUDE_PATH}/glm
     )
 
@@ -112,6 +117,7 @@ target_link_libraries(
         lib_x264
         lib_opus
         lib_fdkaac
+        lib_samplerate
 
         lib_avformat
         lib_avcodec

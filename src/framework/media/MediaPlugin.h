@@ -20,7 +20,7 @@ namespace freee {
         virtual int OpenMedia(MediaPlugin *plugin){ return -1;};
         virtual void CloseMedia(MediaPlugin *plugin){};
         virtual int ProcessMedia(MediaPlugin *plugin, Message msg){ return -1;};
-        virtual void onProcessMedia(MediaPlugin *plugin, Message msg){
+        virtual void onProcessedMedia(MediaPlugin *plugin, Message msg){
             MessageChain::onMsgProcessData(msg);
         };
 
