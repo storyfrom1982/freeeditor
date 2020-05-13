@@ -51,7 +51,7 @@ void VideoRenderer::FinalClear() {
 void VideoRenderer::onMsgOpen(Message pkt) {
     m_config = static_cast<MessageChain *>(pkt.obj())->GetConfig(this);
     if (m_status == Status_Closed){
-        if (OpenModule() != 0){
+        if (OpenMedia() != 0){
             return;
         }
         m_status = Status_Opened;
@@ -61,14 +61,14 @@ void VideoRenderer::onMsgOpen(Message pkt) {
 
 void VideoRenderer::onMsgClose(Message pkt) {
     if (m_status == Status_Opened){
-        CloseModule();
+        CloseMedia();
         m_status = Status_Closed;
         MessageChain::onMsgClose(pkt);
     }
 }
 
 void VideoRenderer::onMsgProcessData(Message pkt) {
-    ProcessMediaByModule(pkt);
+    ProcessMedia(pkt);
 }
 
 void VideoRenderer::onMsgControl(Message pkt) {
@@ -90,7 +90,7 @@ void VideoRenderer::onMsgControl(Message pkt) {
     }
 }
 
-int VideoRenderer::OpenModule() {
+int VideoRenderer::OpenMedia() {
     int width = m_config["codecWidth"];
     int height = m_config["codecHeight"];
     renderer = gl_renderer_create(width, height);
@@ -104,7 +104,7 @@ int VideoRenderer::OpenModule() {
     return 0;
 }
 
-void VideoRenderer::CloseModule() {
+void VideoRenderer::CloseMedia() {
     if (renderer){
         gl_renderer_release(&renderer);
     }
@@ -117,7 +117,7 @@ void VideoRenderer::CloseModule() {
     }
 }
 
-int VideoRenderer::ProcessMediaByModule(Message pkt) {
+int VideoRenderer::ProcessMedia(Message pkt) {
     AutoLock lock(mLock);
     if (!isSurfaceDestroyed){
 //        int64_t startTime = sr_time_begin();

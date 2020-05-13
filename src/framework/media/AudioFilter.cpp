@@ -18,23 +18,23 @@ AudioFilter::~AudioFilter() {
 
 void AudioFilter::onMsgOpen(Message pkt) {
     m_config = static_cast<MessageChain *>(pkt.obj())->GetConfig(this);
-    OpenModule();
+    OpenMedia();
     MessageChain::onMsgOpen(pkt);
 //    OpenNext();
 }
 
 void AudioFilter::onMsgClose(Message pkt) {
-    CloseModule();
+    CloseMedia();
     MessageChain::onMsgClose(pkt);
 //    CloseNext();
 }
 
 void AudioFilter::onMsgProcessData(Message pkt) {
 //    LOGD("AudioFilter::onMsgProcessMedia data %d\n", pkt.GetKey());
-    ProcessMediaByModule(pkt);
+    ProcessMedia(pkt);
 }
 
-int AudioFilter::OpenModule() {
+int AudioFilter::OpenMedia() {
     m_codecSampleRate = m_config[CFG_CODEC_SAMPLE_RATE];
     m_codecChannelCount = m_config[CFG_CODEC_CHANNEL_COUNT];
     m_codecBytePerSample = m_config[CFG_CODEC_BYTES_PER_SAMPLE];
@@ -46,14 +46,14 @@ int AudioFilter::OpenModule() {
     return 0;
 }
 
-void AudioFilter::CloseModule() {
+void AudioFilter::CloseMedia() {
     if (p_bufferPool){
         delete p_bufferPool;
         p_bufferPool = nullptr;
     }
 }
 
-int AudioFilter::ProcessMediaByModule(Message pkt) {
+int AudioFilter::ProcessMedia(Message pkt) {
     MessageChain::onMsgProcessData(pkt);
     return 0;
 }

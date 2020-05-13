@@ -20,19 +20,19 @@ namespace freee {
         ~FaacAudioEncoder();
 
     protected:
-        int OpenModule() override;
+        int OpenMedia(MediaPlugin *plugin) override;
 
-        void CloseModule() override;
+        void CloseMedia(MediaPlugin *plugin) override;
 
-        int ProcessMediaByModule(Message pkt) override;
+        int ProcessMedia(MediaPlugin *plugin, Message msg) override;
 
     public:
         std::string &GetExtraConfig(MessageChain *chain) override;
 
     private:
 
-        unsigned long m_intputSamples;
-        unsigned long m_intputSize;
+        unsigned long m_inputSamples;
+        unsigned long m_inputSize;
         unsigned long m_outputSize;
 
         HANDLE_AACENCODER m_pHandle = nullptr;

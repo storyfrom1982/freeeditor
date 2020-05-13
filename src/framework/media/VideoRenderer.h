@@ -67,11 +67,11 @@ namespace freee {
 
 
     private:
-        int OpenModule() override;
+        int OpenMedia() override;
 
-        void CloseModule() override;
+        void CloseMedia() override;
 
-        int ProcessMediaByModule(Message pkt) override;
+        int ProcessMedia(Message pkt) override;
 
 
     private:

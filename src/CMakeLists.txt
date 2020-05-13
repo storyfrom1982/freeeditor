@@ -87,6 +87,7 @@ target_include_directories(
         freeeditor
         PRIVATE
         nlohmann
+        framework
         framework/base
         framework/message
         framework/media

@@ -16,12 +16,12 @@ FaacAudioEncoder::~FaacAudioEncoder() {
 }
 
 
-int FaacAudioEncoder::OpenModule() {
+int FaacAudioEncoder::OpenMedia(MediaPlugin *plugin) {
 
     int bitRate = m_config[CFG_CODEC_BITRATE];
     int sampleRate = m_config[CFG_CODEC_SAMPLE_RATE];
     int targetCh = m_config[CFG_CODEC_CHANNEL_COUNT];
-    m_intputSamples = m_config[CFG_CODEC_SAMPLES_PER_FRAME];
+    m_inputSamples = m_config[CFG_CODEC_SAMPLES_PER_FRAME];
 
     int aot = AOT_AAC_LC;// AOT_AAC_LC;// AOT_ER_AAC_ELD;
     int afterburner = 1;
@@ -93,11 +93,11 @@ std::string &FaacAudioEncoder::GetExtraConfig(MessageChain *chain) {
     return m_extraConfig;
 }
 
-void FaacAudioEncoder::CloseModule() {
+void FaacAudioEncoder::CloseMedia(MediaPlugin *plugin) {
     aacEncClose(&m_pHandle);
 }
 
-int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
+int FaacAudioEncoder::ProcessMedia(MediaPlugin *plugin, Message msg) {
     AACENC_BufDesc in_buf = { 0 }, out_buf = { 0 };
     AACENC_InArgs in_args = { 0 };
     AACENC_OutArgs out_args = { 0 };
@@ -108,11 +108,11 @@ int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
     int out_size, out_elem_size;
     void *in_ptr, *out_ptr;
 
-    in_ptr = pkt.data();
-    in_size = m_intputSamples*2;
+    in_ptr = msg.data();
+    in_size = m_inputSamples*2;
     in_elem_size = 2;
 
-    in_args.numInSamples = m_intputSamples;
+    in_args.numInSamples = m_inputSamples;
     in_buf.numBufs = 1;
     in_buf.bufs = &in_ptr;
     in_buf.bufferIdentifiers = &in_identifier;
@@ -141,10 +141,11 @@ int FaacAudioEncoder::ProcessMediaByModule(Message pkt) {
     opkt.msgFrame()->type = MediaType_Audio;
     opkt.msgFrame()->size = out_args.numOutBytes;
     opkt.msgFrame()->data = opkt.data();
-    opkt.msgFrame()->timestamp = pkt.msgFrame()->timestamp / 1000;
+    opkt.msgFrame()->timestamp = msg.msgFrame()->timestamp / 1000;
     opkt.msgFrame()->flag = PktFlag_PFrame;
 
-    MessageChain::onMsgProcessData(opkt);
+//    MessageChain::onMsgProcessData(opkt);
+    onProcessMedia(this, opkt);
 
     return 0;
 }

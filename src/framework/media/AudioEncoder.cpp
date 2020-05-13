@@ -5,7 +5,7 @@
 #include "AudioEncoder.h"
 #include "encoder/FaacAudioEncoder.h"
 
-freee::AudioEncoder::AudioEncoder(const std::string name) : MessageChain(name) {
+freee::AudioEncoder::AudioEncoder(const std::string name) : MediaPlugin(name) {
     m_type = MediaType_Audio;
     StartProcessor();
 }
@@ -22,13 +22,13 @@ void freee::AudioEncoder::onMsgOpen(freee::Message pkt) {
     size_t samplePerFrame = m_config[CFG_CODEC_SAMPLES_PER_FRAME];
     m_bufferSize = bytePerSample * samplePerFrame;
     p_bufferPool = new MessagePool("AudioEncoderFramePool", m_bufferSize, 1, 64, 16, 0);
-    OpenModule();
+    OpenMedia(this);
     pkt.msgFrame()->type = MediaType_Audio;
     MessageChain::onMsgOpen(pkt);
 }
 
 void freee::AudioEncoder::onMsgClose(freee::Message pkt) {
-    CloseModule();
+    CloseMedia(this);
     MessageChain::onMsgClose(pkt);
     if (p_bufferPool){
         delete p_bufferPool;
@@ -42,7 +42,7 @@ void freee::AudioEncoder::onMsgProcessData(freee::Message pkt) {
             m_startTimestamp = pkt.msgFrame()->timestamp;
         }
         pkt.msgFrame()->timestamp -= m_startTimestamp;
-        ProcessMediaByModule(pkt);
+        ProcessMedia(this, pkt);
     }
 }
 

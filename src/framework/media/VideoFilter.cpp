@@ -31,7 +31,7 @@ void VideoFilter::FinalClear() {
 void VideoFilter::onMsgOpen(Message pkt) {
     m_config = static_cast<MessageChain *>(pkt.obj())->GetConfig(this);
     if (m_status == Status_Closed){
-        OpenModule();
+        OpenMedia();
         MessageChain::onMsgOpen(pkt);
         m_status = Status_Opened;
     }
@@ -39,17 +39,17 @@ void VideoFilter::onMsgOpen(Message pkt) {
 
 void VideoFilter::onMsgClose(Message pkt) {
     if (m_status == Status_Opened){
-        CloseModule();
+        CloseMedia();
         MessageChain::onMsgClose(pkt);
         m_status = Status_Closed;
     }
 }
 
 void VideoFilter::onMsgProcessData(Message pkt) {
-    ProcessMediaByModule(pkt);
+    ProcessMedia(pkt);
 }
 
-int VideoFilter::OpenModule() {
+int VideoFilter::OpenMedia() {
     LOGD("[MediaConfig] VideoFilter::ModuleOpen >>> %s\n", m_config.dump(4).c_str());
     m_srcWidth = m_config[CFG_SRC_WIDTH];
     m_srcHeight = m_config[CFG_SRC_HEIGHT];
@@ -65,14 +65,14 @@ int VideoFilter::OpenModule() {
     return 0;
 }
 
-void VideoFilter::CloseModule() {
+void VideoFilter::CloseMedia() {
     if (p_bufferPool){
         delete p_bufferPool;
         p_bufferPool = nullptr;
     }
 }
 
-int VideoFilter::ProcessMediaByModule(Message msg) {
+int VideoFilter::ProcessMedia(Message msg) {
 
     if (m_srcImageFormat != m_codecImageFormat
         || m_srcWidth != m_codecWidth

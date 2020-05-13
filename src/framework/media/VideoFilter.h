@@ -28,11 +28,11 @@ namespace freee {
 
         void onMsgProcessData(Message pkt) override;
 
-        int OpenModule() override;
+        int OpenMedia() override;
 
-        void CloseModule() override;
+        void CloseMedia() override;
 
-        int ProcessMediaByModule(Message pkt) override;
+        int ProcessMedia(Message pkt) override;
 
     private:
         void FinalClear() override ;

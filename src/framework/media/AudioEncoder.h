@@ -7,11 +7,12 @@
 
 
 #include "../message/MessageChain.h"
+#include "MediaPlugin.h"
 
 namespace freee {
 
 
-    class AudioEncoder : public MessageChain {
+    class AudioEncoder : public MediaPlugin {
     public:
         static AudioEncoder* Create(std::string name);
         virtual ~AudioEncoder();
