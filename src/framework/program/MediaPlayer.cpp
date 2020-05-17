@@ -31,6 +31,7 @@ void MediaPlayer::onMsgOpen(Message msg)
     m_pMediaSource = MediaSource::Create("ffmpeg");
     m_pMediaSource->SetEventListener(this);
     m_pMediaSource->Open(this);
+    m_pVideoCorrection = new VideoTimeCorrection();
     m_pVideoRenderer = new VideoRenderer();
     m_pAudioPlayer = new AudioPlayer();
 }
@@ -51,6 +52,11 @@ void MediaPlayer::onMsgClose(Message pkt)
         m_pVideoDeocder->Close(this);
         delete m_pVideoDeocder;
         m_pVideoDeocder = nullptr;
+    }
+    if (m_pVideoCorrection){
+        m_pVideoCorrection->Close(this);
+        delete m_pVideoCorrection;
+        m_pVideoCorrection = nullptr;
     }
     if (m_pVideoRenderer){
         m_pVideoRenderer->Close(this);
@@ -98,7 +104,8 @@ void MediaPlayer::onMsgProcessEvent(Message pkt)
         if (cfg[CFG_TYPE] == CFG_VIDEO){
             m_pVideoDeocder = VideoDecoder::Create(cfg[CFG_CODEC_NAME]);
             m_pVideoDeocder->SetStreamId(cfg[CFG_CODEC_STREAM_ID]);
-            m_pVideoDeocder->AddOutput(m_pVideoRenderer);
+            m_pVideoDeocder->AddOutput(m_pVideoCorrection);
+            m_pVideoCorrection->AddOutput(m_pVideoRenderer);
             m_pMediaSource->AddOutput(m_pVideoDeocder);
         }else if (cfg[CFG_TYPE] == CFG_AUDIO){
             m_pAudioDecoder = AudioDecoder::Create(cfg[CFG_CODEC_NAME]);

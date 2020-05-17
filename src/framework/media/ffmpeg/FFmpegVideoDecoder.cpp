@@ -136,6 +136,8 @@ int FFmpegVideoDecoder::DecodeVideo(Message msg)
                 Message message = frameMap[picture.opaque];
                 frameMap.erase(picture.opaque);
 //                LOGD("FFmpegVideoDecoder::DecodeVideo data size %d\n", message.frame.width);
+//                LOGD("FFmpegVideoDecoder::DecodeVideo pts %lld\n", picture.pts);
+                message.msgFrame()->timestamp = picture.pts;
                 MessageChain::onMsgProcessData(message);
             }
             av_frame_unref(&picture);
@@ -207,6 +209,7 @@ void FFmpegVideoDecoder::GetVideoBuffer(AVFrame *frame)
 //    msg.frame.width = frame->linesize[0];
     msg.msgFrame()->width = frame->width;
     msg.msgFrame()->height = frame->height;
+    msg.msgFrame()->timestamp = frame->pts;
     frame->opaque = msg.data();
 
     frameMap[frame->opaque] = msg;

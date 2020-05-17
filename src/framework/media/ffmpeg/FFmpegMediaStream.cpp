@@ -71,7 +71,7 @@ void FFmpegMediaStream::onMsgOpen(Message pkt) {
             }
 
             m_status = Status_Opened;
-            usleep(200000);
+//            usleep(200000);
             MessageChain::onMsgProcessEvent(NewMessage(MsgKey_ProcessEvent, MsgKey_Open));
         }
     }

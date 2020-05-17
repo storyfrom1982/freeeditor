@@ -163,7 +163,9 @@ int FFmpegMediaSource::ReadSource()
 
     Message msg = NewMessage(MsgKey_ProcessData, pkt.data, pkt.size);
     msg.msgFrame()->stream_id = pkt.stream_index;
-    msg.msgFrame()->timestamp = 0;
+//    LOGD("[FFmpegMediaSource] av_read_frame(%d) timestamp %lld  dts = %lld\n", pkt.stream_index, pkt.pts, pkt.dts);
+    msg.msgFrame()->timestamp = (ino64_t)(pkt.pts * 1000 * av_q2d(m_pContext->streams[pkt.stream_index]->time_base));
+//    LOGD("[FFmpegMediaSource] av_read_frame(%d) timestamp %lld\n", pkt.stream_index, msg.msgFrame()->timestamp);
     ProcessMessage(msg);
 
     av_packet_unref(&pkt);

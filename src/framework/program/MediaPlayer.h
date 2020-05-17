@@ -6,6 +6,7 @@
 #define ANDROID_MEDIAPLAYER_H
 
 
+#include <media/VideoTimeCorrection.h>
 #include "../../message/MessageChain.h"
 #include "../../media/MediaSource.h"
 #include "../../media/VideoDecoder.h"
@@ -44,6 +45,7 @@ namespace freee {
         AudioDecoder *m_pAudioDecoder = nullptr;
         VideoRenderer *m_pVideoRenderer = nullptr;
         AudioPlayer *m_pAudioPlayer = nullptr;
+        VideoTimeCorrection *m_pVideoCorrection = nullptr;
     };
 
 
